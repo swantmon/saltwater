@@ -80,7 +80,7 @@ namespace
 
         Scpt::ScriptManager::OnStart();
 
-        Dt::EntityManager::OnStart();
+        Dt::CEntityManager::GetInstance().OnStart();
 
         Gui::InputManager::OnStart();
 
@@ -103,7 +103,7 @@ namespace
 
         Scpt::ScriptManager::OnExit();
 
-        Dt::EntityManager::OnExit();
+        Dt::CEntityManager::GetInstance().OnExit();
 
         Gui::InputManager::OnExit();
 
@@ -124,7 +124,7 @@ namespace
 
         Cam::ControlManager::Update();
 
-        Dt::EntityManager::Update();
+        Dt::CEntityManager::GetInstance().Update();
 
         Scpt::ScriptManager::Update();
 

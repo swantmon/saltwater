@@ -107,8 +107,8 @@ namespace Net
 
             pData->resize(DataLength);
 
-            int32_t MessageID32 = static_cast<int32_t>(MessageCategory);
-            int32_t MessageLength32 = static_cast<int32_t>(MessageLength);
+            auto MessageID32 = static_cast<int32_t>(MessageCategory);
+            auto MessageLength32 = static_cast<int32_t>(MessageLength);
 
             std::memcpy(pData->data(), &MessageID32, sizeof(MessageID32));
             std::memcpy(pData->data() + sizeof(int32_t), &MessageLength32, sizeof(MessageLength32));
@@ -133,8 +133,19 @@ namespace Net
             assert(_TransferredBytes == s_HeaderSize);
 
             int32_t MessageID = *reinterpret_cast<int32_t*>(m_Header.data());
-            int32_t CompressedMessageLength = *reinterpret_cast<int32_t*>(m_Header.data() + sizeof(int32_t));
+			int32_t CompressedMessageLength = *reinterpret_cast<int32_t*>(m_Header.data() + sizeof(int32_t));
             int32_t DecompressedMessageLength = *reinterpret_cast<int32_t*>(m_Header.data() + 2 * sizeof(int32_t));
+
+            if (CompressedMessageLength < 1)
+            {
+				BASE_THROWV("Length of compressed message is invalid (%i)", CompressedMessageLength);
+            }
+
+			if (CompressedMessageLength < 1)
+			{
+				BASE_THROWV("Length of decompressed message is invalid (%i)", DecompressedMessageLength);
+			}
+
             m_PendingMessage.m_Payload.resize(CompressedMessageLength);
 
             auto Callback = std::bind(&CSocket::ReceivePayload, this, std::placeholders::_1, std::placeholders::_2);
@@ -208,9 +219,9 @@ namespace Net
         {
             if (m_IsServer)
             {
-                m_pEndpoint.reset(new asio::ip::tcp::endpoint(asio::ip::tcp::v4(), static_cast<unsigned short>(m_Port)));
-                m_pAcceptor.reset(new asio::ip::tcp::acceptor(IOService, *m_pEndpoint));
-                m_pSocket.reset(new asio::ip::tcp::socket(IOService));
+                m_pEndpoint = std::make_unique<asio::ip::tcp::endpoint>(asio::ip::tcp::v4(), static_cast<unsigned short>(m_Port));
+                m_pAcceptor = std::make_unique<asio::ip::tcp::acceptor>(IOService, *m_pEndpoint);
+                m_pSocket = std::make_unique<asio::ip::tcp::socket>(IOService);
 
                 m_Header.resize(s_HeaderSize);
 
@@ -220,8 +231,8 @@ namespace Net
             {
                 asio::ip::address address = asio::ip::address::from_string(m_IP);
 
-                m_pEndpoint.reset(new asio::ip::tcp::endpoint(address, static_cast<unsigned short>(m_Port)));
-                m_pSocket.reset(new asio::ip::tcp::socket(IOService));
+                m_pEndpoint = std::make_unique<asio::ip::tcp::endpoint>(address, static_cast<unsigned short>(m_Port));
+                m_pSocket = std::make_unique<asio::ip::tcp::socket>(IOService);
 
                 m_Header.resize(s_HeaderSize);
 

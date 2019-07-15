@@ -146,14 +146,14 @@ namespace
         
     private:
         
-        CBufferPtr m_SelectionSettingsBufferPtrs[s_MaxNumberOfBuffer];
-        CBufferPtr m_SelectionOutputBufferPtrs[s_MaxNumberOfBuffer];
+        std::array<CBufferPtr, s_MaxNumberOfBuffer> m_SelectionSettingsBufferPtrs;
+        std::array<CBufferPtr, s_MaxNumberOfBuffer> m_SelectionOutputBufferPtrs;
 
         CShaderPtr m_SelectionCSPtr;
 
         CTextureSetPtr m_GBufferTextureSetPtr;
 
-        CInternSelectionTicket m_SelectionTickets[s_MaxNumberOfTickets];
+        std::array<CInternSelectionTicket, s_MaxNumberOfTickets> m_SelectionTickets;
         
     private:
 
@@ -218,11 +218,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Reset buffer
         // -----------------------------------------------------------------------------
-        for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < s_MaxNumberOfBuffer; ++IndexOfBuffer)
-        {
-            m_SelectionSettingsBufferPtrs[IndexOfBuffer] = nullptr;
-            m_SelectionOutputBufferPtrs[IndexOfBuffer]   = nullptr;
-        }
+        for (auto& rBuffer : m_SelectionOutputBufferPtrs) rBuffer = nullptr;
+        for (auto& rBuffer : m_SelectionSettingsBufferPtrs) rBuffer = nullptr;
     }
     
     // -----------------------------------------------------------------------------
@@ -263,29 +260,30 @@ namespace
     {
         SBufferDescriptor ConstanteBufferDesc;
 
-        for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < s_MaxNumberOfBuffer; ++IndexOfBuffer)
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSelectionSettingsBuffer);
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
+
+        for (auto& rBuffer : m_SelectionSettingsBufferPtrs)
         {
-            ConstanteBufferDesc.m_Stride        = 0;
-            ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
-            ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
-            ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-            ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSelectionSettingsBuffer);
-            ConstanteBufferDesc.m_pBytes        = nullptr;
-            ConstanteBufferDesc.m_pClassKey     = nullptr;
+            rBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        }
 
-            m_SelectionSettingsBufferPtrs[IndexOfBuffer] = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPUToCPU;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPURead;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSelectionOutput);
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
 
-            // -----------------------------------------------------------------------------
-
-            ConstanteBufferDesc.m_Stride        = 0;
-            ConstanteBufferDesc.m_Usage         = CBuffer::GPUToCPU;
-            ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
-            ConstanteBufferDesc.m_Access        = CBuffer::CPURead;
-            ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSelectionOutput);
-            ConstanteBufferDesc.m_pBytes        = nullptr;
-            ConstanteBufferDesc.m_pClassKey     = nullptr;
-
-            m_SelectionOutputBufferPtrs[IndexOfBuffer] = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        for (auto& rBuffer : m_SelectionOutputBufferPtrs)
+        {
+            rBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
         }
     }
     
@@ -328,14 +326,16 @@ namespace
     {
         Performance::BeginEvent("Picking");
 
-        for (int IndexOfTicket = 0; IndexOfTicket < s_MaxNumberOfTickets; ++IndexOfTicket)
-        {
-            CInternSelectionTicket& rTicket = m_SelectionTickets[IndexOfTicket];
+        int IndexOfTicket = 0;
 
+        for (auto& rTicket : m_SelectionTickets)
+        {
             if (rTicket.m_IsValid && (rTicket.m_NumberOfRequests > 0) && (rTicket.m_Frame <= Core::Time::GetNumberOfFrame()))
             {
                 int IndexOfLastRequest = (rTicket.m_IndexOfPushRequest > 0) ? rTicket.m_IndexOfPushRequest - 1 : CInternSelectionTicket::s_MaxNumberOfRequests - 1;
-                int IndexOfBuffer = IndexOfTicket * s_MaxNumberOfTickets + IndexOfLastRequest;
+                int IndexOfBuffer      = IndexOfTicket * CInternSelectionTicket::s_MaxNumberOfRequests + IndexOfLastRequest;
+
+                assert (IndexOfBuffer < s_MaxNumberOfBuffer);
 
                 SRequest& rRequest = rTicket.m_Requests[IndexOfLastRequest];
 
@@ -419,6 +419,8 @@ namespace
                 // -----------------------------------------------------------------------------
                 rRequest.m_TimeStamp = Core::Time::GetNumberOfFrame();
             }
+
+            ++IndexOfTicket;
         }
 
         Performance::EndEvent();
@@ -446,6 +448,8 @@ namespace
 
         CInternSelectionTicket& rTicket = m_SelectionTickets[IndexOfTicket];
 
+        Clear(rTicket);
+
         rTicket.m_IsValid       = true;
         rTicket.m_HitFlag       = SHitFlag::Nothing;
         rTicket.m_OffsetX       = _OffsetX;
@@ -459,8 +463,6 @@ namespace
         rTicket.m_Depth         = -1.0f;
         rTicket.m_pObject       = nullptr;
         rTicket.m_Frame         = Core::Time::GetNumberOfFrame() - 1;
-        
-        Clear(rTicket);
 
         return rTicket;
     }
@@ -572,7 +574,7 @@ namespace
         {
             rTicket.m_HitFlag = SHitFlag::Entity;
 
-            rTicket.m_pObject = Dt::EntityManager::GetEntityByID(pOutput->m_EntityID);
+            rTicket.m_pObject = Dt::CEntityManager::GetInstance().GetEntityByID(pOutput->m_EntityID);
         }
 
         BufferManager::UnmapBuffer(m_SelectionOutputBufferPtrs[IndexOfBuffer]);
@@ -586,6 +588,7 @@ namespace
     {
         auto& rTicket = static_cast<CInternSelectionTicket&>(_rTicket);
 
+        rTicket.m_IsValid            = false;
         rTicket.m_IndexOfPushRequest = 0;
         rTicket.m_IndexOfPopRequest  = 0;
         rTicket.m_NumberOfRequests   = 0;

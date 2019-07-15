@@ -9,6 +9,7 @@
 
 #include "engine/data/data_camera_component.h"
 #include "engine/data/data_component_facet.h"
+#include "engine/data/data_entity_manager.h"
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/script/script_script.h"
@@ -28,14 +29,14 @@ namespace Scpt
 
     public:
 
-        typedef const void* (*ArCoreGetCameraFunc)();
-        typedef int (*ArCoreGetCameraTrackingStateFunc)(const void* _pCamera);
-        typedef glm::mat4 (*ArCoreGetCameraViewMatrixFunc)(const void* _pCamera);
-        typedef glm::mat4 (*ArCoreGetCameraProjectionMatrixFunc)(const void* _pCamera);
-        typedef float (*ArCoreGetCameraNearFunc)(const void* _pCamera);
-        typedef float (*ArCoreGetCameraFarFunc)(const void* _pCamera);
-        typedef Gfx::CTexturePtr (*ArCoreGetBackgroundTextureFunc)();
-        typedef void(*ArSetFlipVerticalFunc)(bool _Flag);
+        using ArCoreGetCameraFunc = const void* (*)();
+        using ArCoreGetCameraTrackingStateFunc = int (*)(const void* _pCamera);
+        using ArCoreGetCameraViewMatrixFunc = glm::mat4 (*)(const void* _pCamera);
+        using ArCoreGetCameraProjectionMatrixFunc = glm::mat4 (*)(const void* _pCamera);
+        using ArCoreGetCameraNearFunc = float (*)(const void* _pCamera);
+        using ArCoreGetCameraFarFunc = float (*)(const void* _pCamera);
+        using ArCoreGetBackgroundTextureFunc = Gfx::CTexturePtr (*)();
+        using ArSetFlipVerticalFunc = void(*)(bool _Flag);
 
         ArCoreGetCameraFunc ArCoreGetCamera;
         ArCoreGetCameraTrackingStateFunc ArCoreGetCameraTrackingState;
@@ -119,7 +120,7 @@ namespace Scpt
 
                 m_pCameraEntity->GetTransformationFacet()->SetRotation(glm::toQuat(WSRotation));
 
-                Dt::EntityManager::MarkEntityAsDirty(*m_pCameraEntity, Dt::CEntity::DirtyMove);
+                Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*m_pCameraEntity, Dt::CEntity::DirtyMove);
             }
 
             if (m_pCameraComponent != nullptr)
@@ -145,6 +146,23 @@ namespace Scpt
         void OnInput(const Base::CInputEvent& _rEvent) override
         {
             BASE_UNUSED(_rEvent);
+        }
+
+    public:
+
+        inline void Read(CSceneReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+        }
+
+        inline void Write(CSceneWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CARCameraControlScript();
         }
     };
 } // namespace Scpt

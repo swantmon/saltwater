@@ -124,15 +124,18 @@ namespace Stereo
 
     bool CPluginInterface::GetLatestFrameCPU(std::vector<char>& _ColorImage, std::vector<char>& _rDepthImage, glm::mat4& _rTransform)
     {
+        BASE_UNUSED(_ColorImage);
+        BASE_UNUSED(_rDepthImage);
+        BASE_UNUSED(_rTransform);
         return false;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics, const std::vector<uint16_t>& _rDepthImage)
+    void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::vec2& _FocalLength, const glm::vec2& _FocalPoint, const std::vector<uint16_t>& _rDepthImage)
     {
         //---Setting Orientations from ARKit---
-        glm::mat3 CamMtx = glm::mat3(_Intrinsics) * m_FrameResolution; // Intrinsic should be modified according to frame resolution.
+        glm::mat3 CamMtx = glm::mat3(_FocalLength.x, 0, 0, 0, _FocalLength.y, 0, _FocalPoint.x, _FocalPoint.y, 1) * m_FrameResolution; // Intrinsic should be modified according to frame resolution.
         CamMtx[1].x = 0; // No skew
         CamMtx[2].z = 1; // Last element should keep 1 because of homogeneous coordinates
 
@@ -212,7 +215,7 @@ namespace Stereo
             //---Stereo Matching---
             // * Calculate Disparity in Rectified Current Image
 
-            const clock_t Time_SM_begin = clock();
+            //const clock_t Time_SM_begin = clock();
             if (m_Is_Scaling)
             {
                 m_DispImg_Rect.resize(RectImg_Curt_DownSample.get_Img().size(), 0.0);
@@ -246,9 +249,9 @@ namespace Stereo
                 imp_StereoMatching_Sub();
             }
 
-            const clock_t Time_SM_end = clock();
+            //const clock_t Time_SM_end = clock();
 
-            float CalTime_SM = float(Time_SM_end - Time_SM_begin) / CLOCKS_PER_SEC;
+            //float CalTime_SM = float(Time_SM_end - Time_SM_begin) / CLOCKS_PER_SEC;
 
             //---Disparity to Depth---
             // * Using Parallax Equation to Transform Disparity to Depth
@@ -331,7 +334,7 @@ namespace Stereo
             // Default disparity is pixel level => Disparity is the same in 8-bit & 16-bit.
             // If turn on sub-pixel => Output disparity must be 16-bit. => Divided by 16 to derive true disparity!!!
 
-            std::vector<uint16_t> DispImg_Rect_uint16(m_RectImg_Curt.get_Img().size(), 0.0);
+            std::vector<uint16_t> DispImg_Rect_uint16(m_RectImg_Curt.get_Img().size(), 0);
 
             m_pStereoMatcher_LibSGM->execute(m_RectImg_Curt.get_Img().data(), m_RectImg_Last.get_Img().data(), DispImg_Rect_uint16.data());
 
@@ -394,7 +397,7 @@ namespace Stereo
 
             }
 
-            const int cvMemCpySize = cvDispImg_Rect_cpu.cols * cvDispImg_Rect_cpu.rows * cvDispImg_Rect_cpu.elemSize();
+            const auto cvMemCpySize = cvDispImg_Rect_cpu.cols * cvDispImg_Rect_cpu.rows * cvDispImg_Rect_cpu.elemSize();
             memcpy(m_DispImg_Rect.data(), cvDispImg_Rect_cpu.data, cvMemCpySize);
 
         }
@@ -404,7 +407,7 @@ namespace Stereo
     {
         if (m_StereoMatching_Method == "LibSGM")
         {
-            std::vector<uint16_t> DispImg_Rect_uint16(m_RectImg_Curt.get_Img().size(), 0.0);
+            std::vector<uint16_t> DispImg_Rect_uint16(m_RectImg_Curt.get_Img().size(), 0);
 
             m_pStereoMatcher_LibSGM->execute(m_RectImg_Curt.get_Img().data(), m_RectImg_Last.get_Img().data(), DispImg_Rect_uint16.data());
 
@@ -422,9 +425,9 @@ namespace Stereo
         std::vector<uint16_t> BuffTile_Disp(BuffTile_CurtImg.size(), 0);
 
 
-        glm::uvec2 Tile_Num;
-        Tile_Num.x = std::ceil(float(m_RectImg_Curt.get_ImgSize().x) / Tile_Size);
-        Tile_Num.y = std::ceil(float(m_RectImg_Curt.get_ImgSize().y) / Tile_Size);
+        glm::ivec2 Tile_Num;
+        Tile_Num.x = static_cast<int>(ceil(float(m_RectImg_Curt.get_ImgSize().x) / Tile_Size));
+        Tile_Num.y = static_cast<int>(ceil(float(m_RectImg_Curt.get_ImgSize().y) / Tile_Size));
 
         for (auto idx_TileNum_y = 0; idx_TileNum_y < Tile_Num.y; idx_TileNum_y++)
         {
@@ -442,7 +445,7 @@ namespace Stereo
                     }
                     if (ImgBound.x >= m_RectImg_Curt.get_Img().size())
                     {
-                        ImgBound.x = m_RectImg_Curt.get_Img().size() - m_RectImg_Curt.get_ImgSize().x;
+                        ImgBound.x = static_cast<int>(m_RectImg_Curt.get_Img().size() - m_RectImg_Curt.get_ImgSize().x);
                     }
 
                     ImgBound.y = ImgBound.x + m_RectImg_Curt.get_ImgSize().x - 1; // Right Boundary
@@ -502,9 +505,9 @@ namespace Stereo
 
     void CPluginInterface::imp_StereoMatching_Sub()
     {
-        const glm::uvec2 SubImg_Size = m_RectImgSize_Sub;
+        const glm::ivec2 SubImg_Size = m_RectImgSize_Sub;
 
-        const glm::uvec2 SubImg_Center = m_RectImg_Curt.get_ImgSize() / 2;
+        const glm::ivec2 SubImg_Center = m_RectImg_Curt.get_ImgSize() / 2;
 
         const glm::ivec2 SubImg_LU(SubImg_Center.x - SubImg_Size.x / 2, SubImg_Center.y - SubImg_Size.y / 2);
         const int SubImg_LU_1D = SubImg_LU.x + SubImg_LU.y * m_RectImg_Curt.get_ImgSize().x;
@@ -565,7 +568,7 @@ namespace Stereo
     {
         if (m_StereoMatching_Method == "LibSGM")
         {
-            std::vector<uint16_t> DispImg_Rect_uint16(RectImg_Curt_DownSample.size(), 0.0);
+            std::vector<uint16_t> DispImg_Rect_uint16(RectImg_Curt_DownSample.size(), 0);
 
             m_pStereoMatcher_LibSGM->execute(RectImg_Curt_DownSample.data(), RectImg_Last_DownSample.data(), DispImg_Rect_uint16.data());
 
@@ -738,11 +741,11 @@ namespace Stereo
     void CPluginInterface::export_OrigImg()
     {
         std::string ExportStr;
-        uint MemCpySize = 0;
+        int MemCpySize = 0;
 
         cv::Mat cvOrigImg_Curt(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4);
 
-        MemCpySize = m_OrigImg_Curt.get_Img().size() * sizeof(m_OrigImg_Curt.get_Img()[0]);
+        MemCpySize = static_cast<int>(m_OrigImg_Curt.get_Img().size() * sizeof(m_OrigImg_Curt.get_Img()[0]));
         memcpy(cvOrigImg_Curt.data, m_OrigImg_Curt.get_Img().data(), MemCpySize);
 
         cv::cvtColor(cvOrigImg_Curt, cvOrigImg_Curt, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
@@ -754,7 +757,6 @@ namespace Stereo
     void CPluginInterface::export_RectImg()
     {
         std::string ExportStr;
-        uint MemCpySize = 0;
 
         cv::Mat cvRectImg_Curt(m_RectImg_Curt.get_ImgSize().y, m_RectImg_Curt.get_ImgSize().x, CV_8UC1);
         memcpy(cvRectImg_Curt.data, m_RectImg_Curt.get_Img().data(), m_RectImg_Curt.get_Img().size());
@@ -777,7 +779,7 @@ namespace Stereo
 
         cv::Mat cvDepthImg_Orig(m_OrigImg_Curt.get_ImgSize().y, m_OrigImg_Curt.get_ImgSize().x, CV_16UC1);
 
-        MemCpySize = m_DepthImg_Orig.size() * sizeof(m_DepthImg_Orig[0]);
+        MemCpySize = static_cast<int>(m_DepthImg_Orig.size() * sizeof(m_DepthImg_Orig[0]));
         memcpy(cvDepthImg_Orig.data, m_DepthImg_Orig.data(), MemCpySize);
 
         ExportStr = "E:\\Project_ARCHITECT\\DepthImg_Orig_" + std::to_string(m_KeyFrameID) + ".png";
@@ -786,7 +788,7 @@ namespace Stereo
 
         cv::Mat cvDepthImg_Sensor(m_OrigImg_Curt.get_ImgSize().y, m_OrigImg_Curt.get_ImgSize().x, CV_16UC1);
 
-        MemCpySize = m_DepthImg_Sensor.size() * sizeof(m_DepthImg_Sensor[0]);
+        MemCpySize = static_cast<int>(m_DepthImg_Sensor.size() * sizeof(m_DepthImg_Sensor[0]));
         memcpy(cvDepthImg_Sensor.data, m_DepthImg_Sensor.data(), MemCpySize);
 
         ExportStr = "E:\\Project_ARCHITECT\\DepthImg_Sensor_" + std::to_string(m_KeyFrameID) + ".png";
@@ -800,19 +802,19 @@ namespace Stereo
         ENGINE_CONSOLE_INFOV("Stereo matching plugin started!");
 
         //---00 Input---
-        m_FrameResolution = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_input:frame_resolution", 0.5); // Full = 1; Half = 0.5;
+        m_FrameResolution = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_input:frame_resolution", 0.5f); // Full = 1; Half = 0.5;
 
         //---00 Keyframe---
-        m_Cdt_Keyf_BaseLineL = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_keyframe:baseline_length", 0.03); // Unit = meter
+        m_Cdt_Keyf_BaseLineL = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_keyframe:baseline_length", 0.03f); // Unit = meter
 
         m_Is_KeyFrame = false;
 
         //---01 Rectification-----
         m_Is_RectSubImg = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:extract_sub_image", false);
-        m_RectImgSize_Sub = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:sub_image_size", glm::uvec2(640, 640));
+        m_RectImgSize_Sub = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:sub_image_size", glm::ivec2(640, 640));
 
         m_Is_Scaling = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:scaling", false);
-        m_RectImgSize_DownSample = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:down_sampling_size", glm::uvec2(256, 256));
+        m_RectImgSize_DownSample = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:down_sampling_size", glm::ivec2(256, 256));
 
         //---02 Stereo Matching---
         m_StereoMatching_Method = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:method", "LibSGM");
@@ -924,9 +926,9 @@ namespace Stereo
 
 // -----------------------------------------------------------------------------
 
-extern "C" CORE_PLUGIN_API_EXPORT void OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics, const std::vector<uint16_t>& _rDepthImage)
+extern "C" CORE_PLUGIN_API_EXPORT void OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::vec2& _FocalLength, const glm::vec2& _FocalPoint, const std::vector<uint16_t>& _rDepthImage)
 {
-    static_cast<Stereo::CPluginInterface&>(GetInstance()).OnFrameCPU(_rRGBImage, _Transform, _Intrinsics, _rDepthImage);
+    static_cast<Stereo::CPluginInterface&>(GetInstance()).OnFrameCPU(_rRGBImage, _Transform, _FocalLength, _FocalPoint, _rDepthImage);
 }
 
 // -----------------------------------------------------------------------------

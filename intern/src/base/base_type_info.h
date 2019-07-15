@@ -14,6 +14,9 @@ namespace CORE
 
         template<class T>
         static CORE::ID GetTypeID();
+
+        template<class T>
+        static const char* GetTypeName(const T& _rValue);
     };
 } // namespace CORE
 
@@ -23,5 +26,13 @@ namespace CORE
     CORE::ID CTypeInfo::GetTypeID()
     {
         return typeid(T).hash_code();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    const char* CTypeInfo::GetTypeName(const T& _rValue)
+    {
+        return typeid(_rValue).name();
     }
 } // namespace CORE

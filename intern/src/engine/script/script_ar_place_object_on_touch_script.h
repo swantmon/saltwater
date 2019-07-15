@@ -4,8 +4,11 @@
 #include "base/base_coordinate_system.h"
 #include "base/base_include_glm.h"
 
+#include "engine/core/core_plugin_manager.h"
+
 #include "engine/data/data_camera_component.h"
 #include "engine/data/data_component_facet.h"
+#include "engine/data/data_entity_manager.h"
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/script/script_script.h"
@@ -16,11 +19,11 @@ namespace Scpt
     {
     public:
 
-        typedef const void* (*ArCoreAcquireNewMarkerFunc)(float _X, float _Y);
-        typedef const void (*ArCoreReleaseMarkerFunc)(const void* _pMarker);
-        typedef int (*ArCoreGetMarkerTrackingStateFunc)(const void* _pMarker);
-        typedef glm::mat4 (*ArCoreGetMarkerModelMatrixFunc)(const void* _pMarker);
-        typedef bool (*ArCoreSetSettingsFunc)(bool _ShowPlanes, bool _ShowPoints);
+        using ArCoreAcquireNewMarkerFunc = const void* (*)(float _X, float _Y);
+        using ArCoreReleaseMarkerFunc = const void (*)(const void* _pMarker);
+        using ArCoreGetMarkerTrackingStateFunc = int (*)(const void* _pMarker);
+        using ArCoreGetMarkerModelMatrixFunc = glm::mat4 (*)(const void* _pMarker);
+        using ArCoreSetSettingsFunc = bool (*)(bool _ShowPlanes, bool _ShowPoints);
 
         ArCoreAcquireNewMarkerFunc AcquireNewMarker;
         ArCoreReleaseMarkerFunc ReleaseMarker;
@@ -48,13 +51,16 @@ namespace Scpt
 
             m_ArCoreAvailable = Core::PluginManager::LoadPlugin("ArCore");
 
-            AcquireNewMarker = (ArCoreAcquireNewMarkerFunc)(Core::PluginManager::GetPluginFunction("ArCore", "AcquireNewMarker"));
-            ReleaseMarker = (ArCoreReleaseMarkerFunc)(Core::PluginManager::GetPluginFunction("ArCore", "ReleaseMarker"));
+            if (m_ArCoreAvailable)
+            {
+                AcquireNewMarker = (ArCoreAcquireNewMarkerFunc)(Core::PluginManager::GetPluginFunction("ArCore", "AcquireNewMarker"));
+                ReleaseMarker = (ArCoreReleaseMarkerFunc)(Core::PluginManager::GetPluginFunction("ArCore", "ReleaseMarker"));
 
-            GetMarkerTrackingState = (ArCoreGetMarkerTrackingStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerTrackingState"));
-            GetMarkerModelMatrix = (ArCoreGetMarkerModelMatrixFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerModelMatrix"));
+                GetMarkerTrackingState = (ArCoreGetMarkerTrackingStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerTrackingState"));
+                GetMarkerModelMatrix = (ArCoreGetMarkerModelMatrixFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerModelMatrix"));
 
-            SetSettings = (ArCoreSetSettingsFunc)(Core::PluginManager::GetPluginFunction("ArCore", "SetSettings"));
+                SetSettings = (ArCoreSetSettingsFunc)(Core::PluginManager::GetPluginFunction("ArCore", "SetSettings"));
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -80,17 +86,19 @@ namespace Scpt
 
             //pTransformation->SetRotation(glm::eulerAngles(glm::toQuat(glm::mat3(ModelMatrix))));
 
-            Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
         }
 
         // -----------------------------------------------------------------------------
 
         void OnInput(const Base::CInputEvent& _rEvent) override
         {
+            if (!m_ArCoreAvailable) return;
+
             if (_rEvent.GetAction() == Base::CInputEvent::TouchPressed)
             {
-                float x = _rEvent.GetGlobalCursorPosition()[0];
-                float y = _rEvent.GetGlobalCursorPosition()[1];
+                auto x = (float)_rEvent.GetGlobalCursorPosition()[0];
+                auto y = (float)_rEvent.GetGlobalCursorPosition()[1];
 
                 if (x < 200.0f || y < 200.0f) return;
 
@@ -108,6 +116,23 @@ namespace Scpt
                     SetSettings(false, false);
                 }
             }
+        }
+
+    public:
+
+        inline void Read(CSceneReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+        }
+
+        inline void Write(CSceneWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CARPlaceObjectOnTouchScript();
         }
     };
 } // namespace Scpt

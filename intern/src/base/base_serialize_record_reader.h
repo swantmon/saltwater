@@ -22,8 +22,8 @@ namespace SER
         };
 
     public:
-        typedef std::istream  CStream;
-        typedef CRecordReader CThis;
+        using CStream = std::istream;
+        using CThis = CRecordReader;
 
     public:
         inline  CRecordReader(CStream& _rStream, unsigned int _Version);

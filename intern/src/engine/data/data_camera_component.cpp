@@ -7,6 +7,8 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CCameraComponent);
+
     CCameraComponent::CCameraComponent()
         : m_CullingMask           (0)
         , m_Depth                 (-1)

@@ -7,6 +7,8 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CAreaLightComponent);
+
     CAreaLightComponent::CAreaLightComponent()
         : m_Direction     (0.01f, 0.01f, -1.0f)
         , m_Color         (1.0f)

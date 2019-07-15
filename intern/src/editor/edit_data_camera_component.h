@@ -13,24 +13,29 @@ namespace Dt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
+            bool HasChanged = false;
+
             // -----------------------------------------------------------------------------
             // Clear flag
             // -----------------------------------------------------------------------------
             {
                 const char* Text[] = { "Skybox", "Webcam", "Solid Color", "No clear" };
 
-                int Index = static_cast<int>(GetClearFlag());
+                auto Index = static_cast<int>(GetClearFlag());
 
-                ImGui::Combo("Clear Flag", &Index, Text, 4);
+                if (ImGui::Combo("Clear Flag", &Index, Text, 4))
+                {
+                    SetClearFlag(static_cast<EClearFlag>(Index));
 
-                SetClearFlag(static_cast<EClearFlag>(Index));
+                    HasChanged = true;
+                }
             }
 
             if (GetClearFlag() == EClearFlag::SolidColor)
             {
-                ImGui::ColorEdit3("Solid Color", &m_BackgroundColor.r);
+                HasChanged |= ImGui::ColorEdit3("Solid Color", &m_BackgroundColor.r);
             }
 
             // -----------------------------------------------------------------------------
@@ -39,20 +44,23 @@ namespace Dt
             {
                 const char* Text[] = { "Perspective", "Orthographic" };
 
-                int Index = static_cast<int>(GetProjectionType());
+                auto Index = static_cast<int>(GetProjectionType());
 
-                ImGui::Combo("Projection", &Index, Text, 2);
+                if (ImGui::Combo("Projection", &Index, Text, 2))
+                {
+                    SetProjectionType(static_cast<EProjectionType>(Index));
 
-                SetProjectionType(static_cast<EProjectionType>(Index));
+                    HasChanged = true;
+                }
             }
 
             if (GetProjectionType() == CCameraComponent::Perspective)
             {
-                ImGui::SliderFloat("Field of View", &m_FoV, 0.0f, 179.0f, "%.0f");
+                HasChanged |= ImGui::SliderFloat("Field of View", &m_FoV, 0.0f, 179.0f, "%.0f");
             }
             else if (GetProjectionType() == CCameraComponent::Orthographic)
             {
-                ImGui::DragFloat("Size", &m_Size);
+                HasChanged |= ImGui::DragFloat("Size", &m_Size);
             }
 
             // -----------------------------------------------------------------------------
@@ -60,14 +68,14 @@ namespace Dt
             // -----------------------------------------------------------------------------
             ImGui::TextDisabled("Clipping Planes");
 
-            ImGui::DragFloat("Near", &m_Near);
+            HasChanged |= ImGui::DragFloat("Near", &m_Near);
 
-            ImGui::DragFloat("Far", &m_Far);
+            HasChanged |= ImGui::DragFloat("Far", &m_Far);
 
             // -----------------------------------------------------------------------------
             // Depth
             // -----------------------------------------------------------------------------
-            ImGui::DragFloat("Depth", &m_Depth);
+            HasChanged |= ImGui::DragFloat("Depth", &m_Depth);
 
             // -----------------------------------------------------------------------------
             // Camera mode
@@ -75,22 +83,26 @@ namespace Dt
             {
                 const char* Text[] = { "Auto", "Manual" };
 
-                int Index = static_cast<int>(GetCameraMode());
+                auto Index = static_cast<int>(GetCameraMode());
 
-                ImGui::Combo("Camera Mode", &Index, Text, 2);
+                if (ImGui::Combo("Camera Mode", &Index, Text, 2))
+                {
+                    SetCameraMode(static_cast<ECameraMode>(Index));
 
-                SetCameraMode(static_cast<ECameraMode>(Index));
+                    HasChanged = true;
+                }
+                
             }
 
             if (GetCameraMode() == CCameraComponent::Manual)
             {
-                ImGui::DragFloat("Shutter Speed", &m_ShutterSpeed, 0.01f, 0.0f, 0.0f, "%.2f seconds");
+                HasChanged |= ImGui::DragFloat("Shutter Speed", &m_ShutterSpeed, 0.01f, 0.0f, 0.0f, "%.2f seconds");
 
-                ImGui::DragFloat("Aperture", &m_Aperture, 0.01f, 0.0f, 0.0f, "%.2f flops");
+                HasChanged |= ImGui::DragFloat("Aperture", &m_Aperture, 0.01f, 0.0f, 0.0f, "%.2f flops");
 
-                ImGui::DragFloat("ISO", &m_ISO, 1.0f, 0.0f, 0.0f, "%.0f");
+                HasChanged |= ImGui::DragFloat("ISO", &m_ISO, 1.0f, 0.0f, 0.0f, "%.0f");
 
-                ImGui::DragFloat("Exposure", &m_EC, 0.1f, -5.0f, 5.0f, "%.1f");
+                HasChanged |= ImGui::DragFloat("Exposure", &m_EC, 0.1f, -5.0f, 5.0f, "%.1f");
             }
 
             // -----------------------------------------------------------------------------
@@ -98,23 +110,18 @@ namespace Dt
             // -----------------------------------------------------------------------------
             ImGui::TextDisabled("Viewport");
 
-            ImGui::DragFloat2("XY", &m_ViewportRect.x);
+            HasChanged |= ImGui::DragFloat2("XY", &m_ViewportRect.x);
 
-            ImGui::DragFloat2("WH", &m_ViewportRect.z);
+            HasChanged |= ImGui::DragFloat2("WH", &m_ViewportRect.z);
+
+            return HasChanged;
         }
 
         // -----------------------------------------------------------------------------
 
-        const char* GetHeader()
+        static void OnNewComponent(Dt::CEntity::BID _ID)
         {
-            return "Camera";
-        }
-
-        // -----------------------------------------------------------------------------
-
-        void OnNewComponent(Dt::CEntity::BID _ID)
-        {
-            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(_ID);
+            Dt::CEntity* pCurrentEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_ID);
 
             pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
@@ -123,6 +130,12 @@ namespace Dt
             pCurrentEntity->AttachComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CCameraComponent::DirtyCreate);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void OnDropAsset(const Edit::CAsset&)
+        {
         }
     };
 } // namespace Dt

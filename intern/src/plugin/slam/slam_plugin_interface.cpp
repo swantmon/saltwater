@@ -52,16 +52,55 @@ namespace SLAM
 
     // -----------------------------------------------------------------------------
 
-    void CPluginInterface::SetActivateSelection(bool _Flag)
+    void CPluginInterface::UpdateScriptSettings(const Scpt::CSLAMScript::SScriptSettings& _rSettings)
     {
-        m_SLAMControl.SetActivateSelection(_Flag);
+        if (_rSettings.m_Colorize || _rSettings.m_IsPermanentColorizationEnabled)
+        {
+            m_SLAMControl.ColorizePlanes();
+        }
+
+        m_SLAMControl.EnableMouseControl(_rSettings.m_IsMouseControlEnabled);
+        m_SLAMControl.SetActivateSelection(_rSettings.m_IsSelectionEnabled);
+        m_SLAMControl.SetIsPlaying(_rSettings.m_IsPlayingRecording);
+        m_SLAMControl.SetPlaybackSpeed(_rSettings.m_PlaybackSpeed);
+
+        if (_rSettings.m_SetRecordFile)
+        {
+            m_SLAMControl.SetRecordFile(Core::AssetManager::GetPathToAssets() + "/" + _rSettings.m_RecordFile, _rSettings.m_PlaybackSpeed);
+            ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", (Core::AssetManager::GetPathToAssets() + "/" + _rSettings.m_RecordFile).c_str());
+        }
+
+        Gfx::ReconstructionRenderer::SetVisibleObjects(
+            _rSettings.m_RenderVolume,
+            _rSettings.m_RenderRoot,
+            _rSettings.m_RenderLevel1,
+            _rSettings.m_RenderLevel2,
+            _rSettings.m_PlaneMode
+        );
+
+		if (_rSettings.m_SendPlanes)
+		{
+			m_SLAMControl.SendPlanes();
+		}
+
+        if (_rSettings.m_Reset)
+        {
+            m_SLAMControl.ResetReconstruction();
+        }
     }
 
     // -----------------------------------------------------------------------------
 
-    void CPluginInterface::EnableMouseControl(bool _Flag)
+    void CPluginInterface::ReadScene(CSceneReader& _rCodec)
     {
-        m_SLAMControl.EnableMouseControl(_Flag);
+        m_SLAMControl.ReadScene(_rCodec);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::WriteScene(CSceneWriter& _rCodec)
+    {
+        m_SLAMControl.WriteScene(_rCodec);
     }
 
     // -----------------------------------------------------------------------------
@@ -114,14 +153,21 @@ extern "C" CORE_PLUGIN_API_EXPORT void OnRenderHitProxy()
 
 // -----------------------------------------------------------------------------
 
-extern "C" CORE_PLUGIN_API_EXPORT void SetActivateSelection(bool _Flag)
+extern "C" CORE_PLUGIN_API_EXPORT void UpdateScriptSettings(const Scpt::CSLAMScript::SScriptSettings& _rSettings)
 {
-    static_cast<SLAM::CPluginInterface&>(GetInstance()).SetActivateSelection(_Flag);
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).UpdateScriptSettings(_rSettings);
 }
 
 // -----------------------------------------------------------------------------
 
-extern "C" CORE_PLUGIN_API_EXPORT void EnableMouseControl(bool _Flag)
+extern "C" CORE_PLUGIN_API_EXPORT void ReadScene(CSceneReader& _rCodec)
 {
-    static_cast<SLAM::CPluginInterface&>(GetInstance()).EnableMouseControl(_Flag);
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).ReadScene(_rCodec);
+}
+
+// -----------------------------------------------------------------------------
+
+extern "C" CORE_PLUGIN_API_EXPORT void WriteScene(CSceneWriter& _rCodec)
+{
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).WriteScene(_rCodec);
 }

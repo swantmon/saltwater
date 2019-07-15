@@ -243,18 +243,18 @@ namespace Stereo
             //         transformLine(epipole1, p1, img1, thetaIdx, m_minRho1, m_maxRho1, m_mapX1, m_mapY1, m_inverseMapX1, m_inverseMapY1);
             //         transformLine(epipole2, p2, img2, thetaIdx, m_minRho2, m_maxRho2, m_mapX2, m_mapY2, m_inverseMapX2, m_inverseMapY2);
 
-            cv::Vec3f v0(p1.x - EpiPole1.x, p1.y - EpiPole1.y, 1.0);
+            cv::Vec3f v0(p1.x - EpiPole1.x, p1.y - EpiPole1.y, 1.0f);
             v0 /= cv::norm(v0);
             cv::Point2d oldP1 = p1;
 
             getNewEpiline(EpiPole1, EpiPole2, ImgSize, F, p1, p2, line1, line2, p1, p2, line1, line2);
 
             // Check if we reached the end
-            cv::Vec3f v1(p1.x - EpiPole1.x, p1.y - EpiPole1.y, 0.0);
+            cv::Vec3f v1(p1.x - EpiPole1.x, p1.y - EpiPole1.y, 0.0f);
             v1 /= cv::norm(v1);
-            cv::Vec3f v2(m_e1.x - EpiPole1.x, m_e1.y - EpiPole1.y, 0.0);
+            cv::Vec3f v2(m_e1.x - EpiPole1.x, m_e1.y - EpiPole1.y, 0.0f);
             v2 /= cv::norm(v2);
-            cv::Vec3f v3(oldP1.x - EpiPole1.x, oldP1.y - EpiPole1.y, 0.0);
+            cv::Vec3f v3(oldP1.x - EpiPole1.x, oldP1.y - EpiPole1.y, 0.0f);
             v3 /= cv::norm(v3);
 
             double crossProd = v1.cross(v2)[2];

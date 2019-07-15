@@ -4,6 +4,7 @@
 #include "base/base_coordinate_system.h"
 #include "base/base_include_glm.h"
 
+#include "engine/core/core_asset_manager.h"
 #include "engine/core/core_plugin_manager.h"
 
 #include "engine/core/core_program_parameters.h"
@@ -15,6 +16,8 @@
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_shader.h"
 #include "engine/graphic/gfx_shader_manager.h"
+#include "engine/graphic/gfx_sky.h"
+#include "engine/graphic/gfx_sky_manager.h"
 #include "engine/graphic/gfx_texture.h"
 #include "engine/graphic/gfx_texture_manager.h"
 
@@ -51,11 +54,11 @@ namespace Scpt
 
     private:
 
-        typedef void(*LESetInputTextureFunc)(Gfx::CTexturePtr);
-        typedef void(*LESetOutputCubemapFunc)(Gfx::CTexturePtr);
-        typedef Gfx::CTexturePtr(*LEGetOutputCubemapFunc)();
-        typedef void(*LESetActiveFunc)(bool);
-        typedef Gfx::CTexturePtr(*ARGetBackgroundTextureFunc)();
+        using LESetInputTextureFunc = void(*)(Gfx::CTexturePtr);
+        using LESetOutputCubemapFunc = void(*)(Gfx::CTexturePtr);
+        using LEGetOutputCubemapFunc = Gfx::CTexturePtr(*)();
+        using LESetActiveFunc = void(*)(bool);
+        using ARGetBackgroundTextureFunc = Gfx::CTexturePtr(*)();
 
         LESetInputTextureFunc SetInputTexture = nullptr;
         LESetOutputCubemapFunc SetOutputCubemap = nullptr;
@@ -135,9 +138,9 @@ namespace Scpt
 
         void Exit() override
         {
-            m_OutputCubemapPtr = 0;
-            m_C2PShaderPtr = 0;
-            m_PanoramaTexturePtr = 0;
+            m_OutputCubemapPtr = nullptr;
+            m_C2PShaderPtr = nullptr;
+            m_PanoramaTexturePtr = nullptr;
         }
 
         // -----------------------------------------------------------------------------
@@ -169,7 +172,7 @@ namespace Scpt
             TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
             TextureDescriptor.m_Usage            = Gfx::CTexture::GPUReadWrite;
             TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-            TextureDescriptor.m_pFileName        = 0;
+            TextureDescriptor.m_pFileName        = nullptr;
             TextureDescriptor.m_pPixels          = const_cast<char*>(&_rMessage.m_Payload[0]);
         
             Gfx::CTexturePtr NewTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
@@ -195,7 +198,7 @@ namespace Scpt
 
             Gfx::ContextManager::ResetShaderCS();
 
-            NewTexturePtr = 0;
+            NewTexturePtr = nullptr;
 
             // -----------------------------------------------------------------------------
             // Set new texture to sky
@@ -203,12 +206,18 @@ namespace Scpt
             Gfx::TextureManager::SetTextureLabel(m_PanoramaTexturePtr, "Sky panorama from image");
 
             m_pSkyComponent->SetType(Dt::CSkyComponent::Panorama);
-            m_pSkyComponent->SetTexture(m_PanoramaTexturePtr);
+            m_pSkyComponent->SetTexture("");
             m_pSkyComponent->SetRefreshMode(Dt::CSkyComponent::Dynamic);
             m_pSkyComponent->SetQuality(Dt::CSkyComponent::PX256);
             m_pSkyComponent->SetIntensity(12000);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
+
+            // -----------------------------------------------------------------------------
+
+            auto pGfxSky = static_cast<Gfx::CSky*>(m_pSkyComponent->GetFacet(Dt::CSkyComponent::Graphic));
+
+            pGfxSky->SetInputTexture(m_PanoramaTexturePtr);
         }
 
         // -----------------------------------------------------------------------------
@@ -219,8 +228,8 @@ namespace Scpt
             {
                 ENGINE_CONSOLE_INFO("Touched (NE = switch estimation; SE = save cube map; NW = send panorama; SW = reset");
 
-                float x = static_cast<float>(_rEvent.GetGlobalCursorPosition()[0]);
-                float y = static_cast<float>(_rEvent.GetGlobalCursorPosition()[1]);
+                auto x = static_cast<float>(_rEvent.GetGlobalCursorPosition()[0]);
+                auto y = static_cast<float>(_rEvent.GetGlobalCursorPosition()[1]);
 
                 if (x < 200.0f && y < 200.0f)
                 {
@@ -357,9 +366,9 @@ namespace Scpt
 
             // -----------------------------------------------------------------------------
 
-            Gfx::TextureManager::SaveTexture(m_PanoramaTexturePtr, Core::AssetManager::GetPathToFiles() + "/env_panorama.ppm");
+            Gfx::TextureManager::SaveTexture(m_PanoramaTexturePtr, Core::AssetManager::GetPathToAssets() + "/env_panorama.png");
 
-            Gfx::TextureManager::SaveTexture(m_OutputCubemapPtr, Core::AssetManager::GetPathToFiles() + "/env_cubemap.ppm");
+            Gfx::TextureManager::SaveTexture(m_OutputCubemapPtr, Core::AssetManager::GetPathToAssets() + "/env_cubemap.png");
         }
 
         // -----------------------------------------------------------------------------
@@ -375,12 +384,12 @@ namespace Scpt
             TextureDescriptor.m_NumberOfTextures = 1;
             TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
             TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
-            TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_BYTE;
+            TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
             TextureDescriptor.m_Usage            = Gfx::CTexture::GPUReadWrite;
             TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-            TextureDescriptor.m_pFileName        = 0;
-            TextureDescriptor.m_pPixels          = 0;
-        
+            TextureDescriptor.m_pFileName        = nullptr;
+            TextureDescriptor.m_pPixels          = nullptr;
+
             m_PanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
             Gfx::TextureManager::SetTextureLabel(m_PanoramaTexturePtr, "Sky panorama from image");
@@ -428,8 +437,8 @@ namespace Scpt
             TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_BYTE;
             TextureDescriptor.m_Usage            = Gfx::CTexture::GPUReadWrite;
             TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-            TextureDescriptor.m_pFileName        = 0;
-            TextureDescriptor.m_pPixels          = 0;
+            TextureDescriptor.m_pFileName        = nullptr;
+            TextureDescriptor.m_pPixels          = nullptr;
         
             m_PanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
@@ -447,8 +456,8 @@ namespace Scpt
             TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
             TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
             TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-            TextureDescriptor.m_pFileName        = 0;
-            TextureDescriptor.m_pPixels          = 0;
+            TextureDescriptor.m_pFileName        = nullptr;
+            TextureDescriptor.m_pPixels          = nullptr;
             TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_BYTE;
 
             m_OutputCubemapPtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
@@ -459,7 +468,7 @@ namespace Scpt
             // Setup sky
             // -----------------------------------------------------------------------------
             m_pSkyComponent->SetType(Dt::CSkyComponent::Cubemap);
-            m_pSkyComponent->SetTexture(m_OutputCubemapPtr);
+            m_pSkyComponent->SetTexture("");
             m_pSkyComponent->SetRefreshMode(Dt::CSkyComponent::Dynamic);
             m_pSkyComponent->SetQuality(Dt::CSkyComponent::PX128);
             m_pSkyComponent->SetIntensity(12000);
@@ -468,7 +477,30 @@ namespace Scpt
 
             // -----------------------------------------------------------------------------
 
+            auto pGfxSky = static_cast<Gfx::CSky*>(m_pSkyComponent->GetFacet(Dt::CSkyComponent::Graphic));
+
+            pGfxSky->SetInputTexture(m_OutputCubemapPtr);
+
+            // -----------------------------------------------------------------------------
+
             SwitchLightEstimation((EEstimationType)m_Mode);
+        }
+
+    public:
+
+        inline void Read(CSceneReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+        }
+
+        inline void Write(CSceneWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CLightEstimationScript();
         }
     };
 } // namespace Scpt

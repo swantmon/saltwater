@@ -1,18 +1,4 @@
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \file base_serialize_text_writer.h
-///
-/// \author Tobias Schwandt
-/// \author Credits to Joerg Sahm
-/// \author Copyright (c) Tobias Schwandt. All rights reserved.
-///
-/// \date 2012-2013
-///
-/// \version 1.0
-/// 
-////////////////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include "base/base_defines.h"
@@ -36,8 +22,8 @@ namespace SER
         };
 
     public:
-        typedef std::ostream CStream;
-        typedef CTextWriter  CThis;
+        using CStream = std::ostream;
+        using CThis = CTextWriter;
 
     public:
         inline  CTextWriter(CStream& _rStream, unsigned int _Version);
@@ -177,7 +163,7 @@ namespace SER
     template<typename TElement>
     inline void CTextWriter::BeginCollection(unsigned int _NumberOfElements)
     {
-        typedef typename SRemoveQualifier<TElement>::X XUnqualified;
+        using XUnqualified = typename SRemoveQualifier<TElement>::X;
 
         InternBeginCollection(static_cast<XUnqualified*>(0), _NumberOfElements);
     }
@@ -195,7 +181,7 @@ namespace SER
     template<typename TElement>
     inline void CTextWriter::EndCollection()
     {
-        typedef typename SRemoveQualifier<TElement>::X XUnqualified;
+        using XUnqualified = typename SRemoveQualifier<TElement>::X;
 
         InternEndCollection(static_cast<XUnqualified*>(0));
     }
@@ -222,7 +208,7 @@ namespace SER
     template<typename TElement>
     inline void CTextWriter::WriteClass(const TElement& _rElement)
     {
-        typedef typename SRemoveQualifier<TElement>::X XUnqualified;
+        using XUnqualified = typename SRemoveQualifier<TElement>::X;
 
         static const unsigned int s_MaxLengthOfClassName = 2048;
 

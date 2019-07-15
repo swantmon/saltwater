@@ -294,7 +294,7 @@ namespace
 
         Gfx::Main::CResizeDelegate::HandleType m_ResizeHandle;
 
-        Dt::EntityManager::CEntityDelegate::HandleType m_EntityDelegate;
+        Dt::CEntityManager::CEntityDelegate::HandleType m_EntityDelegate;
 
         Dt::CComponentManager::CComponentDelegate::HandleType m_ComponentDelegate;
 
@@ -479,7 +479,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Handler
         // -----------------------------------------------------------------------------
-        m_EntityDelegate = Dt::EntityManager::RegisterDirtyEntityHandler(std::bind(&CMRControlManager::OnDirtyEntity, this, std::placeholders::_1));
+        m_EntityDelegate = Dt::CEntityManager::GetInstance().RegisterDirtyEntityHandler(std::bind(&CMRControlManager::OnDirtyEntity, this, std::placeholders::_1));
 
         m_ComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CMRControlManager::OnDirtyComponent, this, std::placeholders::_1));
 
@@ -551,6 +551,9 @@ namespace
         ArCamera_getViewMatrix(m_pARSession, pARCamera, glm::value_ptr(m_Camera.m_ViewMatrix));
 
         ArCamera_getProjectionMatrix(m_pARSession, pARCamera, m_Settings.m_Near, m_Settings.m_Far, glm::value_ptr(m_Camera.m_ProjectionMatrix));
+
+        m_Camera.m_Near = m_Camera.m_ProjectionMatrix[2][3] / (m_Camera.m_ProjectionMatrix[2][2] - 1.0f);
+        m_Camera.m_Far  = m_Camera.m_ProjectionMatrix[2][3] / (m_Camera.m_ProjectionMatrix[2][2] + 1.0f);
 
         ArTrackingState CameraTrackingState;
 

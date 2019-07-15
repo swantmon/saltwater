@@ -11,27 +11,26 @@ namespace Dt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
-            {
-                const char* Text[] = { "Asset", "Box", "Sphere", "IsometricSphere", "Cone", "Rectangle" };
+            const char* Text[] = { "Asset", "Box", "Sphere", "IsometricSphere", "Cone", "Rectangle" };
 
-                int Index = static_cast<int>(GetMeshType());
+            auto Index = static_cast<int>(GetMeshType());
 
-                ImGui::LabelText("Mesh Type", Text[Index]);
-            }
+            ImGui::LabelText("Mesh Type", Text[Index]);
 
             if (GetMeshType() == CMeshComponent::Asset)
             {
                 ImGui::LabelText("File", m_Filename.c_str());
             }
+
+            return false;
         }
 
         // -----------------------------------------------------------------------------
 
-        const char* GetHeader()
+        void OnDropAsset(const Edit::CAsset&)
         {
-            return "Mesh";
         }
     };
 } // namespace Dt

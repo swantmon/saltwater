@@ -123,8 +123,8 @@ namespace
 
     private:
 
-        typedef std::vector<SCameraRenderJob> CCameraRenderJobs;
-        typedef std::vector<SSkyRenderJob> CSkyRenderJobs;
+        using CCameraRenderJobs = std::vector<SCameraRenderJob>;
+        using CSkyRenderJobs = std::vector<SSkyRenderJob>;
         
     private:
 
@@ -176,19 +176,19 @@ namespace
     
     void CGfxBackgroundRenderer::OnExit()
     {
-        m_BackgroundFromSkybox.m_VSPtr            = 0;
-        m_BackgroundFromSkybox.m_PSPtr            = 0;
-        m_BackgroundFromSkybox.m_VSBufferSetPtr   = 0;
-        m_BackgroundFromSkybox.m_PSBufferSetPtr   = 0;
-        m_BackgroundFromSkybox.m_InputLayoutPtr   = 0;
-        m_BackgroundFromSkybox.m_MeshPtr          = 0;
+        m_BackgroundFromSkybox.m_VSPtr            = nullptr;
+        m_BackgroundFromSkybox.m_PSPtr            = nullptr;
+        m_BackgroundFromSkybox.m_VSBufferSetPtr   = nullptr;
+        m_BackgroundFromSkybox.m_PSBufferSetPtr   = nullptr;
+        m_BackgroundFromSkybox.m_InputLayoutPtr   = nullptr;
+        m_BackgroundFromSkybox.m_MeshPtr          = nullptr;
 
-        m_BackgroundFromWebcam.m_VSPtr            = 0;
-        m_BackgroundFromWebcam.m_PSPtr            = 0;
-        m_BackgroundFromWebcam.m_VSBufferSetPtr   = 0;
-        m_BackgroundFromWebcam.m_PSBufferSetPtr   = 0;
-        m_BackgroundFromWebcam.m_InputLayoutPtr   = 0;
-        m_BackgroundFromWebcam.m_MeshPtr          = 0;
+        m_BackgroundFromWebcam.m_VSPtr            = nullptr;
+        m_BackgroundFromWebcam.m_PSPtr            = nullptr;
+        m_BackgroundFromWebcam.m_VSBufferSetPtr   = nullptr;
+        m_BackgroundFromWebcam.m_PSBufferSetPtr   = nullptr;
+        m_BackgroundFromWebcam.m_InputLayoutPtr   = nullptr;
+        m_BackgroundFromWebcam.m_MeshPtr          = nullptr;
 
         m_CameraRenderJobs.clear();
 
@@ -263,8 +263,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSkyboxVSBuffer);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
         
         CBufferPtr SkyboxVSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
                         
@@ -275,8 +275,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSkyboxBufferPS);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
         
         CBufferPtr SkyboxPSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -287,8 +287,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSkyTextureBufferPS);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
         
         CBufferPtr SkyTexturePSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
        
@@ -365,7 +365,7 @@ namespace
     
     void CGfxBackgroundRenderer::Render()
     {
-        bool HasMainCamera = m_CameraRenderJobs.size() != 0;
+        bool HasMainCamera = !m_CameraRenderJobs.empty();
 
         if (HasMainCamera)
         {
@@ -394,7 +394,7 @@ namespace
 
     void CGfxBackgroundRenderer::RenderBackgroundFromSkybox()
     {
-        if (m_SkyRenderJobs.size() == 0) return;
+        if (m_SkyRenderJobs.empty()) return;
 
         CShaderPtr        VSPtr            = m_BackgroundFromSkybox.m_VSPtr;
         CShaderPtr        PSPtr            = m_BackgroundFromSkybox.m_PSPtr;
@@ -510,7 +510,7 @@ namespace
         // -----------------------------------------------------------------------------
         float HDRIntensity = 1.0f;
 
-        if (m_SkyRenderJobs.size() > 0)
+        if (!m_SkyRenderJobs.empty())
         {
             SSkyRenderJob& rCurrentJob = m_SkyRenderJobs[0];
 
@@ -554,7 +554,7 @@ namespace
 
         ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
 
-        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::LessEqualDepth));
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoWriteDepth));
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
 
@@ -611,7 +611,7 @@ namespace
 
         for (auto Component : DataCameraComponents)
         {
-            Dt::CCameraComponent* pDtComponent = static_cast<Dt::CCameraComponent*>(Component);
+            auto* pDtComponent = static_cast<Dt::CCameraComponent*>(Component);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
@@ -631,7 +631,7 @@ namespace
 
         for (auto Component : DataSkyComponents)
         {
-            Dt::CSkyComponent* pDtComponent = static_cast<Dt::CSkyComponent*>(Component);
+            auto* pDtComponent = static_cast<Dt::CSkyComponent*>(Component);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 

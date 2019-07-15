@@ -7,6 +7,8 @@
 
 #include "editor/imgui/imgui.h"
 
+#include "editor/imgui/extensions/ImTextureSlot.h"
+
 #include "engine/graphic/gfx_texture_manager.h"
 
 namespace Dt
@@ -15,17 +17,19 @@ namespace Dt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
+            bool HasChanged = false;
+
             // -----------------------------------------------------------------------------
             // Refresh mode
             // -----------------------------------------------------------------------------
             {
                 const char* Text[] = { "Static", "Dynamic" };
 
-                int Index = static_cast<int>(GetRefreshMode());
+                auto Index = static_cast<int>(GetRefreshMode());
 
-                ImGui::Combo("Refresh Mode", &Index, Text, 2);
+                HasChanged |= ImGui::Combo("Refresh Mode", &Index, Text, 2);
 
                 SetRefreshMode(static_cast<ERefreshMode>(Index));
             }
@@ -36,9 +40,9 @@ namespace Dt
             {
                 const char* Text[] = { "Procedural", "Panorama", "Cubemap" };
 
-                int Index = static_cast<int>(GetType());
+                auto Index = static_cast<int>(GetType());
 
-                ImGui::Combo("Type", &Index, Text, 3);
+                HasChanged |= ImGui::Combo("Type", &Index, Text, 3);
 
                 SetType(static_cast<EType>(Index));
             }
@@ -49,63 +53,31 @@ namespace Dt
             {
                 const char* Text[] = { "64", "128", "256", "512", "1024", "2048" };
 
-                int Index = static_cast<int>(GetQuality());
+                auto Index = static_cast<int>(GetQuality());
 
-                ImGui::Combo("Quality", &Index, Text, 6);
+                HasChanged |= ImGui::Combo("Quality", &Index, Text, 6);
 
                 SetQuality(static_cast<EQuality>(Index));
             }
 
             // -----------------------------------------------------------------------------
-            // Rest
+            // Texture
             // -----------------------------------------------------------------------------
-            static char PathToTexture[255] = {};
+            HasChanged |= ImGui::TextureField("##SKY_TEXTURE", "Texture", m_Texture);
 
-            if (ImGui::InputText("Path to Texture", PathToTexture, 255) && strlen(PathToTexture) > 0)
-            {
-                Gfx::STextureDescriptor TextureDescriptor; 
+            // -----------------------------------------------------------------------------
+            // Intensity
+            // -----------------------------------------------------------------------------
+            HasChanged |= ImGui::DragFloat("Intensity", &m_Intensity);
 
-                TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource; 
-                TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource; 
-                TextureDescriptor.m_NumberOfPixelsW  = 1;
-                TextureDescriptor.m_NumberOfMipMaps  = 1;
-                TextureDescriptor.m_NumberOfTextures = 1;
-                TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite; 
-                TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead; 
-                TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse; 
-                TextureDescriptor.m_pFileName        = 0; 
-                TextureDescriptor.m_pPixels          = 0; 
-                TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
-                TextureDescriptor.m_Format           = Gfx::STextureDescriptor::s_FormatFromSource;
-                TextureDescriptor.m_pFileName        = PathToTexture;
-
-                if (GetType() == Dt::CSkyComponent::Cubemap)
-                {
-                    TextureDescriptor.m_NumberOfTextures = 6;
-
-                    SetTexture(Gfx::TextureManager::CreateCubeTexture(TextureDescriptor));
-                }
-                else
-                {
-                    SetTexture(Gfx::TextureManager::CreateTexture2D(TextureDescriptor));
-                }
-            }
-
-            ImGui::DragFloat("Intensity", &m_Intensity);
+            return HasChanged;
         }
 
         // -----------------------------------------------------------------------------
 
-        const char* GetHeader()
+        static void OnNewComponent(Dt::CEntity::BID _ID)
         {
-            return "Sky";
-        }
-
-        // -----------------------------------------------------------------------------
-
-        void OnNewComponent(Dt::CEntity::BID _ID)
-        {
-            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(_ID);
+            Dt::CEntity* pCurrentEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_ID);
 
             pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
@@ -114,6 +86,12 @@ namespace Dt
             pCurrentEntity->AttachComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CSkyComponent::DirtyCreate);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void OnDropAsset(const Edit::CAsset&)
+        {
         }
     };
 } // namespace Dt

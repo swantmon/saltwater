@@ -313,6 +313,43 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CSLAMReconstructor::UpdataGPUIntrinsics()
+    {
+        const float FocalLengthX0 = m_FocalLength.x;
+        const float FocalLengthY0 = m_FocalLength.y;
+        const float FocalPointX0 = m_FocalPoint.x;
+        const float FocalPointY0 = m_FocalPoint.y;
+
+        std::vector<SIntrinsics> Intrinsics(m_ReconstructionSettings.m_PyramidLevelCount);
+
+        for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++i)
+        {
+            const int PyramidFactor = 1 << i;
+
+            const float FocalLengthX = FocalLengthX0 / PyramidFactor;
+            const float FocalLengthY = FocalLengthY0 / PyramidFactor;
+            const float FocalPointX = FocalPointX0 / PyramidFactor;
+            const float FocalPointY = FocalPointY0 / PyramidFactor;
+
+            glm::mat4 KMatrix(
+                FocalLengthX, 0.0f, 0.0f, 0.0f,
+                0.0f, FocalLengthY, 0.0f, 0.0f,
+                FocalPointX, FocalPointY, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f
+            );
+
+            Intrinsics[i].m_FocalPoint = glm::vec2(FocalPointX, FocalPointY);
+            Intrinsics[i].m_FocalLength = glm::vec2(FocalLengthX, FocalLengthY);
+            Intrinsics[i].m_InvFocalLength = glm::vec2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
+            Intrinsics[i].m_KMatrix = KMatrix;
+            Intrinsics[i].m_InvKMatrix = glm::inverse(KMatrix);
+        }
+
+        BufferManager::UploadBufferData(m_IntrinsicsConstantBufferPtr, Intrinsics.data());
+    }
+
+    // -----------------------------------------------------------------------------
+
     glm::vec4 CSLAMReconstructor::GetHessianNormalForm(const glm::vec3& rA, const glm::vec3& rB, const glm::vec3& rC)
     {
         glm::vec3 V1 = rB - rA;
@@ -1180,122 +1217,93 @@ namespace MR
     
     void CSLAMReconstructor::SetupBuffers(bool _CreatePool)
     {
-        const float FocalLengthX0 = m_FocalLength.x;
-        const float FocalLengthY0 = m_FocalLength.y;
-        const float FocalPointX0 = m_FocalPoint.x;
-        const float FocalPointY0 = m_FocalPoint.y;
-        
-        std::vector<SIntrinsics> Intrinsics(m_ReconstructionSettings.m_PyramidLevelCount);
+        SBufferDescriptor BufferDesc = {};
 
-        for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++ i)
-        {
-            const int PyramidFactor = 1 << i;
+        BufferDesc.m_Stride = 0;
+        BufferDesc.m_Usage = CBuffer::EUsage::GPURead;
+        BufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        BufferDesc.m_Access = CBuffer::CPUWrite;
+        BufferDesc.m_NumberOfBytes = sizeof(SIntrinsics) * m_ReconstructionSettings.m_PyramidLevelCount;
+        BufferDesc.m_pBytes = nullptr;
+        BufferDesc.m_pClassKey = nullptr;
 
-            const float FocalLengthX = FocalLengthX0 / PyramidFactor;
-            const float FocalLengthY = FocalLengthY0 / PyramidFactor;
-            const float FocalPointX = FocalPointX0 / PyramidFactor;
-            const float FocalPointY = FocalPointY0 / PyramidFactor;
-
-            glm::mat4 KMatrix(
-                FocalLengthX, 0.0f, 0.0f, 0.0f,
-                0.0f, FocalLengthY, 0.0f, 0.0f,
-                FocalPointX, FocalPointY, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-            );
-
-            Intrinsics[i].m_FocalPoint = glm::vec2(FocalPointX, FocalPointY);
-            Intrinsics[i].m_FocalLength = glm::vec2(FocalLengthX, FocalLengthY);
-            Intrinsics[i].m_InvFocalLength = glm::vec2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
-            Intrinsics[i].m_KMatrix = KMatrix;
-            Intrinsics[i].m_InvKMatrix = glm::inverse(KMatrix);
-        }
-
-        SBufferDescriptor ConstantBufferDesc = {};
-
-        ConstantBufferDesc.m_Stride = 0;
-        ConstantBufferDesc.m_Usage = CBuffer::EUsage::GPURead;
-        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
-        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SIntrinsics) * m_ReconstructionSettings.m_PyramidLevelCount;
-        ConstantBufferDesc.m_pBytes = Intrinsics.data();
-        ConstantBufferDesc.m_pClassKey = nullptr;
-
-        m_IntrinsicsConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_IntrinsicsConstantBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+        UpdataGPUIntrinsics();
         
         STrackingData TrackingData;
         TrackingData.m_PoseMatrix = m_PoseMatrix;
         TrackingData.m_InvPoseMatrix = glm::inverse(m_PoseMatrix);
 
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(STrackingData);
-        ConstantBufferDesc.m_pBytes        = &TrackingData;
-        m_TrackingDataConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        BufferDesc.m_NumberOfBytes = sizeof(STrackingData);
+        BufferDesc.m_pBytes        = &TrackingData;
+        m_TrackingDataConstantBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
-        ConstantBufferDesc.m_pBytes = nullptr;
-        ConstantBufferDesc.m_NumberOfBytes = 16;
-        ConstantBufferDesc.m_Usage = CBuffer::GPUReadWrite;
-        m_RaycastPyramidConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        BufferDesc.m_pBytes = nullptr;
+        BufferDesc.m_NumberOfBytes = 16;
+        BufferDesc.m_Usage = CBuffer::GPUReadWrite;
+        m_RaycastPyramidConstantBufferPtr = BufferManager::CreateBuffer(BufferDesc);
         
-        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        BufferDesc.m_Usage = CBuffer::GPURead;
 
-        ConstantBufferDesc.m_NumberOfBytes = 16;
-        ConstantBufferDesc.m_pBytes = &m_ReconstructionSettings.m_DepthThreshold;
-        m_BilateralFilterConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        BufferDesc.m_NumberOfBytes = 16;
+        BufferDesc.m_pBytes = &m_ReconstructionSettings.m_DepthThreshold;
+        m_BilateralFilterConstantBufferPtr = BufferManager::CreateBuffer(BufferDesc);
         
         SIndirectBuffers ZeroIndirectData = {};
-        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
-        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
-        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SIndirectBuffers);
-        ConstantBufferDesc.m_pBytes = &ZeroIndirectData;
-        m_IndexedIndirectBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        BufferDesc.m_Usage = CBuffer::GPURead;
+        BufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        BufferDesc.m_Access = CBuffer::CPUWrite;
+        BufferDesc.m_NumberOfBytes = sizeof(SIndirectBuffers);
+        BufferDesc.m_pBytes = &ZeroIndirectData;
+        m_IndexedIndirectBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
         SPointRasterization ZeroPointRasterization = {};
-        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
-        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_pBytes = &ZeroPointRasterization;
-        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SPointRasterization);
-        m_PointRasterizationBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        BufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        BufferDesc.m_Access = CBuffer::CPUWrite;
+        BufferDesc.m_pBytes = &ZeroPointRasterization;
+        BufferDesc.m_Usage = CBuffer::GPURead;
+        BufferDesc.m_NumberOfBytes = sizeof(SPointRasterization);
+        m_PointRasterizationBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
-        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
-        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SInstanceData) * g_MaxVolumeInstanceCount;
-        ConstantBufferDesc.m_pBytes = nullptr;
-        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
-        m_RootVolumeInstanceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        BufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        BufferDesc.m_Access = CBuffer::CPUWrite;
+        BufferDesc.m_NumberOfBytes = sizeof(SInstanceData) * g_MaxVolumeInstanceCount;
+        BufferDesc.m_pBytes = nullptr;
+        BufferDesc.m_Usage = CBuffer::GPURead;
+        m_RootVolumeInstanceBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
-        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
-        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = m_ReconstructionSettings.m_GridResolutions[0] * m_ReconstructionSettings.m_GridResolutions[1];
-        ConstantBufferDesc.m_NumberOfBytes = ConstantBufferDesc.m_NumberOfBytes *
-                                             ConstantBufferDesc.m_NumberOfBytes *
-                                             ConstantBufferDesc.m_NumberOfBytes * sizeof(uint32_t);
-        ConstantBufferDesc.m_pBytes = nullptr;
-        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
-        m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * g_MaxVolumeInstanceCount;
-        m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        BufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        BufferDesc.m_Access = CBuffer::CPUWrite;
+        BufferDesc.m_NumberOfBytes = m_ReconstructionSettings.m_GridResolutions[0] * m_ReconstructionSettings.m_GridResolutions[1];
+        BufferDesc.m_NumberOfBytes = BufferDesc.m_NumberOfBytes *
+                                             BufferDesc.m_NumberOfBytes *
+                                             BufferDesc.m_NumberOfBytes * sizeof(uint32_t);
+        BufferDesc.m_pBytes = nullptr;
+        BufferDesc.m_Usage = CBuffer::GPURead;
+        m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+        BufferDesc.m_NumberOfBytes = sizeof(uint32_t) * g_MaxVolumeInstanceCount;
+        m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
         if (_CreatePool)
         {
             CreatePool();
         }
 
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(int32_t) * 4;// 16 bytes = minimum
-        m_VolumeIndexBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        BufferDesc.m_NumberOfBytes = sizeof(int32_t) * 4;// 16 bytes = minimum
+        m_VolumeIndexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
         SRaycastConstantBuffer RaycastZero = {};
 
-        ConstantBufferDesc.m_pBytes = &RaycastZero;
-        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SRaycastConstantBuffer);
-        m_VolumeBuffers.m_AABBBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        BufferDesc.m_pBytes = &RaycastZero;
+        BufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        BufferDesc.m_NumberOfBytes = sizeof(SRaycastConstantBuffer);
+        m_VolumeBuffers.m_AABBBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
-        ConstantBufferDesc.m_pBytes = nullptr;
-        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SPlaneInpainting);
+        BufferDesc.m_pBytes = nullptr;
+        BufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        BufferDesc.m_NumberOfBytes = sizeof(SPlaneInpainting);
 
-        m_PlaneExtractionBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_PlaneExtractionBufferPtr = BufferManager::CreateBuffer(BufferDesc);
     }
 
     void CSLAMReconstructor::CreatePool()
@@ -1304,30 +1312,30 @@ namespace MR
         m_Level1GridPoolSize = Core::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level1", g_MaxLevel1GridPoolSize / g_MegabyteSize) * g_MegabyteSize;
         m_TSDFPoolSize = Core::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level2", g_MaxTSDFPoolSize / g_MegabyteSize) * g_MegabyteSize;
 
-        SBufferDescriptor ConstantBufferDesc = {};
+        SBufferDescriptor BufferDesc = {};
 
-        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
-        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;        
-        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        BufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        BufferDesc.m_Access = CBuffer::CPUWrite;        
+        BufferDesc.m_Usage = CBuffer::GPURead;
 
         const unsigned int RootVolumePositionBufferSize = g_AABB * g_AABB * g_AABB * sizeof(uint32_t);
 
-        ConstantBufferDesc.m_NumberOfBytes = RootVolumePositionBufferSize;
-        m_VolumeBuffers.m_RootVolumePositionBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        ConstantBufferDesc.m_NumberOfBytes = g_MaxRootVolumePoolSize;
-        m_VolumeBuffers.m_RootVolumePoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        ConstantBufferDesc.m_NumberOfBytes = m_RootGridPoolSize;
-        m_VolumeBuffers.m_RootGridPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        ConstantBufferDesc.m_NumberOfBytes = m_Level1GridPoolSize;
-        m_VolumeBuffers.m_Level1PoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        ConstantBufferDesc.m_NumberOfBytes = m_TSDFPoolSize;
-        m_VolumeBuffers.m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        BufferDesc.m_NumberOfBytes = RootVolumePositionBufferSize;
+        m_VolumeBuffers.m_RootVolumePositionBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+        BufferDesc.m_NumberOfBytes = g_MaxRootVolumePoolSize;
+        m_VolumeBuffers.m_RootVolumePoolPtr = BufferManager::CreateBuffer(BufferDesc);
+        BufferDesc.m_NumberOfBytes = m_RootGridPoolSize;
+        m_VolumeBuffers.m_RootGridPoolPtr = BufferManager::CreateBuffer(BufferDesc);
+        BufferDesc.m_NumberOfBytes = m_Level1GridPoolSize;
+        m_VolumeBuffers.m_Level1PoolPtr = BufferManager::CreateBuffer(BufferDesc);
+        BufferDesc.m_NumberOfBytes = m_TSDFPoolSize;
+        m_VolumeBuffers.m_TSDFPoolPtr = BufferManager::CreateBuffer(BufferDesc);
 
         uint32_t Zero[] = { 0, 0, 0, 0 };
 
-        ConstantBufferDesc.m_pBytes = Zero;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// m_ReconstructionSettings.GRID_LEVELS;
-        m_VolumeBuffers.m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        BufferDesc.m_pBytes = Zero;
+        BufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// m_ReconstructionSettings.GRID_LEVELS;
+        m_VolumeBuffers.m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(BufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -1375,6 +1383,18 @@ namespace MR
     {
         _rMin = m_DepthBounds[0];
         _rMax = m_DepthBounds[1];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::OnNewFrame(Gfx::CTexturePtr DepthBuffer, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform, const glm::vec2& _rFocalLength, const glm::vec2& _rFocalPoint)
+    {
+        m_FocalLength = _rFocalLength;
+        m_FocalPoint = _rFocalPoint;
+
+        UpdataGPUIntrinsics();
+
+        OnNewFrame(DepthBuffer, ColorBuffer, pTransform);
     }
 
     // -----------------------------------------------------------------------------
@@ -1817,10 +1837,15 @@ namespace MR
 
     void CSLAMReconstructor::ResetReconstruction(const SReconstructionSettings* pReconstructionSettings)
     {
+        m_Planes.clear();
+
+        if (!m_IsInizialized)
+        {
+            return;
+        }
+
         m_RootVolumeMap.clear();
         m_RootVolumeVector.clear();
-
-        m_Planes.clear();
 
         if (pReconstructionSettings != nullptr)
         {
@@ -1840,32 +1865,56 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::AddPlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID)
+    void CSLAMReconstructor::AddPlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const std::string& _ID)
     {
-        SPlane Plane = { _Transform, _Extent };
+        SPlane Plane = { _rTransform, _rExtent };
 
         m_Planes[_ID] = Plane;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::UpdatePlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID)
+    void CSLAMReconstructor::UpdatePlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const std::string& _ID)
     {
-        SPlane Plane = { _Transform, _Extent };
+        SPlane Plane = { _rTransform, _rExtent };
 
         m_Planes[_ID] = Plane;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::RemovePlane(int _ID)
+    void CSLAMReconstructor::AddPlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID)
+    {
+        glm::vec3 Normal = glm::normalize(glm::mat3(_rTransform) * glm::vec3(0.0f, -1.0f, 0.0f));
+
+        auto MeshPtr =  MeshManager::CreateMesh(_rVertices.data(), static_cast<int>(_rVertices.size()), sizeof(_rVertices[0]), _rIndices.data(), static_cast<int>(_rIndices.size()));
+
+        SPlane Plane = { _rTransform, _rExtent, Normal, MeshPtr, nullptr, _rVertices, _rIndices };
+
+        m_Planes[_ID] = Plane;
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CSLAMReconstructor::UpdatePlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID)
+    {
+        AddPlaneWithMesh(_rTransform, _rExtent, _rVertices, _rIndices, _ID);
+
+        //SPlane Plane = { _Transform, _Extent };
+
+        //m_Planes[_ID] = Plane;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::RemovePlane(const std::string& _ID)
     {
         m_Planes.erase(m_Planes.find(_ID));
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::map<int, CSLAMReconstructor::SPlane>& CSLAMReconstructor::GetPlanes() const
+    std::map<std::string, CSLAMReconstructor::SPlane>& CSLAMReconstructor::GetPlanes()
     {
         return m_Planes;
     }

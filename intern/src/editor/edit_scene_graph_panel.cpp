@@ -1,11 +1,16 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "engine/core/core_console.h"
-
+#include "editor/edit_asset_helper.h"
+#include "editor/edit_edit_state.h"
+#include "editor/edit_gui.h"
 #include "editor/edit_gui_factory.h"
-#include "editor/edit_scene_graph_panel.h"
 #include "editor/edit_inspector_panel.h"
+#include "editor/edit_load_map_state.h"
+#include "editor/edit_scene_graph_panel.h"
+#include "editor/edit_unload_map_state.h"
+
+#include "engine/core/core_console.h"
 
 #include "engine/data/data_map.h"
 #include "engine/data/data_entity.h"
@@ -56,7 +61,7 @@ namespace GUI
 
                 auto pHierarchyFacet = pSibling->GetHierarchyFacet();
 
-                if (pHierarchyFacet->GetFirstChild() != 0)
+                if (pHierarchyFacet->GetFirstChild() != nullptr)
                 {
                     ++ _rDepth;
 
@@ -80,7 +85,7 @@ namespace GUI
 
             Dt::CEntity* pEntity = &*CurrentEntity;
 
-            if (pHierarchyFacet->GetParent() == 0)
+            if (pHierarchyFacet->GetParent() == nullptr)
             {
                 RecursiveTree(pEntity, CurrentDepth);
             }
@@ -91,10 +96,18 @@ namespace GUI
         // -----------------------------------------------------------------------------
         // GUI
         // -----------------------------------------------------------------------------
+        auto Filename = Edit::CUnloadMapState::GetInstance().GetFilename();
+
+        auto Scenename = Filename.substr(0, Filename.find_last_of('.'));
+
         ImGui::SetNextWindowPos(ImVec2(30, 100), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
 
-        ImGui::Begin("Scene Graph", &m_IsVisible);
+        ImGui::Begin("Scene Graph##SCENE_GRAPH_PANEL", &m_IsVisible, CEditState::GetInstance().IsDirty() ? ImGuiWindowFlags_UnsavedDocument : 0);
+
+        ImGui::Text("Scene: %s", Scenename.c_str());
+
+        ImGui::BeginChild("SCENE_GRAPH_PANEL_CHILD");
 
         int MaximumDepth = 1000;
 
@@ -115,7 +128,7 @@ namespace GUI
 
             auto pHierarchyFacet = pEntity->GetHierarchyFacet();
 
-            if (pHierarchyFacet->GetFirstChild() != 0)
+            if (pHierarchyFacet->GetFirstChild() != nullptr)
             {
                 char* Identifier = m_SelectionState[CurrentID] ? "+" : "-";
 
@@ -127,7 +140,7 @@ namespace GUI
                 ImGui::SameLine();
             }
 
-            if (pHierarchyFacet->GetFirstChild() == 0)
+            if (pHierarchyFacet->GetFirstChild() == nullptr)
             {
                 ImGui::Indent();
             }
@@ -145,13 +158,13 @@ namespace GUI
             {
                 if (ImGui::Button("Delete"))
                 {
-                    Dt::EntityManager::MarkEntityAsDirty(*pEntity, Dt::CEntity::DirtyRemove | Dt::CEntity::DirtyDestroy);
+                    Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*pEntity, Dt::CEntity::DirtyRemove | Dt::CEntity::DirtyDestroy);
                 }
 
                 ImGui::EndPopup();
             }
 
-            if (pHierarchyFacet->GetFirstChild() == 0)
+            if (pHierarchyFacet->GetFirstChild() == nullptr)
             {
                 ImGui::Unindent();
             }
@@ -176,24 +189,59 @@ namespace GUI
                 {
                     assert(payload->DataSize == sizeof(Dt::CEntity::BID*));
 
-                    const Dt::CEntity::BID EntityIDDestination = *(const Dt::CEntity::BID*)payload->Data;
+                    auto EntityIDDestination = *static_cast<const Dt::CEntity::BID*>(payload->Data);
 
-                    Dt::CEntity* pSourceEntity = Dt::EntityManager::GetEntityByID(EntityIDDestination);
+                    Dt::CEntity* pSourceEntity = Dt::CEntityManager::GetInstance().GetEntityByID(EntityIDDestination);
 
                     if (pSourceEntity == nullptr) return;
 
                     pSourceEntity->Detach();
 
-                    Dt::CEntity* pDestinationEntity = Dt::EntityManager::GetEntityByID(CurrentID);
+                    Dt::CEntity* pDestinationEntity = Dt::CEntityManager::GetInstance().GetEntityByID(CurrentID);
 
                     pDestinationEntity->Attach(*pSourceEntity);
 
-                    Dt::EntityManager::MarkEntityAsDirty(*pSourceEntity, Dt::CEntity::DirtyMove);
+                    Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*pSourceEntity, Dt::CEntity::DirtyMove);
+
+                    CEditState::GetInstance().SetDirty();
                 }
                 ImGui::EndDragDropTarget();
             }
 
             ImGui::PopID();
+        }
+
+        ImGui::EndChild();
+
+        if (ImGui::BeginDragDropTarget())
+        {
+            ImGuiDragDropFlags ImGuiTargetFlags = 0;
+
+            // ImGuiTargetFlags |= ImGuiDragDropFlags_AcceptBeforeDelivery;    // Don't wait until the delivery (release mouse button on a target) to do something
+            // ImGuiTargetFlags |= ImGuiDragDropFlags_AcceptNoDrawDefaultRect; // Don't display the yellow rectangle
+
+            if (const ImGuiPayload* _pPayload = ImGui::AcceptDragDropPayload("ASSETS_DRAGDROP", ImGuiTargetFlags))
+            {
+                auto& DraggedAsset = *static_cast<CAsset*>(_pPayload->Data);
+
+                if (DraggedAsset.GetType() == CAsset::Model)
+                {
+                    auto pEntity = Edit::AssetHelper::LoadPrefabFromModel(DraggedAsset);
+
+                    if (pEntity != nullptr)
+                    {
+                        Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*pEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                    }
+                }
+                else if (DraggedAsset.GetType() == CAsset::Scene)
+                {
+                    const auto& File = DraggedAsset.GetPathToFile();
+
+                    GUI::SwitchScene(File);
+                }
+            }
+
+            ImGui::EndDragDropTarget();
         }
 
         ImGui::End();

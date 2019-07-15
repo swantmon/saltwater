@@ -13,33 +13,30 @@ namespace Dt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
-            ImGui::DragFloat("Near Distance", &m_NearDistance, 0.01f);
+            bool HasChanged = false;
 
-            ImGui::DragFloat("Far Distance", &m_FarDistance, 0.01f);
+            HasChanged |= ImGui::DragFloat("Near Distance", &m_NearDistance, 0.01f);
 
-            ImGui::DragFloat("Near to far ratio", &m_NearToFarRatio, 0.01f);
+            HasChanged |= ImGui::DragFloat("Far Distance", &m_FarDistance, 0.01f);
 
-            ImGui::DragFloat("Fade Un- to Small blur", &m_FadeUnToSmallBlur, 0.01f);
+            HasChanged |= ImGui::DragFloat("Near to far ratio", &m_NearToFarRatio, 0.01f);
 
-            ImGui::DragFloat("Fade Small- to medium blur", &m_FadeSmallToMediumBlur, 0.01f);
+            HasChanged |= ImGui::DragFloat("Fade Un- to Small blur", &m_FadeUnToSmallBlur, 0.01f);
 
-            UpdateEffect();
+            HasChanged |= ImGui::DragFloat("Fade Small- to medium blur", &m_FadeSmallToMediumBlur, 0.01f);
+
+            if (HasChanged) UpdateEffect();
+
+            return HasChanged;
         }
 
         // -----------------------------------------------------------------------------
 
-        const char* GetHeader()
+        static void OnNewComponent(Dt::CEntity::BID _ID)
         {
-            return "Depth-of-Field";
-        }
-
-        // -----------------------------------------------------------------------------
-
-        void OnNewComponent(Dt::CEntity::BID _ID)
-        {
-            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(_ID);
+            Dt::CEntity* pCurrentEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_ID);
 
             pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
@@ -48,6 +45,12 @@ namespace Dt
             pCurrentEntity->AttachComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CDOFComponent::DirtyCreate);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void OnDropAsset(const Edit::CAsset&)
+        {
         }
     };
 } // namespace Dt

@@ -78,6 +78,20 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
+    bool CEditorControl::IsFlying()
+    {
+        return m_IsFlying;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CEditorControl::IsDragging()
+    {
+        return m_IsDragging;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CEditorControl::InternOnEvent(const Base::CInputEvent& _rEvent)
     {
         if (_rEvent.GetAction() == Base::CInputEvent::MouseMiddlePressed && !m_IsFlying)

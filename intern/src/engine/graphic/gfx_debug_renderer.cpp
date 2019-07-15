@@ -125,7 +125,6 @@ namespace
     private:
         
         CMeshPtr m_QuadModelPtr;
-        CMeshPtr m_GizmoModelPtr;
 
         CBufferSetPtr m_ViewModelVSBuffer;
         CBufferSetPtr m_BaseModelVSBuffer;
@@ -169,7 +168,6 @@ namespace
 {
     CGfxDebugRenderer::CGfxDebugRenderer()
         : m_QuadModelPtr            ()
-        , m_GizmoModelPtr           ()
         , m_ViewModelVSBuffer       ()
         , m_BaseModelVSBuffer       ()
         , m_ViewPSBuffer            ()
@@ -214,7 +212,6 @@ namespace
     void CGfxDebugRenderer::OnExit()
     {
         m_QuadModelPtr             = nullptr;
-        m_GizmoModelPtr            = nullptr;
         m_ViewModelVSBuffer        = nullptr;
         m_BaseModelVSBuffer        = nullptr;
         m_ViewPSBuffer             = nullptr;
@@ -455,12 +452,6 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        std::string PathToModel = Core::AssetManager::GetPathToData() + "/graphic/models/gizmo.obj";
-
-        m_GizmoModelPtr = MeshManager::CreateMeshFromFile(PathToModel, Core::AssetGenerator::SGeneratorFlag::Default | Core::AssetGenerator::SGeneratorFlag::FlipUVs);
-
-        // -----------------------------------------------------------------------------
-
         static float PlaneVertexBufferData[] =
         {
             0.0f, 1.0f, 0.0f,
@@ -672,69 +663,6 @@ namespace
     void CGfxDebugRenderer::RenderGizmo()
     {
         if (!m_IsGizmoVisible) return;
-
-        Performance::BeginEvent("Gizmo");
-
-        // -----------------------------------------------------------------------------
-        // Per frame: Buffer
-        // -----------------------------------------------------------------------------
-        CCameraPtr CameraPtr = m_RenderContextPtr->GetCamera();
-
-        SPerFrameConstantBuffer ViewBuffer;
-
-        ViewBuffer.m_ViewProjection = CameraPtr->GetProjectionMatrix();
-        ViewBuffer.m_ModelMatrix  = glm::mat4(1.0f);
-        // TODO: Change model matrix
-
-        BufferManager::UploadBufferData(m_ViewModelVSBuffer->GetBuffer(0), &ViewBuffer);
-
-        // -----------------------------------------------------------------------------
-        // Per surface
-        // -----------------------------------------------------------------------------
-        BufferManager::UploadBufferData(m_DeferredPassPSBuffer->GetBuffer(0), &m_GizmoModelPtr->GetLOD(0)->GetSurface()->GetMaterial()->GetMaterialAttributes());
-
-        // -----------------------------------------------------------------------------
-        // Render
-        // -----------------------------------------------------------------------------        
-        ContextManager::SetRenderContext(m_RenderContextPtr);
-
-        ContextManager::SetVertexBuffer(m_GizmoModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(m_GizmoModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(m_GizmoModelPtr->GetLOD(0)->GetSurface()->GetShaderVS()->GetInputLayout());
-
-        ContextManager::SetTopology(STopology::TriangleList);
-
-        ContextManager::SetShaderVS(m_GizmoShaderVSPtr);
-
-        ContextManager::SetShaderPS(m_GizmoShaderPSPtr);
-
-        ContextManager::SetConstantBuffer(0, m_ViewModelVSBuffer->GetBuffer(0));
-
-        ContextManager::SetConstantBuffer(1, m_DeferredPassPSBuffer->GetBuffer(0));
-
-        ContextManager::DrawIndexed(m_GizmoModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
-
-        ContextManager::ResetConstantBuffer(0);
-
-        ContextManager::ResetConstantBuffer(1);
-
-        ContextManager::ResetTopology();
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
-
-        ContextManager::ResetShaderVS();
-
-        ContextManager::ResetShaderPS();
-
-        ContextManager::ResetRenderContext();
-
-        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------

@@ -116,7 +116,12 @@ namespace
     // -----------------------------------------------------------------------------
     
     void CApplication::OnStart(android_app* _pAndroidApp)
-    {        
+    {
+        // -----------------------------------------------------------------------------
+        // Assets
+        // -----------------------------------------------------------------------------
+        Core::AssetManager::SetFilePath(_pAndroidApp->activity->externalDataPath);
+
         // -----------------------------------------------------------------------------
         // Set commands and input
         // -----------------------------------------------------------------------------
@@ -129,7 +134,12 @@ namespace
         // -----------------------------------------------------------------------------
         m_AppSetup.m_pAndroidApp   = _pAndroidApp;
         m_AppSetup.m_Running       = 0;
-        m_AppSetup.m_ParameterFile = std::string(m_AppSetup.m_pAndroidApp->activity->externalDataPath) +  "/data/android.config";
+        m_AppSetup.m_ParameterFile = Core::AssetManager::GetPathToData() + "/android.config";
+
+        // -----------------------------------------------------------------------------
+        // Libraries
+        // -----------------------------------------------------------------------------
+        Core::PluginManager::SetLibraryPath(Core::JNI::GetLibraryPath());
 
         // -----------------------------------------------------------------------------
         // Prepare to monitor accelerometer
@@ -150,12 +160,6 @@ namespace
         VerbosityLevel = Core::CProgramParameters::GetInstance().Get<int>(VerbosityNameString, 3);
 
         Core::CConsole::GetInstance().SetVerbosityLevel(VerbosityLevel);
-
-        // -----------------------------------------------------------------------------
-        // Setup paths
-        // -----------------------------------------------------------------------------
-        Core::AssetManager::SetFilePath(_pAndroidApp->activity->externalDataPath);
-        Core::PluginManager::SetLibraryPath(Core::JNI::GetLibraryPath());
 
         // -----------------------------------------------------------------------------
         // From now on we can start the state engine and enter the first state

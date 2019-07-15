@@ -13,37 +13,34 @@ namespace Dt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
-            ImGui::DragFloat3("Wind Direction", &m_WindDirection.x);
+            bool HasChanged = false;
 
-            ImGui::DragFloat("Wind Speed", &m_WindDirection.w);
+            HasChanged |= ImGui::DragFloat3("Wind Direction", &m_WindDirection.x);
 
-            ImGui::DragFloat("Frustum Depth", &m_FrustumDepthInMeter, 1.0f, 0.0f, 0.0f, "%.3f units");
+            HasChanged |= ImGui::DragFloat("Wind Speed", &m_WindDirection.w);
 
-            ImGui::DragFloat("Shadow Intensity", &m_ShadowIntensity);
+            HasChanged |= ImGui::DragFloat("Frustum Depth", &m_FrustumDepthInMeter, 1.0f, 0.0f, 0.0f, "%.3f units");
 
-            ImGui::DragFloat("Scattering Coefficient", &m_ScatteringCoefficient);
+            HasChanged |= ImGui::DragFloat("Shadow Intensity", &m_ShadowIntensity);
 
-            ImGui::DragFloat("Absorption Coefficient", &m_AbsorptionCoefficient);
+            HasChanged |= ImGui::DragFloat("Scattering Coefficient", &m_ScatteringCoefficient);
 
-            ImGui::DragFloat("Density Level", &m_DensityLevel);
+            HasChanged |= ImGui::DragFloat("Absorption Coefficient", &m_AbsorptionCoefficient);
 
-            ImGui::DragFloat("Density Attenuation", &m_DensityAttenuation);
+            HasChanged |= ImGui::DragFloat("Density Level", &m_DensityLevel);
+
+            HasChanged |= ImGui::DragFloat("Density Attenuation", &m_DensityAttenuation);
+
+            return HasChanged;
         }
 
         // -----------------------------------------------------------------------------
 
-        const char* GetHeader()
+        static void OnNewComponent(Dt::CEntity::BID _ID)
         {
-            return "Volumetric Fog";
-        }
-
-        // -----------------------------------------------------------------------------
-
-        void OnNewComponent(Dt::CEntity::BID _ID)
-        {
-            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(_ID);
+            Dt::CEntity* pCurrentEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_ID);
 
             pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
@@ -52,6 +49,12 @@ namespace Dt
             pCurrentEntity->AttachComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CVolumeFogComponent::DirtyCreate);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void OnDropAsset(const Edit::CAsset&)
+        {
         }
     };
 } // namespace Dt

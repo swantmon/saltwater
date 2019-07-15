@@ -58,10 +58,28 @@ namespace MR
     {
     public:
 
+		struct SPlaneVertex
+		{
+			glm::vec3 m_Position;
+			glm::vec2 m_UV;
+		};
+
+		using CPlaneVertices = std::vector<SPlaneVertex>;
+		using CPlaneIndices = std::vector<uint32_t>;
+
         struct SPlane
         {
             glm::mat4 m_Transform;
             glm::vec4 m_Extent;
+
+            glm::vec3 m_Normal;
+
+            Gfx::CMeshPtr m_MeshPtr;
+
+            Gfx::CTexturePtr m_TexturePtr;
+
+			CPlaneVertices m_Vertices;
+			CPlaneIndices m_Indices;
         };
 
         struct SIndirectParameters
@@ -149,10 +167,15 @@ namespace MR
 
         void ResetReconstruction(const SReconstructionSettings* pReconstructionSettings = nullptr);
 
-        void AddPlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID);
-        void UpdatePlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID);
-        void RemovePlane(int _ID);
-        const std::map<int, SPlane>& GetPlanes() const;
+        void AddPlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const std::string& _ID);
+        void UpdatePlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const std::string& _ID);
+
+        void AddPlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID);
+        void UpdatePlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID);
+
+        void RemovePlane(const std::string& _ID);
+
+        std::map<std::string, SPlane>& GetPlanes();
 
         void PauseIntegration(bool _Paused);
         void PauseTracking(bool _Paused);
@@ -188,6 +211,7 @@ namespace MR
         void GetDepthBounds(float& _rMin, float& _rMax);
 
         void OnNewFrame(Gfx::CTexturePtr DepthBuffer, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform);
+        void OnNewFrame(Gfx::CTexturePtr DepthBuffer, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform, const glm::vec2& _rFocalLength, const glm::vec2& _rFocalPoint);
         
         void Start();
         void Exit();
@@ -228,7 +252,9 @@ namespace MR
         void CreateRaycastPyramid();
         
         void UpdateFrustum();
-                        
+
+        void UpdataGPUIntrinsics();
+
     private:
 
         SReconstructionSettings m_ReconstructionSettings;
@@ -350,6 +376,6 @@ namespace MR
 
         bool m_IsInizialized;
 
-        std::map<int, SPlane> m_Planes;
+        std::map<std::string, SPlane> m_Planes;
     };
 } // namespace MR

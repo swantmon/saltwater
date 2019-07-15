@@ -4,6 +4,7 @@
 #include "engine/engine_config.h"
 
 #include "engine/data/data_component.h"
+#include "engine/data/data_component_manager.h"
 
 namespace Dt
 {
@@ -29,6 +30,33 @@ namespace Dt
 
         CSSRComponent();
         ~CSSRComponent();
+
+    public:
+
+        inline void Read(CSceneReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+
+            _rCodec >> m_Intensity;
+            _rCodec >> m_RoughnessMask;
+            _rCodec >> m_Distance;
+            _rCodec >> m_UseLastFrame;
+        }
+
+        inline void Write(CSceneWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+
+            _rCodec << m_Intensity;
+            _rCodec << m_RoughnessMask;
+            _rCodec << m_Distance;
+            _rCodec << m_UseLastFrame;
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CSSRComponent();
+        }
 
     private:
 

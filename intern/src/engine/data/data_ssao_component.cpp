@@ -5,6 +5,8 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CSSAOComponent);
+
     CSSAOComponent::CSSAOComponent()
     {
     }

@@ -19,7 +19,7 @@ namespace Edit
 namespace Edit
 {
     CPlayState::CPlayState()
-        : m_Action(CState::Play)
+        : CState(Play)
     {
     }
     
@@ -32,45 +32,25 @@ namespace Edit
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CPlayState::InternOnEnter()
+    void CPlayState::InternOnEnter()
     {
         // -----------------------------------------------------------------------------
         // Activate game control for play state
         // -----------------------------------------------------------------------------
         Cam::ControlManager::SetActiveControl(Cam::CControl::GameControl);
-
-        return Edit::CState::Play;
     }
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CPlayState::InternOnLeave()
+    void CPlayState::InternOnLeave()
     {
-        // -----------------------------------------------------------------------------
-        // Reset action
-        // -----------------------------------------------------------------------------
-        m_Action = CState::Play;
-
-        return Edit::CState::Play;
+        m_NextState = Play;
     }
     
     // -----------------------------------------------------------------------------
     
     CState::EStateType CPlayState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Play;
-
-        switch (m_Action)
-        {
-        case Edit::CState::Exit:
-            CUnloadMapState::GetInstance().SetNextState(CState::Exit);
-            NextState = CState::UnloadMap;
-            break;
-        case Edit::CState::Edit:
-            NextState = CState::Edit;
-            break;
-        }
-
-        return NextState;
+        return m_NextState;
     }
 } // namespace Edit

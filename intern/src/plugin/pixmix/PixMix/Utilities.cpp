@@ -1,10 +1,12 @@
 #include "plugin/pixmix/pm_precompiled.h"
 
+#ifndef OCEAN_PIXMIX
+
 #include "Utilities.h"
 
 void Util::createVizPosMap(
-    const cv::Mat_<cv::Vec2i> &srcPosMap,
-    cv::Mat_<cv::Vec3b> &dstColorMap
+    const cv::Mat_<cv::Vec2i>& srcPosMap,
+    cv::Mat_<cv::Vec3b>& dstColorMap
 )
 {
     dstColorMap = cv::Mat_<cv::Vec3b>(srcPosMap.size());
@@ -21,9 +23,9 @@ void Util::createVizPosMap(
 }
 
 void Util::createMask(
-    const cv::Mat_<cv::Vec3b> &srcColor,
-    const cv::Scalar &maskColor,
-    cv::Mat_<uchar> &dstMask,
+    const cv::Mat_<cv::Vec3b>& srcColor,
+    const cv::Scalar& maskColor,
+    cv::Mat_<uchar>& dstMask,
     const int maskVal,
     const int nonMaskVal
 )
@@ -47,3 +49,5 @@ void Util::createMask(
         }
     }
 };
+
+#endif

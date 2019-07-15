@@ -201,16 +201,17 @@ namespace
         m_GraphicsInfo.m_GraphicsAPI  = Core::CProgramParameters::GetInstance().Get("graphics:api:type", CGraphicsInfo::OpenGLES);
         m_GraphicsInfo.m_MajorVersion = Core::CProgramParameters::GetInstance().Get("graphics:api:major_version", 3);
         m_GraphicsInfo.m_MinorVersion = Core::CProgramParameters::GetInstance().Get("graphics:api:minor_version", 2);
+
+        m_GraphicsInfo.m_PixelMatching = static_cast<CInternGraphicsInfo::EPixelMatching>(Core::CProgramParameters::GetInstance().Get("graphics:pixel_matching:type", 1));
+
+        Core::CProgramParameters::GetInstance().Get<float>("graphics:pixel_matching:scale", 0.5f);
 #else
         m_GraphicsInfo.m_GraphicsAPI  = Core::CProgramParameters::GetInstance().Get("graphics:api:type", CGraphicsInfo::OpenGL);
         m_GraphicsInfo.m_MajorVersion = Core::CProgramParameters::GetInstance().Get("graphics:api:major_version", 4);
         m_GraphicsInfo.m_MinorVersion = Core::CProgramParameters::GetInstance().Get("graphics:api:minor_version", 5);
-#endif        
 
-        // -----------------------------------------------------------------------------
-        // Load pixel matching behavior
-        // -----------------------------------------------------------------------------
         m_GraphicsInfo.m_PixelMatching = static_cast<CInternGraphicsInfo::EPixelMatching>(Core::CProgramParameters::GetInstance().Get("graphics:pixel_matching:type", 0));
+#endif        
 
         // -----------------------------------------------------------------------------
         // Show information of windows and initialize them

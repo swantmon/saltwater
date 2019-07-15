@@ -37,9 +37,10 @@ namespace Dt
         {
             Default         = 0x01,
             AR              = 0x02,
-            IgnoreRaycast   = 0x04,
-            UI              = 0x08,
-            NumberOfLayers  = 4,
+            ShadowOnly      = 0x04,
+            IgnoreRaycast   = 0x08,
+            UI              = 0x10,
+            NumberOfLayers  = 5,
             UndefinedLayer  = -1
         };
     };
@@ -70,7 +71,7 @@ namespace Dt
 
     public:
 
-        typedef Base::ID BID;
+        using BID = Base::ID;
 
     public:
 
@@ -161,13 +162,14 @@ namespace Dt
         CComponentFacet* GetComponentFacet();
         const CComponentFacet* GetComponentFacet() const;
 
-    public:
-
         void Attach(CEntity& _rEntity);
         void Detach();
 
         void AttachComponent(Dt::IComponent* _pComponent);
         void DetachComponent(Dt::IComponent* _pComponent);
+
+        void Read(CSceneReader& _rCodec);
+        void Write(CSceneWriter& _rCodec);
 
     protected:
         

@@ -5,6 +5,8 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CSSRComponent);
+
     CSSRComponent::CSSRComponent()
         : m_Intensity    (1.0f)
         , m_RoughnessMask(-6.66f)

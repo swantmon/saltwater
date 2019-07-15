@@ -2,7 +2,6 @@
 #include "engine/engine_precompiled.h"
 
 #include "base/base_include_glm.h"
-#include "base/base_math_limits.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -374,7 +373,7 @@ namespace
 
     void CGfxHighlightRenderer::HighlightEntity(Base::ID _EntityID)
     {
-        m_pSelectedEntity = Dt::EntityManager::GetEntityByID(_EntityID);
+        m_pSelectedEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_EntityID);
 
         assert(m_pSelectedEntity != nullptr);
     }

@@ -1,5 +1,7 @@
 #include "plugin/pixmix/pm_precompiled.h"
 
+#ifndef OCEAN_PIXMIX
+
 #include "OneLvPixMix.h"
 
 OneLvPixMix::OneLvPixMix()
@@ -271,3 +273,5 @@ void OneLvPixMix::bwdUpdate(
         }
     }
 }
+
+#endif

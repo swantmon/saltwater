@@ -1,5 +1,7 @@
 #include "plugin/pixmix/pm_precompiled.h"
 
+#ifndef OCEAN_PIXMIX
+
 #include "PixMix.h"
 
 PixMix::PixMix() { }
@@ -136,3 +138,5 @@ void PixMix::blendBorder(
 
     mDstF.convertTo(dst, CV_8UC3, 255.0);
 }
+
+#endif

@@ -7,7 +7,5 @@
 
 namespace Dt
 {
-    REGISTER_GUI(CSunComponentGUI, CSunComponent);
-
-    REGISTER_COMPONENT(CSunComponentGUI);
+	REGISTER_COMPONENT_GUI(CSunComponentGUI, CSunComponent, "Sun");
 } // namespace Dt

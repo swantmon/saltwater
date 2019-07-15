@@ -6,6 +6,7 @@
 #include "base/base_typedef.h"
 
 #include "engine/data/data_component.h"
+#include "engine/data/data_component_manager.h"
 
 #include <vector>
 
@@ -15,7 +16,7 @@ namespace Dt
     {
     public:
 
-        typedef std::vector<Dt::IComponent*> CComponentVector;
+        using CComponentVector = std::vector<Dt::IComponent*>;
 
     public:
 
@@ -31,6 +32,9 @@ namespace Dt
         CComponentVector& GetComponents();
 
         const CComponentVector& GetComponents() const;
+
+        void Read(CSceneReader& _rCodec);
+        void Write(CSceneWriter& _rCodec);
 
     public:
 

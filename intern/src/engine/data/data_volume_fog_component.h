@@ -4,8 +4,10 @@
 #include "engine/engine_config.h"
 
 #include "base/base_include_glm.h"
+#include "base/base_serialize_glm.h"
 
 #include "engine/data/data_component.h"
+#include "engine/data/data_component_manager.h"
 
 namespace Dt
 {
@@ -41,6 +43,43 @@ namespace Dt
 
         CVolumeFogComponent();
         ~CVolumeFogComponent();
+
+    public:
+
+        inline void Read(CSceneReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+
+            Base::Serialize(_rCodec, m_WindDirection);
+            Base::Serialize(_rCodec, m_FogColor);
+
+            _rCodec >> m_FrustumDepthInMeter;
+            _rCodec >> m_ShadowIntensity;
+            _rCodec >> m_ScatteringCoefficient;
+            _rCodec >> m_AbsorptionCoefficient;
+            _rCodec >> m_DensityLevel;
+            _rCodec >> m_DensityAttenuation;
+        }
+
+        inline void Write(CSceneWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+
+            Base::Serialize(_rCodec, m_WindDirection);
+            Base::Serialize(_rCodec, m_FogColor);
+
+            _rCodec << m_FrustumDepthInMeter;
+            _rCodec << m_ShadowIntensity;
+            _rCodec << m_ScatteringCoefficient;
+            _rCodec << m_AbsorptionCoefficient;
+            _rCodec << m_DensityLevel;
+            _rCodec << m_DensityAttenuation;
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CVolumeFogComponent();
+        }
 
     private:
 

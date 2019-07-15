@@ -9,6 +9,7 @@
 #include "base/base_serialize_text_writer.h"
 #include "base/base_serialize_binary_reader.h"
 #include "base/base_serialize_binary_writer.h"
+#include "base/base_type_info.h"
 
 #include <string>
 #include <vector>
@@ -465,4 +466,193 @@ BASE_TEST(SerializeComplexWithBinary)
 
         ++Index;
     }
+}
+
+// -----------------------------------------------------------------------------
+
+#include <map>
+
+
+class IFactoryBase
+{
+public:
+    virtual inline void Read(Base::CTextReader& _rCodec) = 0;
+    virtual inline void Write(Base::CTextWriter& _rCodec) = 0;
+    virtual IFactoryBase* AllocateInstance() = 0;
+};
+
+class CSerializeFactory
+{
+
+public:
+
+    static CSerializeFactory& GetInstance()
+    {
+        static CSerializeFactory s_Instance;
+        return s_Instance;
+    }
+
+public:
+
+    using CFactoryMap     = std::map<Base::ID, IFactoryBase*>;
+    using CFactoryMapPair = std::pair<Base::ID, IFactoryBase*>;
+
+public:
+
+    CFactoryMap m_Factory;
+
+public:
+
+    template<class T>
+    void Register(IFactoryBase* _pBase)
+    {
+        auto ID = Base::CTypeInfo::GetTypeID<T>();
+
+        if (m_Factory.find(ID) == m_Factory.end()) m_Factory.insert(CFactoryMapPair(ID, _pBase));
+    }
+
+    IFactoryBase* Allocate(Base::ID _ID)
+    {
+        if (m_Factory.find(_ID) != m_Factory.end()) return m_Factory.find(_ID)->second->AllocateInstance();
+
+        return nullptr;
+    }
+};
+
+class CDerivedA : public IFactoryBase
+{
+public:
+
+    int a;
+
+public:
+
+    inline void Read(Base::CTextReader& _rCodec) override
+    {
+        _rCodec >> a;
+    }
+
+    inline void Write(Base::CTextWriter& _rCodec) override
+    {
+        _rCodec << a;
+    }
+
+    IFactoryBase* AllocateInstance() override
+    {
+        return new CDerivedA();
+    }
+};
+struct SRegisterSerializeDerivedA
+{
+    SRegisterSerializeDerivedA()
+    {
+        static CDerivedA s_FactorySRegisterSerializeDerivedA;
+        CSerializeFactory::GetInstance().Register<CDerivedA>(&s_FactorySRegisterSerializeDerivedA);
+    }
+} g_SRegisterSerializeDerivedA;
+
+
+class CDerivedB : public IFactoryBase
+{
+public:
+
+    float b;
+
+public:
+
+    inline void Read(Base::CTextReader& _rCodec) override
+    {
+        _rCodec >> b;
+    }
+
+    inline void Write(Base::CTextWriter& _rCodec) override
+    {
+        _rCodec << b;
+    }
+
+    IFactoryBase* AllocateInstance() override
+    {
+        return new CDerivedB();
+    }
+};
+struct SRegisterSerializeDerivedB
+{
+    SRegisterSerializeDerivedB()
+    {
+        static CDerivedB s_FactorySRegisterSerializeDerivedB;
+        CSerializeFactory::GetInstance().Register<CDerivedB>(&s_FactorySRegisterSerializeDerivedB);
+    }
+} g_SRegisterSerializeDerivedB;
+
+BASE_TEST(SerializeInterfaceWithText)
+{
+    // -----------------------------------------------------------------------------
+    // Data
+    // -----------------------------------------------------------------------------
+    CDerivedA CompexClassA;
+    CDerivedB CompexClassB;
+
+    CompexClassA.a = 4;
+    CompexClassB.b = 13.37f;
+
+    // -----------------------------------------------------------------------------
+    // Stream (this could be also a file)
+    // -----------------------------------------------------------------------------
+    std::stringstream Stream;
+
+    // -----------------------------------------------------------------------------
+    // Writing
+    // -----------------------------------------------------------------------------
+    Base::CTextWriter Writer(Stream, 1);
+
+    auto ID = Base::CTypeInfo::GetTypeID<CDerivedA>();
+    Writer << ID;
+    Writer << CompexClassA;
+
+    ID = Base::CTypeInfo::GetTypeID<CDerivedB>();
+    Writer << ID;
+    Writer << CompexClassB;
+
+    // -----------------------------------------------------------------------------
+    // Test data
+    // -----------------------------------------------------------------------------
+    Base::ID IDTest;
+
+    IFactoryBase* pBaseCompexClassATest;
+    IFactoryBase* pBaseCompexClassBTest;
+
+    // -----------------------------------------------------------------------------
+    // Reading
+    // -----------------------------------------------------------------------------
+    Base::CTextReader Reader(Stream, 1);
+
+    Reader >> IDTest;
+
+    pBaseCompexClassATest = CSerializeFactory::GetInstance().Allocate(IDTest);
+
+    Reader >> (*pBaseCompexClassATest);
+
+    Reader >> IDTest;
+
+    pBaseCompexClassBTest = CSerializeFactory::GetInstance().Allocate(IDTest);
+
+    Reader >> (*pBaseCompexClassBTest);
+
+    // -----------------------------------------------------------------------------
+    // Convert
+    // -----------------------------------------------------------------------------
+    CDerivedA& rCompexClassATest = *reinterpret_cast<CDerivedA*>(pBaseCompexClassATest);
+    CDerivedB& rCompexClassBTest = *reinterpret_cast<CDerivedB*>(pBaseCompexClassBTest);
+
+    // -----------------------------------------------------------------------------
+    // Check
+    // -----------------------------------------------------------------------------
+    BASE_CHECK(CompexClassA.a == rCompexClassATest.a);
+    BASE_CHECK(CompexClassB.b == rCompexClassBTest.b);
+
+    // -----------------------------------------------------------------------------
+    // Remove
+    // -----------------------------------------------------------------------------
+    delete pBaseCompexClassATest;
+    delete pBaseCompexClassBTest;
 }

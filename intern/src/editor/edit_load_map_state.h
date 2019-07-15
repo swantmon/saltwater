@@ -14,12 +14,7 @@ namespace Edit
         
     public:
         
-        void SetMapfile(const char* _pFilename);
-        const char* GetMapfile() const;
-        
-    private:
-        
-        const char* m_pMapfile;
+        void LoadFromFile(const std::string& _rFilename);
         
     private:
         
@@ -28,9 +23,12 @@ namespace Edit
         
     private:
         
-        virtual CState::EStateType InternOnEnter();
-        virtual CState::EStateType InternOnLeave();
-        virtual CState::EStateType InternOnRun();
-        
+        void InternOnEnter() override;
+        void InternOnLeave() override;
+        CState::EStateType InternOnRun() override;
+
+    private:
+
+        std::string m_Filename;
     };
 } // namespace Edit

@@ -13,36 +13,33 @@ namespace Dt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
-            ImGui::ColorEdit4("Tint", &m_Tint.x);
+            bool HasChanged = false;
 
-            ImGui::DragFloat("Intensity", &m_Intensity, 0.1f, 0.0f, 8.0f);
+            HasChanged |= ImGui::ColorEdit4("Tint", &m_Tint.x);
 
-            ImGui::DragFloat("Threshold", &m_Treshhold, 0.1f, -1.0f, 8.0f);
+            HasChanged |= ImGui::DragFloat("Intensity", &m_Intensity, 0.1f, 0.0f, 8.0f);
 
-            ImGui::DragFloat("Exposure Scale", &m_ExposureScale, 0.1f);
+            HasChanged |= ImGui::DragFloat("Threshold", &m_Treshhold, 0.1f, -1.0f, 8.0f);
+
+            HasChanged |= ImGui::DragFloat("Exposure Scale", &m_ExposureScale, 0.1f);
 
             unsigned int Min = 0;
             unsigned int Max = 5;
 
-            ImGui::DragScalar("Scale", ImGuiDataType_U32, &m_Size, 1.0f, &Min, &Max);
+            HasChanged |= ImGui::DragScalar("Scale", ImGuiDataType_U32, &m_Size, 1.0f, &Min, &Max);
 
-            UpdateEffect();
+            if (HasChanged) UpdateEffect();
+
+            return HasChanged;
         }
 
         // -----------------------------------------------------------------------------
 
-        const char* GetHeader()
+        static void OnNewComponent(Dt::CEntity::BID _ID)
         {
-            return "Bloom";
-        }
-
-        // -----------------------------------------------------------------------------
-
-        void OnNewComponent(Dt::CEntity::BID _ID)
-        {
-            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(_ID);
+            Dt::CEntity* pCurrentEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_ID);
 
             pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
@@ -51,6 +48,12 @@ namespace Dt
             pCurrentEntity->AttachComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CBloomComponent::DirtyCreate);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void OnDropAsset(const Edit::CAsset&)
+        {
         }
     };
 } // namespace Dt

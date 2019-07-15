@@ -6,8 +6,7 @@
 #include "base/base_typedef.h"
 
 #include "engine/data/data_component.h"
-
-#include "engine/graphic/gfx_texture.h"
+#include "engine/data/data_component_manager.h"
 
 namespace Dt
 {
@@ -54,9 +53,8 @@ namespace Dt
         EQuality GetQuality() const;
         unsigned int GetQualityInPixel() const;
 
-        void SetTexture(Gfx::CTexturePtr _TexturePtr);
-        Gfx::CTexturePtr GetTexture();
-        const Gfx::CTexturePtr GetTexture() const;
+        void SetTexture(const std::string& _rTexture);
+        const std::string& GetTexture() const;
 
         bool HasTexture() const;
 
@@ -68,13 +66,54 @@ namespace Dt
         CSkyComponent();
         ~CSkyComponent();
 
+    public:
+
+        inline void Read(CSceneReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec); 
+
+            int RefreshMode, Type, Quality;
+            
+            _rCodec >> RefreshMode;
+            _rCodec >> Type;
+            _rCodec >> Quality;
+            _rCodec >> m_HasHDR;
+
+            Base::Serialize(_rCodec, m_Texture);
+
+            _rCodec >> m_Intensity;
+
+            m_RefreshMode = (ERefreshMode)RefreshMode;
+            m_Type = (EType)Type;
+            Quality = (EQuality)Quality;
+        }
+
+        inline void Write(CSceneWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+
+            _rCodec << (int)m_RefreshMode;
+            _rCodec << (int)m_Type;
+            _rCodec << (int)m_Quality;
+            _rCodec << m_HasHDR; 
+
+            Base::Serialize(_rCodec, m_Texture);
+
+            _rCodec << m_Intensity;
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CSkyComponent();
+        }
+
     private:
 
         ERefreshMode     m_RefreshMode;        //< Refresh mode of the sky
         EType            m_Type;               //< Type of the skybox for procedural panorama or cubemap
         EQuality         m_Quality;            //< Quality of the probe (@see EQuality)
         bool             m_HasHDR;             //< Declares either the image consists of HDR values
-        Gfx::CTexturePtr m_TexturePtr;         //< Texture
+        std::string      m_Texture;            //< Texture
         float            m_Intensity;          //< Intensity of sky that is freely adjustable by artist (multiplier on the image)
 
     private:

@@ -5,18 +5,21 @@
 #include "base/base_type_info.h"
 #include "base/base_uncopyable.h"
 
+#include "editor/edit_asset_helper.h"
+
 #include <array>
 #include <map>
 
-#define REGISTER_GUI(Name, Child)                                                                               \
+#define REGISTER_GUI(Name, Child, HEADER)                                                                       \
 class BASE_CONCAT(Name, Factory) : public Edit::IGUIFactory                                                     \
 {                                                                                                               \
 public:                                                                                                         \
     BASE_CONCAT(Name, Factory)() { }                                                                            \
-    IGUIFactory* Create() { return new BASE_CONCAT(Name, Factory)(); };                                         \
+    IGUIFactory* Create() { return new BASE_CONCAT(Name, Factory)(); }                                          \
     void SetChild(void* _pChild) { m_pChild = (Name*)(_pChild); }                                               \
-    void OnGUI() { m_pChild->OnGUI(); }                                                                         \
-    const char* GetHeader() { return m_pChild->GetHeader(); };                                                  \
+    bool OnGUI() { return m_pChild ? m_pChild->OnGUI() : false; }                                               \
+    const char* GetHeader() { return HEADER; }                  					                            \
+    void OnDropAsset(const Edit::CAsset& _rAsset) { m_pChild ? m_pChild->OnDropAsset(_rAsset) : 0; }            \
 private:                                                                                                        \
     Name* m_pChild;                                                                                             \
 };                                                                                                              \
@@ -38,9 +41,11 @@ namespace Edit
 
         virtual void SetChild(void* _pChild) = 0;
 
-        virtual void OnGUI() = 0;
+        virtual bool OnGUI() = 0;
 
         virtual const char* GetHeader() = 0;
+
+        virtual void OnDropAsset(const Edit::CAsset& _rAsset) = 0;
     };
 
     // -----------------------------------------------------------------------------
@@ -82,8 +87,8 @@ namespace Edit
 
     private:
 
-        typedef std::map<size_t, SFactoryElement> CFactoryMap;
-        typedef std::pair<size_t, SFactoryElement> CFactoryMapPair;
+        using CFactoryMap = std::map<size_t, SFactoryElement>;
+        using CFactoryMapPair = std::pair<size_t, SFactoryElement>;
         
     private:
         

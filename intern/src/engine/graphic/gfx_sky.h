@@ -4,7 +4,7 @@
 
 namespace Gfx
 {
-    class CSky : public Base::CManagedPoolItemBase
+    class ENGINE_API CSky : public Base::CManagedPoolItemBase
     {
     public:
 
@@ -16,14 +16,19 @@ namespace Gfx
         CTexturePtr GetCubemapPtr() const;
         Base::U64 GetTimeStamp() const;
 
+    public:
+
+        void SetInputTexture(Gfx::CTexturePtr _InputTexturePtr);
+
     protected:
 
         CTexturePtr m_CubemapPtr;
+        CTexturePtr m_InputTexturePtr;
         Base::U64   m_TimeStamp;
     };
 } // namespace Gfx
 
 namespace Gfx
 {
-    typedef Base::CManagedPoolItemPtr<CSky> CSkyPtr;
+    using CSkyPtr = Base::CManagedPoolItemPtr<CSky>;
 } // namespace Gfx

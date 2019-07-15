@@ -13,29 +13,26 @@ namespace Dt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
-            ImGui::DragFloat("Intensity", &m_Intensity);
+            bool HasChanged = false;
 
-            ImGui::DragFloat("Roughness", &m_RoughnessMask);
+            HasChanged |= ImGui::DragFloat("Intensity", &m_Intensity);
 
-            ImGui::DragFloat("Distance", &m_Distance);
+            HasChanged |= ImGui::DragFloat("Roughness", &m_RoughnessMask);
 
-            ImGui::Checkbox("Use last frame", &m_UseLastFrame);
+            HasChanged |= ImGui::DragFloat("Distance", &m_Distance);
+
+            HasChanged |= ImGui::Checkbox("Use last frame", &m_UseLastFrame);
+
+            return HasChanged;
         }
 
         // -----------------------------------------------------------------------------
 
-        const char* GetHeader()
+        static void OnNewComponent(Dt::CEntity::BID _ID)
         {
-            return "Screen Space Reflections";
-        }
-
-        // -----------------------------------------------------------------------------
-
-        void OnNewComponent(Dt::CEntity::BID _ID)
-        {
-            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(_ID);
+            Dt::CEntity* pCurrentEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_ID);
 
             pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
@@ -44,6 +41,12 @@ namespace Dt
             pCurrentEntity->AttachComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CSSRComponent::DirtyCreate);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void OnDropAsset(const Edit::CAsset&)
+        {
         }
     };
 } // namespace Dt

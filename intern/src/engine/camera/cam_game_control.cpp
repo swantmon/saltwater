@@ -213,7 +213,7 @@ namespace Cam
 
             if (pCameraComponent->IsActiveAndUsable())
             {
-                Dt::CEntity* pNewEntity = Dt::EntityManager::GetEntityByID(pCameraComponent->GetHostEntity()->GetID());
+                Dt::CEntity* pNewEntity = Dt::CEntityManager::GetInstance().GetEntityByID(pCameraComponent->GetHostEntity()->GetID());
 
                 if (pNewEntity != nullptr && pNewEntity->IsInMap())
                 {

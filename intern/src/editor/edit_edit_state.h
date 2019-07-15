@@ -21,9 +21,40 @@ namespace Edit
         
         static CEditState& GetInstance();
 
+    public:
+
+        enum EOperation
+        {
+            Hand,
+            Translate,
+            Rotate,
+            Scale
+        };
+
+        enum EMode
+        {
+            Local,
+            World
+        };
+
+    public:
+
+        void SetOperation(EOperation _Operation);
+        EOperation GetOperation() const;
+
+        void SetMode(EMode _Mode);
+        EMode GetMode() const;
+
+        void SetDirty(bool _Flag = true);
+        bool IsDirty() const;
+
     private:
 
-        CState::EStateType m_Action;
+        EOperation m_CurrentOperation;
+
+        EMode m_CurrentMode;
+
+        bool m_DirtyFlag;
 
         Gfx::CSelectionTicket* m_pSelectionTicket;
 
@@ -36,9 +67,9 @@ namespace Edit
         
     private:
         
-        virtual CState::EStateType InternOnEnter();
-        virtual CState::EStateType InternOnLeave();
-        virtual CState::EStateType InternOnRun();
+        void InternOnEnter() override;
+        void InternOnLeave() override;
+        CState::EStateType InternOnRun() override;
 
     private:
 
