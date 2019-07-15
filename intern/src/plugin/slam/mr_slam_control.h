@@ -486,6 +486,17 @@ namespace MR
                     *m_pRecordReader >> Message.m_DecompressedSize;
                     Base::Read(*m_pRecordReader, Message.m_Payload);
 
+                    // TODO: find better solution
+                    // We just create a temporary recording everytime so we can always save a slam scene.
+                    // However, we couild also save the loaded recording when saving a scene again.
+
+                    if (m_pTempRecordWriter == nullptr)
+                    {
+                        m_pTempRecordWriter = std::make_unique<Base::CRecordWriter>(m_TempRecordFile, 1);
+                    }
+
+                    WriteMessage(*m_pTempRecordWriter, Message);
+
                     HandleMessage(Message);
                 }
             }
@@ -605,6 +616,8 @@ namespace MR
             m_pRecordReader->SkipTime();
 
             m_pRecordReader->SetSpeed(_Speed);
+
+            m_Reconstructor.ResetReconstruction();
 
             ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", _rFileName.c_str());
         }
@@ -788,7 +801,13 @@ namespace MR
         void WriteScene(CSceneWriter& _rCodec)
         {
             std::string RecordFolder = Core::AssetManager::GetPathToAssets() + "/recordings/scene";
-            std::string RecordFile = RecordFolder + '/' + "test.swr";
+
+            std::string RecordFileName;
+            int FileCount = 0;
+            do
+            {
+                RecordFileName = RecordFolder + '/' + std::to_string(FileCount ++) + ".swr";
+            } while (std::filesystem::exists(RecordFileName));
             
             try
             {
@@ -804,7 +823,7 @@ namespace MR
                     BASE_THROWM(("Cannot create directory " + RecordFolder + ". Is there already a file with that name?").c_str());
                 }
 
-                if (!std::filesystem::copy_file(m_TempRecordPath, RecordFile))
+                if (!std::filesystem::copy_file(m_TempRecordPath, RecordFileName))
                 {
                     BASE_THROWM("SLAM record file could not be saved as part of the scene");
                 }
@@ -814,7 +833,7 @@ namespace MR
                 BASE_THROWM(e.what());
             }
 
-            Base::Serialize(_rCodec, RecordFile);
+            Base::Serialize(_rCodec, RecordFileName);
         }
 
     private:
@@ -1321,11 +1340,7 @@ namespace MR
                         m_pRecordWriter = std::make_unique<Base::CRecordWriter>(m_RecordFile, 1);
                     }
 
-                    *m_pRecordWriter << _rMessage.m_Category;
-                    *m_pRecordWriter << _rMessage.m_MessageType;
-                    *m_pRecordWriter << _rMessage.m_CompressedSize;
-                    *m_pRecordWriter << _rMessage.m_DecompressedSize;
-                    Base::Write(*m_pRecordWriter, _rMessage.m_Payload);
+                    WriteMessage(*m_pRecordWriter, _rMessage);
                 }
 
                 if (m_pTempRecordWriter == nullptr)
@@ -1333,11 +1348,7 @@ namespace MR
                     m_pTempRecordWriter = std::make_unique<Base::CRecordWriter>(m_TempRecordFile, 1);
                 }
 
-                *m_pTempRecordWriter << _rMessage.m_Category;
-                *m_pTempRecordWriter << _rMessage.m_MessageType;
-                *m_pTempRecordWriter << _rMessage.m_CompressedSize;
-                *m_pTempRecordWriter << _rMessage.m_DecompressedSize;
-                Base::Write(*m_pTempRecordWriter, _rMessage.m_Payload);
+                WriteMessage(*m_pTempRecordWriter, _rMessage);
 
                 HandleMessage(_rMessage);
             }
@@ -1346,6 +1357,17 @@ namespace MR
                 // Enable mouse control after disconnect
                 m_UseTrackingCamera = false;
             }
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void WriteMessage(Base::CRecordWriter& _rWriter, const Net::CMessage& _rMessage)
+        {
+            _rWriter << _rMessage.m_Category;
+            _rWriter << _rMessage.m_MessageType;
+            _rWriter << _rMessage.m_CompressedSize;
+            _rWriter << _rMessage.m_DecompressedSize;
+            Base::Write(_rWriter, _rMessage.m_Payload);
         }
 
         // -----------------------------------------------------------------------------
