@@ -488,7 +488,7 @@ namespace MR
 
                     // TODO: find better solution
                     // We just create a temporary recording everytime so we can always save a slam scene.
-                    // However, we couild also save the loaded recording when saving a scene again.
+                    // However, we could also save the loaded recording when saving a scene again.
 
                     if (m_pTempRecordWriter == nullptr)
                     {
@@ -602,24 +602,17 @@ namespace MR
 
         void SetRecordFile(const std::string& _rFileName, float _Speed = 1.0f)
         {
-            std::string RecordParam = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:mode", "none");
-
-            m_RecordFile.open(Core::AssetManager::GetPathToAssets() + "/" + _rFileName, std::fstream::in | std::fstream::binary);
+            m_RecordFile = std::fstream(_rFileName, std::fstream::in | std::fstream::binary);
 
             if (!m_RecordFile.is_open())
             {
-                ENGINE_CONSOLE_INFOV("File %s not found", _rFileName.c_str());
+                BASE_THROWM(("File " + _rFileName + " was not found").c_str());
             }
 
             m_pRecordReader = std::make_unique<Base::CRecordReader>(m_RecordFile, 1);
-
             m_pRecordReader->SkipTime();
-
             m_pRecordReader->SetSpeed(_Speed);
-
             m_Reconstructor.ResetReconstruction();
-
-            ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", _rFileName.c_str());
         }
 
         // -----------------------------------------------------------------------------
@@ -782,18 +775,16 @@ namespace MR
 
             Base::Serialize(_rCodec, RecordFileName);
 
-            m_RecordFile.open(RecordFileName, std::fstream::in | std::fstream::binary);
-
-            if (!m_RecordFile.is_open())
+            try
             {
-                BASE_THROWM("SLAM data of scene could not be loaded");
+                SetRecordFile(RecordFileName, 10000.0f);
+            }
+            catch (...)
+            {
+                BASE_THROWM(("The slam data could be loaded because " + RecordFileName + " was not found").c_str());
             }
 
             m_RecordMode = PLAY;
-
-            m_pRecordReader = std::make_unique<Base::CRecordReader>(m_RecordFile, 1);
-            m_pRecordReader->SkipTime();
-            m_pRecordReader->SetSpeed(10000.0f);
         }
 
         // -----------------------------------------------------------------------------
