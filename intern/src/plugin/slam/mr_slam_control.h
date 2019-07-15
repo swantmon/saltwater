@@ -197,7 +197,7 @@ namespace MR
         std::unique_ptr<Base::CRecordWriter> m_pTempRecordWriter;
         std::string m_TempRecordPath;
 
-		int m_NumberOfExtractedFrame;
+		int m_NumberOfExtractedFrames;
 
 		bool m_ExtractStream;
 
@@ -270,7 +270,7 @@ namespace MR
 			// Settings
 			// -----------------------------------------------------------------------------
 			m_ExtractStream = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:extract_stream", false);
-			m_NumberOfExtractedFrame = 0;
+			m_NumberOfExtractedFrames = 0;
 
             // -----------------------------------------------------------------------------
             // Determine where we get our data from
@@ -997,7 +997,7 @@ namespace MR
 
 					if (m_ExtractStream)
 					{
-						auto FrameString = std::to_string(m_NumberOfExtractedFrame);
+						auto FrameString = std::to_string(m_NumberOfExtractedFrames ++);
 
 						auto PathToDepthTexture = Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_depth.raw";
 						auto PathToColorTexture = Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_color.png";
@@ -1007,13 +1007,11 @@ namespace MR
 
 						std::ofstream PoseMatrixStream(Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_pose_intrinsics.byte", std::ofstream::binary);
 
-						PoseMatrixStream.write((char*)(&m_PoseMatrix), sizeof(m_PoseMatrix));
-						PoseMatrixStream.write((char*)(&m_ColorIntrinsics.m_FocalLength), sizeof(m_ColorIntrinsics.m_FocalLength));
-						PoseMatrixStream.write((char*)(&m_ColorIntrinsics.m_FocalPoint), sizeof(m_ColorIntrinsics.m_FocalPoint));
+						PoseMatrixStream.write(reinterpret_cast<char*>(&m_PoseMatrix), sizeof(m_PoseMatrix));
+						PoseMatrixStream.write(reinterpret_cast<char*>(&m_ColorIntrinsics.m_FocalLength), sizeof(m_ColorIntrinsics.m_FocalLength));
+						PoseMatrixStream.write(reinterpret_cast<char*>(&m_ColorIntrinsics.m_FocalPoint), sizeof(m_ColorIntrinsics.m_FocalPoint));
 
 						PoseMatrixStream.close();
-
-						++m_NumberOfExtractedFrame;
 					}
                 }
                 else
