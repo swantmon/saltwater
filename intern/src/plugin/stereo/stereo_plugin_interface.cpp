@@ -299,7 +299,7 @@ namespace Stereo
             }
             */
 
-            m_Delegate.Notify(m_OrigImg_Curt.get_Img(), DepthImage, Transform);
+            m_Delegate.Notify(m_OrigImg_Curt.get_Img(), DepthImage, Transform, _FocalLength, _FocalPoint);
 
             if (m_Is_ExportDepth)
             {
@@ -700,7 +700,7 @@ namespace Stereo
         glm::mat4 Transform = glm::mat4(glm::transpose(m_OrigImg_Curt.get_Rot()));
         Transform[3] = glm::vec4(m_OrigImg_Curt.get_PC(), 1.0f);
 
-        m_Delegate.Notify(m_OrigImg_Curt.get_Img(), m_DepthImg_Orig, Transform);
+        //m_Delegate.Notify(m_OrigImg_Curt.get_Img(), m_DepthImg_Orig, Transform);
     }
 
     void CPluginInterface::cmp_Depth()

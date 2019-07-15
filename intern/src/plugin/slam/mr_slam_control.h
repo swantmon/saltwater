@@ -267,7 +267,7 @@ namespace MR
         StereoOnFrameGPUFunc StereoOnFrameGPU;
         StereoGetFrameGPUFunc StereoGetFrameGPU;
 
-        using StereoCallbackType = std::function<void(const std::vector<char>&, const std::vector<char>&, const glm::mat4&)>;
+        using StereoCallbackType = std::function<void(const std::vector<char>&, const std::vector<char>&, const glm::mat4&, const glm::vec2&, const glm::vec2&)>;
         using StereoHandleType = std::shared_ptr<StereoCallbackType>;
 
         StereoHandleType m_StereoHandle;
@@ -429,6 +429,36 @@ namespace MR
 
             m_TempRecordPath = Core::AssetManager::GetPathToAssets() + "/recordings/" + "_temp_recording.swr";
             m_TempRecordFile.open(m_TempRecordPath , std::fstream::out | std::fstream::binary);
+
+            m_UseStereoMatching = Core::CProgramParameters::GetInstance().Get("mr:stereo:enable", true);
+            m_UseGPUForStereo = Core::CProgramParameters::GetInstance().Get("mr:stereo:use_gpu", false);
+
+            if (m_UseStereoMatching)
+            {
+                if (!Core::PluginManager::LoadPlugin("Stereo Matching"))
+                {
+                    throw Base::CException(__FILE__, __LINE__, "Stereo Matching plugin was not loaded");
+                }
+
+                if (m_UseGPUForStereo)
+                {
+                    StereoOnFrameGPU = (StereoOnFrameGPUFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "OnFrameGPU"));
+                    StereoGetFrameGPU = (StereoGetFrameGPUFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "GetLatestDepthImageGPU"));
+                }
+                else
+                {
+                    StereoOnFrameCPU = (StereoOnFrameCPUFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "OnFrameCPU"));
+                    StereoGetFrameCPU = (StereoGetFrameCPUFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "GetLatestFrameCPU"));
+                }
+
+                typedef StereoHandleType(*RegisterFunc)(StereoCallbackType);
+
+                auto Register = (RegisterFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "Register"));
+
+                auto Binder = std::bind(&CSLAMControl::OnNewStereoFrame, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
+
+                m_StereoHandle = Register(Binder);
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -1017,55 +1047,53 @@ namespace MR
                 Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
 
                 if (m_StreamState == STREAM_SLAM)
-                if (m_UseStereoMatching)
                 {
-                    m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &m_PoseMatrix, m_ColorIntrinsics.m_FocalLength, m_ColorIntrinsics.m_FocalPoint);
-
-					if (m_ExtractStream)
-					{
-						auto FrameString = std::to_string(m_NumberOfExtractedFrame);
-
-						auto PathToDepthTexture = Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_depth.raw";
-						auto PathToColorTexture = Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_color.png";
-
-						Gfx::TextureManager::SaveTexture(m_DepthTexture, PathToDepthTexture);
-						Gfx::TextureManager::SaveTexture(m_RGBATexture, PathToColorTexture);
-
-						std::ofstream PoseMatrixStream(Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_pose_intrinsics.byte", std::ofstream::binary);
-
-						PoseMatrixStream.write((char*)(&m_PoseMatrix), sizeof(m_PoseMatrix));
-						PoseMatrixStream.write((char*)(&m_ColorIntrinsics.m_FocalLength), sizeof(m_ColorIntrinsics.m_FocalLength));
-						PoseMatrixStream.write((char*)(&m_ColorIntrinsics.m_FocalPoint), sizeof(m_ColorIntrinsics.m_FocalPoint));
-
-						PoseMatrixStream.close();
-
-						++m_NumberOfExtractedFrame;
-					}
-                    if (m_UseGPUForStereo)
+                    if (m_UseStereoMatching)
                     {
-                        StereoOnFrameGPU(m_RGBATexture, m_PoseMatrix);
+                        if (m_UseGPUForStereo)
+                        {
+                            StereoOnFrameGPU(m_RGBATexture, m_PoseMatrix);
+                        }
+                        else
+                        {
+                            std::vector<char> PixelData(m_RGBATexture->GetNumberOfPixelsU() * m_RGBATexture->GetNumberOfPixelsV() * 4);
+                            Gfx::TextureManager::CopyTextureToCPU(m_RGBATexture, PixelData.data());
+
+                            std::vector<uint16_t> DepthData(m_RGBATexture->GetNumberOfPixelsU() * m_RGBATexture->GetNumberOfPixelsV());
+                            Gfx::TextureManager::CopyTextureToCPU(m_DepthTexture, reinterpret_cast<char*>(DepthData.data()));
+
+                            StereoOnFrameCPU(PixelData, m_PoseMatrix, m_ColorIntrinsics.m_FocalLength, m_ColorIntrinsics.m_FocalPoint, DepthData);
+                        }
                     }
                     else
                     {
-                        std::vector<char> PixelData(m_RGBATexture->GetNumberOfPixelsU() * m_RGBATexture->GetNumberOfPixelsV() * 4);
-                        Gfx::TextureManager::CopyTextureToCPU(m_RGBATexture, PixelData.data());
+                        m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &m_PoseMatrix, m_ColorIntrinsics.m_FocalLength, m_ColorIntrinsics.m_FocalPoint);
 
-                        std::vector<uint16_t> DepthData(m_RGBATexture->GetNumberOfPixelsU() * m_RGBATexture->GetNumberOfPixelsV());
-                        Gfx::TextureManager::CopyTextureToCPU(m_DepthTexture, reinterpret_cast<char*>(DepthData.data()));
+                        if (m_ExtractStream)
+                        {
+                            auto FrameString = std::to_string(m_NumberOfExtractedFrame);
 
-                        StereoOnFrameCPU(PixelData, m_PoseMatrix, m_ColorIntrinsics.m_FocalLength, m_ColorIntrinsics.m_FocalPoint, DepthData);
+                            auto PathToDepthTexture = Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_depth.raw";
+                            auto PathToColorTexture = Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_color.png";
+
+                            Gfx::TextureManager::SaveTexture(m_DepthTexture, PathToDepthTexture);
+                            Gfx::TextureManager::SaveTexture(m_RGBATexture, PathToColorTexture);
+
+                            std::ofstream PoseMatrixStream(Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_pose_intrinsics.byte", std::ofstream::binary);
+
+                            PoseMatrixStream.write((char*)(&m_PoseMatrix), sizeof(m_PoseMatrix));
+                            PoseMatrixStream.write((char*)(&m_ColorIntrinsics.m_FocalLength), sizeof(m_ColorIntrinsics.m_FocalLength));
+                            PoseMatrixStream.write((char*)(&m_ColorIntrinsics.m_FocalPoint), sizeof(m_ColorIntrinsics.m_FocalPoint));
+
+                            PoseMatrixStream.close();
+
+                            ++m_NumberOfExtractedFrame;
+                        }
                     }
                 }
                 else
                 {
-                    if (m_StreamState == STREAM_SLAM)
-                    {
-                        m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &m_PoseMatrix);
-                    }
-                    else
-                    {
-                        m_PoseMatrix = m_PreliminaryPoseMatrix;
-                    }
+                    m_PoseMatrix = m_PreliminaryPoseMatrix;
                 }
             }
             else if (MessageType == LIGHTESTIMATE)
@@ -1442,14 +1470,14 @@ namespace MR
 
         // -----------------------------------------------------------------------------
 
-        void OnNewStereoFrame(const std::vector<char>& _rColor, const std::vector<char>& _rDepth, const glm::mat4& _rTransform)
+        void OnNewStereoFrame(const std::vector<char>& _rColor, const std::vector<char>& _rDepth, const glm::mat4& _rTransform, const glm::vec2& _rFocalLength, const glm::vec2& _rFocalPoint)
         {
             auto TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x, m_ColorSize.y));
 
             Gfx::TextureManager::CopyToTexture2D(m_RGBATexture, TargetRect, m_ColorSize.x, _rColor.data());
             Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_ColorSize.x, _rDepth.data());
 
-            m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &_rTransform);
+            m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &_rTransform, _rFocalLength, _rFocalPoint);
         }
 
         // -----------------------------------------------------------------------------
