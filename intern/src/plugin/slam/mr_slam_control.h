@@ -37,6 +37,8 @@
 
 #include "plugin/slam/gfx_reconstruction_renderer.h"
 
+#include <filesystem>
+
 namespace MR
 {
     class CSLAMControl
@@ -185,11 +187,15 @@ namespace MR
             RECORD,
         };
         
-        ERecordMode m_RecordMode;
+        ERecordMode m_RecordMode = NONE;
 
         std::fstream m_RecordFile;
         std::unique_ptr<Base::CRecordWriter> m_pRecordWriter;
 		std::unique_ptr<Base::CRecordReader> m_pRecordReader;
+
+        std::fstream m_TempRecordFile;
+        std::unique_ptr<Base::CRecordWriter> m_pTempRecordWriter;
+        std::string m_TempRecordPath;
 
 		int m_NumberOfExtractedFrame;
 
@@ -394,29 +400,12 @@ namespace MR
                 BASE_THROWM("Unknown data source for SLAM plugin");
             }
 
-            std::string RecordParam = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:mode", "none");
-            
-            if (RecordParam == "record")
-            {
-                auto FileName = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:file", "");
-
-                m_RecordMode = RECORD;
-                m_RecordFile.open(FileName, std::fstream::out | std::fstream::binary);
-
-                ENGINE_CONSOLE_INFOV("Recording into file file \"%s\"", FileName.c_str());
-            }
-            else if (RecordParam == "none")
-            {
-                m_RecordMode = NONE;
-            }
-            else
-            {
-                BASE_THROWM("Invalid recording mode!");
-            }
-
             m_SendInpaintedResult = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:send_result", true);
 
             m_pPlaneColorizer = std::make_unique<MR::CPlaneColorizer>(&m_Reconstructor);
+
+            m_TempRecordPath = Core::AssetManager::GetPathToAssets() + "/recordings/" + "_temp_recording.swr";
+            m_TempRecordFile.open(m_TempRecordPath , std::fstream::out | std::fstream::binary);
         }
 
         // -----------------------------------------------------------------------------
@@ -424,6 +413,7 @@ namespace MR
         void Exit()
         {
             m_RecordFile.close();
+            m_TempRecordFile.close();
 
             m_DepthBuffer.clear();
             m_ColorBuffer.clear();
@@ -495,6 +485,17 @@ namespace MR
                     *m_pRecordReader >> Message.m_CompressedSize;
                     *m_pRecordReader >> Message.m_DecompressedSize;
                     Base::Read(*m_pRecordReader, Message.m_Payload);
+
+                    // TODO: find better solution
+                    // We just create a temporary recording everytime so we can always save a slam scene.
+                    // However, we couild also save the loaded recording when saving a scene again.
+
+                    if (m_pTempRecordWriter == nullptr)
+                    {
+                        m_pTempRecordWriter = std::make_unique<Base::CRecordWriter>(m_TempRecordFile, 1);
+                    }
+
+                    WriteMessage(*m_pTempRecordWriter, Message);
 
                     HandleMessage(Message);
                 }
@@ -615,6 +616,8 @@ namespace MR
             m_pRecordReader->SkipTime();
 
             m_pRecordReader->SetSpeed(_Speed);
+
+            m_Reconstructor.ResetReconstruction();
 
             ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", _rFileName.c_str());
         }
@@ -770,6 +773,68 @@ namespace MR
 				}
 			}
 		}
+
+        // -----------------------------------------------------------------------------
+
+        void ReadScene(CSceneReader& _rCodec)
+        {
+            std::string RecordFileName;
+
+            Base::Serialize(_rCodec, RecordFileName);
+
+            m_RecordFile.open(RecordFileName, std::fstream::in | std::fstream::binary);
+
+            if (!m_RecordFile.is_open())
+            {
+                BASE_THROWM("SLAM data of scene could not be loaded");
+            }
+
+            m_RecordMode = PLAY;
+
+            m_pRecordReader = std::make_unique<Base::CRecordReader>(m_RecordFile, 1);
+            m_pRecordReader->SkipTime();
+            m_pRecordReader->SetSpeed(10000.0f);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void WriteScene(CSceneWriter& _rCodec)
+        {
+            std::string RecordFolder = Core::AssetManager::GetPathToAssets() + "/recordings/scene";
+
+            std::string RecordFileName;
+            int FileCount = 0;
+            do
+            {
+                RecordFileName = RecordFolder + '/' + std::to_string(FileCount ++) + ".swr";
+            } while (std::filesystem::exists(RecordFileName));
+            
+            try
+            {
+                if (!std::filesystem::exists(RecordFolder))
+                {
+                    if (!std::filesystem::create_directory(RecordFolder))
+                    {
+                        BASE_THROWM("Scene folder could not be created");
+                    }
+                }
+                else if (!std::filesystem::is_directory(RecordFolder))
+                {
+                    BASE_THROWM(("Cannot create directory " + RecordFolder + ". Is there already a file with that name?").c_str());
+                }
+
+                if (!std::filesystem::copy_file(m_TempRecordPath, RecordFileName))
+                {
+                    BASE_THROWM("SLAM record file could not be saved as part of the scene");
+                }
+            }
+            catch (std::exception& e)
+            {
+                BASE_THROWM(e.what());
+            }
+
+            Base::Serialize(_rCodec, RecordFileName);
+        }
 
     private:
 
@@ -1275,12 +1340,15 @@ namespace MR
                         m_pRecordWriter = std::make_unique<Base::CRecordWriter>(m_RecordFile, 1);
                     }
 
-                    *m_pRecordWriter << _rMessage.m_Category;
-                    *m_pRecordWriter << _rMessage.m_MessageType;
-                    *m_pRecordWriter << _rMessage.m_CompressedSize;
-                    *m_pRecordWriter << _rMessage.m_DecompressedSize;
-                    Base::Write(*m_pRecordWriter, _rMessage.m_Payload);
+                    WriteMessage(*m_pRecordWriter, _rMessage);
                 }
+
+                if (m_pTempRecordWriter == nullptr)
+                {
+                    m_pTempRecordWriter = std::make_unique<Base::CRecordWriter>(m_TempRecordFile, 1);
+                }
+
+                WriteMessage(*m_pTempRecordWriter, _rMessage);
 
                 HandleMessage(_rMessage);
             }
@@ -1289,6 +1357,17 @@ namespace MR
                 // Enable mouse control after disconnect
                 m_UseTrackingCamera = false;
             }
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void WriteMessage(Base::CRecordWriter& _rWriter, const Net::CMessage& _rMessage)
+        {
+            _rWriter << _rMessage.m_Category;
+            _rWriter << _rMessage.m_MessageType;
+            _rWriter << _rMessage.m_CompressedSize;
+            _rWriter << _rMessage.m_DecompressedSize;
+            Base::Write(_rWriter, _rMessage.m_Payload);
         }
 
         // -----------------------------------------------------------------------------
@@ -1380,7 +1459,7 @@ namespace MR
 
             m_RegisteringBufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc);
         }
-
+        
         // -----------------------------------------------------------------------------
 
         void CreateShiftLUTTexture()

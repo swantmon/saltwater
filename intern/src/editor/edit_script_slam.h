@@ -1,6 +1,9 @@
 
 #pragma once
 
+#include "editor/imgui/extensions/ImFiledialog.h"
+
+#include "engine/core/core_asset_manager.h"
 #include "engine/data/data_component_manager.h"
 #include "engine/data/data_entity_manager.h"
 
@@ -70,6 +73,31 @@ namespace Scpt
                     }
                 }
                 ImGui::EndCombo();
+            }
+
+            using Edit::CImFileFialog;
+            using Edit::CAsset;
+
+            if (ImGui::Button("Save recording"))
+            {
+                CImFileFialog::GetInstance().Open("Save record...", CAsset::s_Filter[CAsset::Record], Core::AssetManager::GetPathToAssets(), CImFileFialog::RootIsRoot | CImFileFialog::SaveDialog);
+            }
+
+            if (Edit::CImFileFialog::GetInstance().Draw())
+            {
+                auto Files = Edit::CImFileFialog::GetInstance().GetSelectedFiles();
+
+                if (!Files.empty())
+                {
+                    auto rSceneFile = Files[0];
+
+                    if (!regex_match(rSceneFile, CAsset::s_Filter[CAsset::Scene]))
+                    {
+                        rSceneFile += ".swr";
+                    }
+
+                    // TODO: implement
+                }
             }
 
             return false;

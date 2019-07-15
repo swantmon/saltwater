@@ -90,6 +90,20 @@ namespace SLAM
 
     // -----------------------------------------------------------------------------
 
+    void CPluginInterface::ReadScene(CSceneReader& _rCodec)
+    {
+        m_SLAMControl.ReadScene(_rCodec);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::WriteScene(CSceneWriter& _rCodec)
+    {
+        m_SLAMControl.WriteScene(_rCodec);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::OnPause()
     {
         ENGINE_CONSOLE_INFOV("SLAM plugin paused!");
@@ -141,4 +155,18 @@ extern "C" CORE_PLUGIN_API_EXPORT void OnRenderHitProxy()
 extern "C" CORE_PLUGIN_API_EXPORT void UpdateScriptSettings(const Scpt::CSLAMScript::SScriptSettings& _rSettings)
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).UpdateScriptSettings(_rSettings);
+}
+
+// -----------------------------------------------------------------------------
+
+extern "C" CORE_PLUGIN_API_EXPORT void ReadScene(CSceneReader& _rCodec)
+{
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).ReadScene(_rCodec);
+}
+
+// -----------------------------------------------------------------------------
+
+extern "C" CORE_PLUGIN_API_EXPORT void WriteScene(CSceneWriter& _rCodec)
+{
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).WriteScene(_rCodec);
 }
