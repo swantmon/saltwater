@@ -33,6 +33,12 @@ namespace
         float m_FocalLength; // Unit = pixel
         glm::ivec2 m_Padding;
     };
+
+    struct SUpSampleParameter 
+    {
+        glm::vec2 m_Lamda = glm::vec2(900.0f, 100.0f);
+        glm::vec2 m_Sigma = glm::vec2(0.005f,0.005f);
+    };
 }
 
 namespace Stereo
@@ -592,33 +598,36 @@ namespace Stereo
 
         if (m_Is_Scaling)
         {
+            if (m_UpSample_Method == "BiLinear")
+            {
+                //---GPU Start---
+                Gfx::Performance::BeginEvent("Disparity Up-Sampling by BiLinear");
 
-            //===Up-Sampling Disparity by Bilinear Interpolation===
-            //---GPU Start---
-            Gfx::Performance::BeginEvent("Up-Sampling Disparity");
+                // Submit Data to Managers
+                Base::AABB2UInt TargetRect;
+                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_RectImgSize_DownSample.x, m_RectImgSize_DownSample.y));
+                Gfx::TextureManager::CopyToTexture2D(m_Disp_DownSample_TexturePtr, TargetRect, m_RectImgSize_DownSample.x, static_cast<const void*>(m_DispImg_Rect.data()));
 
-            // Submit Data to Managers
-            Base::AABB2UInt TargetRect;
-            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_RectImgSize_DownSample.x, m_RectImgSize_DownSample.y));
-            Gfx::TextureManager::CopyToTexture2D(m_Disp_DownSample_TexturePtr, TargetRect, m_RectImgSize_DownSample.x, static_cast<const void*>(m_DispImg_Rect.data()));
+                // Connecting Managers (@CPU) & GLSL (@GPU)
+                Gfx::ContextManager::SetShaderCS(m_DispUpSampling_CSPtr);
+                Gfx::ContextManager::SetImageTexture(0, m_Disp_DownSample_TexturePtr);
+                Gfx::ContextManager::SetImageTexture(1, m_DispImg_Rect_TexturePtr);
 
-            // Connecting Managers (@CPU) & GLSL (@GPU)
-            Gfx::ContextManager::SetShaderCS(m_DispUpSampling_CSPtr);
-            Gfx::ContextManager::SetImageTexture(0, m_Disp_DownSample_TexturePtr);
-            Gfx::ContextManager::SetImageTexture(1, m_DispImg_Rect_TexturePtr);
+                // Start GPU Parallel Processing
+                const int WorkGroupsX = DivUp(m_RectImg_Curt.get_ImgSize().x, TileSize_2D);
+                const int WorkGroupsY = DivUp(m_RectImg_Curt.get_ImgSize().y, TileSize_2D);
 
-            // Start GPU Parallel Processing
-            const int WorkGroupsX = DivUp(m_RectImg_Curt.get_ImgSize().x, TileSize_2D);
-            const int WorkGroupsY = DivUp(m_RectImg_Curt.get_ImgSize().y, TileSize_2D);
+                Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
-            Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+                Gfx::ContextManager::ResetShaderCS();
 
-            Gfx::ContextManager::ResetShaderCS();
-
-            Gfx::Performance::EndEvent();
-            //---GPU End---
-
-            //===Up-Sampling Disparity by FGS Provided by ===
+                Gfx::Performance::EndEvent();
+                //---GPU End---
+            }
+            else if (m_UpSample_Method == "FGI")
+            {
+                imp_UpSampling_FGS();
+            }
             
         }
         else
@@ -719,6 +728,11 @@ namespace Stereo
         // GPU End
     }
 
+    void CPluginInterface::imp_UpSampling_FGS()
+    {
+        
+    }
+
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::export_OrigImg()
@@ -807,6 +821,8 @@ namespace Stereo
         m_DispRange = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:disparity_range", 128);
 
         //---03 Disparity to Depth in Rectified Current Image---
+        m_UpSample_Method = Core::CProgramParameters::GetInstance().Get("mr:stereo:03_disparity_3_depth:upsample_method", "BiLinear");
+
         std::stringstream DefineStream;
         DefineStream
             << "#define TILE_SIZE_2D " << TileSize_2D << " \n";

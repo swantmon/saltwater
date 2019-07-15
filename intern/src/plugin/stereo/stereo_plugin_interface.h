@@ -114,6 +114,9 @@ namespace Stereo
         cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvConstBP_cuda;
 
         //---03 Disparity to Depth in Rectified Current Image---
+        void imp_UpSampling_FGS();
+        std::string m_UpSample_Method; // Select method for disparity up-sampling
+
         void imp_Disp2Depth(); 
 
         Gfx::CShaderPtr m_Disp2Depth_CSPtr;
