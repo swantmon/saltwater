@@ -66,7 +66,8 @@ namespace SLAM
 
         if (_rSettings.m_SetRecordFile)
         {
-            m_SLAMControl.SetRecordFile(_rSettings.m_RecordFile, _rSettings.m_PlaybackSpeed);
+            m_SLAMControl.SetRecordFile(Core::AssetManager::GetPathToAssets() + "/" + _rSettings.m_RecordFile, _rSettings.m_PlaybackSpeed);
+            ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", (Core::AssetManager::GetPathToAssets() + "/" + _rSettings.m_RecordFile).c_str());
         }
 
         Gfx::ReconstructionRenderer::SetVisibleObjects(
