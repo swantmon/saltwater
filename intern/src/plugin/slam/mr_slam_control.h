@@ -488,7 +488,7 @@ namespace MR
 
                     // TODO: find better solution
                     // We just create a temporary recording everytime so we can always save a slam scene.
-                    // However, we couild also save the loaded recording when saving a scene again.
+                    // However, we could also save the loaded recording when saving a scene again.
 
                     if (m_pTempRecordWriter == nullptr)
                     {
@@ -790,6 +790,8 @@ namespace MR
             }
 
             m_RecordMode = PLAY;
+
+            m_Reconstructor.ResetReconstruction();
 
             m_pRecordReader = std::make_unique<Base::CRecordReader>(m_RecordFile, 1);
             m_pRecordReader->SkipTime();
