@@ -119,6 +119,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Clear ticket
         // -----------------------------------------------------------------------------
+        assert(m_pSelectionTicket);
+
         Gfx::SelectionRenderer::Clear(*m_pSelectionTicket);
 
         m_pSelectionTicket = nullptr;
