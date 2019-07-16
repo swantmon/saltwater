@@ -269,7 +269,7 @@ namespace MR
 			// -----------------------------------------------------------------------------
 			// Settings
 			// -----------------------------------------------------------------------------
-			m_ExtractStream = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:extract_stream", false);
+			m_ExtractStream = Core::CProgramParameters::GetInstance().Get("mr:file_storing:extract_stream", false);
 			m_NumberOfExtractedFrames = 0;
 
             // -----------------------------------------------------------------------------
@@ -777,7 +777,7 @@ namespace MR
 
             try
             {
-                SetRecordFile(RecordFileName, 10000.0f);
+                SetRecordFile(RecordFileName, Core::CProgramParameters::GetInstance().Get("mr:file_storing:scene_load_speed", 10000.0f));
             }
             catch (...)
             {
