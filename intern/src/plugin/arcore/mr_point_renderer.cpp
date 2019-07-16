@@ -109,6 +109,8 @@ namespace
         Gfx::CBufferPtr m_PointVerticesBufferPtr;
 
         Gfx::CBufferPtr m_MatrixBufferPtr;
+
+        Engine::CEventDelegates::HandleType m_RenderDelegateHandle;
     };
 } // namespace
 
@@ -174,6 +176,8 @@ namespace
         // Settings
         // -----------------------------------------------------------------------------
         ResetSettings();
+
+        m_RenderDelegateHandle = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnRenderForward, std::bind(&CMRPointRenderer::Render, this));
     }
 
     // -----------------------------------------------------------------------------
@@ -184,6 +188,8 @@ namespace
         m_PointPS                = 0;
         m_PointVerticesBufferPtr = 0;
         m_MatrixBufferPtr        = 0;
+
+        m_RenderDelegateHandle = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -214,7 +220,7 @@ namespace
         if (!m_Settings.m_ShowPoints) return;
 
         ArSession* pARSession = MR::ControlManager::GetCurrentSession();
-        ArFrame*   pARFrame   = MR::ControlManager::GetCurrentFrame();
+        ArFrame* pARFrame = MR::ControlManager::GetCurrentFrame();
 
         if (pARSession == nullptr || pARFrame == nullptr) return;
 

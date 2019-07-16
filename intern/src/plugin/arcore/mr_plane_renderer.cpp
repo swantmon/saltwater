@@ -144,6 +144,8 @@ namespace
         Gfx::CBufferPtr m_MatrixBufferPtr;
 
         Gfx::CBufferPtr m_ColorBufferPtr;
+
+        Engine::CEventDelegates::HandleType m_RenderDelegateHandle;
     };
 } // namespace
 
@@ -229,6 +231,8 @@ namespace
         // Settings
         // -----------------------------------------------------------------------------
         ResetSettings();
+
+        m_RenderDelegateHandle = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnRenderForward, std::bind(&CMRPlaneRenderer::Render, this));
     }
 
     // -----------------------------------------------------------------------------
@@ -241,6 +245,8 @@ namespace
         m_PlaneIndicesBufferPtr  = nullptr;
         m_MatrixBufferPtr        = nullptr;
         m_ColorBufferPtr         = nullptr;
+
+        m_RenderDelegateHandle = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -616,3 +622,8 @@ namespace PlaneRenderer
     }
 } // namespace PlaneRenderer
 } // namespace MR
+
+extern "C" CORE_PLUGIN_API_EXPORT void SetPlaneRendererSettings(MR::PlaneRenderer::SSettings _Settings)
+{
+    MR::PlaneRenderer::SetSettings(_Settings);
+}
