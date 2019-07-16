@@ -36,12 +36,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\..\src\plugin\stereo\FutoGCV_Rectification_Planar.cpp" />
+    <ClCompile Include="FutoGCV_upsample_fgi.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\plugin\stereo\FutoGCV_Img.h" />
     <ClInclude Include="..\..\..\src\plugin\stereo\stereo_plugin_interface.h" />
     <ClInclude Include="..\..\..\src\plugin\stereo\stereo_precompiled.h" />
     <ClInclude Include="..\..\..\src\plugin\stereo\FutoGCV_Rectification_Planar.h" />
+    <ClInclude Include="FutoGCV_upsample_fgi.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3E5E354E-2967-4AA5-B6CE-F57BA9D0B4AE}</ProjectGuid>
