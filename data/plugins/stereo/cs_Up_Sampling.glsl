@@ -35,7 +35,7 @@ void main()
 
 	const vec2 UpRatio = ImgSize_DownSample / ImgSize_UpSample;
 
-	const vec2 pix_Sample = UpRatio * uvec2(gl_GlobalInvocationID.xy);
+	const vec2 pix_Sample = UpRatio * ivec2(gl_GlobalInvocationID.xy);
 
 	float pixValue = BiLinearInterpolation(pix_Sample);
 

@@ -1,47 +1,60 @@
-#ifndef __INCLUDE_CS_Up_Sampling_GLSL__
-#define __INCLUDE_CS_Up_Sampling_GLSL__
+#ifndef __INCLUDE_CS_FGS_GLSL__
+#define __INCLUDE_CS_FGS_GLSL__
 
-layout (binding = 0, r32f) readonly uniform image2D cs_Disp_DownSample; // Pixel in image2D is 32-bit float
-layout (binding = 1, r32f) writeonly uniform image2D cs_Disp_UpSample; // Pixel in image2D is 32-bit float
+layout (binding = 0, r32f) writeonly uniform image2D cs_Out; // Pixel in image2D is 32-bit float
+layout (binding = 1, r32f) readonly uniform image2D cs_In; // Pixel in image2D is 32-bit float
+layout (binding = 2, r32f) readonly uniform image2D cs_Guide; // Pixel in image2D is 32-bit float
 
-float BiLinearInterpolation(vec2 pixPosition)
+layout(std140, binding = 0) uniform ParameterBuffer
 {
-	const ivec2 pixPosition_UL = ivec2(pixPosition);
-	const ivec2 pixPosition_UR = pixPosition_UL + ivec2(1, 0);
-	const ivec2 pixPosition_DL = pixPosition_UL + ivec2(0, 1);
-	const ivec2 pixPosition_DR = pixPosition_UL + ivec2(1, 1);
+    vec2 g_Lamda;
+	vec2 g_Sigma;
+};
 
-	const float pixValue_UL = imageLoad(cs_Disp_DownSample, pixPosition_UL).x;
-	const float pixValue_UR = imageLoad(cs_Disp_DownSample, pixPosition_UR).x;
-	const float pixValue_DL = imageLoad(cs_Disp_DownSample, pixPosition_DL).x;
-	const float pixValue_DR = imageLoad(cs_Disp_DownSample, pixPosition_DR).x;
+float cal_GuidedWeight(ivec2 CenterPos, ivec2 NeighborPos)
+{
+	float CenterValue = imageLoad(cs_Guide, CenterPos).x;
+	float NeighborValue = imageLoad(cs_Guide, NeighborPos).x;
 
-	const float a_x = (pixPosition.x - pixPosition_UL.x) / (pixPosition_UR.x - pixPosition_UL.x);
-	const float a_y = (pixPosition.y - pixPosition_UL.y) / (pixPosition_DL.y - pixPosition_UL.y);
+	float GuidedSimilarity = sqrt(pow(CenterValue - NeighborValue, 2));
+	float GuidedWeight = exp(-GuidedSimilarity / g_Sigma.x);
 
-	const float pixValue_UM = mix(pixValue_UL, pixValue_UR, a_x);
-	const float pixValue_DM = mix(pixValue_DL, pixValue_DR, a_x);
-
-	const float pixValue = mix(pixValue_UM, pixValue_DM, a_y);
-	
-	return pixValue;
+	return GuidedWeight;
 }
 
 layout (local_size_x = TILE_SIZE_2D, local_size_y = TILE_SIZE_2D, local_size_z = 1) in;
 void main()
 {
-	const vec2 ImgSize_DownSample = imageSize(cs_Disp_DownSample);
-	const vec2 ImgSize_UpSample = imageSize(cs_Disp_UpSample);
+	const ivec2 UpSampleSize = imageSize(cs_Out);
 
-	const vec2 UpRatio = ImgSize_DownSample / ImgSize_UpSample;
+	//---Horizontal 1D WLS---
+	float Weight_left, Weight_right, Weight_up, Weight_down;
 
-	const vec2 pix_Sample = UpRatio * uvec2(gl_GlobalInvocationID.xy);
+	float a_x[UpSampleSize.x], b_x[UpSampleSize.x], c_x[UpSampleSize.x];
+	float c_x_Temp[UpSampleSize.x], f_x_Temp[UpSampleSize.x];
 
-	float pixValue = BiLinearInterpolation(pix_Sample);
+	int y_wise = int(gl_GlobalInvocationID.y); 
 
-	pixValue /= UpRatio.x;
+	for (int x = 0; x < UpSampleSize.x; x++)
+	{
+		Weight_left = cal_GuidedWeight(ivec2(x, y_wise), ivec2(x-1, y_wise));
+		Weight_right = cal_GuidedWeight(ivec2(x, y_wise), ivec2(x+1, y_wise));
 
-	imageStore(cs_Disp_UpSample, ivec2(gl_GlobalInvocationID.xy), vec4(pixValue)); 
+		a_x[x] = -g_Lamda.x * Weight_left;
+		c_x[x] = -g_Lamda.x * Weight_right;
+		b_x[x] = 1 - a_x[x] - c_x[x];
+
+		c_x_Temp[x] = c_x[x] / (b_x[x] - c_x_Temp[x-1] * a_x[x]);
+		f_x_Temp[x] = (f_x[x] - f_x[x-1] * a_x[x]) / (b_x[x] - c_x_Temp[x-1] * a_x[x]);
+	}
+
+	for (int x = UpSampleSize.x - 2; x = 0; x--)
+	{
+		u[x] = f_x_Temp[x] - c_x_Temp[x] * u[x+1];
+	}
+
+	//---Vertical 1D WLS---
+	int ColWise = int(gl_GlobalInvocationID.x);
 }
 
-#endif //__INCLUDE_CS_Up_Sampling_GLSL__
+#endif //__INCLUDE_CS_FGS_GLSL__
