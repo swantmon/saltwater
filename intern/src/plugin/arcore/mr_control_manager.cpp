@@ -44,19 +44,6 @@ using namespace MR::ControlManager;
 
 namespace
 {
-    glm::vec3 GetPlaneColor(int _Index)
-    {
-        static constexpr int s_NumberOfPlaneColors = 12;
-
-        constexpr unsigned int s_PlaneColorRGB[s_NumberOfPlaneColors] = {
-                0xFFFFFFFF, 0xF44336FF, 0xE91E63FF, 0x9C27B0FF, 0x673AB7FF, 0x3F51B5FF,
-                0x2196F3FF, 0x03A9F4FF, 0x00BCD4FF, 0x009688FF, 0x4CAF50FF, 0x8BC34AFF};
-
-        const int RGB = s_PlaneColorRGB[_Index % s_NumberOfPlaneColors];
-
-        return glm::vec3(((RGB >> 24) & 0xff) / 255.0f, ((RGB >> 16) & 0xff) / 255.0f, ((RGB >> 8) & 0xff) / 255.0f);
-    }
-
     const float c_Uvs[] = {
             0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
     };
@@ -104,77 +91,6 @@ namespace
         }
     )";
 
-    constexpr char c_VertexShaderPlane[] = R"(
-        #version 320 es
-
-        precision highp float;
-
-        layout(std140, binding = 0) uniform UB0 { mat4 m_MVP; };
-
-        layout(location = 0) in vec3 in_Vertex;
-
-        layout(location = 0) out float out_Alpha;
-
-        void main()
-        {
-          gl_Position = m_MVP * vec4(in_Vertex.x, 0.0f, in_Vertex.y, 1.0f);
-
-          out_Alpha = in_Vertex.z;
-        }
-    )";
-
-    constexpr char c_FragmentShaderPlane[] = R"(
-        #version 320 es
-
-        precision highp float;
-
-        layout(binding = 1) uniform UB1 { vec4 m_Color; };
-
-        layout(location = 0) in float in_Alpha;
-
-        layout(location = 0) out vec4 out_Output;
-
-        void main()
-        {
-            vec2 PixelPos = gl_FragCoord.xy + 0.5f;
-
-            float PatternMask = mod((PixelPos.x / 2.0f + PixelPos.y / 2.0f), 2.0f);
-
-            out_Output = mix(m_Color, vec4(0.0f, 0.0f ,0.0f, 0.0f), PatternMask) * in_Alpha;
-        }
-    )";
-
-    constexpr char c_VertexShaderPoint[] = R"(
-        #version 320 es
-
-        layout(std140, binding = 0) uniform UB0 { mat4 m_MVP; };
-
-        layout(location = 0) in vec4 in_Vertex;
-
-        void main()
-        {
-            gl_PointSize = 4.0;
-
-            gl_Position = m_MVP * vec4(in_Vertex.xyz, 1.0);
-        }
-    )";
-
-    constexpr char c_FragmentShaderPoint[] = R"(
-        #version  320 es
-
-        precision lowp float;
-
-        layout(location = 0) out vec4 out_Output;
-
-        void main()
-        {
-            out_Output = vec4(0.1215f, 0.7372f, 0.8235f, 1.0f);
-        }
-    )";
-
-    static constexpr int s_MaxNumberOfVerticesPerPlane = 1024;
-    static constexpr int s_MaxNumberOfPoints           = 1024;
-
     static constexpr int s_NumberOfVertices = 4;
     bool g_IsUVsInitialized = false;
     float g_TransformedUVs[s_NumberOfVertices * 2];
@@ -197,6 +113,8 @@ namespace
         void OnExit();
         void Update();
 
+        void UpdateBackground();
+
         void OnPause();
         void OnResume();
 
@@ -212,6 +130,9 @@ namespace
         const SSettings& GetSettings();
         void SetSettings(const SSettings& _rSettings);
         void ResetSettings();
+
+        ArSession* GetCurrentSession();
+        ArFrame* GetCurrentFrame();
 
     private:
 
@@ -267,41 +188,13 @@ namespace
 
         Gfx::CShaderPtr m_WebcamPSPtr;
 
-        Gfx::CShaderPtr m_PlaneVS;
-
-        Gfx::CShaderPtr m_PlanePS;
-
-        Gfx::CShaderPtr m_PointVS;
-
-        Gfx::CShaderPtr m_PointPS;
-
         Gfx::CBufferPtr m_WebcamUVBufferPtr;
-
-        Gfx::CBufferPtr m_PlaneVerticesBufferPtr;
-
-        Gfx::CBufferPtr m_PlaneIndicesBufferPtr;
-
-        Gfx::CBufferPtr m_PointVerticesBufferPtr;
-
-        Gfx::CBufferPtr m_MatrixBufferPtr;
-
-        Gfx::CBufferPtr m_ColorBufferPtr;
 
         Gfx::Main::CResizeDelegate::HandleType m_ResizeHandle;
 
-        Dt::CEntityManager::CEntityDelegate::HandleType m_EntityDelegate;
-
-        Dt::CComponentManager::CComponentDelegate::HandleType m_ComponentDelegate;
-
-        Engine::CEventDelegates::HandleType m_GfxOnRenderForwardHandle;
-
     private:
 
-        void RenderBackground();
-
         void OnResize(int _Width, int _Height);
-        void OnDirtyEntity(Dt::CEntity* _pEntity);
-        void OnDirtyComponent(Dt::IComponent* _pComponent);
     };
 } // namespace
 
@@ -321,9 +214,6 @@ namespace
         , m_ARCToEngineMatrix(1.0f)
     {
         m_ARCToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,-1));
-
-        m_Settings.m_ShowPlanes = false;
-        m_Settings.m_ShowPoints = false;
 
         m_ResizeHandle = Gfx::Main::RegisterResizeHandler(std::bind(&CMRControlManager::OnResize, this, std::placeholders::_1, std::placeholders::_2));
     }
@@ -345,34 +235,12 @@ namespace
 
         m_WebcamPSPtr = Gfx::ShaderManager::CompilePS(c_FragmentShaderWebcam, "main", nullptr, nullptr, 0, false, false, true);
 
-        m_PlaneVS = Gfx::ShaderManager::CompileVS(c_VertexShaderPlane, "main", nullptr, nullptr, 0, false, false, true);
-
-        m_PlanePS = Gfx::ShaderManager::CompilePS(c_FragmentShaderPlane, "main", nullptr, nullptr, 0, false, false, true);
-
-        m_PointVS = Gfx::ShaderManager::CompileVS(c_VertexShaderPoint, "main", nullptr, nullptr, 0, false, false, true);
-
-        m_PointPS = Gfx::ShaderManager::CompilePS(c_FragmentShaderPoint, "main", nullptr, nullptr, 0, false, false, true);
-
         const Gfx::SInputElementDescriptor InputLayoutWebcam[] =
         {
             { "UV", 0, Gfx::CInputLayout::Float2Format, 0, 0, 8, Gfx::CInputLayout::PerVertex, 0, },
         };
 
         Gfx::ShaderManager::CreateInputLayout(InputLayoutWebcam, 1, m_WebcamVSPtr);
-
-        const Gfx::SInputElementDescriptor InputLayoutPlane[] =
-        {
-            { "VERTEX", 0, Gfx::CInputLayout::Float3Format, 0, 0, 12, Gfx::CInputLayout::PerVertex, 0, },
-        };
-
-        Gfx::ShaderManager::CreateInputLayout(InputLayoutPlane, 1, m_PlaneVS);
-
-        const Gfx::SInputElementDescriptor InputLayoutPoint[] =
-        {
-            { "POINT", 0, Gfx::CInputLayout::Float4Format, 0, 0, 16, Gfx::CInputLayout::PerVertex, 0, },
-        };
-
-        Gfx::ShaderManager::CreateInputLayout(InputLayoutPoint, 1, m_PointVS);
 
 
         // -----------------------------------------------------------------------------
@@ -423,63 +291,6 @@ namespace
         
         m_WebcamUVBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
 
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::VertexBuffer;
-        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = s_MaxNumberOfVerticesPerPlane * sizeof(glm::vec3);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        m_PlaneVerticesBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::IndexBuffer;
-        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = s_MaxNumberOfVerticesPerPlane * sizeof(unsigned int);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        m_PlaneIndicesBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::VertexBuffer;
-        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = s_MaxNumberOfPoints * sizeof(glm::vec3);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        m_PointVerticesBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(glm::mat4);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        m_MatrixBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(glm::vec4);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        m_ColorBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        // -----------------------------------------------------------------------------
-        // Handler
-        // -----------------------------------------------------------------------------
-        m_EntityDelegate = Dt::CEntityManager::GetInstance().RegisterDirtyEntityHandler(std::bind(&CMRControlManager::OnDirtyEntity, this, std::placeholders::_1));
-
-        m_ComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CMRControlManager::OnDirtyComponent, this, std::placeholders::_1));
-
         // -----------------------------------------------------------------------------
         // Settings
         // -----------------------------------------------------------------------------
@@ -489,19 +300,12 @@ namespace
         // Initialize ARCore if needed
         // -----------------------------------------------------------------------------
         OnResume();
-
-        // -----------------------------------------------------------------------------
-        // Hook
-        // -----------------------------------------------------------------------------
-        m_GfxOnRenderForwardHandle = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnRenderForward, std::bind(&CMRControlManager::RenderBackground, this));
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::OnExit()
     {
-        m_GfxOnRenderForwardHandle = nullptr;
-
         m_TrackedObjects.clear();
 
         // -----------------------------------------------------------------------------
@@ -512,16 +316,7 @@ namespace
         m_BackgroundTargetSetPtr = 0;
         m_WebcamVSPtr            = 0;
         m_WebcamPSPtr            = 0;
-        m_PlaneVS                = 0;
-        m_PlanePS                = 0;
-        m_PointVS                = 0;
-        m_PointPS                = 0;
         m_WebcamUVBufferPtr      = 0;
-        m_PlaneVerticesBufferPtr = 0;
-        m_PlaneIndicesBufferPtr  = 0;
-        m_PointVerticesBufferPtr = 0;
-        m_MatrixBufferPtr        = 0;
-        m_ColorBufferPtr         = 0;
 
         // -----------------------------------------------------------------------------
         // AR session and frame
@@ -580,7 +375,6 @@ namespace
 
         // -----------------------------------------------------------------------------
         // Light estimation
-        // Intensity value ranges from 0.0f to 1.0f.
         // -----------------------------------------------------------------------------
         m_LightEstimation.Detect(m_pARSession, m_pARFrame);
 
@@ -618,10 +412,14 @@ namespace
 
             ArPose_destroy(pARPose);
         }
+    }
 
-        // -----------------------------------------------------------------------------
-        // Prepare
-        // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::UpdateBackground()
+    {
+        if (m_pARSession == nullptr) return;
+
         Gfx::ContextManager::SetTargetSet(m_BackgroundTargetSetPtr);
 
         Gfx::ContextManager::SetBlendState(Gfx::StateManager::GetBlendState(Gfx::CBlendState::Default));
@@ -632,9 +430,6 @@ namespace
 
         Gfx::ContextManager::SetViewPortSet(Gfx::ViewManager::GetViewPortSet());
 
-        // -----------------------------------------------------------------------------
-        // Background image from webcam
-        // -----------------------------------------------------------------------------
         int32_t HasGeometryChanged = 0;
 
         ArFrame_getDisplayGeometryChanged(m_pARSession, m_pARFrame, &HasGeometryChanged);
@@ -974,352 +769,22 @@ namespace
 
     void CMRControlManager::ResetSettings()
     {
-        m_Settings.m_Near       = Core::CProgramParameters::GetInstance().Get<float>("mr:camera:projection:near", 0.1f);
-        m_Settings.m_Far        = Core::CProgramParameters::GetInstance().Get<float>("mr:camera:projection:far", 100.0f);
-        m_Settings.m_ShowPlanes = Core::CProgramParameters::GetInstance().Get<bool>("mr:ar:debug:render_planes", true);
-        m_Settings.m_ShowPoints = Core::CProgramParameters::GetInstance().Get<bool>("mr:ar:debug:render_points", true);
+        m_Settings.m_Near = Core::CProgramParameters::GetInstance().Get<float>("mr:camera:projection:near", 0.1f);
+        m_Settings.m_Far  = Core::CProgramParameters::GetInstance().Get<float>("mr:camera:projection:far", 100.0f);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMRControlManager::RenderBackground()
+    ArSession* CMRControlManager::GetCurrentSession()
     {
-        // -----------------------------------------------------------------------------
-        // Prepare
-        // -----------------------------------------------------------------------------
-        Gfx::ContextManager::SetTargetSet(Gfx::TargetSetManager::GetLightAccumulationTargetSet());
-
-        Gfx::ContextManager::SetBlendState(Gfx::StateManager::GetBlendState(Gfx::CBlendState::AlphaBlend));
-
-        Gfx::ContextManager::SetDepthStencilState(Gfx::StateManager::GetDepthStencilState(Gfx::CDepthStencilState::NoDepth));
-
-        Gfx::ContextManager::SetRasterizerState(Gfx::StateManager::GetRasterizerState(Gfx::CRasterizerState::NoCull));
-
-        Gfx::ContextManager::SetViewPortSet(Gfx::ViewManager::GetViewPortSet());
-
-        // -----------------------------------------------------------------------------
-        // Render planes
-        // -----------------------------------------------------------------------------
-        if (m_Settings.m_ShowPlanes)
-        {
-            std::vector<glm::vec3> PlaneVertices;
-            std::vector<unsigned int> PlaneIndices;
-
-            glm::mat4 PlaneModelMatrix = glm::mat4(1.0f);
-
-            auto UpdateGeometryForPlane = [&](const ArPlane *_pPlane)
-            {
-                // -----------------------------------------------------------------------------
-                // Settings:
-                // Feather distance 0.2 meters.
-                // Feather scale over the distance between plane center and vertices.
-                // -----------------------------------------------------------------------------
-                const float kFeatherLength = 0.2f;
-                const float kFeatherScale = 0.2f;
-                const float kOuterAlpha = 0.8f;
-                const float kInnerAlpha = 0.8f;
-
-                // -----------------------------------------------------------------------------
-                // The following code generates a triangle mesh filling a convex polygon,
-                // including a feathered edge for blending.
-                //
-                // The indices shown in the diagram are used in comments below.
-                // _______________     0_______________1
-                // |             |      |4___________5|
-                // |             |      | |         | |
-                // |             | =>   | |         | |
-                // |             |      | |         | |
-                // |             |      |7-----------6|
-                // ---------------     3---------------2
-                // -----------------------------------------------------------------------------
-
-                PlaneVertices.clear();
-                PlaneIndices.clear();
-
-                int LengthOfPolygon;
-
-                ArPlane_getPolygonSize(m_pARSession, _pPlane, &LengthOfPolygon);
-
-                int NumberOfVertices = LengthOfPolygon / 2;
-
-                std::vector<glm::vec2> VerticesRAW(NumberOfVertices);
-
-                ArPlane_getPolygon(m_pARSession, _pPlane, &VerticesRAW.front()[0]);
-
-                // -----------------------------------------------------------------------------
-                // Fill vertex 0 to 3. Note that the vertex.xy are used for x and z
-                // position. vertex.z is used for alpha. The outter polygon's alpha
-                // is 0.
-                // -----------------------------------------------------------------------------
-                for (int IndexOfVertex = 0; IndexOfVertex < NumberOfVertices; ++IndexOfVertex)
-                {
-                    PlaneVertices.push_back(glm::vec3(VerticesRAW[IndexOfVertex][0], VerticesRAW[IndexOfVertex][1], kOuterAlpha));
-                }
-
-                // -----------------------------------------------------------------------------
-                // Generate pose and get model matrix
-                // -----------------------------------------------------------------------------
-                ArPose *Pose;
-
-                ArPose_create(m_pARSession, nullptr, &Pose);
-
-                ArPlane_getCenterPose(m_pARSession, _pPlane, Pose);
-
-                ArPose_getMatrix(m_pARSession, Pose, glm::value_ptr(PlaneModelMatrix));
-
-                ArPose_destroy(Pose);
-
-                // -----------------------------------------------------------------------------
-                // Get plane center in XZ axis.
-                // -----------------------------------------------------------------------------
-                glm::vec2 CenterOfPlane = glm::vec2(PlaneModelMatrix[3][0], PlaneModelMatrix[3][2]);
-
-                // -----------------------------------------------------------------------------
-                // Fill vertex 0 to 3, with alpha set to kAlpha.
-                // -----------------------------------------------------------------------------
-                for (auto Vertex : VerticesRAW)
-                {
-                    glm::vec2 Direction = Vertex - CenterOfPlane;
-
-                    float Scale = 1.0f - std::min((kFeatherLength / glm::length(Direction)), kFeatherScale);
-
-                    glm::vec2 ResultVector = Scale * Direction + CenterOfPlane;
-
-                    PlaneVertices.push_back(glm::vec3(ResultVector[0], ResultVector[1], kInnerAlpha));
-                }
-
-                // -----------------------------------------------------------------------------
-                // Generate vertices / triangles
-                // -----------------------------------------------------------------------------
-                NumberOfVertices = PlaneVertices.size();
-
-                int NumberOfVerticesHalf = NumberOfVertices / 2.0f;
-
-                // -----------------------------------------------------------------------------
-                // Generate triangle (4, 5, 6) and (4, 6, 7).
-                // -----------------------------------------------------------------------------
-                for (int IndexOfIndice = NumberOfVerticesHalf + 1; IndexOfIndice < NumberOfVertices - 1; ++IndexOfIndice)
-                {
-                    PlaneIndices.push_back(NumberOfVerticesHalf);
-                    PlaneIndices.push_back(IndexOfIndice);
-                    PlaneIndices.push_back(IndexOfIndice + 1);
-                }
-
-                // -----------------------------------------------------------------------------
-                // Generate triangle (0, 1, 4), (4, 1, 5), (5, 1, 2), (5, 2, 6),
-                // (6, 2, 3), (6, 3, 7), (7, 3, 0), (7, 0, 4)
-                // -----------------------------------------------------------------------------
-                for (int IndexOfIndice = 0; IndexOfIndice < NumberOfVerticesHalf; ++IndexOfIndice)
-                {
-                    PlaneIndices.push_back(IndexOfIndice);
-                    PlaneIndices.push_back((IndexOfIndice + 1) % NumberOfVerticesHalf);
-                    PlaneIndices.push_back(IndexOfIndice + NumberOfVerticesHalf);
-
-                    PlaneIndices.push_back(IndexOfIndice + NumberOfVerticesHalf);
-                    PlaneIndices.push_back((IndexOfIndice + 1) % NumberOfVerticesHalf);
-                    PlaneIndices.push_back((IndexOfIndice + NumberOfVerticesHalf + 1) % NumberOfVerticesHalf + NumberOfVerticesHalf);
-                }
-            };
-
-            // -----------------------------------------------------------------------------
-            // Get trackable planes
-            // -----------------------------------------------------------------------------
-            ArTrackableList *ListOfPlanes = nullptr;
-
-            ArTrackableList_create(m_pARSession, &ListOfPlanes);
-
-            assert(ListOfPlanes != nullptr);
-
-            ArSession_getAllTrackables(m_pARSession, AR_TRACKABLE_PLANE, ListOfPlanes);
-
-            int NumberOfPlanes = 0;
-
-            ArTrackableList_getSize(m_pARSession, ListOfPlanes, &NumberOfPlanes);
-
-            // -----------------------------------------------------------------------------
-            // Update every available plane
-            // -----------------------------------------------------------------------------
-            Gfx::ContextManager::SetShaderVS(m_PlaneVS);
-
-            Gfx::ContextManager::SetShaderPS(m_PlanePS);
-
-            Gfx::ContextManager::SetVertexBuffer(m_PlaneVerticesBufferPtr);
-
-            Gfx::ContextManager::SetIndexBuffer(m_PlaneIndicesBufferPtr, 0);
-
-            Gfx::ContextManager::SetConstantBuffer(0, m_MatrixBufferPtr);
-
-            Gfx::ContextManager::SetConstantBuffer(1, m_ColorBufferPtr);
-
-            Gfx::ContextManager::SetInputLayout(m_PlaneVS->GetInputLayout());
-
-            Gfx::ContextManager::SetTopology(Gfx::STopology::TriangleList);
-
-            for (int IndexOfPlane = 0; IndexOfPlane < NumberOfPlanes; ++IndexOfPlane)
-            {
-                ArTrackable *pTrackableItem = nullptr;
-
-                ArTrackableList_acquireItem(m_pARSession, ListOfPlanes, IndexOfPlane, &pTrackableItem);
-
-                ArPlane *pPlane = ArAsPlane(pTrackableItem);
-
-                ArTrackingState TrackableTrackingState;
-
-                ArTrackable_getTrackingState(m_pARSession, pTrackableItem, &TrackableTrackingState);
-
-                ArPlane *pSubsumedPlane;
-
-                ArPlane_acquireSubsumedBy(m_pARSession, pPlane, &pSubsumedPlane);
-
-                if (pSubsumedPlane != nullptr)
-                {
-                    ArTrackable_release(ArAsTrackable(pSubsumedPlane));
-
-                    continue;
-                }
-
-                if (TrackableTrackingState != AR_TRACKING_STATE_TRACKING) continue;
-
-                ArTrackingState PlaneTrackingState;
-
-                ArTrackable_getTrackingState(m_pARSession, ArAsTrackable(pPlane), &PlaneTrackingState);
-
-                if (PlaneTrackingState != AR_TRACKING_STATE_TRACKING) continue;
-
-                ArTrackable_release(pTrackableItem);
-
-                // -----------------------------------------------------------------------------
-                // Generate planes and upload data
-                // -----------------------------------------------------------------------------
-                UpdateGeometryForPlane(pPlane);
-
-                if (PlaneIndices.size() == 0 || PlaneVertices.size() == 0) continue;
-
-                if (PlaneVertices.size() >= s_MaxNumberOfVerticesPerPlane || PlaneIndices.size() >= s_MaxNumberOfVerticesPerPlane)
-                {
-                    ENGINE_CONSOLE_WARNING("Plane could not be rendered because of too many vertices.");
-                    continue;
-                }
-
-                // -----------------------------------------------------------------------------
-                // Prepare model-view-projection matrix
-                // TODO: Change color depending on height of the plane
-                // -----------------------------------------------------------------------------
-                auto MainCameraPtr = Gfx::ViewManager::GetMainCamera();
-
-                glm::mat4 PlaneMVPMatrix = MainCameraPtr->GetViewProjectionMatrix() * glm::mat4(m_ARCToEngineMatrix) * PlaneModelMatrix;
-
-                glm::vec4 Color = glm::vec4(GetPlaneColor(IndexOfPlane), 1.0f);
-
-                // -----------------------------------------------------------------------------
-                // Upload data
-                // -----------------------------------------------------------------------------
-                Gfx::BufferManager::UploadBufferData(m_PlaneVerticesBufferPtr, &PlaneVertices.front()[0], 0, PlaneVertices.size() * sizeof(glm::vec3));
-
-                Gfx::BufferManager::UploadBufferData(m_PlaneIndicesBufferPtr, &PlaneIndices.front(), 0, PlaneIndices.size() * sizeof(unsigned int));
-
-                Gfx::BufferManager::UploadBufferData(m_MatrixBufferPtr, &PlaneMVPMatrix);
-
-                Gfx::BufferManager::UploadBufferData(m_ColorBufferPtr, &Color);
-
-                // -----------------------------------------------------------------------------
-                // Draw
-                // -----------------------------------------------------------------------------
-                Gfx::ContextManager::DrawIndexed(PlaneIndices.size(), 0, 0);
-            }
-
-            ArTrackableList_destroy(ListOfPlanes);
-
-            ListOfPlanes = nullptr;
-        }
-
-        // -----------------------------------------------------------------------------
-        // Render points
-        // -----------------------------------------------------------------------------
-        if (m_Settings.m_ShowPoints)
-        {
-            ArPointCloud *pPointCloud = nullptr;
-
-            ArStatus Status = ArFrame_acquirePointCloud(m_pARSession, m_pARFrame, &pPointCloud);
-
-            if (Status == AR_SUCCESS)
-            {
-                // -----------------------------------------------------------------------------
-                // Generate points and upload data
-                // -----------------------------------------------------------------------------
-                int NumberOfPoints = 0;
-
-                ArPointCloud_getNumberOfPoints(m_pARSession, pPointCloud, &NumberOfPoints);
-
-                if (NumberOfPoints > 0)
-                {
-                    const float *pPointCloudData;
-
-                    ArPointCloud_getData(m_pARSession, pPointCloud, &pPointCloudData);
-
-                    auto MainCameraPtr = Gfx::ViewManager::GetMainCamera();
-
-                    glm::mat4 PointMVPMatrix = MainCameraPtr->GetViewProjectionMatrix() *
-                                               glm::mat4(m_ARCToEngineMatrix);
-
-                    // -----------------------------------------------------------------------------
-                    // Upload
-                    // -----------------------------------------------------------------------------
-                    Gfx::BufferManager::UploadBufferData(m_PointVerticesBufferPtr, pPointCloudData, 0, sizeof(glm::vec4) * glm::min(NumberOfPoints, s_MaxNumberOfPoints));
-
-                    Gfx::BufferManager::UploadBufferData(m_MatrixBufferPtr, &PointMVPMatrix);
-
-                    // -----------------------------------------------------------------------------
-                    // Draw
-                    // -----------------------------------------------------------------------------
-                    Gfx::ContextManager::SetShaderVS(m_PointVS);
-
-                    Gfx::ContextManager::SetShaderPS(m_PointPS);
-
-                    Gfx::ContextManager::SetVertexBuffer(m_PointVerticesBufferPtr);
-
-                    Gfx::ContextManager::SetConstantBuffer(0, m_MatrixBufferPtr);
-
-                    Gfx::ContextManager::SetTopology(Gfx::STopology::PointList);
-
-                    Gfx::ContextManager::SetInputLayout(m_PointVS->GetInputLayout());
-
-                    Gfx::ContextManager::Draw(NumberOfPoints, 0);
-
-                    ArPointCloud_release(pPointCloud);
-                }
-            }
-        }
-
-        Gfx::ContextManager::ResetShaderVS();
-
-        Gfx::ContextManager::ResetShaderPS();
-
-        Gfx::ContextManager::ResetVertexBuffer();
-
-        Gfx::ContextManager::ResetIndexBuffer();
-
-        Gfx::ContextManager::ResetInputLayout();
-
-        Gfx::ContextManager::ResetTexture(0);
-
-        Gfx::ContextManager::ResetViewPortSet();
-
-        Gfx::ContextManager::ResetRenderContext();
+        return m_pARSession;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMRControlManager::OnDirtyEntity(Dt::CEntity* _pEntity)
+    ArFrame* CMRControlManager::GetCurrentFrame()
     {
-        BASE_UNUSED(_pEntity);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMRControlManager::OnDirtyComponent(Dt::IComponent* _pComponent)
-    {
-        BASE_UNUSED(_pComponent);
+        return m_pARFrame;
     }
 } // namespace
 
@@ -1344,6 +809,13 @@ namespace ControlManager
     void Update()
     {
         CMRControlManager::GetInstance().Update();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void UpdateBackground()
+    {
+        CMRControlManager::GetInstance().UpdateBackground();
     }
 
     // -----------------------------------------------------------------------------
@@ -1415,6 +887,20 @@ namespace ControlManager
     {
         CMRControlManager::GetInstance().ResetSettings();
     }
+
+    // -----------------------------------------------------------------------------
+
+    ArSession* GetCurrentSession()
+    {
+        return CMRControlManager::GetInstance().GetCurrentSession();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    ArFrame* GetCurrentFrame()
+    {
+        return CMRControlManager::GetInstance().GetCurrentFrame();
+    }
 } // namespace ControlManager
 } // namespace MR
 
@@ -1443,12 +929,7 @@ extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetBackgroundTexture()
     return MR::ControlManager::GetBackgroundTexture();
 }
 
-extern "C" CORE_PLUGIN_API_EXPORT void SetSettings(bool _ShowPlanes, bool _ShowPoints)
+extern "C" CORE_PLUGIN_API_EXPORT void SetControlSettings(MR::ControlManager::SSettings _Settings)
 {
-    MR::ControlManager::SSettings Settings = MR::ControlManager::GetSettings();
-
-    Settings.m_ShowPlanes = _ShowPlanes;
-    Settings.m_ShowPoints = _ShowPoints;
-
-    MR::ControlManager::SetSettings(Settings);
+    MR::ControlManager::SetSettings(_Settings);
 }

@@ -23,13 +23,11 @@ namespace Scpt
         using ArCoreReleaseMarkerFunc = const void (*)(const void* _pMarker);
         using ArCoreGetMarkerTrackingStateFunc = int (*)(const void* _pMarker);
         using ArCoreGetMarkerModelMatrixFunc = glm::mat4 (*)(const void* _pMarker);
-        using ArCoreSetSettingsFunc = bool (*)(bool _ShowPlanes, bool _ShowPoints);
 
         ArCoreAcquireNewMarkerFunc AcquireNewMarker;
         ArCoreReleaseMarkerFunc ReleaseMarker;
         ArCoreGetMarkerTrackingStateFunc GetMarkerTrackingState;
         ArCoreGetMarkerModelMatrixFunc GetMarkerModelMatrix;
-        ArCoreSetSettingsFunc SetSettings;
 
     public:
 
@@ -58,8 +56,6 @@ namespace Scpt
 
                 GetMarkerTrackingState = (ArCoreGetMarkerTrackingStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerTrackingState"));
                 GetMarkerModelMatrix = (ArCoreGetMarkerModelMatrixFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerModelMatrix"));
-
-                SetSettings = (ArCoreSetSettingsFunc)(Core::PluginManager::GetPluginFunction("ArCore", "SetSettings"));
             }
         }
 
@@ -112,8 +108,6 @@ namespace Scpt
                 if (pNewMarker != nullptr)
                 {
                     m_pMarker = pNewMarker;
-
-                    SetSettings(false, false);
                 }
             }
         }

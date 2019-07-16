@@ -10,6 +10,7 @@
 #include "engine/core/core_program_parameters.h"
 #include "engine/data/data_component_facet.h"
 #include "engine/data/data_sky_component.h"
+#include <engine/data/data_sun_component.h>
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/graphic/gfx_main.h"
@@ -27,9 +28,6 @@
 
 #include <array>
 #include <string>
-#include <engine/data/data_sun_component.h>
-
-#include "glm.hpp"
 
 namespace Scpt
 {
