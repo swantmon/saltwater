@@ -222,12 +222,20 @@ namespace Scpt
                     TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
                     TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
                     TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
-                    TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+                    TextureDescriptor.m_Semantic         = Gfx::CTexture::HDR;
                     TextureDescriptor.m_pFileName        = nullptr;
                     TextureDescriptor.m_pPixels          = nullptr;
                     TextureDescriptor.m_Format           = Gfx::CTexture::R16G16B16A16_FLOAT;
 
                     m_ArCoreOutputCubemapPtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
+
+                    m_pSkyComponent->SetType(Dt::CSkyComponent::Cubemap);
+                    m_pSkyComponent->SetTexture("");
+                    m_pSkyComponent->SetRefreshMode(Dt::CSkyComponent::Dynamic);
+                    m_pSkyComponent->SetQuality(Dt::CSkyComponent::PX64);
+                    m_pSkyComponent->SetIntensity(60000);
+
+                    Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
 
                     auto pGfxSky = static_cast<Gfx::CSky*>(m_pSkyComponent->GetFacet(Dt::CSkyComponent::Graphic));
 
