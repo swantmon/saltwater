@@ -26,7 +26,7 @@ namespace MR
         CLightEstimation();
         ~CLightEstimation();
 
-        void Detect(ArSession* _pARSession, ArFrame* _pFrame);
+        void Detect();
 
         EEstimationState GetEstimationState() const;
         float GetPixelIntensity() const;
@@ -34,11 +34,12 @@ namespace MR
         const glm::vec3& GetMainLightIntensity() const;
         const glm::vec3& GetMainLightDirection() const;
         const float* GetAmbientSHCoefficients() const;
+
+        void AcquireHDRCubemap();
         void GetHDRCubemap(int _Face, const void** _FaceData, int& _Width,  int& _Height, int& _BufferSize) const;
+        void FreeHDRCubemap();
 
     private:
-
-        ArSession* m_pArSession;
 
         EEstimationState m_EstimationState;
 

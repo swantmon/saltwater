@@ -6,12 +6,12 @@
 #include "engine/core/core_plugin.h"
 
 #include "plugin/arcore/mr_light_estimation.h"
+#include "plugin/arcore/mr_control_manager.h"
 
 namespace MR
 {
     CLightEstimation::CLightEstimation()
-        : m_pArSession        (nullptr)
-        , m_EstimationState   (Undefined)
+        : m_EstimationState   (Undefined)
         , m_PixelIntensity    (1.0f)
         , m_ColorCorrection   (0.0f)
         , m_MainLightIntensity(1.0f)
@@ -24,46 +24,41 @@ namespace MR
 
     CLightEstimation::~CLightEstimation()
     {
-        for (auto Face = 0; Face < 6; ++Face)
-        {
-            ArImage_release(m_HDRCubemap[Face]);
-        }
     }
 
     // -----------------------------------------------------------------------------
 
-    void CLightEstimation::Detect(ArSession* _pARSession, ArFrame* _pFrame)
+    void CLightEstimation::Detect()
     {
-        m_pArSession = _pARSession;
+        auto pArSession = MR::ControlManager::GetCurrentSession();
+        auto pArFrame = MR::ControlManager::GetCurrentFrame();
 
         static glm::mat3 s_ARCToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,-1));
 
         ArLightEstimate* ARLightEstimate;
         ArLightEstimateState ARLightEstimateState;
 
-        ArLightEstimate_create(_pARSession, &ARLightEstimate);
+        ArLightEstimate_create(pArSession, &ARLightEstimate);
 
-        ArFrame_getLightEstimate(_pARSession, _pFrame, ARLightEstimate);
+        ArFrame_getLightEstimate(pArSession, pArFrame, ARLightEstimate);
 
-        ArLightEstimate_getState(_pARSession, ARLightEstimate, &ARLightEstimateState);
+        ArLightEstimate_getState(pArSession, ARLightEstimate, &ARLightEstimateState);
 
         m_EstimationState = CLightEstimation::NotValid;
 
         if (ARLightEstimateState == AR_LIGHT_ESTIMATE_STATE_VALID)
         {
-            ArLightEstimate_getPixelIntensity(_pARSession, ARLightEstimate, &m_PixelIntensity);
+            ArLightEstimate_getPixelIntensity(pArSession, ARLightEstimate, &m_PixelIntensity);
 
-            ArLightEstimate_getColorCorrection(_pARSession, ARLightEstimate, &m_ColorCorrection[0]);
+            ArLightEstimate_getColorCorrection(pArSession, ARLightEstimate, &m_ColorCorrection[0]);
 
-            ArLightEstimate_getEnvironmentalHdrMainLightIntensity(_pARSession, ARLightEstimate, &m_MainLightIntensity[0]);
+            ArLightEstimate_getEnvironmentalHdrMainLightIntensity(pArSession, ARLightEstimate, &m_MainLightIntensity[0]);
 
-            ArLightEstimate_getEnvironmentalHdrMainLightDirection(_pARSession, ARLightEstimate, &m_MainLightDirection[0]);
+            ArLightEstimate_getEnvironmentalHdrMainLightDirection(pArSession, ARLightEstimate, &m_MainLightDirection[0]);
 
             m_MainLightDirection = s_ARCToEngineMatrix * m_MainLightDirection;
 
-            ArLightEstimate_getEnvironmentalHdrAmbientSphericalHarmonics(_pARSession, ARLightEstimate, m_AmbientSH);
-
-            ArLightEstimate_acquireEnvironmentalHdrCubemap(_pARSession, ARLightEstimate, m_HDRCubemap);
+            ArLightEstimate_getEnvironmentalHdrAmbientSphericalHarmonics(pArSession, ARLightEstimate, m_AmbientSH);
 
             m_EstimationState = CLightEstimation::Valid;
         }
@@ -117,13 +112,47 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CLightEstimation::AcquireHDRCubemap()
+    {
+        auto pArSession = MR::ControlManager::GetCurrentSession();
+        auto pArFrame = MR::ControlManager::GetCurrentFrame();
+
+        ArLightEstimate* ARLightEstimate;
+        ArLightEstimateState ARLightEstimateState;
+
+        ArLightEstimate_create(pArSession, &ARLightEstimate);
+
+        ArFrame_getLightEstimate(pArSession, pArFrame, ARLightEstimate);
+
+        ArLightEstimate_getState(pArSession, ARLightEstimate, &ARLightEstimateState);
+
+        if (ARLightEstimateState == AR_LIGHT_ESTIMATE_STATE_VALID)
+        {
+            ArLightEstimate_acquireEnvironmentalHdrCubemap(pArSession, ARLightEstimate, m_HDRCubemap);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CLightEstimation::GetHDRCubemap(int _Face, const void** _FaceData, int& _Width,  int& _Height, int& _BufferSize) const
     {
+        auto pArSession = MR::ControlManager::GetCurrentSession();
+
         ArImage* FaceImage = m_HDRCubemap[_Face];
 
-        ArImage_getWidth(m_pArSession, FaceImage, &_Width);
-        ArImage_getHeight(m_pArSession, FaceImage, &_Height);
-        ArImage_getPlaneData(m_pArSession, FaceImage, 0, (const uint8_t**)_FaceData, &_BufferSize);
+        ArImage_getWidth(pArSession, FaceImage, &_Width);
+        ArImage_getHeight(pArSession, FaceImage, &_Height);
+        ArImage_getPlaneData(pArSession, FaceImage, 0, (const uint8_t**)_FaceData, &_BufferSize);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CLightEstimation::FreeHDRCubemap()
+    {
+        for (auto Face = 0; Face < 6; ++Face)
+        {
+            ArImage_release(m_HDRCubemap[Face]);
+        }
     }
 } // namespace MR
 
@@ -157,7 +186,17 @@ extern "C" CORE_PLUGIN_API_EXPORT const float* GetLightEstimationAmbientSHCoeffi
     return _pObj->GetAmbientSHCoefficients();
 }
 
-extern "C" CORE_PLUGIN_API_EXPORT void GetLightEstimationHDRCubemap(const MR::CLightEstimation* _pObj, int _Face, const void** _FaceData, int& _Width,  int& _Height, int& _BufferSize)
+extern "C" CORE_PLUGIN_API_EXPORT void LightEstimationAcquireHDRCubemap(MR::CLightEstimation* _pObj)
+{
+    _pObj->AcquireHDRCubemap();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void LightEstimationGetHDRCubemap(const MR::CLightEstimation* _pObj, int _Face, const void** _FaceData, int& _Width,  int& _Height, int& _BufferSize)
 {
     _pObj->GetHDRCubemap(_Face, _FaceData, _Width, _Height, _BufferSize);
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void LightEstimationFreeHDRCubemap(MR::CLightEstimation* _pObj)
+{
+    _pObj->FreeHDRCubemap();
 }

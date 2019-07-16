@@ -66,13 +66,18 @@ namespace Scpt
         using ARGetLightEstimationStateFunc = int(*)(void*);
         using ARGetLightEstimationMainLightIntensityFunc = glm::vec3(*)(void*);
         using ARGetLightEstimationMainLightDirectionFunc = glm::vec3(*)(void*);
-        using ARGetLightEstimationHDRCubemapFunc = void(*)(void*, int, const void**, int&,  int&, int&);
+        using ARLightEstimationAcquireHDRCubemapFunc = void(*)(void*);
+        using ARLightEstimationGetHDRCubemapFunc = void(*)(void*, int, const void**, int&,  int&, int&);
+        using ARLightEstimationFreeHDRCubemapFunc = void(*)(void*);
 
         ARGetLightEstimationFunc GetLightEstimation = nullptr;
-        ARGetLightEstimationStateFunc GetLightEstimationState = nullptr;
-        ARGetLightEstimationMainLightIntensityFunc GetLightEstimationMainLightDirection = nullptr;
-        ARGetLightEstimationMainLightDirectionFunc GetLightEstimationMainLightIntensity = nullptr;
-        ARGetLightEstimationHDRCubemapFunc GetLightEstimationHDRCubemap = nullptr;
+        ARGetLightEstimationStateFunc GetState = nullptr;
+        ARGetLightEstimationMainLightIntensityFunc GetMainLightDirection = nullptr;
+        ARGetLightEstimationMainLightDirectionFunc GetMainLightIntensity = nullptr;
+
+        ARLightEstimationAcquireHDRCubemapFunc AcquireHDRCubemap = nullptr;
+        ARLightEstimationGetHDRCubemapFunc GetHDRCubemap = nullptr;
+        ARLightEstimationFreeHDRCubemapFunc FreeHDRCubemap = nullptr;
 
         LESetInputTextureFunc SetInputTexture = nullptr;
         LESetOutputCubemapFunc SetOutputCubemap = nullptr;
@@ -111,6 +116,7 @@ namespace Scpt
             }
 
             if (m_pSkyComponent == nullptr) return;
+
 
             // -----------------------------------------------------------------------------
             // Shader
@@ -174,15 +180,15 @@ namespace Scpt
 
                 if (pObject == nullptr) return;
 
-                int State = GetLightEstimationState(pObject);
+                int State = GetState(pObject);
 
                 if (State != 1) return;
 
                 // -----------------------------------------------------------------------------
 
-                glm::vec3 MainLightDirection = GetLightEstimationMainLightDirection(pObject);
+                glm::vec3 MainLightDirection = GetMainLightDirection(pObject);
 
-                glm::vec3 MainLightIntensity = GetLightEstimationMainLightIntensity(pObject);
+                glm::vec3 MainLightIntensity = GetMainLightIntensity(pObject);
 
                 if (m_pSunComponent == nullptr) return;
 
@@ -199,7 +205,9 @@ namespace Scpt
                 const void* pFaceData;
                 int W, H, B;
 
-                GetLightEstimationHDRCubemap(pObject, 0, &pFaceData, W, H, B);
+                AcquireHDRCubemap(pObject);
+
+                GetHDRCubemap(pObject, 0, &pFaceData, W, H, B);
 
                 if (m_ArCoreOutputCubemapPtr == nullptr || m_ArCoreOutputCubemapPtr->GetNumberOfPixelsU() != W || m_ArCoreOutputCubemapPtr->GetNumberOfPixelsV() != H)
                 {
@@ -228,10 +236,12 @@ namespace Scpt
 
                 for(auto Face = 0; Face < 6; ++ Face)
                 {
-                    GetLightEstimationHDRCubemap(pObject, Face, &pFaceData, W, H, B);
+                    GetHDRCubemap(pObject, Face, &pFaceData, W, H, B);
 
                     Gfx::TextureManager::CopyToTextureArray2D(m_ArCoreOutputCubemapPtr, Face, Base::AABB2UInt(glm::ivec2(0, 0), glm::ivec2(W, H)), 0, pFaceData);
                 }
+
+                FreeHDRCubemap(pObject);
             }
         }
 
@@ -429,10 +439,12 @@ namespace Scpt
                 // -----------------------------------------------------------------------------
 
                 GetLightEstimation = (ARGetLightEstimationFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimation"));
-                GetLightEstimationState = (ARGetLightEstimationStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationState"));
-                GetLightEstimationMainLightDirection = (ARGetLightEstimationMainLightDirectionFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationMainLightDirection"));
-                GetLightEstimationMainLightIntensity = (ARGetLightEstimationMainLightIntensityFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationMainLightIntensity"));
-                GetLightEstimationHDRCubemap = (ARGetLightEstimationHDRCubemapFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationHDRCubemap"));
+                GetState = (ARGetLightEstimationStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationState"));
+                GetMainLightDirection = (ARGetLightEstimationMainLightDirectionFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationMainLightDirection"));
+                GetMainLightIntensity = (ARGetLightEstimationMainLightIntensityFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationMainLightIntensity"));
+                AcquireHDRCubemap = (ARLightEstimationAcquireHDRCubemapFunc)(Core::PluginManager::GetPluginFunction("ArCore", "LightEstimationAcquireHDRCubemap"));
+                GetHDRCubemap = (ARLightEstimationGetHDRCubemapFunc)(Core::PluginManager::GetPluginFunction("ArCore", "LightEstimationGetHDRCubemap"));
+                FreeHDRCubemap = (ARLightEstimationFreeHDRCubemapFunc)(Core::PluginManager::GetPluginFunction("ArCore", "LightEstimationFreeHDRCubemap"));
             }
             else
             {
