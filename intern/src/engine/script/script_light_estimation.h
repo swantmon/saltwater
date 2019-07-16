@@ -66,18 +66,14 @@ namespace Scpt
         using ARGetLightEstimationStateFunc = int(*)(void*);
         using ARGetLightEstimationMainLightIntensityFunc = glm::vec3(*)(void*);
         using ARGetLightEstimationMainLightDirectionFunc = glm::vec3(*)(void*);
-        using ARLightEstimationAcquireHDRCubemapFunc = void(*)(void*);
-        using ARLightEstimationGetHDRCubemapFunc = void(*)(void*, int, const void**, int&,  int&, int&);
-        using ARLightEstimationFreeHDRCubemapFunc = void(*)(void*);
+        using ARLightEstimationGetHDRCubemapFunc = Gfx::CTexturePtr(*)(void*);
 
         ARGetLightEstimationFunc GetLightEstimation = nullptr;
         ARGetLightEstimationStateFunc GetState = nullptr;
         ARGetLightEstimationMainLightIntensityFunc GetMainLightDirection = nullptr;
         ARGetLightEstimationMainLightDirectionFunc GetMainLightIntensity = nullptr;
 
-        ARLightEstimationAcquireHDRCubemapFunc AcquireHDRCubemap = nullptr;
         ARLightEstimationGetHDRCubemapFunc GetHDRCubemap = nullptr;
-        ARLightEstimationFreeHDRCubemapFunc FreeHDRCubemap = nullptr;
 
         LESetInputTextureFunc SetInputTexture = nullptr;
         LESetOutputCubemapFunc SetOutputCubemap = nullptr;
@@ -202,54 +198,11 @@ namespace Scpt
 
                 // -----------------------------------------------------------------------------
 
-                const void* pFaceData;
-                int W, H, B;
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
 
-                AcquireHDRCubemap(pObject);
+                auto pGfxSky = static_cast<Gfx::CSky*>(m_pSkyComponent->GetFacet(Dt::CSkyComponent::Graphic));
 
-                GetHDRCubemap(pObject, 0, &pFaceData, W, H, B);
-
-                if (m_ArCoreOutputCubemapPtr == nullptr || m_ArCoreOutputCubemapPtr->GetNumberOfPixelsU() != W || m_ArCoreOutputCubemapPtr->GetNumberOfPixelsV() != H)
-                {
-                    Gfx::STextureDescriptor TextureDescriptor = { };
-
-                    TextureDescriptor.m_NumberOfPixelsU  = W;
-                    TextureDescriptor.m_NumberOfPixelsV  = H;
-                    TextureDescriptor.m_NumberOfPixelsW  = 1;
-                    TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
-                    TextureDescriptor.m_NumberOfTextures = 6;
-                    TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource | Gfx::CTexture::RenderTarget;
-                    TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
-                    TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
-                    TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
-                    TextureDescriptor.m_Semantic         = Gfx::CTexture::HDR;
-                    TextureDescriptor.m_pFileName        = nullptr;
-                    TextureDescriptor.m_pPixels          = nullptr;
-                    TextureDescriptor.m_Format           = Gfx::CTexture::R16G16B16A16_FLOAT;
-
-                    m_ArCoreOutputCubemapPtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
-
-                    m_pSkyComponent->SetType(Dt::CSkyComponent::Cubemap);
-                    m_pSkyComponent->SetTexture("");
-                    m_pSkyComponent->SetRefreshMode(Dt::CSkyComponent::Dynamic);
-                    m_pSkyComponent->SetQuality(Dt::CSkyComponent::PX64);
-                    m_pSkyComponent->SetIntensity(60000);
-
-                    Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
-
-                    auto pGfxSky = static_cast<Gfx::CSky*>(m_pSkyComponent->GetFacet(Dt::CSkyComponent::Graphic));
-
-                    pGfxSky->SetInputTexture(m_ArCoreOutputCubemapPtr);
-                }
-
-                for(auto Face = 0; Face < 6; ++ Face)
-                {
-                    GetHDRCubemap(pObject, Face, &pFaceData, W, H, B);
-
-                    Gfx::TextureManager::CopyToTextureArray2D(m_ArCoreOutputCubemapPtr, Face, Base::AABB2UInt(glm::ivec2(0, 0), glm::ivec2(W, H)), 0, pFaceData);
-                }
-
-                FreeHDRCubemap(pObject);
+                pGfxSky->SetInputTexture(GetHDRCubemap(pObject));
             }
         }
 
@@ -450,9 +403,7 @@ namespace Scpt
                 GetState = (ARGetLightEstimationStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationState"));
                 GetMainLightDirection = (ARGetLightEstimationMainLightDirectionFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationMainLightDirection"));
                 GetMainLightIntensity = (ARGetLightEstimationMainLightIntensityFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationMainLightIntensity"));
-                AcquireHDRCubemap = (ARLightEstimationAcquireHDRCubemapFunc)(Core::PluginManager::GetPluginFunction("ArCore", "LightEstimationAcquireHDRCubemap"));
                 GetHDRCubemap = (ARLightEstimationGetHDRCubemapFunc)(Core::PluginManager::GetPluginFunction("ArCore", "LightEstimationGetHDRCubemap"));
-                FreeHDRCubemap = (ARLightEstimationFreeHDRCubemapFunc)(Core::PluginManager::GetPluginFunction("ArCore", "LightEstimationFreeHDRCubemap"));
             }
             else
             {

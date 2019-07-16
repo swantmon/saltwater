@@ -2,6 +2,8 @@
 
 #include "base/base_include_glm.h"
 
+#include "engine/graphic/gfx_texture.h"
+
 #include "arcore_c_api.h"
 
 namespace MR
@@ -34,10 +36,7 @@ namespace MR
         const glm::vec3& GetMainLightIntensity() const;
         const glm::vec3& GetMainLightDirection() const;
         const float* GetAmbientSHCoefficients() const;
-
-        void AcquireHDRCubemap();
-        void GetHDRCubemap(int _Face, const void** _FaceData, int& _Width,  int& _Height, int& _BufferSize) const;
-        void FreeHDRCubemap();
+        Gfx::CTexturePtr GetHDRCubemap() const;
 
     private:
 
@@ -48,6 +47,6 @@ namespace MR
         glm::vec3 m_MainLightIntensity;
         glm::vec3 m_MainLightDirection;
         float m_AmbientSH[s_NumberOfSHCoefficients];
-        ArImageCubemap m_HDRCubemap;
+        Gfx::CTexturePtr m_CubemapHDRPtr;
     };
 } // namespace MR
