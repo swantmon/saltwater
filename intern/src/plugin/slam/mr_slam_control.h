@@ -180,14 +180,14 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Recording
         // -----------------------------------------------------------------------------
-        enum ERecordMode
+        enum EPlayMode
         {
             NONE,
             PLAY,
-            RECORD,
+            LOAD_SCENE,
         };
         
-        ERecordMode m_RecordMode = NONE;
+        EPlayMode m_PlayMode = NONE;
 
         std::fstream m_RecordFile;
         std::unique_ptr<Base::CRecordWriter> m_pRecordWriter;
@@ -466,13 +466,13 @@ namespace MR
             // -----------------------------------------------------------------------------
             // Playing
             // -----------------------------------------------------------------------------
-            if (m_RecordMode == PLAY && m_pRecordReader != nullptr)
+            if ((m_PlayMode == PLAY || m_PlayMode == LOAD_SCENE) && m_pRecordReader != nullptr)
             {
                 m_pRecordReader->Update();
 
                 if (m_pRecordReader->IsEnd())
                 {
-                    m_RecordMode = NONE;
+                    m_PlayMode = NONE;
                     m_UseTrackingCamera = false;
                 }
 
@@ -645,9 +645,9 @@ namespace MR
 
         void SetIsPlaying(bool _Flag)
         {
-            if (m_RecordMode != RECORD)
+            if (m_PlayMode != LOAD_SCENE)
             {
-                m_RecordMode = _Flag ? PLAY : NONE;
+                m_PlayMode = _Flag ? PLAY : NONE;
             }
         }
 
@@ -779,7 +779,7 @@ namespace MR
                 BASE_THROWM(("The slam data could be loaded because " + RecordFileName + " was not found").c_str());
             }
 
-            m_RecordMode = PLAY;
+            m_PlayMode = LOAD_SCENE;
         }
 
         // -----------------------------------------------------------------------------
@@ -1338,16 +1338,6 @@ namespace MR
             
             if (_rMessage.m_MessageType == 0)
             {
-                if (m_RecordMode == RECORD)
-                {
-                    if (m_pRecordWriter == nullptr)
-                    {
-                        m_pRecordWriter = std::make_unique<Base::CRecordWriter>(m_RecordFile, 1);
-                    }
-
-                    WriteMessage(*m_pRecordWriter, _rMessage);
-                }
-
                 if (m_pTempRecordWriter == nullptr)
                 {
                     m_pTempRecordWriter = std::make_unique<Base::CRecordWriter>(m_TempRecordFile, 1);
