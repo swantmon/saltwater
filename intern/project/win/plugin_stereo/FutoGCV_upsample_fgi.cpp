@@ -49,13 +49,18 @@ namespace FutoGCV
     //---Assist Functions---
     void CFGI::FGS1(Gfx::CTexturePtr& Output_TexturePtr, const Gfx::CTexturePtr& Input_TexturePtr, const Gfx::CTexturePtr& Guide_TexturePtr)
     {
-        m_Param_FGS1.m_Lamda = 900.f;
-        m_Param_FGS1.m_Sigma = 0.005f;
 
-        for (int iter = 0; iter < m_Param_FGS1.m_Iteration; iter++)
+        for (int iter = 0; iter < m_Iteration_FGS1; iter++)
         {
             //---Start Horizontal FGS1 in GLSL---
             Gfx::Performance::BeginEvent("Horizontal FGS1");
+
+            m_Param_FGS1.m_Direction = glm::ivec2(1, 0);
+
+            float LamdaRatio = std::powf(m_Attenuation_FGS1, m_Iteration_FGS1 - iter) / (std::powf(m_Attenuation_FGS1, m_Iteration_FGS1) - 1);
+            m_Param_FGS1.m_Lamda = 1.5f * LamdaRatio * m_Lamda_FGS1;
+
+            Gfx::BufferManager::UploadBufferData(m_FGSParameter_BufferPtr, &m_Param_FGS1);
 
             Gfx::ContextManager::SetShaderCS(m_FGS_CSPtr);
             Gfx::ContextManager::SetImageTexture(0, Output_TexturePtr);

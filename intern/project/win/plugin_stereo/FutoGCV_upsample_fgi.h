@@ -13,9 +13,8 @@ namespace FutoGCV
     struct SFGSParameter 
     {
         float m_Lamda;
-        float m_Sigma;
-        int m_Iteration = 3;
-        int m_Attenuation = 4;
+        float m_Sigma = 0.05f;
+        glm::ivec2 m_Direction;
     };
 
     class CFGI
@@ -34,6 +33,9 @@ namespace FutoGCV
     
     //---Members---
     private:
+        const float m_Lamda_FGS1 = 900.f;
+        const int m_Iteration_FGS1 = 3;
+        const int m_Attenuation_FGS1 = 4;
         SFGSParameter m_Param_FGS1;
 
         //---GLSL---

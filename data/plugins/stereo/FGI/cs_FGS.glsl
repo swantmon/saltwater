@@ -1,17 +1,15 @@
 #ifndef __INCLUDE_CS_FGS_GLSL__
 #define __INCLUDE_CS_FGS_GLSL__
 
-const int Iteration_Number = 3;
-const int Attenuation = 4;
-
 layout (binding = 0, r32f) writeonly uniform image2D cs_Out; // Pixel in image2D is 32-bit float
 layout (binding = 1, r32f) readonly uniform image2D cs_In; // Pixel in image2D is 32-bit float
 layout (binding = 2, r32f) readonly uniform image2D cs_Guide; // Pixel in image2D is 32-bit float
 
 layout(std140, binding = 0) uniform ParameterBuffer
 {
-    vec2 g_Lamda;
-	vec2 g_Sigma;
+    float g_Lamda;
+	float g_Sigma;
+	ivec2 g_Direction;
 };
 
 float cal_GuidedWeight(ivec2 CenterPos, ivec2 NeighborPos)
@@ -28,17 +26,43 @@ float cal_GuidedWeight(ivec2 CenterPos, ivec2 NeighborPos)
 layout (local_size_x = TILE_SIZE_1D, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
-	const ivec2 UpSampleSize = imageSize(cs_Out);
+	const ivec2 ImgSize = imageSize(cs_Out);
+
+	int ComputeRange = int(dot(ImgSize, g_Direction));
+
+	float a[ComputeRange], b[ComputeRange], c[ComputeRange];
+	float c_Temp[ComputeRange], f_Temp[ComputeRange];
+
+	for (int idx = 0; idx < ComputeRange; idx++)
+	{
+		if (idx == 0)
+		{
+			a[idx] = 0.0f;
+		}
+		else
+		{
+			
+		}
+
+		if (idx == ComputeRange-1)
+		{
+			c[idx] = 0.0f;
+		}
+		else
+		{
+			
+		}
+
+		b[idx] = 1 - a[idx] - c[idx];
+		
+
+	}
+
+	//***OLD***
 	
 	for (int iter = 0; iter < Iteration_Number; iter++)
 	{
-		const float LamdaRatio = pow(Attenuation, Iteration_Number - iter) / (pow(Attenuation, Iteration_Number) - 1);
-		const float Lamda_t = 1.5f * LamdaRatio * g_Lamda.x;
-
 		//---Horizontal 1D WLS---
-		float a_x[UpSampleSize.x], b_x[UpSampleSize.x], c_x[UpSampleSize.x];
-		float c_x_Temp[UpSampleSize.x], f_x_Temp[UpSampleSize.x];
-
 		const int y_wise = int(gl_GlobalInvocationID.y); 
 
 		for (int x = 0; x < UpSampleSize.x; x++)
