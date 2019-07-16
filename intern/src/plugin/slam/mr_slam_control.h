@@ -528,12 +528,7 @@ namespace MR
             if (m_UseTrackingCamera)
             {
                 auto& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
-
-                // -----------------------------------------------------------------------------
-                // Projection
-                // -----------------------------------------------------------------------------
-                rControl.SetProjectionMatrix(glm::transpose(m_DeviceProjectionMatrix));
-
+                
                 // -----------------------------------------------------------------------------
                 // View
                 // -----------------------------------------------------------------------------
@@ -1148,6 +1143,13 @@ namespace MR
             Gfx::ContextManager::SetImageTexture(2, m_RGBATexture);
 
             Gfx::ContextManager::Dispatch(DivUp(m_ColorSize.x, m_TileSize2D), DivUp(m_ColorSize.y, m_TileSize2D), 1);
+
+            if (m_UseTrackingCamera)
+            {
+                auto& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
+
+                rControl.SetProjectionMatrix(glm::transpose(m_DeviceProjectionMatrix));
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -1264,6 +1266,20 @@ namespace MR
                 glNamedBufferStorage(m_PixelDataBuffer, m_PixelBufferSize * 3, nullptr, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT);
                 m_pGPUPixelData = glMapNamedBufferRange(m_PixelDataBuffer, 0, m_PixelBufferSize * 3, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT);
             }
+
+            auto Components = Dt::CComponentManager::GetInstance().GetComponents<Dt::CScriptComponent>();
+
+            /*for (auto Component : Components)
+            {
+                auto pScriptComponent = static_cast<Dt::CScriptComponent*>(Component);
+
+                if (pScriptComponent->GetScriptTypeID() == Base::CTypeInfo::GetTypeID<Scpt::CSLAMScript>())
+                {
+                    auto pSLAMScript = static_cast<Scpt::CSLAMScript*>(pScriptComponent);
+
+                    // ...
+                }
+            }*/
 
             ENGINE_CONSOLE_INFO("Initialization complete");
         }
