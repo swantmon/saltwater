@@ -405,7 +405,7 @@ namespace MR
             m_pPlaneColorizer = std::make_unique<MR::CPlaneColorizer>(&m_Reconstructor);
 
             m_TempRecordPath = Core::AssetManager::GetPathToAssets() + "/recordings/" + "_temp_recording.swr";
-            m_TempRecordFile.open(m_TempRecordPath , std::fstream::out | std::fstream::binary);
+            m_TempRecordFile.open(m_TempRecordPath , std::fstream::out | std::fstream::binary | std::fstream::trunc);
         }
 
         // -----------------------------------------------------------------------------
@@ -597,6 +597,9 @@ namespace MR
 
         void SetRecordFile(const std::string& _rFileName, float _Speed = 1.0f)
         {
+            m_TempRecordFile = std::fstream(m_TempRecordPath, std::fstream::out | std::fstream::binary);
+            m_pTempRecordWriter = std::make_unique<Base::CRecordWriter>(m_TempRecordFile, 1);
+
             m_RecordFile = std::fstream(_rFileName, std::fstream::in | std::fstream::binary);
 
             if (!m_RecordFile.is_open())
