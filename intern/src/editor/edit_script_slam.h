@@ -58,12 +58,15 @@ namespace Scpt
                 {
                     auto& DraggedAsset = *static_cast<Edit::CAsset*>(_pPayload->Data);
 
-                    if (m_Settings.m_RecordFile != DraggedAsset.GetPathToFile())
-                    {
+                    if (std::regex_match(DraggedAsset.GetPathToFile(), std::regex(".*.(swr)")))
+                    {   
+                        m_Settings.m_RecordFile = DraggedAsset.GetPathToFile();
                         m_Settings.m_SetRecordFile = true;
                     }
-
-                    m_Settings.m_RecordFile = DraggedAsset.GetPathToFile();
+                    else
+                    {
+                        ENGINE_CONSOLE_ERROR("File is not a saltwater recording!");
+                    }
                 }
 
                 ImGui::EndDragDropTarget();
