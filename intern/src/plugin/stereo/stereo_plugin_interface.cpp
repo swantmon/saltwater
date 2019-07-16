@@ -33,12 +33,6 @@ namespace
         float m_FocalLength; // Unit = pixel
         glm::ivec2 m_Padding;
     };
-
-    struct SUpSampleParameter 
-    {
-        glm::vec2 m_Lamda = glm::vec2(900.0f, 100.0f);
-        glm::vec2 m_Sigma = glm::vec2(0.005f,0.005f);
-    };
 }
 
 namespace Stereo
