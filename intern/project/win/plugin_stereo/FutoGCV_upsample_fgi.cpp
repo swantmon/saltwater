@@ -9,7 +9,7 @@
 
 namespace
 {
-    #define TileSize_2D 16 // Define size of work group for GPU parallel processing. <= 16 suggested for 2D image (based on experience).
+    #define TileSize_1D 64 
 
     int DivUp(int TotalShaderCount, int WorkGroupSize) // Calculate number of work groups.
     {
@@ -25,7 +25,7 @@ namespace FutoGCV
         //---Initialize Shader Manager---
         std::stringstream DefineStream;
         DefineStream
-            << "#define TILE_SIZE_2D " << TileSize_2D << " \n";
+            << "#define TILE_SIZE_1D " << TileSize_1D << " \n";
         std::string DefineString = DefineStream.str();
         m_FGS_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/FGI/cs_FGS.glsl", "main", DefineString.c_str());
 
@@ -35,10 +35,10 @@ namespace FutoGCV
         Param_BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
         Param_BufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
         Param_BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
-        Param_BufferDesc.m_NumberOfBytes = sizeof(SFGIParam);
+        Param_BufferDesc.m_NumberOfBytes = sizeof(SFGSParameter);
         Param_BufferDesc.m_pBytes = nullptr;
         Param_BufferDesc.m_pClassKey = 0;
-        m_Parameter_BufferPtr = Gfx::BufferManager::CreateBuffer(Param_BufferDesc);
+        m_FGSParameter_BufferPtr = Gfx::BufferManager::CreateBuffer(Param_BufferDesc);
     }
 
 
@@ -47,26 +47,52 @@ namespace FutoGCV
     }
 
     //---Assist Functions---
-    void CFGI::FGS(Gfx::CTexturePtr& Output_TexturePtr, const Gfx::CTexturePtr& Input_TexturePtr, const Gfx::CTexturePtr& Guide_TexturePtr)
+    void CFGI::FGS1(Gfx::CTexturePtr& Output_TexturePtr, const Gfx::CTexturePtr& Input_TexturePtr, const Gfx::CTexturePtr& Guide_TexturePtr)
     {
-        //---Start WLS in GLSL---
-        Gfx::Performance::BeginEvent("Planar Rectification");
+        m_Param_FGS1.m_Lamda = 900.f;
+        m_Param_FGS1.m_Sigma = 0.005f;
 
-        Gfx::ContextManager::SetShaderCS(m_FGS_CSPtr);
-        Gfx::ContextManager::SetImageTexture(0, Output_TexturePtr);
-        Gfx::ContextManager::SetImageTexture(1, Input_TexturePtr);
-        Gfx::ContextManager::SetImageTexture(2, Guide_TexturePtr);
-        Gfx::ContextManager::SetConstantBuffer(0, m_Parameter_BufferPtr);
+        for (int iter = 0; iter < m_Param_FGS1.m_Iteration; iter++)
+        {
+            //---Start Horizontal FGS1 in GLSL---
+            Gfx::Performance::BeginEvent("Horizontal FGS1");
 
-        const int WorkGroupsX = DivUp(m_ImgSize_Rect.x, TileSize_2D);
-        const int WorkGroupsY = DivUp(m_ImgSize_Rect.y, TileSize_2D);
+            Gfx::ContextManager::SetShaderCS(m_FGS_CSPtr);
+            Gfx::ContextManager::SetImageTexture(0, Output_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(1, Input_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(2, Guide_TexturePtr);
+            Gfx::ContextManager::SetConstantBuffer(0, m_FGSParameter_BufferPtr);
 
-        Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+            const int WorkGroupsX = DivUp(Output_TexturePtr->GetNumberOfPixelsV, TileSize_1D); 
 
-        Gfx::ContextManager::ResetShaderCS();
+            Gfx::ContextManager::Dispatch(WorkGroupsX, 1, 1);
 
-        Gfx::Performance::EndEvent();
-        //---Finish WLS in GLSL---
+            Gfx::ContextManager::ResetShaderCS();
+
+            Gfx::Performance::EndEvent();
+            //---Finish Horizontal FGS1 in GLSL---
+
+            //---Start Vertical FGS1 in GLSL---
+            Gfx::Performance::BeginEvent("Vertical FGS1");
+
+            Gfx::ContextManager::SetShaderCS(m_FGS_CSPtr);
+            Gfx::ContextManager::SetImageTexture(0, Output_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(1, Input_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(2, Guide_TexturePtr);
+            Gfx::ContextManager::SetConstantBuffer(0, m_FGSParameter_BufferPtr);
+
+            const int WorkGroupsX = DivUp(Output_TexturePtr->GetNumberOfPixelsU, TileSize_1D); 
+
+            Gfx::ContextManager::Dispatch(WorkGroupsX, 1, 1);
+
+            Gfx::ContextManager::ResetShaderCS();
+
+            Gfx::Performance::EndEvent();
+            //---Finish Vertical FGS1 in GLSL---
+        }
+
+
+        
     }
 
 } // Namespace FutoGCV

@@ -25,7 +25,7 @@ float cal_GuidedWeight(ivec2 CenterPos, ivec2 NeighborPos)
 	return GuidedWeight;
 }
 
-layout (local_size_x = TILE_SIZE_2D, local_size_y = TILE_SIZE_2D, local_size_z = 1) in;
+layout (local_size_x = TILE_SIZE_1D, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
 	const ivec2 UpSampleSize = imageSize(cs_Out);

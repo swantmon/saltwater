@@ -10,10 +10,12 @@
 
 namespace FutoGCV
 {
-    struct SFGIParam 
+    struct SFGSParameter 
     {
-        glm::vec2 m_Lamda = glm::vec2(900.0f, 100.0f);
-        glm::vec2 m_Sigma = glm::vec2(0.005f, 0.005f);
+        float m_Lamda;
+        float m_Sigma;
+        int m_Iteration = 3;
+        int m_Attenuation = 4;
     };
 
     class CFGI
@@ -28,15 +30,15 @@ namespace FutoGCV
 
     //---Assist Functions---
     private:
-        void FGS(Gfx::CTexturePtr& OutputData, const Gfx::CTexturePtr& InputData, const Gfx::CTexturePtr& GuideData);
+        void FGS1(Gfx::CTexturePtr& OutputData, const Gfx::CTexturePtr& InputData, const Gfx::CTexturePtr& GuideData);
     
     //---Members---
     private:
-        SFGIParam m_Parameter;
+        SFGSParameter m_Param_FGS1;
 
         //---GLSL---
         Gfx::CShaderPtr m_FGS_CSPtr;
-        Gfx::CBufferPtr m_Parameter_BufferPtr;
+        Gfx::CBufferPtr m_FGSParameter_BufferPtr;
     };
 } // namespace FutoGCV
 
