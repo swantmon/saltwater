@@ -2,6 +2,7 @@
 #pragma once
 
 #include "base/base_defines.h"
+#include "base/base_exception.h"
 #include "base/base_serialize_archive.h"
 #include "base/base_serialize_text_codec.h"
 
@@ -129,7 +130,7 @@ namespace SER
 
         if (m_ArchiveVersion != _Version)
         {
-           throw "Bad resource because of incompatible version.";
+           BASE_THROWM("Bad resource because of incompatible version.");
         }
     }
 
