@@ -13,10 +13,10 @@ layout(std140, binding = 0) uniform ParameterBuffer
 
 float cal_GuidedWeight(ivec2 CenterPos, ivec2 NeighborPos)
 {
-	float CenterValue = imageLoad(cs_Guide, CenterPos).x;
-	float NeighborValue = imageLoad(cs_Guide, NeighborPos).x;
+	float CenterPixValue = imageLoad(cs_Guide, CenterPos).x;
+	float NeighborPixValue = imageLoad(cs_Guide, NeighborPos).x;
 
-	float GuidedSimilarity = sqrt(pow(CenterValue - NeighborValue, 2));
+	float GuidedSimilarity = sqrt(pow(CenterPixValue - NeighborPixValue, 2));
 	float GuidedWeight = exp(-GuidedSimilarity / g_Sigma.x);
 
 	return GuidedWeight;
@@ -28,8 +28,6 @@ void main()
 	const ivec2 UpSampleSize = imageSize(cs_Out);
 
 	//---Horizontal 1D WLS---
-	float Weight_left, Weight_right, Weight_up, Weight_down;
-
 	float a_x[UpSampleSize.x], b_x[UpSampleSize.x], c_x[UpSampleSize.x];
 	float c_x_Temp[UpSampleSize.x], f_x_Temp[UpSampleSize.x];
 
@@ -37,24 +35,111 @@ void main()
 
 	for (int x = 0; x < UpSampleSize.x; x++)
 	{
-		Weight_left = cal_GuidedWeight(ivec2(x, y_wise), ivec2(x-1, y_wise));
-		Weight_right = cal_GuidedWeight(ivec2(x, y_wise), ivec2(x+1, y_wise));
+		if (x == 0)
+		{
+			a_x[x] = 0;
+		}
+		else
+		{
+			float Weight_left = cal_GuidedWeight(ivec2(x, y_wise), ivec2(x-1, y_wise));
 
-		a_x[x] = -g_Lamda.x * Weight_left;
-		c_x[x] = -g_Lamda.x * Weight_right;
+			a_x[x] = -g_Lamda.x * Weight_left;
+		}
+		
+		if (x == UpSampleSize.x-1)
+		{
+			c_x[x] = 0;
+		}
+		else
+		{
+			float Weight_right = cal_GuidedWeight(ivec2(x, y_wise), ivec2(x+1, y_wise));
+		
+			c_x[x] = -g_Lamda.x * Weight_right;
+		}
+
 		b_x[x] = 1 - a_x[x] - c_x[x];
 
-		c_x_Temp[x] = c_x[x] / (b_x[x] - c_x_Temp[x-1] * a_x[x]);
-		f_x_Temp[x] = (f_x[x] - f_x[x-1] * a_x[x]) / (b_x[x] - c_x_Temp[x-1] * a_x[x]);
+		if (x == 0)
+		{
+			c_x_Temp[x] = c_x[x] / b_x[x];
+
+			float f_x_Curt = imageLoad(cs_In, ivec2(x, y_wise)).x;
+			f_x_Temp[x] = f_x_Curt / b_x[x];
+		}
+		else
+		{
+			c_x_Temp[x] = c_x[x] / (b_x[x] - c_x_Temp[x-1] * a_x[x]);
+
+			float f_x_Curt = imageLoad(cs_In, ivec2(x, y_wise)).x;
+			float f_x_Last = imageLoad(cs_In, ivec2(x-1, y_wise)).x;
+			f_x_Temp[x] = (f_x_Curt - f_x_Last * a_x[x]) / (b_x[x] - c_x_Temp[x-1] * a_x[x]);
+		}
+		
 	}
 
-	for (int x = UpSampleSize.x - 2; x = 0; x--)
+	imageStore(cs_Out, ivec2(UpSampleSize.x-1, y_wise), vec4(f_x_Temp[UpSampleSize.x-1]));
+	for (int x = UpSampleSize.x-2; x >= 0; x--)
 	{
-		u[x] = f_x_Temp[x] - c_x_Temp[x] * u[x+1];
+		float u_x = f_x_Temp[x] - c_x_Temp[x] * imageLoad(cs_Out, ivec2(x+1, y_wise));
+		imageStore(cs_Out, ivec2(x, y_wise), vec4(u_x));
 	}
 
 	//---Vertical 1D WLS---
-	int ColWise = int(gl_GlobalInvocationID.x);
+	float a_y[UpSampleSize.y], b_y[UpSampleSize.y], c_y[UpSampleSize.y];
+	float c_y_Temp[UpSampleSize.y], f_y_Temp[UpSampleSize.y];
+
+	int x_Wise = int(gl_GlobalInvocationID.x); 
+
+	for (int y = 0; y < UpSampleSize.y; y++)
+	{
+		if (y == 0)
+		{
+			a_y[y] = 0;
+		}
+		else
+		{
+			float Weight_up = cal_GuidedWeight(ivec2(x_Wise, y), ivec2(x_Wise, y-1));
+
+			a_y[y] = -g_Lamda.x * Weight_up;
+		}
+		
+		if (y == UpSampleSize.y-1)
+		{
+			c_y[y] = 0;
+		}
+		else
+		{
+			float Weight_down = cal_GuidedWeight(ivec2(x_Wise, y), ivec2(x_Wise, y+1));
+		
+			c_y[y] = -g_Lamda.x * Weight_down;
+		}
+
+		b_y[y] = 1 - a_y[y] - c_y[y];
+
+		if (y == 0)
+		{
+			c_y_Temp[y] = c_y[y] / b_y[y];
+
+			float f_y_Curt = imageLoad(cs_In, ivec2(x_Wise, y)).x;
+			f_y_Temp[y] = f_y_Curt / b_y[y];
+		}
+		else
+		{
+			c_y_Temp[y] = c_y[y] / (b_y[y] - c_y_Temp[y-1] * a_y[y]);
+
+			float f_y_Curt = imageLoad(cs_In, ivec2(x_Wise, y)).x;
+			float f_y_Last = imageLoad(cs_In, ivec2(x_Wise, y-1)).x;
+			f_y_Temp[y] = (f_y_Curt - f_y_Last * a_y[y]) / (b_y[y] - c_y_Temp[y-1] * a_y[y]);
+		}
+		
+	}
+
+	imageStore(cs_Out, ivec2(x_Wise, UpSampleSize.y-1), vec4(f_y_Temp[UpSampleSize.y-1]));
+	for (int y = UpSampleSize.y-2; y >= 0; y--)
+	{
+		float u_y = f_y_Temp[y] - c_y_Temp[y] * imageLoad(cs_Out, ivec2(x_Wise, y+1));
+		imageStore(cs_Out, ivec2(x_Wise, y), vec4(u_y));
+	}
 }
 
 #endif //__INCLUDE_CS_FGS_GLSL__
