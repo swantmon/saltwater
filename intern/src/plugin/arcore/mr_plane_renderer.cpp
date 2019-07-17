@@ -20,6 +20,7 @@
 #include "engine/data/data_entity_manager.h"
 #include "engine/data/data_map.h"
 #include "engine/data/data_transformation_facet.h"
+#include "engine/data/data_script_component.h"
 
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
@@ -31,6 +32,8 @@
 #include "engine/graphic/gfx_view_manager.h"
 
 #include "engine/gui/gui_event_handler.h"
+
+#include "engine/script/script_ar_settings_script.h"
 
 #include "plugin/arcore/mr_control_manager.h"
 #include "plugin/arcore/mr_plane_renderer.h"
@@ -146,14 +149,17 @@ namespace
         Gfx::CBufferPtr m_ColorBufferPtr;
 
         Engine::CEventDelegates::HandleType m_RenderDelegateHandle;
+
+        Scpt::CARSettingsScript* m_pARSettings;
     };
 } // namespace
 
 namespace
 {
     CMRPlaneRenderer::CMRPlaneRenderer()
-            : m_Settings         ( )
-            , m_ARCToEngineMatrix(1.0f)
+        : m_Settings         ( )
+        , m_ARCToEngineMatrix(1.0f)
+        , m_pARSettings      (nullptr)
     {
         m_ARCToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,-1));
     }
@@ -162,6 +168,7 @@ namespace
 
     CMRPlaneRenderer::~CMRPlaneRenderer()
     {
+        m_pARSettings = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -253,6 +260,25 @@ namespace
 
     void CMRPlaneRenderer::Update()
     {
+        if (m_pARSettings != nullptr && m_pARSettings->IsActiveAndUsable()) return;
+
+        m_pARSettings = nullptr;
+
+        auto ScriptComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CScriptComponent>();
+
+        for (auto ScriptComponent : ScriptComponents)
+        {
+            auto pScriptComponent = static_cast<Dt::CScriptComponent*>(ScriptComponent);
+
+            if (!pScriptComponent->IsActiveAndUsable()) continue;
+
+            if (Base::CTypeInfo::IsEqual(pScriptComponent->GetScriptTypeInfo(), Base::CTypeInfo::Get<Scpt::CARSettingsScript>()))
+            {
+                m_pARSettings = static_cast<Scpt::CARSettingsScript*>(pScriptComponent);
+
+                break;
+            }
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -272,6 +298,8 @@ namespace
     void CMRPlaneRenderer::Render()
     {
         if (!m_Settings.m_ShowPlanes) return;
+
+        if (m_pARSettings != nullptr && !m_pARSettings->m_RenderPlanes) return;
 
         ArSession* pARSession = MR::ControlManager::GetCurrentSession();
 

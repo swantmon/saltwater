@@ -28,6 +28,7 @@
 
 #include "engine/script/script_ar_camera_control_script.h"
 #include "engine/script/script_ar_place_object_on_touch_script.h"
+#include "engine/script/script_ar_settings_script.h"
 #include "engine/script/script_light_estimation.h"
 #include "engine/script/script_script_manager.h"
 
@@ -152,11 +153,21 @@ namespace App
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CCameraComponent::DirtyCreate);
 
-            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CARCameraControlScript>();
+            {
+                auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CARCameraControlScript>();
 
-            rEntity.AttachComponent(ScriptComponent);
+                rEntity.AttachComponent(ScriptComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
+            }
+
+            {
+                auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CARSettingsScript>();
+
+                rEntity.AttachComponent(ScriptComponent);
+
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
+            }
 
             Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }

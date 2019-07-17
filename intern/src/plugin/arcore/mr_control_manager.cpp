@@ -36,6 +36,8 @@
 
 #include <array>
 #include <vector>
+#include <engine/data/data_script_component.h>
+#include <engine/script/script_ar_camera_control_script.h>
 
 #include "arcore_c_api.h"
 
@@ -311,12 +313,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Release resources
         // -----------------------------------------------------------------------------
-        m_BackgroundTexturePtr   = 0;
-        m_ExternalTexturePtr     = 0;
-        m_BackgroundTargetSetPtr = 0;
-        m_WebcamVSPtr            = 0;
-        m_WebcamPSPtr            = 0;
-        m_WebcamUVBufferPtr      = 0;
+        m_BackgroundTexturePtr   = nullptr;
+        m_ExternalTexturePtr     = nullptr;
+        m_BackgroundTargetSetPtr = nullptr;
+        m_WebcamVSPtr            = nullptr;
+        m_WebcamPSPtr            = nullptr;
+        m_WebcamUVBufferPtr      = nullptr;
 
         // -----------------------------------------------------------------------------
         // AR session and frame

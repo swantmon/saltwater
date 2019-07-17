@@ -22,6 +22,8 @@ namespace CORE
 
         template<class T>
         static BInfo Get(const T& _rValue);
+
+		static bool IsEqual(const BInfo& _rLeft, const BInfo& _rRight);
     };
 } // namespace CORE
 
@@ -39,5 +41,17 @@ namespace CORE
 	CTypeInfo::BInfo CTypeInfo::Get(const T& _rValue)
     {
         return std::type_index(typeid(_rValue));
-    }
+	}
+
+	// -----------------------------------------------------------------------------
+
+	inline bool CTypeInfo::IsEqual(const BInfo& _rLeft, const BInfo& _rRight)
+	{
+#ifdef PLATFORM_ANDROID
+		return std::string(_rLeft.name()) == std::string(_rRight.name());
+#else
+		return _rLeft == _rRight;
+#endif // PLATFORM_ANDROID
+
+	}
 } // namespace CORE
