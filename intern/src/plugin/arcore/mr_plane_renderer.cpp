@@ -150,7 +150,11 @@ namespace
 
         Engine::CEventDelegates::HandleType m_RenderDelegateHandle;
 
-        Scpt::CARSettingsScript* m_pARSettings;
+        Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
+
+    private:
+
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
     };
 } // namespace
 
@@ -159,16 +163,17 @@ namespace
     CMRPlaneRenderer::CMRPlaneRenderer()
         : m_Settings         ( )
         , m_ARCToEngineMatrix(1.0f)
-        , m_pARSettings      (nullptr)
     {
         m_ARCToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,-1));
+
+        m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CMRPlaneRenderer::OnDirtyComponent, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------
 
     CMRPlaneRenderer::~CMRPlaneRenderer()
     {
-        m_pARSettings = nullptr;
+        m_OnDirtyComponentDelegate = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -260,25 +265,6 @@ namespace
 
     void CMRPlaneRenderer::Update()
     {
-        if (m_pARSettings != nullptr && m_pARSettings->IsActiveAndUsable()) return;
-
-        m_pARSettings = nullptr;
-
-        auto ScriptComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CScriptComponent>();
-
-        for (auto ScriptComponent : ScriptComponents)
-        {
-            auto pScriptComponent = static_cast<Dt::CScriptComponent*>(ScriptComponent);
-
-            if (!pScriptComponent->IsActiveAndUsable()) continue;
-
-            if (Base::CTypeInfo::IsEqual(pScriptComponent->GetScriptTypeInfo(), Base::CTypeInfo::Get<Scpt::CARSettingsScript>()))
-            {
-                m_pARSettings = static_cast<Scpt::CARSettingsScript*>(pScriptComponent);
-
-                break;
-            }
-        }
     }
 
     // -----------------------------------------------------------------------------
@@ -298,8 +284,6 @@ namespace
     void CMRPlaneRenderer::Render()
     {
         if (!m_Settings.m_ShowPlanes) return;
-
-        if (m_pARSettings != nullptr && !m_pARSettings->m_RenderPlanes) return;
 
         ArSession* pARSession = MR::ControlManager::GetCurrentSession();
 
@@ -581,6 +565,24 @@ namespace
     void CMRPlaneRenderer::ResetSettings()
     {
         m_Settings.m_ShowPlanes = Core::CProgramParameters::GetInstance().Get<bool>("mr:ar:debug:render_planes", true);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRPlaneRenderer::OnDirtyComponent(Dt::IComponent* _pComponent)
+    {
+        if (!Base::CTypeInfo::IsEqual(_pComponent->GetTypeInfo(), Base::CTypeInfo::Get<Dt::CScriptComponent>())) return;
+
+        auto* pScriptComponent = static_cast<Dt::CScriptComponent*>(_pComponent);
+
+        if (!pScriptComponent->IsActiveAndUsable()) return;
+
+        if (Base::CTypeInfo::IsEqual(pScriptComponent->GetScriptTypeInfo(), Base::CTypeInfo::Get<Scpt::CARSettingsScript>()))
+        {
+            auto pARSettings = static_cast<Scpt::CARSettingsScript*>(pScriptComponent);
+
+            m_Settings.m_ShowPlanes = pARSettings->m_RenderPlanes;
+        }
     }
 } // namespace
 

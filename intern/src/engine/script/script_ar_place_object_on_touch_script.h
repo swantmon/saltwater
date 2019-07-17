@@ -124,6 +124,8 @@ namespace Scpt
                             {
                                 pARSettingsScript->m_RenderPlanes = false;
                                 pARSettingsScript->m_RenderPoints = false;
+
+                                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pARSettingsScript, Dt::IComponent::DirtyInfo);
                             }
 
                             break;

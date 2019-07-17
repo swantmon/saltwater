@@ -115,7 +115,11 @@ namespace
 
         Engine::CEventDelegates::HandleType m_RenderDelegateHandle;
 
-        Scpt::CARSettingsScript* m_pARSettings;
+        Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
+
+    private:
+
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
     };
 } // namespace
 
@@ -124,16 +128,17 @@ namespace
     CMRPointRenderer::CMRPointRenderer()
             : m_Settings         ( )
             , m_ARCToEngineMatrix(1.0f)
-            , m_pARSettings      (nullptr)
     {
         m_ARCToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,-1));
+
+        m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CMRPointRenderer::OnDirtyComponent, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------
 
     CMRPointRenderer::~CMRPointRenderer()
     {
-        m_pARSettings = nullptr;
+        m_OnDirtyComponentDelegate = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -203,25 +208,6 @@ namespace
 
     void CMRPointRenderer::Update()
     {
-        if (m_pARSettings != nullptr && m_pARSettings->IsActiveAndUsable()) return;
-
-        m_pARSettings = nullptr;
-
-        auto ScriptComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CScriptComponent>();
-
-        for (auto ScriptComponent : ScriptComponents)
-        {
-            auto pScriptComponent = static_cast<Dt::CScriptComponent*>(ScriptComponent);
-
-            if (!pScriptComponent->IsActiveAndUsable()) continue;
-
-            if (Base::CTypeInfo::IsEqual(pScriptComponent->GetScriptTypeInfo(), Base::CTypeInfo::Get<Scpt::CARSettingsScript>()))
-            {
-                m_pARSettings = static_cast<Scpt::CARSettingsScript*>(pScriptComponent);
-
-                break;
-            }
-        }
     }
 
     // -----------------------------------------------------------------------------
@@ -243,8 +229,6 @@ namespace
     void CMRPointRenderer::Render()
     {
         if (!m_Settings.m_ShowPoints) return;
-
-        if (m_pARSettings != nullptr && !m_pARSettings->m_RenderPoints) return;
 
         ArSession* pARSession = MR::ControlManager::GetCurrentSession();
         ArFrame* pARFrame = MR::ControlManager::GetCurrentFrame();
@@ -349,6 +333,24 @@ namespace
     void CMRPointRenderer::ResetSettings()
     {
         m_Settings.m_ShowPoints = Core::CProgramParameters::GetInstance().Get<bool>("mr:ar:debug:render_points", true);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRPointRenderer::OnDirtyComponent(Dt::IComponent* _pComponent)
+    {
+        if (!Base::CTypeInfo::IsEqual(_pComponent->GetTypeInfo(), Base::CTypeInfo::Get<Dt::CScriptComponent>())) return;
+
+        auto* pScriptComponent = static_cast<Dt::CScriptComponent*>(_pComponent);
+
+        if (!pScriptComponent->IsActiveAndUsable()) return;
+
+        if (Base::CTypeInfo::IsEqual(pScriptComponent->GetScriptTypeInfo(), Base::CTypeInfo::Get<Scpt::CARSettingsScript>()))
+        {
+            auto pARSettings = static_cast<Scpt::CARSettingsScript*>(pScriptComponent);
+
+            m_Settings.m_ShowPoints = pARSettings->m_RenderPoints;
+        }
     }
 } // namespace
 

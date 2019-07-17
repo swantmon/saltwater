@@ -32,6 +32,8 @@
 
 #include "engine/gui/gui_event_handler.h"
 
+#include "engine/script/script_ar_settings_script.h"
+
 #include "plugin/arcore/mr_control_manager.h"
 
 #include <array>
@@ -194,7 +196,11 @@ namespace
 
         Gfx::Main::CResizeDelegate::HandleType m_ResizeHandle;
 
+        Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
+
     private:
+
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void OnResize(int _Width, int _Height);
     };
@@ -218,12 +224,17 @@ namespace
         m_ARCToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,-1));
 
         m_ResizeHandle = Gfx::Main::RegisterResizeHandler(std::bind(&CMRControlManager::OnResize, this, std::placeholders::_1, std::placeholders::_2));
+
+        m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CMRControlManager::OnDirtyComponent, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------
 
     CMRControlManager::~CMRControlManager()
     {
+        m_ResizeHandle = nullptr;
+
+        m_OnDirtyComponentDelegate = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -787,6 +798,22 @@ namespace
     ArFrame* CMRControlManager::GetCurrentFrame()
     {
         return m_pARFrame;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::OnDirtyComponent(Dt::IComponent* _pComponent)
+    {
+        if (!Base::CTypeInfo::IsEqual(_pComponent->GetTypeInfo(), Base::CTypeInfo::Get<Dt::CScriptComponent>())) return;
+
+        auto* pScriptComponent = static_cast<Dt::CScriptComponent*>(_pComponent);
+
+        if (!pScriptComponent->IsActiveAndUsable()) return;
+
+        if (Base::CTypeInfo::IsEqual(pScriptComponent->GetScriptTypeInfo(), Base::CTypeInfo::Get<Scpt::CARSettingsScript>()))
+        {
+            auto pARSettings = static_cast<Scpt::CARSettingsScript*>(pScriptComponent);
+        }
     }
 } // namespace
 
