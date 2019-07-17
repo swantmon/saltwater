@@ -26,10 +26,11 @@ namespace FutoGCV
 
     //---Execute Functions---
     public:
+        void WLS_Single(Gfx::CTexturePtr Output_HR, const Gfx::CTexturePtr Input_LR, const Gfx::CTexturePtr Guide_HR);
 
     //---Assist Functions---
     private:
-        void FGS1(Gfx::CTexturePtr& OutputData, const Gfx::CTexturePtr& InputData, const Gfx::CTexturePtr& GuideData);
+        void FGS(Gfx::CTexturePtr OutputData, const Gfx::CTexturePtr InputData, const Gfx::CTexturePtr GuideData);
     
     //---Members---
     private:

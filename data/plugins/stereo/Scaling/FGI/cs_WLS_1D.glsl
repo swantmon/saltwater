@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_CS_FGS_GLSL__
-#define __INCLUDE_CS_FGS_GLSL__
+#ifndef __INCLUDE_CS_WLS_1D_GLSL__
+#define __INCLUDE_CS_WLS_1D_GLSL__
 
 layout (binding = 0, r32f) writeonly uniform image2D cs_Out; // Pixel in image2D is 32-bit float
 layout (binding = 1, r32f) readonly uniform image2D cs_In; // Pixel in image2D is 32-bit float
@@ -76,4 +76,4 @@ void main()
 	
 }
 
-#endif //__INCLUDE_CS_FGS_GLSL__
+#endif //__INCLUDE_CS_WLS_1D_GLSL__
