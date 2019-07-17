@@ -2131,7 +2131,7 @@ namespace
 
             if (ScriptComponent->IsActiveAndUsable() == false) continue;
 
-            if (ScriptComponent->GetScriptTypeID() == Base::CTypeInfo::GetTypeID<Scpt::CSLAMScript>())
+            if (ScriptComponent->GetScriptTypeInfo() == Base::CTypeInfo::Get<Scpt::CSLAMScript>())
             {
                 ID = ScriptComponent->GetHostEntity()->GetID();
 

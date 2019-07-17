@@ -112,23 +112,23 @@ namespace Dt
 namespace Dt
 {
     template<class T>
-    T* CComponentManager::Allocate()
-    {
-        // -----------------------------------------------------------------------------
-        // Allocate new component
-        // -----------------------------------------------------------------------------
-        m_Components.emplace_back(std::unique_ptr<T>(new T()));
+	T* CComponentManager::Allocate()
+	{
+		// -----------------------------------------------------------------------------
+		// Allocate new component
+		// -----------------------------------------------------------------------------
+		m_Components.emplace_back(std::unique_ptr<T>(new T()));
 
-        auto* pComponent = static_cast<T*>(m_Components.back().get());
+		auto* pComponent = static_cast<T*>(m_Components.back().get());
 
-        pComponent->m_ID = m_CurrentID++;
+		pComponent->m_ID = m_CurrentID++;
 
-        // -----------------------------------------------------------------------------
-        // Save component to organizer
-        // -----------------------------------------------------------------------------
-        m_ComponentByID[pComponent->m_ID] = pComponent;
+		// -----------------------------------------------------------------------------
+		// Save component to organizer
+		// -----------------------------------------------------------------------------
+		m_ComponentByID[pComponent->m_ID] = pComponent;
 
-        m_ComponentsByType[Base::CTypeInfo::Get<T>()].emplace_back(pComponent);
+		m_ComponentsByType[pComponent->GetTypeInfo()].emplace_back(pComponent);
 
         return pComponent;
     }
