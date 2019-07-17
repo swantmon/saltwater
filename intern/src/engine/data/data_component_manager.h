@@ -19,6 +19,10 @@
 #include <unordered_map>
 #include <vector>
 
+#ifdef PLATFORM_ANDROID
+#define COMPONENT_MANAGER_MAPTYPE_BY_NAME
+#endif // PLATFORM_ANDROID
+
 #define REGISTER_COMPONENT_SER_NAME(_Name, _Class)                                                                    \
     struct BASE_CONCAT(SRegisterSerialize, _Class)                                                                    \
     {                                                                                                                 \
@@ -30,8 +34,6 @@
     } BASE_CONCAT(g_SRegisterSerialize, _Class);
 
 #define REGISTER_COMPONENT_SER(_Class) REGISTER_COMPONENT_SER_NAME(#_Class, _Class)
-
-
 
 namespace Dt
 {
@@ -74,11 +76,19 @@ namespace Dt
         void Read(Base::CTextReader& _rCodec);
         void Write(Base::CTextWriter& _rCodec);
 
+	private:
+
+#if COMPONENT_MANAGER_MAPTYPE_BY_NAME
+		using BComponentTypeKey = std::string;
+#else
+		using BComponentTypeKey = Base::CTypeInfo::BInfo;
+#endif // COMPONENT_MANAGER_MAPTYPE_BY_NAME
+
     private:
 
         using CComponents       = std::vector<std::unique_ptr<IComponent>>;
         using CComponentsByID   = std::unordered_map<Base::ID, IComponent*>;
-        using CComponentsByType = std::unordered_map<Base::CTypeInfo::BInfo, std::vector<IComponent*>>;
+        using CComponentsByType = std::unordered_map<BComponentTypeKey, std::vector<IComponent*>>;
 
         using CFactoryMap     = std::unordered_map<Base::BHash, IComponent*>;
         using CFactoryMapPair = std::pair<Base::BHash, IComponent*>;
@@ -128,7 +138,11 @@ namespace Dt
 		// -----------------------------------------------------------------------------
 		m_ComponentByID[pComponent->m_ID] = pComponent;
 
+#if COMPONENT_MANAGER_MAPTYPE_BY_NAME
+		m_ComponentsByType[pComponent->GetTypeInfo().name()].emplace_back(pComponent);
+#else
 		m_ComponentsByType[pComponent->GetTypeInfo()].emplace_back(pComponent);
+#endif // COMPONENT_MANAGER_MAPTYPE_BY_NAME
 
         return pComponent;
     }
@@ -148,7 +162,11 @@ namespace Dt
     template<class T>
     const std::vector<Dt::IComponent*>& CComponentManager::GetComponents()
     {
+#if COMPONENT_MANAGER_MAPTYPE_BY_NAME
+		return m_ComponentsByType[Base::CTypeInfo::Get<T>().name()];
+#else
         return m_ComponentsByType[Base::CTypeInfo::Get<T>()];
+#endif
     }
 
 	// -----------------------------------------------------------------------------

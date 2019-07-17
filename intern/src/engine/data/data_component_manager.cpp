@@ -59,8 +59,12 @@ namespace Dt
         // -----------------------------------------------------------------------------
         m_ComponentByID.erase(_ID);
 
-        auto& rComponentTypeVector = m_ComponentsByType[Component->GetTypeInfo()];
-
+#ifdef COMPONENT_MANAGER_MAPTYPE_BY_NAME
+		auto& rComponentTypeVector = m_ComponentsByType[Component->GetTypeInfo().name()];
+#else
+		auto& rComponentTypeVector = m_ComponentsByType[Component->GetTypeInfo()];
+#endif // COMPONENT_MANAGER_MAPTYPE_BY_NAME
+        
         auto ComponentTypeVectorIter = std::find(rComponentTypeVector.begin(), rComponentTypeVector.end(), Component);
 
         if (ComponentTypeVectorIter == rComponentTypeVector.end()) return;
@@ -130,7 +134,11 @@ namespace Dt
             // -----------------------------------------------------------------------------
             m_ComponentByID[pNewComponent->m_ID] = pNewComponent;
 
-            m_ComponentsByType[pNewComponent->GetTypeInfo()].emplace_back(pNewComponent);
+#if COMPONENT_MANAGER_MAPTYPE_BY_NAME
+			m_ComponentsByType[pNewComponent->GetTypeInfo().name()].emplace_back(pNewComponent);
+#else
+			m_ComponentsByType[pNewComponent->GetTypeInfo()].emplace_back(pNewComponent);
+#endif // COMPONENT_MANAGER_MAPTYPE_BY_NAME
         }
     }
 
