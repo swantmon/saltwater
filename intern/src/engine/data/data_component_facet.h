@@ -66,7 +66,7 @@ namespace Dt
     {
         for (auto Component : m_Components)
         {
-            if (Component->GetTypeID() == Base::CTypeInfo::GetTypeID<T>())
+            if (Component->GetTypeInfo() == Base::CTypeInfo::Get<T>())
             {
                 return static_cast<T*>(Component);
             }
@@ -82,7 +82,7 @@ namespace Dt
     {
         for (auto Component : m_Components)
         {
-            if (Component->GetTypeID() == Base::CTypeInfo::GetTypeID<T>())
+            if (Component->GetTypeInfo() == Base::CTypeInfo::Get<T>())
             {
                 return static_cast<T*>(Component);
             }

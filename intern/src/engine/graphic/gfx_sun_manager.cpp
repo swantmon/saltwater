@@ -264,7 +264,7 @@ namespace
 
         for (auto pComponent : AreaLightComponents)
         {
-            if (pComponent->GetTypeID() == Base::CTypeInfo::GetTypeID<Dt::CSunComponent>())
+            if (pComponent->GetTypeInfo() == Base::CTypeInfo::Get<Dt::CSunComponent>())
             {
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CSunComponent::DirtyInfo);
             }
@@ -275,7 +275,7 @@ namespace
 
     void CGfxSunManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CSunComponent>()) return;
+        if (_pComponent->GetTypeInfo() != Base::CTypeInfo::Get<Dt::CSunComponent>()) return;
 
         Dt::CSunComponent* pSunComponent = static_cast<Dt::CSunComponent*>(_pComponent);
 

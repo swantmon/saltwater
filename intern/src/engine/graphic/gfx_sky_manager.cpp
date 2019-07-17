@@ -432,7 +432,7 @@ namespace
 
     void CGfxSkyManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CSkyComponent>()) return;
+        if (_pComponent->GetTypeInfo() != Base::CTypeInfo::Get<Dt::CSkyComponent>()) return;
 
         auto* pSkyComponent = static_cast<Dt::CSkyComponent*>(_pComponent);
 

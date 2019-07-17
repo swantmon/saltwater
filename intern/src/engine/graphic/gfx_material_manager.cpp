@@ -177,7 +177,7 @@ namespace
     private:
 
         using CMaterials = Base::CManagedPool<CInternMaterial, 32, 1>;
-        using CMaterialsByHash = std::map<Base::BHash, CInternMaterial*>;
+        using CMaterialsByHash = std::unordered_map<Base::BHash, CInternMaterial*>;
 
     private:
 
@@ -460,7 +460,7 @@ namespace
 
     void CGfxMaterialManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CMaterialComponent>()) return;
+        if (_pComponent->GetTypeInfo() != Base::CTypeInfo::Get<Dt::CMaterialComponent>()) return;
 
         auto* pMaterialComponent = static_cast<Dt::CMaterialComponent*>(_pComponent);
 

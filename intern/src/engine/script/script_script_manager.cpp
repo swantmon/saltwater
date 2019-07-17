@@ -113,7 +113,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Only if component has changed
         // -----------------------------------------------------------------------------
-        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CScriptComponent>()) return;
+        if (_pComponent->GetTypeInfo() != Base::CTypeInfo::Get<Dt::CScriptComponent>()) return;
 
         auto* pScriptComponent = static_cast<Dt::CScriptComponent*>(_pComponent);
 

@@ -335,7 +335,7 @@ namespace Dt
 
                 for (auto& rComponent : Components)
                 {
-                    if (rComponent->GetTypeID() == Dt::CMeshComponent::STATIC_TYPE_ID)
+                    if (rComponent->GetTypeInfo() == Base::CTypeInfo::Get<Dt::CMeshComponent>())
                     {
                         auto MeshComponent = static_cast<Dt::CMeshComponent*>(rComponent);
 

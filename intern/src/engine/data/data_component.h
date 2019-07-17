@@ -103,7 +103,7 @@ namespace Dt
 
     public:
 
-        virtual const Base::ID GetTypeID() const = 0;
+        virtual Base::CTypeInfo::BInfo GetTypeInfo() const = 0;
 
         virtual ~IComponent() {};
 
@@ -142,14 +142,10 @@ namespace Dt
 
     public:
 
-        static const Base::ID STATIC_TYPE_ID;
-
-    public:
-
         CComponent();
         ~CComponent();
 
-        const Base::ID GetTypeID() const override;
+		Base::CTypeInfo::BInfo GetTypeInfo() const override;
 
         void SetFacet(unsigned int _Category, void* _pFacet);
         void* GetFacet(unsigned int _Category);
@@ -168,11 +164,6 @@ namespace Dt
     };
 } // namespace Dt
 
-namespace Dt
-{
-    template<class T>
-    const Base::ID CComponent<T>::STATIC_TYPE_ID = Base::CTypeInfo::GetTypeID<T>();
-} // namespace Dt
 
 namespace Dt
 {
@@ -197,9 +188,9 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
     template<class T>
-    const Base::ID CComponent<T>::GetTypeID() const
+    Base::CTypeInfo::BInfo CComponent<T>::GetTypeInfo() const
     {
-        return STATIC_TYPE_ID;
+        return Base::CTypeInfo::Get<T>();
     }
 
     // -----------------------------------------------------------------------------

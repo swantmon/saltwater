@@ -15,8 +15,8 @@
 #include "engine/data/data_component.h"
 
 #include <functional>
-#include <map>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #define REGISTER_COMPONENT_SER_NAME(_Name, _Class)                                                                    \
@@ -63,41 +63,28 @@ namespace Dt
         void MarkComponentAsDirty(IComponent& _rComponent, unsigned int _DirtyFlags);
 
         CComponentDelegate::HandleType RegisterDirtyComponentHandler(CComponentDelegate::FunctionType _NewDelegate); 
-        
-        template<class T> 
-        void Register(const std::string& _rName, IComponent* _pBase)
-        {
-            auto Hash = Base::CRC32(_rName.c_str(), static_cast<unsigned int>(_rName.length()));
 
-            auto ID = Base::CTypeInfo::GetTypeID<T>();
+		void Clear();
 
-            assert(m_Factory.find(Hash) == m_Factory.end());
+	public:
 
-            assert(m_FactoryHash.find(ID) == m_FactoryHash.end());
-
-            m_Factory.insert(CFactoryMapPair(Hash, _pBase));
-
-            m_FactoryHash.insert(CFactoryHashMapPair(ID, Hash));
-        }
-
-        void Clear();
-
-    public:
+		template<class T>
+		void Register(const std::string& _rName, IComponent* _pBase);
 
         void Read(Base::CTextReader& _rCodec);
         void Write(Base::CTextWriter& _rCodec);
 
     private:
 
-        using CComponents = std::vector<std::unique_ptr<IComponent>>;
-        using CComponentsByID = std::map<Base::ID, IComponent*>;
-        using CComponentsByType = std::map<Base::ID, std::vector<IComponent*>>;
+        using CComponents       = std::vector<std::unique_ptr<IComponent>>;
+        using CComponentsByID   = std::unordered_map<Base::ID, IComponent*>;
+        using CComponentsByType = std::unordered_map<Base::CTypeInfo::BInfo, std::vector<IComponent*>>;
 
-        using CFactoryMap     = std::map<Base::BHash, IComponent*>;
+        using CFactoryMap     = std::unordered_map<Base::BHash, IComponent*>;
         using CFactoryMapPair = std::pair<Base::BHash, IComponent*>;
 
-        using CFactoryHashMap     = std::map<Base::ID, Base::BHash>;
-        using CFactoryHashMapPair = std::pair<Base::ID, Base::BHash>;
+        using CFactoryHashMap     = std::unordered_map<Base::CTypeInfo::BInfo, Base::BHash>;
+        using CFactoryHashMapPair = std::pair<Base::CTypeInfo::BInfo, Base::BHash>;
 
     private:
 
@@ -141,7 +128,7 @@ namespace Dt
         // -----------------------------------------------------------------------------
         m_ComponentByID[pComponent->m_ID] = pComponent;
 
-        m_ComponentsByType[pComponent->GetTypeID()].emplace_back(pComponent);
+        m_ComponentsByType[Base::CTypeInfo::Get<T>()].emplace_back(pComponent);
 
         return pComponent;
     }
@@ -161,6 +148,24 @@ namespace Dt
     template<class T>
     const std::vector<Dt::IComponent*>& CComponentManager::GetComponents()
     {
-        return m_ComponentsByType[Base::CTypeInfo::GetTypeID<T>()];
+        return m_ComponentsByType[Base::CTypeInfo::Get<T>()];
     }
+
+	// -----------------------------------------------------------------------------
+
+	template<class T>
+	void CComponentManager::Register(const std::string& _rName, IComponent* _pBase)
+	{
+		auto TypeInfo = Base::CTypeInfo::Get<T>();
+
+		auto Hash = Base::CRC32(_rName.c_str(), static_cast<unsigned int>(_rName.length()));
+
+		assert(m_Factory.find(Hash) == m_Factory.end());
+
+		assert(m_FactoryHash.find(TypeInfo) == m_FactoryHash.end());
+
+		m_Factory.insert(CFactoryMapPair(Hash, _pBase));
+
+		m_FactoryHash.insert(CFactoryHashMapPair(TypeInfo, Hash));
+	}
 } // namespace Dt

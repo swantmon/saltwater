@@ -12,11 +12,7 @@ namespace Scpt
     {
     public:
 
-        static const Base::ID STATIC_SCRIPT_TYPE_ID;
-
-    public:
-
-        const Base::ID GetScriptTypeID() const override;
+        const Base::CTypeInfo::BInfo GetScriptTypeInfo() const override;
 
     public:
 
@@ -28,15 +24,9 @@ namespace Scpt
 namespace Scpt
 {
     template<class T>
-    const Base::ID CScript<T>::STATIC_SCRIPT_TYPE_ID = Base::CTypeInfo::GetTypeID<T>();
-} // namespace Scpt
-
-namespace Scpt
-{
-    template<class T>
-    const Base::ID CScript<T>::GetScriptTypeID() const
+    const Base::CTypeInfo::BInfo CScript<T>::GetScriptTypeInfo() const
     {
-        return STATIC_SCRIPT_TYPE_ID;
+        return Base::CTypeInfo::Get<T>();
     }
 
     // -----------------------------------------------------------------------------
