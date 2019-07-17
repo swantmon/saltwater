@@ -50,14 +50,16 @@ namespace FutoGCV
     void CFGI::FGS1(Gfx::CTexturePtr& Output_TexturePtr, const Gfx::CTexturePtr& Input_TexturePtr, const Gfx::CTexturePtr& Guide_TexturePtr)
     {
 
+        const int WorkGroupsX = DivUp(Output_TexturePtr->GetNumberOfPixelsV, TileSize_1D);
+
         for (int iter = 0; iter < m_Iteration_FGS1; iter++)
         {
             //---Start Horizontal FGS1 in GLSL---
             Gfx::Performance::BeginEvent("Horizontal FGS1");
 
-            m_Param_FGS1.m_Direction = glm::ivec2(1, 0);
+            m_Param_FGS1.m_Direction = glm::ivec2(1, 0); // Means horizontal direction
 
-            float LamdaRatio = std::powf(m_Attenuation_FGS1, m_Iteration_FGS1 - iter) / (std::powf(m_Attenuation_FGS1, m_Iteration_FGS1) - 1);
+            float LamdaRatio = std::powf(m_Attenuation_FGS1, m_Iteration_FGS1 - iter) / (std::powf(m_Attenuation_FGS1, m_Iteration_FGS1) - 1.0f);
             m_Param_FGS1.m_Lamda = 1.5f * LamdaRatio * m_Lamda_FGS1;
 
             Gfx::BufferManager::UploadBufferData(m_FGSParameter_BufferPtr, &m_Param_FGS1);
@@ -67,8 +69,6 @@ namespace FutoGCV
             Gfx::ContextManager::SetImageTexture(1, Input_TexturePtr);
             Gfx::ContextManager::SetImageTexture(2, Guide_TexturePtr);
             Gfx::ContextManager::SetConstantBuffer(0, m_FGSParameter_BufferPtr);
-
-            const int WorkGroupsX = DivUp(Output_TexturePtr->GetNumberOfPixelsV, TileSize_1D); 
 
             Gfx::ContextManager::Dispatch(WorkGroupsX, 1, 1);
 
@@ -85,8 +85,6 @@ namespace FutoGCV
             Gfx::ContextManager::SetImageTexture(1, Input_TexturePtr);
             Gfx::ContextManager::SetImageTexture(2, Guide_TexturePtr);
             Gfx::ContextManager::SetConstantBuffer(0, m_FGSParameter_BufferPtr);
-
-            const int WorkGroupsX = DivUp(Output_TexturePtr->GetNumberOfPixelsU, TileSize_1D); 
 
             Gfx::ContextManager::Dispatch(WorkGroupsX, 1, 1);
 
