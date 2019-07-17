@@ -134,7 +134,7 @@ namespace Dt
             // -----------------------------------------------------------------------------
             m_ComponentByID[pNewComponent->m_ID] = pNewComponent;
 
-#if COMPONENT_MANAGER_MAPTYPE_BY_NAME
+#ifdef COMPONENT_MANAGER_MAPTYPE_BY_NAME
 			m_ComponentsByType[pNewComponent->GetTypeInfo().name()].emplace_back(pNewComponent);
 #else
 			m_ComponentsByType[pNewComponent->GetTypeInfo()].emplace_back(pNewComponent);

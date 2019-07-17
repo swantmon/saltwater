@@ -78,7 +78,7 @@ namespace Dt
 
 	private:
 
-#if COMPONENT_MANAGER_MAPTYPE_BY_NAME
+#ifdef COMPONENT_MANAGER_MAPTYPE_BY_NAME
 		using BComponentTypeKey = std::string;
 #else
 		using BComponentTypeKey = Base::CTypeInfo::BInfo;
@@ -138,7 +138,7 @@ namespace Dt
 		// -----------------------------------------------------------------------------
 		m_ComponentByID[pComponent->m_ID] = pComponent;
 
-#if COMPONENT_MANAGER_MAPTYPE_BY_NAME
+#ifdef COMPONENT_MANAGER_MAPTYPE_BY_NAME
 		m_ComponentsByType[pComponent->GetTypeInfo().name()].emplace_back(pComponent);
 #else
 		m_ComponentsByType[pComponent->GetTypeInfo()].emplace_back(pComponent);
@@ -162,7 +162,7 @@ namespace Dt
     template<class T>
     const std::vector<Dt::IComponent*>& CComponentManager::GetComponents()
     {
-#if COMPONENT_MANAGER_MAPTYPE_BY_NAME
+#ifdef COMPONENT_MANAGER_MAPTYPE_BY_NAME
 		return m_ComponentsByType[Base::CTypeInfo::Get<T>().name()];
 #else
         return m_ComponentsByType[Base::CTypeInfo::Get<T>()];
