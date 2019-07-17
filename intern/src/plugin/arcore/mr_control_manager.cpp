@@ -198,6 +198,8 @@ namespace
 
         Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
 
+        Scpt::CARSettingsScript* m_pARSettings;
+
     private:
 
         void OnDirtyComponent(Dt::IComponent* _pComponent);
@@ -220,6 +222,7 @@ namespace
         , m_pARFrame         (0)
         , m_TrackedObjects   ( )
         , m_ARCToEngineMatrix(1.0f)
+        , m_pARSettings      (nullptr)
     {
         m_ARCToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,-1));
 
@@ -235,6 +238,8 @@ namespace
         m_ResizeHandle = nullptr;
 
         m_OnDirtyComponentDelegate = nullptr;
+
+        m_pARSettings = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -548,6 +553,38 @@ namespace
 
             ArConfig_setPlaneFindingMode(m_pARSession, ARConfig, AR_PLANE_FINDING_MODE_HORIZONTAL_AND_VERTICAL);
 
+            if (m_pARSettings != nullptr)
+            {
+                switch(m_pARSettings->m_PlaneFindingMode)
+                {
+                    case Scpt::CARSettingsScript::SPlaneFindingMode::Disabled:
+                        ArConfig_setPlaneFindingMode(m_pARSession, ARConfig, AR_PLANE_FINDING_MODE_DISABLED);
+                        break;
+                    case Scpt::CARSettingsScript::SPlaneFindingMode::Horizontal:
+                        ArConfig_setPlaneFindingMode(m_pARSession, ARConfig, AR_PLANE_FINDING_MODE_HORIZONTAL);
+                        break;
+                    case Scpt::CARSettingsScript::SPlaneFindingMode::Vertical:
+                        ArConfig_setPlaneFindingMode(m_pARSession, ARConfig, AR_PLANE_FINDING_MODE_VERTICAL);
+                        break;
+                    case Scpt::CARSettingsScript::SPlaneFindingMode::HorizontalAndVertical:
+                        ArConfig_setPlaneFindingMode(m_pARSession, ARConfig, AR_PLANE_FINDING_MODE_HORIZONTAL_AND_VERTICAL);
+                        break;
+                }
+
+                switch(m_pARSettings->m_LightEstimation)
+                {
+                    case Scpt::CARSettingsScript::SLightingEstimation::Disabled:
+                        ArConfig_setLightEstimationMode(m_pARSession, ARConfig, AR_LIGHT_ESTIMATION_MODE_DISABLED);
+                        break;
+                    case Scpt::CARSettingsScript::SLightingEstimation::AmbientIntensity:
+                        ArConfig_setLightEstimationMode(m_pARSession, ARConfig, AR_LIGHT_ESTIMATION_MODE_AMBIENT_INTENSITY);
+                        break;
+                    case Scpt::CARSettingsScript::SLightingEstimation::HDREnvironment:
+                        ArConfig_setLightEstimationMode(m_pARSession, ARConfig, AR_LIGHT_ESTIMATION_MODE_ENVIRONMENTAL_HDR);
+                        break;
+                }
+            }
+
             assert(ARConfig != 0);
 
             Status = ArSession_configure(m_pARSession, ARConfig);
@@ -804,15 +841,56 @@ namespace
 
     void CMRControlManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (!Base::CTypeInfo::IsEqual(_pComponent->GetTypeInfo(), Base::CTypeInfo::Get<Dt::CScriptComponent>())) return;
+        if (!Base::CTypeInfo::IsEqualName(_pComponent->GetTypeInfo(), Base::CTypeInfo::Get<Dt::CScriptComponent>())) return;
 
         auto* pScriptComponent = static_cast<Dt::CScriptComponent*>(_pComponent);
 
         if (!pScriptComponent->IsActiveAndUsable()) return;
 
-        if (Base::CTypeInfo::IsEqual(pScriptComponent->GetScriptTypeInfo(), Base::CTypeInfo::Get<Scpt::CARSettingsScript>()))
+        if (Base::CTypeInfo::IsEqualName(pScriptComponent->GetScriptTypeInfo(), Base::CTypeInfo::Get<Scpt::CARSettingsScript>()))
         {
-            auto pARSettings = static_cast<Scpt::CARSettingsScript*>(pScriptComponent);
+            m_pARSettings = static_cast<Scpt::CARSettingsScript*>(pScriptComponent);
+
+            if (m_pARSession != nullptr)
+            {
+                ArConfig* ARConfig = 0;
+
+                ArSession_getConfig(m_pARSession, ARConfig);
+
+                if (m_pARSettings != nullptr)
+                {
+                    switch(m_pARSettings->m_PlaneFindingMode)
+                    {
+                        case Scpt::CARSettingsScript::SPlaneFindingMode::Disabled:
+                            ArConfig_setPlaneFindingMode(m_pARSession, ARConfig, AR_PLANE_FINDING_MODE_DISABLED);
+                            break;
+                        case Scpt::CARSettingsScript::SPlaneFindingMode::Horizontal:
+                            ArConfig_setPlaneFindingMode(m_pARSession, ARConfig, AR_PLANE_FINDING_MODE_HORIZONTAL);
+                            break;
+                        case Scpt::CARSettingsScript::SPlaneFindingMode::Vertical:
+                            ArConfig_setPlaneFindingMode(m_pARSession, ARConfig, AR_PLANE_FINDING_MODE_VERTICAL);
+                            break;
+                        case Scpt::CARSettingsScript::SPlaneFindingMode::HorizontalAndVertical:
+                            ArConfig_setPlaneFindingMode(m_pARSession, ARConfig, AR_PLANE_FINDING_MODE_HORIZONTAL_AND_VERTICAL);
+                            break;
+                    }
+
+                    switch(m_pARSettings->m_LightEstimation)
+                    {
+                        case Scpt::CARSettingsScript::SLightingEstimation::Disabled:
+                            ArConfig_setLightEstimationMode(m_pARSession, ARConfig, AR_LIGHT_ESTIMATION_MODE_DISABLED);
+                            break;
+                        case Scpt::CARSettingsScript::SLightingEstimation::AmbientIntensity:
+                            ArConfig_setLightEstimationMode(m_pARSession, ARConfig, AR_LIGHT_ESTIMATION_MODE_AMBIENT_INTENSITY);
+                            break;
+                        case Scpt::CARSettingsScript::SLightingEstimation::HDREnvironment:
+                            ArConfig_setLightEstimationMode(m_pARSession, ARConfig, AR_LIGHT_ESTIMATION_MODE_ENVIRONMENTAL_HDR);
+                            break;
+                    }
+                }
+
+                ArSession_configure(m_pARSession, ARConfig);
+            }
         }
     }
 } // namespace

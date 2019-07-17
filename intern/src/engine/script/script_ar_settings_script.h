@@ -9,6 +9,30 @@ namespace Scpt
     {
     public:
 
+        struct SPlaneFindingMode
+        {
+            enum Enum
+            {
+                Disabled,
+                Horizontal,
+                Vertical,
+                HorizontalAndVertical,
+            };
+        };
+
+        struct SLightingEstimation
+        {
+            enum Enum
+            {
+                Disabled,
+                AmbientIntensity,
+                HDREnvironment,
+            };
+        };
+
+        SPlaneFindingMode::Enum m_PlaneFindingMode = SPlaneFindingMode::HorizontalAndVertical;
+        SLightingEstimation::Enum m_LightEstimation = SLightingEstimation::HDREnvironment;
+
         bool m_HidePlanesAndPointsOnFirstMarker = true;
         bool m_RenderPlanes = true;
         bool m_RenderPoints = true;

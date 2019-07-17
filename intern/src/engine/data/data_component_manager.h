@@ -19,6 +19,12 @@
 #include <unordered_map>
 #include <vector>
 
+// -----------------------------------------------------------------------------
+// This define is only necessary on Android because th hash-code can be
+// different between different shared libraries. The name stays the same.
+// TODO: Find out why this behavior happens and how to solve it more
+// 	     efficiently.
+// -----------------------------------------------------------------------------
 #ifdef PLATFORM_ANDROID
 #define COMPONENT_MANAGER_MAPTYPE_BY_NAME
 #endif // PLATFORM_ANDROID

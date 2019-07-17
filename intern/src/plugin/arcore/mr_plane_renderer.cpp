@@ -571,13 +571,13 @@ namespace
 
     void CMRPlaneRenderer::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (!Base::CTypeInfo::IsEqual(_pComponent->GetTypeInfo(), Base::CTypeInfo::Get<Dt::CScriptComponent>())) return;
+        if (!Base::CTypeInfo::IsEqualName(_pComponent->GetTypeInfo(), Base::CTypeInfo::Get<Dt::CScriptComponent>())) return;
 
         auto* pScriptComponent = static_cast<Dt::CScriptComponent*>(_pComponent);
 
         if (!pScriptComponent->IsActiveAndUsable()) return;
 
-        if (Base::CTypeInfo::IsEqual(pScriptComponent->GetScriptTypeInfo(), Base::CTypeInfo::Get<Scpt::CARSettingsScript>()))
+        if (Base::CTypeInfo::IsEqualName(pScriptComponent->GetScriptTypeInfo(), Base::CTypeInfo::Get<Scpt::CARSettingsScript>()))
         {
             auto pARSettings = static_cast<Scpt::CARSettingsScript*>(pScriptComponent);
 

@@ -23,7 +23,13 @@ namespace CORE
         template<class T>
         static BInfo Get(const T& _rValue);
 
-		static bool IsEqual(const BInfo& _rLeft, const BInfo& _rRight);
+		// -----------------------------------------------------------------------------
+		// This function is only necessary on Android because th hash-code can be
+		// different between different shared libraries. The name stays the same.
+		// TODO: Find out why this behavior happens and how to solve it more
+		//       efficiently.
+		// -----------------------------------------------------------------------------
+		static bool IsEqualName(const BInfo& _rLeft, const BInfo& _rRight);
     };
 } // namespace CORE
 
@@ -45,13 +51,8 @@ namespace CORE
 
 	// -----------------------------------------------------------------------------
 
-	inline bool CTypeInfo::IsEqual(const BInfo& _rLeft, const BInfo& _rRight)
+	inline bool CTypeInfo::IsEqualName(const BInfo& _rLeft, const BInfo& _rRight)
 	{
-#ifdef PLATFORM_ANDROID
 		return std::string(_rLeft.name()) == std::string(_rRight.name());
-#else
-		return _rLeft == _rRight;
-#endif // PLATFORM_ANDROID
-
 	}
 } // namespace CORE
