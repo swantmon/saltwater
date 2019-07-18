@@ -20,6 +20,10 @@ namespace
 namespace FutoGCV
 {
     //---Constructors & Destructor---
+    CFGI::CFGI()
+    {
+    }
+
     CFGI::CFGI(const glm::ivec2& OutputSize)
     {
         //---Initialize Shader Manager---
@@ -71,6 +75,7 @@ namespace FutoGCV
 
     void CFGI::FGI(Gfx::CTexturePtr Output_HR, const Gfx::CTexturePtr Input_SparseHR, const Gfx::CTexturePtr Guide_HR)
     {
+
         /*
             * Input_SparseHR = Input_HR_Interpolation .* Mask <- Already masked before transmitted
 

@@ -638,7 +638,6 @@ namespace Stereo
 
 
 
-            ColorGuidedFGS();
             
         }
         else
@@ -735,10 +734,6 @@ namespace Stereo
         Gfx::Performance::EndEvent();
     }
 
-    void CPluginInterface::ColorGuidedFGS()
-    {
-        
-    }
 
     // -----------------------------------------------------------------------------
 

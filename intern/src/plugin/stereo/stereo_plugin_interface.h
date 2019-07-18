@@ -117,7 +117,7 @@ namespace Stereo
         //---03 Disparity Up-Sampling---
         FutoGCV::CFGI m_FGI_UpSampler;
 
-        void ColorGuidedFGS();
+        //void ColorGuidedFGS();
 
         //---03 Disparity to Depth in Rectified Current Image---
         void imp_Disp2Depth(); 

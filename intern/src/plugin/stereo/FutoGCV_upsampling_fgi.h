@@ -21,6 +21,7 @@ namespace FutoGCV
     {
     //---Constructors & Destructor---
     public:
+        CFGI();
         CFGI(const glm::ivec2& OutputSize);
         ~CFGI();
 
