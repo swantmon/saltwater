@@ -115,9 +115,9 @@ namespace Stereo
         cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvConstBP_cuda;
 
         //---03 Disparity Up-Sampling---
-        FutoGCV::CFGI m_FGI_UpSampler;
+        Gfx::CTexturePtr m_Disp_HR_BiLinear_TexturePtr;
 
-        //void ColorGuidedFGS();
+        FutoGCV::CFGI m_FGI_UpSampler;
 
         //---03 Disparity to Depth in Rectified Current Image---
         void imp_Disp2Depth(); 

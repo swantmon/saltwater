@@ -28,7 +28,8 @@ void main()
 {
 	const ivec2 ImgSize = imageSize(cs_Out);
 
-	int ComputeRange = int(dot(ImgSize, g_Direction));
+	//const int ComputeRange = int(dot(ImgSize, g_Direction));
+	const int ComputeRange = 640;
 
 	float a[ComputeRange], b[ComputeRange], c[ComputeRange];
 	float c_Temp[ComputeRange], f_Temp[ComputeRange];

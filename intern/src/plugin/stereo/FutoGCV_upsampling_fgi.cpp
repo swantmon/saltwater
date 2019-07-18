@@ -15,6 +15,8 @@ namespace
     {
         return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
     }
+
+    Gfx::CTexturePtr Temp1_TexturePtr, Temp2_TexturePtr;
 }
 
 namespace FutoGCV
@@ -46,8 +48,8 @@ namespace FutoGCV
         TextureDesc.m_Semantic = Gfx::CTexture::UndefinedSemantic;
         TextureDesc.m_Format = Gfx::CTexture::R32_FLOAT; // 1 channels with 32-bit float.
 
-        m_Intermediate_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc);
-        m_Temp_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc);
+        Temp1_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc);
+        Temp2_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc);
 
         //---Initialize Buffer Manager---
         Gfx::SBufferDescriptor Param_BufferDesc = {};
@@ -68,9 +70,9 @@ namespace FutoGCV
     }
 
     //---Execute Functions---
-    void CFGI::FGS(Gfx::CTexturePtr Output, const Gfx::CTexturePtr Input, const Gfx::CTexturePtr Guide)
+    void CFGI::FGS(Gfx::CTexturePtr Output_TexturePtr, const Gfx::CTexturePtr Input_TexturePtr, const Gfx::CTexturePtr Guide_TexturePtr)
     {
-        WLS(Output, Input, Guide);
+        WLS_1D(Output_TexturePtr, Input_TexturePtr, Guide_TexturePtr);
     }
 
     void CFGI::FGI(Gfx::CTexturePtr Output_HR, const Gfx::CTexturePtr Input_SparseHR, const Gfx::CTexturePtr Guide_HR)
@@ -87,14 +89,13 @@ namespace FutoGCV
     }
 
     //---Assist Functions---
-    void CFGI::WLS(Gfx::CTexturePtr Output_TexturePtr, const Gfx::CTexturePtr Input_TexturePtr, const Gfx::CTexturePtr Guide_TexturePtr)
+    void CFGI::WLS_1D(Gfx::CTexturePtr Output_TexturePtr, const Gfx::CTexturePtr Input_TexturePtr, const Gfx::CTexturePtr Guide_TexturePtr)
     {
 
         const int WorkGroupsX = DivUp(Output_TexturePtr->GetNumberOfPixelsV(), TileSize_1D);
 
-        m_Intermediate_TexturePtr = Input_TexturePtr;
 
-        for (int iter = 0; iter < m_Iteration; iter++)
+        for (int iter = 1; iter <= m_Iteration; iter++)
         {
             float LamdaRatio = std::powf(m_Attenuation, static_cast<float>(m_Iteration - iter)) / (std::powf(m_Attenuation, static_cast<float>(m_Iteration)) - 1.0f);
             m_Param_WLS.m_Lamda = 1.5f * LamdaRatio * m_Lamda;
@@ -107,10 +108,19 @@ namespace FutoGCV
             Gfx::BufferManager::UploadBufferData(m_WLSParameter_BufferPtr, &m_Param_WLS);
 
             Gfx::ContextManager::SetShaderCS(m_FGS_CSPtr);
-            Gfx::ContextManager::SetImageTexture(0, m_Temp_TexturePtr);
-            Gfx::ContextManager::SetImageTexture(1, m_Intermediate_TexturePtr);
-            Gfx::ContextManager::SetImageTexture(2, Guide_TexturePtr);
+
             Gfx::ContextManager::SetConstantBuffer(0, m_WLSParameter_BufferPtr);
+
+            Gfx::ContextManager::SetImageTexture(0, Temp1_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(2, Guide_TexturePtr);
+            if (iter == 1)
+            {
+                Gfx::ContextManager::SetImageTexture(1, Input_TexturePtr);
+            }
+            else
+            {
+                Gfx::ContextManager::SetImageTexture(1, Temp2_TexturePtr);
+            }
 
             Gfx::ContextManager::Dispatch(WorkGroupsX, 1, 1);
 
@@ -127,10 +137,19 @@ namespace FutoGCV
             Gfx::BufferManager::UploadBufferData(m_WLSParameter_BufferPtr, &m_Param_WLS);
 
             Gfx::ContextManager::SetShaderCS(m_FGS_CSPtr);
-            Gfx::ContextManager::SetImageTexture(0, m_Intermediate_TexturePtr);
-            Gfx::ContextManager::SetImageTexture(1, m_Temp_TexturePtr);
-            Gfx::ContextManager::SetImageTexture(2, Guide_TexturePtr);
+
             Gfx::ContextManager::SetConstantBuffer(0, m_WLSParameter_BufferPtr);
+
+            Gfx::ContextManager::SetImageTexture(1, Temp1_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(2, Guide_TexturePtr);
+            if (iter == m_Iteration)
+            {
+                Gfx::ContextManager::SetImageTexture(0, Output_TexturePtr);
+            } 
+            else
+            {
+                Gfx::ContextManager::SetImageTexture(0, Temp2_TexturePtr);
+            }
 
             Gfx::ContextManager::Dispatch(WorkGroupsX, 1, 1);
 
@@ -139,8 +158,6 @@ namespace FutoGCV
             Gfx::Performance::EndEvent();
             //---Finish Vertical FGS1 in GLSL---
         }
-
-        Output_TexturePtr = m_Intermediate_TexturePtr;
 
     }
 

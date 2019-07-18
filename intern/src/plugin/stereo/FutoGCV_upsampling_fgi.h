@@ -32,19 +32,17 @@ namespace FutoGCV
 
     //---Assist Functions---
     private:
-        void WLS(Gfx::CTexturePtr OutputData, const Gfx::CTexturePtr InputData, const Gfx::CTexturePtr GuideData);
+        void WLS_1D(Gfx::CTexturePtr OutputData, const Gfx::CTexturePtr InputData, const Gfx::CTexturePtr GuideData);
     
     //---Members---
     private:
-        const float m_Lamda = 900.0f;
-        const int m_Iteration = 3;
-        const float m_Attenuation = 4.0f;
+        float m_Lamda = 900.0f;
+        int m_Iteration = 3;
+        float m_Attenuation = 4.0f;
         SFGSParameter m_Param_WLS;
 
         //---GLSL---
         Gfx::CShaderPtr m_FGS_CSPtr;
-
-        Gfx::CTexturePtr m_Intermediate_TexturePtr, m_Temp_TexturePtr;
 
         Gfx::CBufferPtr m_WLSParameter_BufferPtr;
     };
