@@ -67,7 +67,9 @@ namespace Stereo
             TextureDesc_DownSample.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
             TextureDesc_DownSample.m_Semantic = Gfx::CTexture::UndefinedSemantic;
             TextureDesc_DownSample.m_Format = Gfx::CTexture::R32_FLOAT; // 1 channels with 32-bit float.
-            m_Disp_DownSample_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DownSample);
+            m_Disp_LR_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DownSample);
+
+            
         }
         else
         {
@@ -595,36 +597,48 @@ namespace Stereo
 
         if (m_Is_Scaling)
         {
-            if (m_UpSample_Method == "BiLinear")
-            {
-                //---GPU Start---
-                Gfx::Performance::BeginEvent("Disparity Up-Sampling by BiLinear");
+            /*
+            Strategy Design
 
-                // Submit Data to Managers
-                Base::AABB2UInt TargetRect;
-                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_RectImgSize_DownSample.x, m_RectImgSize_DownSample.y));
-                Gfx::TextureManager::CopyToTexture2D(m_Disp_DownSample_TexturePtr, TargetRect, m_RectImgSize_DownSample.x, static_cast<const void*>(m_DispImg_Rect.data()));
+            * Add Hierarchical Structure
+            
+            * Option 1. LR Depth -> Up-Sampling by BiLinear -> Color Guided FGS -> HR Depth
 
-                // Connecting Managers (@CPU) & GLSL (@GPU)
-                Gfx::ContextManager::SetShaderCS(m_DispUpSampling_CSPtr);
-                Gfx::ContextManager::SetImageTexture(0, m_Disp_DownSample_TexturePtr);
-                Gfx::ContextManager::SetImageTexture(1, m_DispImg_Rect_TexturePtr);
+            * Option 2. LR Depth -> Up-Sampling by Color Guided Sparse-Input FGI -> HR Depth
 
-                // Start GPU Parallel Processing
-                const int WorkGroupsX = DivUp(m_RectImg_Curt.get_ImgSize().x, TileSize_2D);
-                const int WorkGroupsY = DivUp(m_RectImg_Curt.get_ImgSize().y, TileSize_2D);
+            * Option 3. Fusion HR Depth from Option 1. & Option 2.
+                * Still need to think about the strategy (Research Contribution !!!)
+                * Consensus Check + Weighted Average
+                * Weighted Least Square
 
-                Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+            */
+            // 
 
-                Gfx::ContextManager::ResetShaderCS();
+            //---Up-Sampling by BiLinear Interpolation---
+            Gfx::Performance::BeginEvent("BiLinear Up-Sampling");
 
-                Gfx::Performance::EndEvent();
-                //---GPU End---
-            }
-            else if (m_UpSample_Method == "FGI")
-            {
-                imp_UpSampling_FGS();
-            }
+            Base::AABB2UInt TargetRect;
+            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_RectImgSize_DownSample.x, m_RectImgSize_DownSample.y));
+            Gfx::TextureManager::CopyToTexture2D(m_Disp_LR_TexturePtr, TargetRect, m_RectImgSize_DownSample.x, static_cast<const void*>(m_DispImg_Rect.data()));
+
+            Gfx::ContextManager::SetShaderCS(m_UpSampling_BiLinear_CSPtr);
+            Gfx::ContextManager::SetImageTexture(0, m_Disp_LR_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(1, m_DispImg_Rect_TexturePtr);
+
+            const int WorkGroupsX = DivUp(m_RectImg_Curt.get_ImgSize().x, TileSize_2D);
+            const int WorkGroupsY = DivUp(m_RectImg_Curt.get_ImgSize().y, TileSize_2D);
+
+            Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+            Gfx::ContextManager::ResetShaderCS();
+
+            Gfx::Performance::EndEvent();
+
+            //---Color Guided FGS---
+
+
+
+            ColorGuidedFGS();
             
         }
         else
@@ -703,16 +717,13 @@ namespace Stereo
         TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_OrigImgSize.x, m_OrigImgSize.y));
         Gfx::TextureManager::CopyToTexture2D(m_DepthImg_Sensor_TexturePtr, TargetRect, m_OrigImgSize.x, static_cast<const void*>(m_DepthImg_Sensor.data()));
 
-        //---GPU Start---
         Gfx::Performance::BeginEvent("Compare Depth");
 
-        // Connecting Managers (@CPU) & GLSL (@GPU)
         Gfx::ContextManager::SetShaderCS(m_Compare_Depth_CSPtr);
         Gfx::ContextManager::SetImageTexture(0, m_DepthImg_Orig_TexturePtr);
         Gfx::ContextManager::SetImageTexture(1, m_DepthImg_Sensor_TexturePtr);
         Gfx::ContextManager::SetImageTexture(2, m_Depth_Difference_TexturePtr);
 
-        // Start GPU Parallel Processing
         const int WorkGroupsX = DivUp(m_OrigImgSize.x, TileSize_2D);
         const int WorkGroupsY = DivUp(m_OrigImgSize.y, TileSize_2D);
 
@@ -722,10 +733,9 @@ namespace Stereo
         Gfx::ContextManager::ResetImageTexture(1);
 
         Gfx::Performance::EndEvent();
-        // GPU End
     }
 
-    void CPluginInterface::imp_UpSampling_FGS()
+    void CPluginInterface::ColorGuidedFGS()
     {
         
     }
@@ -817,14 +827,12 @@ namespace Stereo
         m_DispRange = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:disparity_range", 128);
 
         //---03 Disparity to Depth in Rectified Current Image---
-        m_UpSample_Method = Core::CProgramParameters::GetInstance().Get("mr:stereo:03_disparity_3_depth:upsample_method", "BiLinear");
-
         std::stringstream DefineStream;
         DefineStream
             << "#define TILE_SIZE_2D " << TileSize_2D << " \n";
         std::string DefineString = DefineStream.str();
         m_Disp2Depth_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Disparity_to_Depth.glsl", "main", DefineString.c_str());
-        m_DispUpSampling_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Up_Sampling.glsl", "main", DefineString.c_str());
+        m_UpSampling_BiLinear_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/Scaling/cs_upsampling_bilinear.glsl", "main", DefineString.c_str());
 
         Gfx::SBufferDescriptor ParaxEq_BufferDesc = {};
         ParaxEq_BufferDesc.m_Stride = 0;

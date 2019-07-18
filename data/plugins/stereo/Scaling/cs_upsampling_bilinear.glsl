@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_CS_Up_Sampling_GLSL__
-#define __INCLUDE_CS_Up_Sampling_GLSL__
+#ifndef __INCLUDE_CS_Up_Sampling_BiLinear_GLSL__
+#define __INCLUDE_CS_Up_Sampling_BiLinear_GLSL__
 
 layout (binding = 0, r32f) readonly uniform image2D cs_Disp_DownSample; // Pixel in image2D is 32-bit float
 layout (binding = 1, r32f) writeonly uniform image2D cs_Disp_UpSample; // Pixel in image2D is 32-bit float
@@ -44,4 +44,4 @@ void main()
 	imageStore(cs_Disp_UpSample, ivec2(gl_GlobalInvocationID.xy), vec4(pixValue)); 
 }
 
-#endif //__INCLUDE_CS_Up_Sampling_GLSL__
+#endif //__INCLUDE_CS_Up_Sampling_BiLinear_GLSL__

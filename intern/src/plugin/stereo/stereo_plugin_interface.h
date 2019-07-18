@@ -14,6 +14,7 @@
 //---FutoGmtCV---
 #include "plugin\stereo\FutoGCV_Img.h"
 #include "plugin\stereo\FutoGCV_Rectification_Planar.h"
+#include "plugin\stereo\FutoGCV_upsampling_fgi.h"
 
 //---Basic Processing---
 #include <vector>
@@ -89,7 +90,7 @@ namespace Stereo
         FutoGCV::CPlanarRectification m_Rectifier_Planar; // Implement planar rectification
 
         bool m_Is_RectSubImg, m_Is_Scaling;
-        glm::uvec2 m_RectImgSize_Sub, m_RectImgSize_DownSample;
+        glm::ivec2 m_RectImgSize_Sub, m_RectImgSize_DownSample;
 
         //---02 Stereo Matching---
         void imp_StereoMatching();
@@ -113,10 +114,12 @@ namespace Stereo
         cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvBP_cuda;
         cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvConstBP_cuda;
 
-        //---03 Disparity to Depth in Rectified Current Image---
-        void imp_UpSampling_FGS();
-        std::string m_UpSample_Method; // Select method for disparity up-sampling
+        //---03 Disparity Up-Sampling---
+        FutoGCV::CFGI m_FGI_UpSampler;
 
+        void ColorGuidedFGS();
+
+        //---03 Disparity to Depth in Rectified Current Image---
         void imp_Disp2Depth(); 
 
         Gfx::CShaderPtr m_Disp2Depth_CSPtr;
@@ -124,8 +127,8 @@ namespace Stereo
         Gfx::CTexturePtr m_DepthImg_Rect_TexturePtr;
         Gfx::CBufferPtr m_ParaxEq_BufferPtr;
 
-        Gfx::CShaderPtr m_DispUpSampling_CSPtr;
-        Gfx::CTexturePtr m_Disp_DownSample_TexturePtr;
+        Gfx::CShaderPtr m_UpSampling_BiLinear_CSPtr;
+        Gfx::CTexturePtr m_Disp_LR_TexturePtr;
 
         //---04 Depth from Rectified to Original Current Image---
         void imp_Depth_Rect2Orig();

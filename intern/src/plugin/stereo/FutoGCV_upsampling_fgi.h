@@ -21,27 +21,31 @@ namespace FutoGCV
     {
     //---Constructors & Destructor---
     public:
-        CFGI();
+        CFGI(const glm::ivec2& OutputSize);
         ~CFGI();
 
     //---Execute Functions---
     public:
-        void WLS_Single(Gfx::CTexturePtr Output_HR, const Gfx::CTexturePtr Input_LR, const Gfx::CTexturePtr Guide_HR);
+        void FGS(Gfx::CTexturePtr Output, const Gfx::CTexturePtr Input, const Gfx::CTexturePtr Guide);
+        void FGI(Gfx::CTexturePtr Output_HR, const Gfx::CTexturePtr Input_SparseHR, const Gfx::CTexturePtr Guide_HR);
 
     //---Assist Functions---
     private:
-        void FGS(Gfx::CTexturePtr OutputData, const Gfx::CTexturePtr InputData, const Gfx::CTexturePtr GuideData);
+        void WLS(Gfx::CTexturePtr OutputData, const Gfx::CTexturePtr InputData, const Gfx::CTexturePtr GuideData);
     
     //---Members---
     private:
-        const float m_Lamda_FGS1 = 900.f;
-        const int m_Iteration_FGS1 = 3;
-        const int m_Attenuation_FGS1 = 4;
-        SFGSParameter m_Param_FGS1;
+        const float m_Lamda = 900.0f;
+        const int m_Iteration = 3;
+        const float m_Attenuation = 4.0f;
+        SFGSParameter m_Param_WLS;
 
         //---GLSL---
         Gfx::CShaderPtr m_FGS_CSPtr;
-        Gfx::CBufferPtr m_FGSParameter_BufferPtr;
+
+        Gfx::CTexturePtr m_Intermediate_TexturePtr, m_Temp_TexturePtr;
+
+        Gfx::CBufferPtr m_WLSParameter_BufferPtr;
     };
 } // namespace FutoGCV
 
