@@ -24,7 +24,7 @@ namespace FutoGCV
     //---Constructor & Destructor---
     public:
         CPlanarRectification();
-        CPlanarRectification(const glm::uvec2& ImgSize_Orig, const glm::uvec2& ImgSize_Rect = glm::uvec2(0), const glm::uvec2& ImgSize_DownSample = glm::uvec2(0));
+        CPlanarRectification(const glm::ivec2& ImgSize_Orig, const glm::ivec2& ImgSize_Rect = glm::ivec2(0), const glm::ivec2& ImgSize_DownSample = glm::ivec2(0));
         ~CPlanarRectification();
 
     //---Execution Functions---
@@ -56,7 +56,7 @@ namespace FutoGCV
     private:
         //---Image Data---
         CFutoImg m_Img_Rect_B, m_Img_Rect_M; // Rectified Images
-        glm::uvec2 m_ImgSize_Rect, m_ImgSize_DownSample;
+        glm::ivec2 m_ImgSize_Rect, m_ImgSize_DownSample;
         bool m_Is_FixSize, m_Is_DownSample;
 
         //---Homography---

@@ -22,7 +22,7 @@ namespace FutoGCV
     {
     }
 
-    CPlanarRectification::CPlanarRectification(const glm::uvec2& ImgSize_Orig, const glm::uvec2& ImgSize_Rect, const glm::uvec2& ImgSize_DownSample)
+    CPlanarRectification::CPlanarRectification(const glm::ivec2& ImgSize_Orig, const glm::ivec2& ImgSize_Rect, const glm::ivec2& ImgSize_DownSample)
         : m_ImgSize_Rect(ImgSize_Rect),
           m_ImgSize_DownSample(ImgSize_DownSample)
     {
@@ -67,7 +67,7 @@ namespace FutoGCV
         m_OrigImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_OrigImg);
         m_OrigImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_OrigImg);
 
-        if (m_ImgSize_Rect == glm::uvec2(0))
+        if (m_ImgSize_Rect == glm::ivec2(0))
         {
             m_Is_FixSize = false;
         }
@@ -86,7 +86,7 @@ namespace FutoGCV
             m_RectImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
         }
 
-        if (m_ImgSize_DownSample == glm::uvec2(0))
+        if (m_ImgSize_DownSample == glm::ivec2(0))
         {
             m_Is_DownSample = false;
         }

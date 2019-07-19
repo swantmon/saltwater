@@ -1,9 +1,7 @@
 
 //---Engine---
 #include "plugin/stereo/stereo_precompiled.h"
-
 #include "engine/engine.h"
-
 #include "plugin/stereo/stereo_plugin_interface.h"
 
 //---Config---
@@ -52,7 +50,7 @@ namespace Stereo
         } 
         else if (m_Is_Scaling)
         {
-            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, glm::uvec2(0), m_RectImgSize_DownSample);
+            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, glm::ivec2(0), m_RectImgSize_DownSample);
 
             m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_DownSample.x, m_RectImgSize_DownSample.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
 
@@ -129,8 +127,8 @@ namespace Stereo
     void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::vec2& _FocalLength, const glm::vec2& _FocalPoint, const std::vector<uint16_t>& _rDepthImage)
     {
         //---Setting Orientations from ARKit---
-        glm::mat3 CamMtx = glm::mat3(_FocalLength.x, 0, 0, 0, _FocalLength.y, 0, _FocalPoint.x, _FocalPoint.y, 1) * m_FrameResolution; // Intrinsic should be modified according to frame resolution.
-        CamMtx[1].x = 0; // No skew
+        glm::mat3 CamMtx = glm::mat3(_FocalLength.x, 0, 0, 0, _FocalLength.y, 0, _FocalPoint.x, _FocalPoint.y, 1); 
+        CamMtx *= m_FrameResolution; // Intrinsic should be modified according to frame resolution.
         CamMtx[2].z = 1; // Last element should keep 1 because of homogeneous coordinates
 
         glm::mat3 RotMtx = glm::transpose(glm::mat3(_Transform));// ARKit's Rotation is Camera2World (Computer Graphics), but we need Rotation as World2Camera (Computer Vision).
@@ -597,7 +595,9 @@ namespace Stereo
 
         if (m_Is_Scaling)
         {
+
             /*
+
             Strategy Design
 
             * Add Hierarchical Structure
@@ -608,11 +608,9 @@ namespace Stereo
 
             * Option 3. Fusion HR Depth from Option 1. & Option 2.
                 * Still need to think about the strategy (Research Contribution !!!)
-                * Consensus Check + Weighted Average
-                * Weighted Least Square
+                * Consensus Check + Weighted Average / Weighted Least Square
 
             */
-            // 
 
             //---Up-Sampling by BiLinear Interpolation---
             {
