@@ -400,7 +400,12 @@ namespace MR
                 BASE_THROWM("Unknown data source for SLAM plugin");
             }
 
-            m_SendInpaintedResult = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:send_result", true);
+            m_SendInpaintedResult = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:send_result", false);
+
+            if (m_SendInpaintedResult)
+            {
+                BASE_THROWM("Sending the result is not supported at the moment.");
+            }
 
             m_pPlaneColorizer = std::make_unique<MR::CPlaneColorizer>(&m_Reconstructor);
 
@@ -543,10 +548,11 @@ namespace MR
                 rControl.Update();
             }
 
+            /* Sending the result does not work at the moment
             if (m_SendInpaintedResult && Net::CNetworkManager::GetInstance().IsConnected(m_SLAMSocket))
             {
                 SendInpaintedResult();
-            }
+            }*/
 
             if (m_StreamState == STREAM_DIMINSIHED)
             {
@@ -925,17 +931,15 @@ namespace MR
                 else if (m_StreamState == STREAM_DIMINSIHED)
                 {
                     m_PreliminaryPoseMatrix = *reinterpret_cast<glm::mat4*>(Decompressed.data() + sizeof(int32_t)) * glm::eulerAngleX(glm::pi<float>());
-                }                
+                }
             }
             else if (MessageType == DEPTHFRAME)
             {
                 //int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
                 //int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
 
-                m_DepthIntrinsics.m_FocalLength.x = *reinterpret_cast<float*>(Decompressed.data() + 3 * sizeof(int32_t));
-                m_DepthIntrinsics.m_FocalLength.y = *reinterpret_cast<float*>(Decompressed.data() + 4 * sizeof(int32_t));
-                m_DepthIntrinsics.m_FocalPoint.x = *reinterpret_cast<float*>(Decompressed.data() + 5 * sizeof(int32_t));
-                m_DepthIntrinsics.m_FocalPoint.y = *reinterpret_cast<float*>(Decompressed.data() + 6 * sizeof(int32_t));
+                m_DepthIntrinsics.m_FocalLength = *reinterpret_cast<glm::vec2*>(Decompressed.data() + 3 * sizeof(int32_t));
+                m_DepthIntrinsics.m_FocalPoint = *reinterpret_cast<glm::vec2*>(Decompressed.data() + 3 * sizeof(int32_t) + sizeof(glm::vec2));
 
                 const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 7 * sizeof(int32_t));
 
@@ -1123,10 +1127,8 @@ namespace MR
             const int32_t Width = *reinterpret_cast<const int32_t*>(_rData.data() + sizeof(int32_t));
             const int32_t Height = *reinterpret_cast<const int32_t*>(_rData.data() + 2 * sizeof(int32_t));
 
-            m_ColorIntrinsics.m_FocalLength.x = *reinterpret_cast<const float*>(_rData.data() + 3 * sizeof(int32_t));
-            m_ColorIntrinsics.m_FocalLength.y = *reinterpret_cast<const float*>(_rData.data() + 4 * sizeof(int32_t));
-            m_ColorIntrinsics.m_FocalPoint.x = *reinterpret_cast<const float*>(_rData.data() + 5 * sizeof(int32_t));
-            m_ColorIntrinsics.m_FocalPoint.y = *reinterpret_cast<const float*>(_rData.data() + 6 * sizeof(int32_t));
+            m_ColorIntrinsics.m_FocalLength = *reinterpret_cast<const glm::vec2*>(_rData.data() + 3 * sizeof(int32_t));
+            m_ColorIntrinsics.m_FocalPoint = *reinterpret_cast<const glm::vec2*>(_rData.data() + 3 * sizeof(int32_t) + sizeof(glm::vec2));
 
             m_DeviceProjectionMatrix = *reinterpret_cast<const glm::mat4*>(_rData.data() + 7 * sizeof(int32_t));
 
@@ -1258,7 +1260,8 @@ namespace MR
 
             m_RegisterDepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_register_depth.glsl", "main", DefineString.c_str());
             m_32To16BitCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_32To16Bit.glsl", "main", DefineString.c_str());
-
+            
+            /* Sending the result does not work at the moment
             if (m_SendInpaintedResult)
             {
                 m_PixelBufferSize = m_DeviceResolution.x * m_DeviceResolution.y * 4;
@@ -1268,11 +1271,10 @@ namespace MR
 
                 glNamedBufferStorage(m_PixelDataBuffer, m_PixelBufferSize * 3, nullptr, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT);
                 m_pGPUPixelData = glMapNamedBufferRange(m_PixelDataBuffer, 0, m_PixelBufferSize * 3, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT);
-            }
+            }*/
 
-            auto Components = Dt::CComponentManager::GetInstance().GetComponents<Dt::CScriptComponent>();
-
-            /*for (auto Component : Components)
+/*            auto Components = Dt::CComponentManager::GetInstance().GetComponents<Dt::CScriptComponent>();
+            for (auto Component : Components)
             {
                 auto pScriptComponent = static_cast<Dt::CScriptComponent*>(Component);
 
