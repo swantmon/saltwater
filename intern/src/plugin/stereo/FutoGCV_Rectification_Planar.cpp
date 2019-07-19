@@ -380,7 +380,7 @@ namespace FutoGCV
         m_Homography_M.m_RectImgConer_UL = RectImgConerUL;
         m_Homography_M.m_RectImgConer_DR = RectImgConerDR;
 
-        glm::uvec2 RectPlane = m_Homography_B.m_RectImgConer_DR - m_Homography_B.m_RectImgConer_UL;
+        glm::ivec2 RectPlane = m_Homography_B.m_RectImgConer_DR - m_Homography_B.m_RectImgConer_UL;
 
         if (RectPlane.x > 5000 || RectPlane.y > 5000)
         {

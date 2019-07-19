@@ -622,7 +622,7 @@ namespace Stereo
 
                 Gfx::ContextManager::SetShaderCS(m_UpSampling_BiLinear_CSPtr);
                 Gfx::ContextManager::SetImageTexture(0, m_Disp_LR_TexturePtr);
-                Gfx::ContextManager::SetImageTexture(1, m_Disp_HR_BiLinear_TexturePtr);
+                Gfx::ContextManager::SetImageTexture(1, m_DispImg_Rect_TexturePtr);
 
                 const int WorkGroupsX = DivUp(m_RectImg_Curt.get_ImgSize().x, TileSize_2D);
                 const int WorkGroupsY = DivUp(m_RectImg_Curt.get_ImgSize().y, TileSize_2D);
@@ -635,17 +635,18 @@ namespace Stereo
             }
 
             //---Color Guided FGS---
+            /*
             {
                 m_FGI_UpSampler = FutoGCV::CFGI(m_RectImg_Curt.get_ImgSize());
 
                 Base::AABB2UInt TargetRect;
-                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_RectImg_Curt.get_ImgSize().x, m_RectImg_Curt.get_ImgSize().y));
-                std::vector<float> Temp_RectImg(m_RectImg_Curt.get_Img().begin(), m_RectImg_Curt.get_Img().end());
+                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_RectImg_Curt.get_ImgSize()));
+                std::vector<float> Temp_RectImg = std::vector<float>::vector(m_RectImg_Curt.get_Img().begin(), m_RectImg_Curt.get_Img().end());
                 Gfx::TextureManager::CopyToTexture2D(Temp_RectImg_TexturePtr, TargetRect, m_RectImg_Curt.get_ImgSize().x, static_cast<const void*>(Temp_RectImg.data()));
 
                 m_FGI_UpSampler.FGS(m_DispImg_Rect_TexturePtr, m_Disp_HR_BiLinear_TexturePtr, Temp_RectImg_TexturePtr);
             }
-
+            */
         }
         else
         {
@@ -708,7 +709,7 @@ namespace Stereo
         Gfx::Performance::EndEvent();
         // GPU End
 
-        const uint MemSize = m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsU() * m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t);
+        const auto MemSize = m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsU() * m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t);
         m_DepthImg_Orig.resize(MemSize);
         Gfx::TextureManager::CopyTextureToCPU(m_DepthImg_Orig_TexturePtr, m_DepthImg_Orig.data());
         glm::mat4 Transform = glm::mat4(glm::transpose(m_OrigImg_Curt.get_Rot()));
