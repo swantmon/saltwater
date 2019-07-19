@@ -128,8 +128,6 @@ namespace Stereo
     {
         //---Setting Orientations from ARKit---
         glm::mat3 CamMtx = glm::mat3(_FocalLength.x, 0, 0, 0, _FocalLength.y, 0, _FocalPoint.x, _FocalPoint.y, 1); 
-        CamMtx *= m_FrameResolution; // Intrinsic should be modified according to frame resolution.
-        CamMtx[2].z = 1; // Last element should keep 1 because of homogeneous coordinates
 
         glm::mat3 RotMtx = glm::transpose(glm::mat3(_Transform));// ARKit's Rotation is Camera2World (Computer Graphics), but we need Rotation as World2Camera (Computer Vision).
 
@@ -266,11 +264,6 @@ namespace Stereo
             }
 
             //---Return Depth to plugin_slam---
-            const int MemCpySize = m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsU() * m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t);
-            std::vector<char> DepthImage(MemCpySize);
-            Gfx::TextureManager::CopyTextureToCPU(m_DepthImg_Orig_TexturePtr, DepthImage.data());
-            glm::mat4 Transform = glm::mat4(glm::transpose(m_OrigImg_Curt.get_Rot()));
-            Transform[3] = glm::vec4(m_OrigImg_Curt.get_PC(), 1.0f);
 
             //---Test: Apply cvFGS---
             /*
@@ -291,7 +284,7 @@ namespace Stereo
             }
             */
 
-            m_Delegate.Notify(m_OrigImg_Curt.get_Img(), DepthImage, Transform, _FocalLength, _FocalPoint);
+            m_Delegate.Notify(_rRGBImage, m_DepthImg_Orig, _Transform, _FocalLength, _FocalPoint);
 
             if (m_Is_ExportDepth)
             {
@@ -712,10 +705,6 @@ namespace Stereo
         const auto MemSize = m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsU() * m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t);
         m_DepthImg_Orig.resize(MemSize);
         Gfx::TextureManager::CopyTextureToCPU(m_DepthImg_Orig_TexturePtr, m_DepthImg_Orig.data());
-        glm::mat4 Transform = glm::mat4(glm::transpose(m_OrigImg_Curt.get_Rot()));
-        Transform[3] = glm::vec4(m_OrigImg_Curt.get_PC(), 1.0f);
-
-        //m_Delegate.Notify(m_OrigImg_Curt.get_Img(), m_DepthImg_Orig, Transform);
     }
 
     void CPluginInterface::cmp_Depth()
