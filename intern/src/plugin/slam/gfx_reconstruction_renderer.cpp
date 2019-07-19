@@ -1057,9 +1057,7 @@ namespace
 
         MR::SReconstructionSettings Settings;
         m_pReconstructor->GetReconstructionSettings(&Settings);
-
-        glm::mat4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
-
+        
         ContextManager::SetShaderVS(m_RaycastVSPtr);
         ContextManager::SetShaderPS(m_RaycastFSPtr);
 
@@ -1146,9 +1144,7 @@ namespace
 
         MR::SReconstructionSettings Settings;
         m_pReconstructor->GetReconstructionSettings(&Settings);
-
-        glm::mat4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
-
+        
         ContextManager::SetShaderVS(m_RaycastVSPtr);
         ContextManager::SetShaderPS(m_RaycastHighlightFSPtr);
 
@@ -2147,8 +2143,6 @@ namespace
 
             MR::SReconstructionSettings Settings;
             m_pReconstructor->GetReconstructionSettings(&Settings);
-
-            glm::mat4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
 
             ContextManager::SetShaderVS(m_RaycastVSPtr);
             ContextManager::SetShaderPS(m_RaycastHitProxyFSPtr);

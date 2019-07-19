@@ -180,14 +180,14 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Recording
         // -----------------------------------------------------------------------------
-        enum ERecordMode
+        enum EPlayMode
         {
             NONE,
             PLAY,
-            RECORD,
+            LOAD_SCENE,
         };
         
-        ERecordMode m_RecordMode = NONE;
+        EPlayMode m_PlayMode = NONE;
 
         std::fstream m_RecordFile;
         std::unique_ptr<Base::CRecordWriter> m_pRecordWriter;
@@ -197,7 +197,7 @@ namespace MR
         std::unique_ptr<Base::CRecordWriter> m_pTempRecordWriter;
         std::string m_TempRecordPath;
 
-		int m_NumberOfExtractedFrame;
+		int m_NumberOfExtractedFrames;
 
 		bool m_ExtractStream;
 
@@ -292,8 +292,8 @@ namespace MR
 			// -----------------------------------------------------------------------------
 			// Settings
 			// -----------------------------------------------------------------------------
-			m_ExtractStream = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:extract_stream", false);
-			m_NumberOfExtractedFrame = 0;
+			m_ExtractStream = Core::CProgramParameters::GetInstance().Get("mr:file_storing:extract_stream", false);
+			m_NumberOfExtractedFrames = 0;
 
             // -----------------------------------------------------------------------------
             // Determine where we get our data from
@@ -428,6 +428,7 @@ namespace MR
             m_pPlaneColorizer = std::make_unique<MR::CPlaneColorizer>(&m_Reconstructor);
 
             m_TempRecordPath = Core::AssetManager::GetPathToAssets() + "/recordings/" + "_temp_recording.swr";
+            m_TempRecordFile.open(m_TempRecordPath , std::fstream::out | std::fstream::binary | std::fstream::trunc);
             m_TempRecordFile.open(m_TempRecordPath , std::fstream::out | std::fstream::binary);
 
             m_UseStereoMatching = Core::CProgramParameters::GetInstance().Get("mr:stereo:enable", true);
@@ -521,13 +522,13 @@ namespace MR
             // -----------------------------------------------------------------------------
             // Playing
             // -----------------------------------------------------------------------------
-            if (m_RecordMode == PLAY && m_pRecordReader != nullptr)
+            if ((m_PlayMode == PLAY || m_PlayMode == LOAD_SCENE) && m_pRecordReader != nullptr)
             {
                 m_pRecordReader->Update();
 
                 if (m_pRecordReader->IsEnd())
                 {
-                    m_RecordMode = NONE;
+                    m_PlayMode = NONE;
                     m_UseTrackingCamera = false;
                 }
 
@@ -583,12 +584,7 @@ namespace MR
             if (m_UseTrackingCamera)
             {
                 auto& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
-
-                // -----------------------------------------------------------------------------
-                // Projection
-                // -----------------------------------------------------------------------------
-                rControl.SetProjectionMatrix(glm::transpose(m_DeviceProjectionMatrix));
-
+                
                 // -----------------------------------------------------------------------------
                 // View
                 // -----------------------------------------------------------------------------
@@ -657,6 +653,9 @@ namespace MR
 
         void SetRecordFile(const std::string& _rFileName, float _Speed = 1.0f)
         {
+            m_TempRecordFile = std::fstream(m_TempRecordPath, std::fstream::out | std::fstream::binary);
+            m_pTempRecordWriter = std::make_unique<Base::CRecordWriter>(m_TempRecordFile, 1);
+
             m_RecordFile = std::fstream(_rFileName, std::fstream::in | std::fstream::binary);
 
             if (!m_RecordFile.is_open())
@@ -705,9 +704,9 @@ namespace MR
 
         void SetIsPlaying(bool _Flag)
         {
-            if (m_RecordMode != RECORD)
+            if (m_PlayMode != LOAD_SCENE)
             {
-                m_RecordMode = _Flag ? PLAY : NONE;
+                m_PlayMode = _Flag ? PLAY : NONE;
             }
         }
 
@@ -832,14 +831,14 @@ namespace MR
 
             try
             {
-                SetRecordFile(RecordFileName, 10000.0f);
+                SetRecordFile(RecordFileName, Core::CProgramParameters::GetInstance().Get("mr:file_storing:scene_load_speed", 10000.0f));
             }
             catch (...)
             {
                 BASE_THROWM(("The slam data could be loaded because " + RecordFileName + " was not found").c_str());
             }
 
-            m_RecordMode = PLAY;
+            m_PlayMode = LOAD_SCENE;
         }
 
         // -----------------------------------------------------------------------------
@@ -1071,7 +1070,7 @@ namespace MR
 
                         if (m_ExtractStream)
                         {
-                            auto FrameString = std::to_string(m_NumberOfExtractedFrame);
+                            auto FrameString = std::to_string(m_NumberOfExtractedFrames ++);
 
                             auto PathToDepthTexture = Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_depth.raw";
                             auto PathToColorTexture = Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_color.png";
@@ -1086,8 +1085,6 @@ namespace MR
                             PoseMatrixStream.write((char*)(&m_ColorIntrinsics.m_FocalPoint), sizeof(m_ColorIntrinsics.m_FocalPoint));
 
                             PoseMatrixStream.close();
-
-                            ++m_NumberOfExtractedFrame;
                         }
                     }
                 }
@@ -1225,6 +1222,13 @@ namespace MR
             Gfx::ContextManager::SetImageTexture(2, m_RGBATexture);
 
             Gfx::ContextManager::Dispatch(DivUp(m_ColorSize.x, m_TileSize2D), DivUp(m_ColorSize.y, m_TileSize2D), 1);
+
+            if (m_UseTrackingCamera)
+            {
+                auto& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
+
+                rControl.SetProjectionMatrix(glm::transpose(m_DeviceProjectionMatrix));
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -1351,6 +1355,20 @@ namespace MR
                 m_pGPUPixelData = glMapNamedBufferRange(m_PixelDataBuffer, 0, m_PixelBufferSize * 3, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT);
             }
 
+            auto Components = Dt::CComponentManager::GetInstance().GetComponents<Dt::CScriptComponent>();
+
+            /*for (auto Component : Components)
+            {
+                auto pScriptComponent = static_cast<Dt::CScriptComponent*>(Component);
+
+                if (pScriptComponent->GetScriptTypeID() == Base::CTypeInfo::GetTypeID<Scpt::CSLAMScript>())
+                {
+                    auto pSLAMScript = static_cast<Scpt::CSLAMScript*>(pScriptComponent);
+
+                    // ...
+                }
+            }*/
+
             ENGINE_CONSOLE_INFO("Initialization complete");
         }
 
@@ -1408,16 +1426,6 @@ namespace MR
             
             if (_rMessage.m_MessageType == 0)
             {
-                if (m_RecordMode == RECORD)
-                {
-                    if (m_pRecordWriter == nullptr)
-                    {
-                        m_pRecordWriter = std::make_unique<Base::CRecordWriter>(m_RecordFile, 1);
-                    }
-
-                    WriteMessage(*m_pRecordWriter, _rMessage);
-                }
-
                 if (m_pTempRecordWriter == nullptr)
                 {
                     m_pTempRecordWriter = std::make_unique<Base::CRecordWriter>(m_TempRecordFile, 1);
