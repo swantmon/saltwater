@@ -284,20 +284,17 @@ namespace Stereo
 
             //---Return Depth to plugin_slam---
 
-            uint16_t test, Test;
-            for (auto iter = m_DepthImg_Orig.begin(); iter != m_DepthImg_Orig.end(); iter++)
-            {
-                test = *iter;
-                if (test > 1)
-                {
-                    Test = test;
-                }
-            }
+            // Return Depth from Stereo Matching
+            std::vector<char> Depth_SM(m_DepthImg_Orig.size() * sizeof(m_DepthImg_Orig[0]), 0);
+            memcpy(Depth_SM.data(), m_DepthImg_Orig.data(), m_DepthImg_Orig.size() * sizeof(m_DepthImg_Orig[0]));
+            // Return Depth from Stereo Matching
 
+            // Test: Return Depth from Structure Sensor
             std::vector<char> Depth_Sensor(_rDepthImage.size() * sizeof(_rDepthImage[0]), 0);
             memcpy(Depth_Sensor.data(), _rDepthImage.data(), _rDepthImage.size() * sizeof(_rDepthImage[0]));
+            // Test by Depth from Structure Sensor
 
-            m_Delegate.Notify(_rRGBImage, Depth_Sensor, _Transform, _FocalLength, _FocalPoint);
+            m_Delegate.Notify(_rRGBImage, Depth_SM, _Transform, _FocalLength, _FocalPoint);
 
             if (m_Is_ExportDepth)
             {
@@ -784,7 +781,8 @@ namespace Stereo
     void CPluginInterface::export_Depth()
     {
         std::string ExportStr;
-        uint MemCpySize = 0;
+
+        int MemCpySize = 0;
 
         cv::Mat cvDepthImg_Orig(m_OrigImg_Curt.get_ImgSize().y, m_OrigImg_Curt.get_ImgSize().x, CV_16UC1);
 

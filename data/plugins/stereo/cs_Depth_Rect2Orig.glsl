@@ -46,7 +46,7 @@ void main()
 	float Depth = BiLinearInterpolation(pix_Rect);
 
 	ivec2 Coords = ivec2(gl_GlobalInvocationID.xy);
-	Coords.x = imageSize(cs_Depth_OrigImg).x - Coords.x;
+	//Coords.x = imageSize(cs_Depth_OrigImg).x - Coords.x;
 	imageStore(cs_Depth_OrigImg, Coords, uvec4(Depth)); 
 }
 
