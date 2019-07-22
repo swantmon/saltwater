@@ -76,7 +76,7 @@ namespace Stereo
         if (m_StereoMatching_Mode == "Tile")
         {
             const auto Tile_Size = m_OrigImgSize.x < m_OrigImgSize.y ? m_OrigImgSize.x : m_OrigImgSize.y;;
-            const auto BufferPix = int(Tile_Size * 0.1);
+            const auto BufferPix = static_cast <int>(Tile_Size * 0.1);
             const auto BuffTile_Size = Tile_Size + 2 * BufferPix;
             m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(BuffTile_Size, BuffTile_Size, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
         }
@@ -263,8 +263,6 @@ namespace Stereo
                 cmp_Depth();
             }
 
-            //---Return Depth to plugin_slam---
-
             //---Test: Apply cvFGS---
             /*
             {
@@ -284,7 +282,22 @@ namespace Stereo
             }
             */
 
-            m_Delegate.Notify(_rRGBImage, m_DepthImg_Orig, _Transform, _FocalLength, _FocalPoint);
+            //---Return Depth to plugin_slam---
+
+            uint16_t test, Test;
+            for (auto iter = m_DepthImg_Orig.begin(); iter != m_DepthImg_Orig.end(); iter++)
+            {
+                test = *iter;
+                if (test > 1)
+                {
+                    Test = test;
+                }
+            }
+
+            std::vector<char> Depth_Sensor(_rDepthImage.size() * sizeof(_rDepthImage[0]), 0);
+            memcpy(Depth_Sensor.data(), _rDepthImage.data(), _rDepthImage.size() * sizeof(_rDepthImage[0]));
+
+            m_Delegate.Notify(_rRGBImage, Depth_Sensor, _Transform, _FocalLength, _FocalPoint);
 
             if (m_Is_ExportDepth)
             {
@@ -704,7 +717,7 @@ namespace Stereo
 
         const auto MemSize = m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsU() * m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t);
         m_DepthImg_Orig.resize(MemSize);
-        Gfx::TextureManager::CopyTextureToCPU(m_DepthImg_Orig_TexturePtr, m_DepthImg_Orig.data());
+        Gfx::TextureManager::CopyTextureToCPU(m_DepthImg_Orig_TexturePtr, reinterpret_cast<char*>(m_DepthImg_Orig.data()));
     }
 
     void CPluginInterface::cmp_Depth()
