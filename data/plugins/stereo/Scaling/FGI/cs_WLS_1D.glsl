@@ -3,7 +3,7 @@
 
 layout (binding = 0, r32f) writeonly uniform image2D cs_Out; // Pixel in image2D is 32-bit float
 layout (binding = 1, r32f) readonly uniform image2D cs_In; // Pixel in image2D is 32-bit float
-layout (binding = 2, r32f) readonly uniform image2D cs_Guide; // Pixel in image2D is 32-bit float
+layout (binding = 2, r8) readonly uniform image2D cs_Guide; // Pixel in image2D is 8-bit float (0~255 -> 0~1)
 
 layout(std140, binding = 0) uniform ParameterBuffer
 {
@@ -29,11 +29,10 @@ void main()
 	const ivec2 ImgSize = imageSize(cs_Out);
 
 	const int ComputeRange = int(dot(ImgSize, g_Direction));
-	//const int ComputeRange = 640;
 
-	float a[ComputeRange], b[ComputeRange], c[ComputeRange];
-	float c_Temp[ComputeRange], f_Temp[ComputeRange];
-	float u[ComputeRange];
+	float a[LOCAL_MEM_SIZE], b[LOCAL_MEM_SIZE], c[LOCAL_MEM_SIZE];
+	float c_Temp[LOCAL_MEM_SIZE], f_Temp[LOCAL_MEM_SIZE];
+	float u[LOCAL_MEM_SIZE];
 
 	for (int idx = 0; idx < ComputeRange; idx++)
 	{
@@ -52,7 +51,7 @@ void main()
 		b[idx] = 1 - a[idx] - c[idx];
 		
 		float Temp_denominator = idx == 0 ? b[idx] : b[idx] - c_Temp[idx-1] * a[idx];
-		c_Temp[idx] = c[idx] / Temp_denominator;
+		c_Temp[idx] = Temp_denominator == 0.0f ? 0.0f :  c[idx] / Temp_denominator;
 
 		float f_Curt = imageLoad(cs_In, Position_Curt).x;
 		float f_Last = idx == 0 ? 0.0f : imageLoad(cs_In, Position_Last).x;

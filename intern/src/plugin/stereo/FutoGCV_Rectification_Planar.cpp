@@ -169,7 +169,7 @@ namespace FutoGCV
 
     void CPlanarRectification::return_Result(CFutoImg& RectImgB, CFutoImg& RectImgM, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M)
     {
-        const int RectImgSize_1D = m_ImgSize_Rect.x * m_ImgSize_Rect.y;
+        const auto RectImgSize_1D = m_ImgSize_Rect.x * m_ImgSize_Rect.y;
         std::vector<char> RectImgB_Vector1D(RectImgSize_1D, 0), RectImgM_Vector1D(RectImgSize_1D, 0);
         Gfx::TextureManager::CopyTextureToCPU(m_RectImgB_TexturePtr, reinterpret_cast<char*>(RectImgB_Vector1D.data()));
         Gfx::TextureManager::CopyTextureToCPU(m_RectImgM_TexturePtr, reinterpret_cast<char*>(RectImgM_Vector1D.data()));

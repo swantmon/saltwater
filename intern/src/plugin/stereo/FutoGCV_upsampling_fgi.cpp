@@ -17,6 +17,8 @@ namespace
     }
 
     Gfx::CTexturePtr Temp1_TexturePtr, Temp2_TexturePtr;
+
+    Gfx::CBufferPtr TempCalculation;
 }
 
 namespace FutoGCV
@@ -29,9 +31,12 @@ namespace FutoGCV
     CFGI::CFGI(const glm::ivec2& OutputSize)
     {
         //---Initialize Shader Manager---
+        const auto LocalMemSize = OutputSize.x >= OutputSize.y ? OutputSize.x : OutputSize.y;
+
         std::stringstream DefineStream;
         DefineStream
-            << "#define TILE_SIZE_1D " << TileSize_1D << " \n";
+            << "#define TILE_SIZE_1D " << TileSize_1D << " \n" 
+            << "#define LOCAL_MEM_SIZE " << LocalMemSize << "\n";
         std::string DefineString = DefineStream.str();
         m_FGS_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/Scaling/FGI/cs_WLS_1D.glsl", "main", DefineString.c_str());
 
@@ -61,6 +66,15 @@ namespace FutoGCV
         Param_BufferDesc.m_pBytes = nullptr;
         Param_BufferDesc.m_pClassKey = 0;
         m_WLSParameter_BufferPtr = Gfx::BufferManager::CreateBuffer(Param_BufferDesc);
+
+        Gfx::SBufferDescriptor TempCalc_BufferDesc = {};
+        TempCalc_BufferDesc.m_Stride = 0;
+        TempCalc_BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
+        TempCalc_BufferDesc.m_Binding = Gfx::CBuffer::ResourceBuffer;
+        TempCalc_BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
+        TempCalc_BufferDesc.m_NumberOfBytes = m_MaxBorderPatchCount * 2 * sizeof(glm::vec4);
+        TempCalc_BufferDesc.m_pBytes = nullptr;
+        TempCalc_BufferDesc.m_pClassKey = nullptr;
     }
 
     CFGI::~CFGI()
@@ -92,9 +106,6 @@ namespace FutoGCV
     void CFGI::WLS_1D(Gfx::CTexturePtr Output_TexturePtr, const Gfx::CTexturePtr Input_TexturePtr, const Gfx::CTexturePtr Guide_TexturePtr)
     {
 
-        const int WorkGroupsX = DivUp(Output_TexturePtr->GetNumberOfPixelsV(), TileSize_1D);
-
-
         for (int iter = 1; iter <= m_Iteration; iter++)
         {
             float LamdaRatio = std::powf(m_Attenuation, static_cast<float>(m_Iteration - iter)) / (std::powf(m_Attenuation, static_cast<float>(m_Iteration)) - 1.0f);
@@ -122,7 +133,8 @@ namespace FutoGCV
                 Gfx::ContextManager::SetImageTexture(1, Temp2_TexturePtr);
             }
 
-            Gfx::ContextManager::Dispatch(WorkGroupsX, 1, 1);
+            const int WorkGroupsH = DivUp(Output_TexturePtr->GetNumberOfPixelsV(), TileSize_1D);
+            Gfx::ContextManager::Dispatch(WorkGroupsH, 1, 1);
 
             Gfx::ContextManager::ResetShaderCS();
 
@@ -151,7 +163,8 @@ namespace FutoGCV
                 Gfx::ContextManager::SetImageTexture(0, Temp2_TexturePtr);
             }
 
-            Gfx::ContextManager::Dispatch(WorkGroupsX, 1, 1);
+            const int WorkGroupsV = DivUp(Output_TexturePtr->GetNumberOfPixelsU(), TileSize_1D);
+            Gfx::ContextManager::Dispatch(WorkGroupsV, 1, 1);
 
             Gfx::ContextManager::ResetShaderCS();
 

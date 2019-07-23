@@ -208,11 +208,11 @@ namespace Stereo
             //const clock_t Time_SM_begin = clock();
             if (m_Is_Scaling)
             {
-                m_DispImg_Rect.resize(RectImg_Curt_DownSample.get_Img().size(), 0.0);
+                m_DispImg_Rect.resize(RectImg_Curt_DownSample.get_Img().size(), 0.0f);
             } 
             else
             {
-                m_DispImg_Rect.resize(m_RectImg_Curt.get_Img().size(), 0.0);
+                m_DispImg_Rect.resize(m_RectImg_Curt.get_Img().size(), 0.0f);
             }
 
             if (m_StereoMatching_Mode == "Original")
@@ -579,6 +579,8 @@ namespace Stereo
 
         m_DispImg_Rect_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DispImg_Rect);
         m_Disp_HR_BiLinear_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DispImg_Rect);
+
+        TextureDesc_DispImg_Rect.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit uint.
         Gfx::CTexturePtr Temp_RectImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DispImg_Rect);
 
         Gfx::STextureDescriptor TextureDesc_DepthImg_Rect = TextureDesc_DispImg_Rect;
@@ -614,7 +616,7 @@ namespace Stereo
 
                 Gfx::ContextManager::SetShaderCS(m_UpSampling_BiLinear_CSPtr);
                 Gfx::ContextManager::SetImageTexture(0, m_Disp_LR_TexturePtr);
-                Gfx::ContextManager::SetImageTexture(1, m_DispImg_Rect_TexturePtr);
+                Gfx::ContextManager::SetImageTexture(1, m_Disp_HR_BiLinear_TexturePtr);
 
                 const int WorkGroupsX = DivUp(m_RectImg_Curt.get_ImgSize().x, TileSize_2D);
                 const int WorkGroupsY = DivUp(m_RectImg_Curt.get_ImgSize().y, TileSize_2D);
@@ -627,23 +629,22 @@ namespace Stereo
             }
 
             //---Color Guided FGS---
-            /*
+            
             {
                 m_FGI_UpSampler = FutoGCV::CFGI(m_RectImg_Curt.get_ImgSize());
 
                 Base::AABB2UInt TargetRect;
                 TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_RectImg_Curt.get_ImgSize()));
-                std::vector<float> Temp_RectImg = std::vector<float>::vector(m_RectImg_Curt.get_Img().begin(), m_RectImg_Curt.get_Img().end());
-                Gfx::TextureManager::CopyToTexture2D(Temp_RectImg_TexturePtr, TargetRect, m_RectImg_Curt.get_ImgSize().x, static_cast<const void*>(Temp_RectImg.data()));
+                Gfx::TextureManager::CopyToTexture2D(Temp_RectImg_TexturePtr, TargetRect, m_RectImg_Curt.get_ImgSize().x, static_cast<const void*>(m_RectImg_Curt.get_Img().data()));
 
                 m_FGI_UpSampler.FGS(m_DispImg_Rect_TexturePtr, m_Disp_HR_BiLinear_TexturePtr, Temp_RectImg_TexturePtr);
             }
-            */
+            
         }
         else
         {
             Base::AABB2UInt TargetRect;
-            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_RectImg_Curt.get_ImgSize().x, m_RectImg_Curt.get_ImgSize().y));
+            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_RectImg_Curt.get_ImgSize()));
             Gfx::TextureManager::CopyToTexture2D(m_DispImg_Rect_TexturePtr, TargetRect, m_RectImg_Curt.get_ImgSize().x, static_cast<const void*>(m_DispImg_Rect.data()));
         }
 
