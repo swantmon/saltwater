@@ -14,7 +14,7 @@ layout(std140, binding = 0) uniform ParameterBuffer
 
 layout(std430, binding = 1) buffer ArrayCalculationBuffer
 {
-    vec4 g_GaussEliminCalc[MAX_ARRAYSIZE]; // c_Temp, f_Temp, u, padding
+    vec4 g_GaussElimin[MAX_ARRAYSIZE]; // c_Temp, f_Temp, u, padding
 };
 
 float cal_Weight(ivec2 CenterPos, ivec2 NeighborPos)
@@ -51,19 +51,18 @@ void main()
 
 		float b = 1 - a - c;
 		
-		float Temp_denominator = idx == 0 ? b : b - g_GaussEliminCalc[idx-1].x * a;
-		g_GaussEliminCalc[idx].x = Temp_denominator == 0.0f ? 0.0f : c / Temp_denominator;
+		float denominator = idx == 0 ? b : b - g_GaussElimin[idx-1].x * a;
+		g_GaussElimin[idx].x = denominator == 0.0f ? 0.0f : c / denominator;
 
-		float f_Curt = imageLoad(cs_In, Position_Curt).x;
-		float f_Last = idx == 0 ? 0.0f : imageLoad(cs_In, Position_Last).x;
-		g_GaussEliminCalc[idx].y = (f_Curt - f_Last * a) / Temp_denominator;
-
+		float f = imageLoad(cs_In, Position_Curt).x;
+		g_GaussElimin[idx].y = idx == 0 ? f / b : (f - g_GaussElimin[idx-1].y * a) / denominator;
+		g_GaussElimin[idx].z = 0.0f;
 	}
 
-	g_GaussEliminCalc[ComputeRange-1].z = g_GaussEliminCalc[ComputeRange-1].y;
+	g_GaussElimin[ComputeRange-1].z = g_GaussElimin[ComputeRange-1].y;
 	for (int idx = ComputeRange-2; idx >= 0; idx--)
 	{
-		g_GaussEliminCalc[idx].z = g_GaussEliminCalc[idx].y - g_GaussEliminCalc[idx].x * g_GaussEliminCalc[idx+1].z;
+		g_GaussElimin[idx].z = g_GaussElimin[idx].y - g_GaussElimin[idx].x * g_GaussElimin[idx+1].z;
 	}
 
 	for (int idx = 0; idx < ComputeRange; idx++)
@@ -72,7 +71,7 @@ void main()
 		Position_Curt.x = g_Direction.x == 1 ? idx : int(gl_GlobalInvocationID.x);
 		Position_Curt.y = g_Direction.y == 1 ? idx : int(gl_GlobalInvocationID.x);
 
-		imageStore(cs_Out, Position_Curt, vec4(g_GaussEliminCalc[idx].z));
+		imageStore(cs_Out, Position_Curt, vec4(g_GaussElimin[idx].z));
 	}
 	
 }
