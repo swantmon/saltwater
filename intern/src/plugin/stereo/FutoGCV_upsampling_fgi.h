@@ -44,7 +44,7 @@ namespace FutoGCV
         //---GLSL---
         Gfx::CShaderPtr m_FGS_CSPtr;
 
-        Gfx::CBufferPtr m_WLSParameter_BufferPtr;
+        Gfx::CBufferPtr m_WLSParameter_BufferPtr, m_ArrayCalc_BufferPtr;
     };
 } // namespace FutoGCV
 

@@ -31,12 +31,12 @@ namespace FutoGCV
     CFGI::CFGI(const glm::ivec2& OutputSize)
     {
         //---Initialize Shader Manager---
-        const auto LocalMemSize = OutputSize.x >= OutputSize.y ? OutputSize.x : OutputSize.y;
+        const auto MaxArraySize = OutputSize.x >= OutputSize.y ? OutputSize.x : OutputSize.y;
 
         std::stringstream DefineStream;
         DefineStream
-            << "#define TILE_SIZE_1D " << TileSize_1D << " \n" 
-            << "#define LOCAL_MEM_SIZE " << LocalMemSize << "\n";
+            << "#define TILE_SIZE_1D " << TileSize_1D << " \n"
+            << "#define MAX_ARRAYSIZE " << MaxArraySize << " \n";
         std::string DefineString = DefineStream.str();
         m_FGS_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/Scaling/FGI/cs_WLS_1D.glsl", "main", DefineString.c_str());
 
@@ -64,17 +64,18 @@ namespace FutoGCV
         Param_BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
         Param_BufferDesc.m_NumberOfBytes = sizeof(SFGSParameter);
         Param_BufferDesc.m_pBytes = nullptr;
-        Param_BufferDesc.m_pClassKey = 0;
+        Param_BufferDesc.m_pClassKey = nullptr;
         m_WLSParameter_BufferPtr = Gfx::BufferManager::CreateBuffer(Param_BufferDesc);
 
-        Gfx::SBufferDescriptor TempCalc_BufferDesc = {};
-        TempCalc_BufferDesc.m_Stride = 0;
-        TempCalc_BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
-        TempCalc_BufferDesc.m_Binding = Gfx::CBuffer::ResourceBuffer;
-        TempCalc_BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
-        TempCalc_BufferDesc.m_NumberOfBytes = m_MaxBorderPatchCount * 2 * sizeof(glm::vec4);
-        TempCalc_BufferDesc.m_pBytes = nullptr;
-        TempCalc_BufferDesc.m_pClassKey = nullptr;
+        Gfx::SBufferDescriptor ArrayCalc_BufferDesc = {};
+        ArrayCalc_BufferDesc.m_Stride = 0;
+        ArrayCalc_BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
+        ArrayCalc_BufferDesc.m_Binding = Gfx::CBuffer::ResourceBuffer;
+        ArrayCalc_BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
+        ArrayCalc_BufferDesc.m_NumberOfBytes = MaxArraySize * sizeof(glm::vec4);
+        ArrayCalc_BufferDesc.m_pBytes = nullptr;
+        ArrayCalc_BufferDesc.m_pClassKey = nullptr;
+        m_ArrayCalc_BufferPtr = Gfx::BufferManager::CreateBuffer(ArrayCalc_BufferDesc);
     }
 
     CFGI::~CFGI()
@@ -121,6 +122,7 @@ namespace FutoGCV
             Gfx::ContextManager::SetShaderCS(m_FGS_CSPtr);
 
             Gfx::ContextManager::SetConstantBuffer(0, m_WLSParameter_BufferPtr);
+            Gfx::ContextManager::SetResourceBuffer(1, m_ArrayCalc_BufferPtr);
 
             Gfx::ContextManager::SetImageTexture(0, Temp1_TexturePtr);
             Gfx::ContextManager::SetImageTexture(2, Guide_TexturePtr);
