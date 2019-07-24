@@ -18,7 +18,9 @@ namespace
 
     Gfx::CTexturePtr Temp1_TexturePtr, Temp2_TexturePtr;
 
-    Gfx::CBufferPtr TempCalculation;
+    Gfx::CBufferPtr GaussEliminCalc_BufferPtr;
+
+    std::vector <glm::vec4>GaussEliminCalcInitial;
 }
 
 namespace FutoGCV
@@ -32,6 +34,7 @@ namespace FutoGCV
     {
         //---Initialize Shader Manager---
         const auto MaxArraySize = OutputSize.x >= OutputSize.y ? OutputSize.x : OutputSize.y;
+        GaussEliminCalcInitial.resize(MaxArraySize);
 
         std::stringstream DefineStream;
         DefineStream
@@ -82,6 +85,7 @@ namespace FutoGCV
     {
         m_FGS_CSPtr = nullptr;
         m_WLSParameter_BufferPtr = nullptr;
+        m_ArrayCalc_BufferPtr = nullptr;
     }
 
     //---Execute Functions---
@@ -118,6 +122,7 @@ namespace FutoGCV
             m_Param_WLS.m_Direction = glm::ivec2(1, 0); // Horizontal direction
 
             Gfx::BufferManager::UploadBufferData(m_WLSParameter_BufferPtr, &m_Param_WLS);
+            Gfx::BufferManager::UploadBufferData(GaussEliminCalc_BufferPtr, GaussEliminCalcInitial.data());
 
             Gfx::ContextManager::SetShaderCS(m_FGS_CSPtr);
 
