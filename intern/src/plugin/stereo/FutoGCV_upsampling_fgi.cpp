@@ -20,7 +20,7 @@ namespace
 
     Gfx::CBufferPtr GaussEliminCalc_BufferPtr;
 
-    std::vector <glm::vec4>GaussEliminCalcInitial;
+    std::vector<glm::vec4> GaussEliminCalcInitial;
 }
 
 namespace FutoGCV
@@ -127,7 +127,8 @@ namespace FutoGCV
             Gfx::ContextManager::SetShaderCS(m_FGS_CSPtr);
 
             Gfx::ContextManager::SetConstantBuffer(0, m_WLSParameter_BufferPtr);
-            Gfx::ContextManager::SetResourceBuffer(1, m_ArrayCalc_BufferPtr);
+
+            Gfx::ContextManager::SetResourceBuffer(0, m_ArrayCalc_BufferPtr);
 
             Gfx::ContextManager::SetImageTexture(0, Temp1_TexturePtr);
             Gfx::ContextManager::SetImageTexture(2, Guide_TexturePtr);

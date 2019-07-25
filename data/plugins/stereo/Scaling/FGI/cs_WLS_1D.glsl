@@ -12,7 +12,7 @@ layout(std140, binding = 0) uniform ParameterBuffer
 	ivec2 g_Direction;
 };
 
-layout(std430, binding = 1) buffer ArrayCalculationBuffer
+layout(std430, binding = 0) buffer ArrayCalculationBuffer
 {
     vec4 g_GaussElimin[MAX_ARRAYSIZE]; // c_Temp, f_Temp, u, padding
 };
@@ -51,11 +51,16 @@ void main()
 
 		float b = 1 - a - c;
 		
-		float denominator = idx == 0 ? b : b - g_GaussElimin[idx-1].x * a;
-		g_GaussElimin[idx].x = denominator == 0.0f ? 0.0f : c / denominator;
-
 		float f = imageLoad(cs_In, Position_Curt).x;
-		g_GaussElimin[idx].y = idx == 0 ? f / b : (f - g_GaussElimin[idx-1].y * a) / denominator;
+		float denominator = idx == 0 ? b : b - g_GaussElimin[idx-1].x * a;
+
+		g_GaussElimin[idx].x = 0.0f;
+		g_GaussElimin[idx].x = c / denominator;
+
+		g_GaussElimin[idx].y = 0.0f;
+		g_GaussElimin[idx].y = idx == 0 ? f : f - g_GaussElimin[idx-1].y * a;
+		g_GaussElimin[idx].y /= denominator;
+
 		g_GaussElimin[idx].z = 0.0f;
 	}
 
