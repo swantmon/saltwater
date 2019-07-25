@@ -45,6 +45,10 @@ namespace FutoGCV
         Gfx::CShaderPtr m_FGS_CSPtr;
 
         Gfx::CBufferPtr m_WLSParameter_BufferPtr, m_GaussEliminCalc_BufferPtr;
+
+        Gfx::CTexturePtr m_Temp1_TexturePtr, m_Temp2_TexturePtr;
+
+        std::vector<glm::vec4> m_GaussEliminCalcInitialVec;
     };
 } // namespace FutoGCV
 

@@ -16,9 +16,6 @@ namespace
         return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
     }
 
-    Gfx::CTexturePtr Temp1_TexturePtr, Temp2_TexturePtr;
-
-    std::vector<glm::vec4> GaussEliminCalcInitialVec;
 }
 
 namespace FutoGCV
@@ -32,7 +29,7 @@ namespace FutoGCV
     {
         //---Initialize Shader Manager---
         const auto MaxArraySize = OutputSize.x >= OutputSize.y ? OutputSize.x : OutputSize.y;
-        GaussEliminCalcInitialVec.resize(MaxArraySize);
+        m_GaussEliminCalcInitialVec.resize(MaxArraySize);
 
         std::stringstream DefineStream;
         DefineStream
@@ -54,8 +51,8 @@ namespace FutoGCV
         TextureDesc.m_Semantic = Gfx::CTexture::UndefinedSemantic;
         TextureDesc.m_Format = Gfx::CTexture::R32_FLOAT; // 1 channels with 32-bit float.
 
-        Temp1_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc);
-        Temp2_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc);
+        m_Temp1_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc);
+        m_Temp2_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc);
 
         //---Initialize Buffer Manager---
         Gfx::SBufferDescriptor Param_BufferDesc = {};
@@ -87,8 +84,8 @@ namespace FutoGCV
         m_WLSParameter_BufferPtr = nullptr;
         m_GaussEliminCalc_BufferPtr = nullptr;
 
-        Temp1_TexturePtr = nullptr;
-        Temp2_TexturePtr = nullptr;
+        m_Temp1_TexturePtr = nullptr;
+        m_Temp2_TexturePtr = nullptr;
     }
 
     //---Execute Functions---
@@ -125,7 +122,7 @@ namespace FutoGCV
             m_Param_WLS.m_Direction = glm::ivec2(1, 0); // Horizontal direction
 
             Gfx::BufferManager::UploadBufferData(m_WLSParameter_BufferPtr, &m_Param_WLS);
-            Gfx::BufferManager::UploadBufferData(m_GaussEliminCalc_BufferPtr, GaussEliminCalcInitialVec.data());
+            Gfx::BufferManager::UploadBufferData(m_GaussEliminCalc_BufferPtr, m_GaussEliminCalcInitialVec.data());
 
             Gfx::ContextManager::SetShaderCS(m_FGS_CSPtr);
 
@@ -133,7 +130,7 @@ namespace FutoGCV
 
             Gfx::ContextManager::SetResourceBuffer(0, m_GaussEliminCalc_BufferPtr);
 
-            Gfx::ContextManager::SetImageTexture(0, Temp1_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(0, m_Temp1_TexturePtr);
             Gfx::ContextManager::SetImageTexture(2, Guide_TexturePtr);
             if (iter == 1)
             {
@@ -141,7 +138,7 @@ namespace FutoGCV
             }
             else
             {
-                Gfx::ContextManager::SetImageTexture(1, Temp2_TexturePtr);
+                Gfx::ContextManager::SetImageTexture(1, m_Temp2_TexturePtr);
             }
 
             const int WorkGroupsH = DivUp(Output_TexturePtr->GetNumberOfPixelsV(), TileSize_1D);
@@ -158,7 +155,7 @@ namespace FutoGCV
             m_Param_WLS.m_Direction = glm::ivec2(0, 1); // Vertical direction
 
             Gfx::BufferManager::UploadBufferData(m_WLSParameter_BufferPtr, &m_Param_WLS);
-            Gfx::BufferManager::UploadBufferData(m_GaussEliminCalc_BufferPtr, GaussEliminCalcInitialVec.data());
+            Gfx::BufferManager::UploadBufferData(m_GaussEliminCalc_BufferPtr, m_GaussEliminCalcInitialVec.data());
 
             Gfx::ContextManager::SetShaderCS(m_FGS_CSPtr);
 
@@ -166,7 +163,7 @@ namespace FutoGCV
 
             Gfx::ContextManager::SetResourceBuffer(0, m_GaussEliminCalc_BufferPtr);
 
-            Gfx::ContextManager::SetImageTexture(1, Temp1_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(1, m_Temp1_TexturePtr);
             Gfx::ContextManager::SetImageTexture(2, Guide_TexturePtr);
             if (iter == m_Iteration)
             {
@@ -174,7 +171,7 @@ namespace FutoGCV
             } 
             else
             {
-                Gfx::ContextManager::SetImageTexture(0, Temp2_TexturePtr);
+                Gfx::ContextManager::SetImageTexture(0, m_Temp2_TexturePtr);
             }
 
             const int WorkGroupsV = DivUp(Output_TexturePtr->GetNumberOfPixelsU(), TileSize_1D);
