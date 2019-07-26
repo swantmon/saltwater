@@ -14,7 +14,7 @@ layout(std140, binding = 0) uniform ParameterBuffer
 
 layout(std430, binding = 0) buffer ArrayCalculationBuffer
 {
-    vec4 g_GaussElimin[MAX_ARRAYSIZE]; // c_Temp, f_Temp, u, padding
+    vec4 g_GaussElimin[MAX_ARRAYSIZE * MAX_ARRAYSIZE]; // c_Temp, f_Temp, u, padding
 };
 
 float cal_Weight(ivec2 CenterPos, ivec2 NeighborPos)
@@ -35,8 +35,10 @@ void main()
 
 	const int ComputeRange = int(dot(ImgSize, g_Direction));
 
+	int ThrID = int(gl_GlobalInvocationID.x) * MAX_ARRAYSIZE;
+
 	for (int idx = 0; idx < ComputeRange; idx++)
-	{
+	{		
 		ivec2 Position_Curt, Position_Last, Position_Next;
 		
 		Position_Curt.x = g_Direction.x == 1 ? idx : int(gl_GlobalInvocationID.x);
@@ -52,22 +54,20 @@ void main()
 		float b = 1 - a - c;
 		
 		float f = imageLoad(cs_In, Position_Curt).x;
-		float denominator = idx == 0 ? b : b - g_GaussElimin[idx-1].x * a;
+		float denominator = idx == 0 ? b : b - g_GaussElimin[idx-1 + ThrID].x * a;
 
-		g_GaussElimin[idx].x = 0.0f;
-		g_GaussElimin[idx].x = c / denominator;
+		g_GaussElimin[idx + ThrID].x = c / denominator;
 
-		g_GaussElimin[idx].y = 0.0f;
-		g_GaussElimin[idx].y = idx == 0 ? f : f - g_GaussElimin[idx-1].y * a;
-		g_GaussElimin[idx].y /= denominator;
-
-		g_GaussElimin[idx].z = 0.0f;
+		g_GaussElimin[idx + ThrID].y = idx == 0 ? f : f - g_GaussElimin[idx-1 + ThrID].y * a;
+		g_GaussElimin[idx + ThrID].y /= denominator;
 	}
 
-	g_GaussElimin[ComputeRange-1].z = g_GaussElimin[ComputeRange-1].y;
+	g_GaussElimin[ComputeRange-1 + ThrID].z = g_GaussElimin[ComputeRange-1 + ThrID].y;
+
 	for (int idx = ComputeRange-2; idx >= 0; idx--)
-	{
-		g_GaussElimin[idx].z = g_GaussElimin[idx].y - g_GaussElimin[idx].x * g_GaussElimin[idx+1].z;
+	{		
+		g_GaussElimin[idx + ThrID].z = 
+			g_GaussElimin[idx + ThrID].y - g_GaussElimin[idx + ThrID].x * g_GaussElimin[idx+1 + ThrID].z;
 	}
 
 	for (int idx = 0; idx < ComputeRange; idx++)
@@ -76,7 +76,7 @@ void main()
 		Position_Curt.x = g_Direction.x == 1 ? idx : int(gl_GlobalInvocationID.x);
 		Position_Curt.y = g_Direction.y == 1 ? idx : int(gl_GlobalInvocationID.x);
 
-		imageStore(cs_Out, Position_Curt, vec4(g_GaussElimin[idx].z));
+		imageStore(cs_Out, Position_Curt, vec4(g_GaussElimin[idx + ThrID].z));
 	}
 	
 }

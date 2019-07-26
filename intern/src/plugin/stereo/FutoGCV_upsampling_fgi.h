@@ -48,7 +48,7 @@ namespace FutoGCV
 
         Gfx::CTexturePtr m_Temp1_TexturePtr, m_Temp2_TexturePtr;
 
-        std::vector<glm::vec4> m_GaussEliminCalcInitialVec;
+        std::vector<glm::vec4> m_GaussEliminCalcInitial;
     };
 } // namespace FutoGCV
 

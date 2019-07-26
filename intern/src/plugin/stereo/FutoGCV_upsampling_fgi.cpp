@@ -29,7 +29,7 @@ namespace FutoGCV
     {
         //---Initialize Shader Manager---
         const auto MaxArraySize = OutputSize.x >= OutputSize.y ? OutputSize.x : OutputSize.y;
-        m_GaussEliminCalcInitialVec.resize(MaxArraySize);
+        m_GaussEliminCalcInitial.resize(MaxArraySize);
 
         std::stringstream DefineStream;
         DefineStream
@@ -65,15 +65,15 @@ namespace FutoGCV
         Param_BufferDesc.m_pClassKey = nullptr;
         m_WLSParameter_BufferPtr = Gfx::BufferManager::CreateBuffer(Param_BufferDesc);
 
-        Gfx::SBufferDescriptor ArrayCalc_BufferDesc = {};
-        ArrayCalc_BufferDesc.m_Stride = 0;
-        ArrayCalc_BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
-        ArrayCalc_BufferDesc.m_Binding = Gfx::CBuffer::ResourceBuffer;
-        ArrayCalc_BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
-        ArrayCalc_BufferDesc.m_NumberOfBytes = MaxArraySize * sizeof(glm::vec4);
-        ArrayCalc_BufferDesc.m_pBytes = nullptr;
-        ArrayCalc_BufferDesc.m_pClassKey = nullptr;
-        m_GaussEliminCalc_BufferPtr = Gfx::BufferManager::CreateBuffer(ArrayCalc_BufferDesc);
+        Gfx::SBufferDescriptor GaussElimin_BufferDesc = {};
+        GaussElimin_BufferDesc.m_Stride = 0;
+        GaussElimin_BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
+        GaussElimin_BufferDesc.m_Binding = Gfx::CBuffer::ResourceBuffer;
+        GaussElimin_BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
+        GaussElimin_BufferDesc.m_NumberOfBytes = MaxArraySize * MaxArraySize * sizeof(glm::vec4);
+        GaussElimin_BufferDesc.m_pBytes = nullptr;
+        GaussElimin_BufferDesc.m_pClassKey = nullptr;
+        m_GaussEliminCalc_BufferPtr = Gfx::BufferManager::CreateBuffer(GaussElimin_BufferDesc);
 
     }
 
@@ -110,6 +110,8 @@ namespace FutoGCV
     //---Assist Functions---
     void CFGI::WLS_1D(Gfx::CTexturePtr Output_TexturePtr, const Gfx::CTexturePtr Input_TexturePtr, const Gfx::CTexturePtr Guide_TexturePtr)
     {
+        
+        auto UnitMemSize = m_GaussEliminCalcInitial.size() * sizeof(m_GaussEliminCalcInitial[0]);
 
         for (int iter = 1; iter <= m_Iteration; iter++)
         {
@@ -122,7 +124,12 @@ namespace FutoGCV
             m_Param_WLS.m_Direction = glm::ivec2(1, 0); // Horizontal direction
 
             Gfx::BufferManager::UploadBufferData(m_WLSParameter_BufferPtr, &m_Param_WLS);
-            Gfx::BufferManager::UploadBufferData(m_GaussEliminCalc_BufferPtr, m_GaussEliminCalcInitialVec.data());
+
+            for (auto thr = 0; thr < Output_TexturePtr->GetNumberOfPixelsV(); thr++)
+            {
+                Gfx::BufferManager::UploadBufferData(m_GaussEliminCalc_BufferPtr, m_GaussEliminCalcInitial.data(), 
+                                                     thr * UnitMemSize, UnitMemSize);
+            }
 
             Gfx::ContextManager::SetShaderCS(m_FGS_CSPtr);
 
@@ -155,7 +162,12 @@ namespace FutoGCV
             m_Param_WLS.m_Direction = glm::ivec2(0, 1); // Vertical direction
 
             Gfx::BufferManager::UploadBufferData(m_WLSParameter_BufferPtr, &m_Param_WLS);
-            Gfx::BufferManager::UploadBufferData(m_GaussEliminCalc_BufferPtr, m_GaussEliminCalcInitialVec.data());
+
+            for (auto thr = 0; thr < Output_TexturePtr->GetNumberOfPixelsU(); thr++)
+            {
+                Gfx::BufferManager::UploadBufferData(m_GaussEliminCalc_BufferPtr, m_GaussEliminCalcInitial.data(),
+                                                     thr * UnitMemSize, UnitMemSize);
+            }
 
             Gfx::ContextManager::SetShaderCS(m_FGS_CSPtr);
 
