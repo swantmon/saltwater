@@ -51,6 +51,8 @@ namespace FutoGCV
         void ComputeEpiCorner(const int Which_Img = 0);
         void DetermEpiImgSize();
 
+        void GenrtEpiImg(Gfx::CTexturePtr _OrigImg_TexturePtr, const int Which_Img = 0);
+
     //---Members---
     private:
 
@@ -65,6 +67,18 @@ namespace FutoGCV
 
         SHomography m_Homography_B, m_Homography_M;
 
+        Gfx::CShaderPtr m_PlanarRectCSPtr, m_DownSamplingCSPtr;
+
+        Gfx::CTexturePtr m_OrigImgB_TexturePtr, m_OrigImgM_TexturePtr;
+        Gfx::CTexturePtr m_EpiImgB_TexturePtr, m_EpiImgM_TexturePtr;
+
+
+
+        Gfx::CTexturePtr m_RectImgB_DownSample_TexturePtr, m_RectImgM_DownSample_TexturePtr;
+
+        Gfx::CBufferPtr m_HomographyB_BufferPtr, m_HomographyM_BufferPtr;
+
+
     // *** OLD ***
 
     //---Execution Functions---
@@ -77,10 +91,6 @@ namespace FutoGCV
 
         bool m_Is_LargeSize;
 
-    //---Assistant Functions---
-    private:
-
-        void genrt_RectImg(const std::vector<char>& Img_Orig, const glm::ivec2& ImgSize_Orig, const int Which_Img = 0);
 
     //---Members---
     private:
@@ -89,15 +99,6 @@ namespace FutoGCV
         glm::ivec2 m_ImgSize_Rect, m_ImgSize_DownSample;
         bool m_Is_FixSize, m_Is_DownSample;
 
-
-        //---GLSL Managers---
-        Gfx::CShaderPtr m_PlanarRectCSPtr, m_DownSamplingCSPtr;
-
-        Gfx::CTexturePtr m_OrigImgB_TexturePtr, m_OrigImgM_TexturePtr;
-        Gfx::CTexturePtr m_RectImgB_TexturePtr, m_RectImgM_TexturePtr;
-        Gfx::CTexturePtr m_RectImgB_DownSample_TexturePtr, m_RectImgM_DownSample_TexturePtr;
-
-        Gfx::CBufferPtr m_HomographyB_BufferPtr, m_HomographyM_BufferPtr;
     };
 
 } // namespace FutoGmtCV

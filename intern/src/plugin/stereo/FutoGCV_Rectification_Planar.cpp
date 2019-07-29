@@ -83,8 +83,8 @@ namespace FutoGCV
             TextureDescriptor_RectImg.m_NumberOfPixelsV = m_ImgSize_Rect.y;
             TextureDescriptor_RectImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels and each channel is 8-bit.
 
-            m_RectImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
-            m_RectImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
+            m_EpiImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
+            m_EpiImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
         }
 
         if (m_ImgSize_DownSample == glm::ivec2(0))
@@ -121,8 +121,8 @@ namespace FutoGCV
         m_OrigImgB_TexturePtr = nullptr;
         m_OrigImgM_TexturePtr = nullptr;
 
-        m_RectImgB_TexturePtr = nullptr;
-        m_RectImgM_TexturePtr = nullptr;
+        m_EpiImgB_TexturePtr = nullptr;
+        m_EpiImgM_TexturePtr = nullptr;
 
         m_HomographyB_BufferPtr = nullptr;
         m_HomographyM_BufferPtr = nullptr;
@@ -154,10 +154,14 @@ namespace FutoGCV
         ComputeHomography(_OrigImg_B.m_PPM, _OrigImg_M.m_PPM); // Update Homography after shifting.
 
         //---Step 3. Calculate Boundary of Epipolar Images---
-        ComputeEpiCorner(OrigImg_B.get_ImgSize(), 0);
-        ComputeEpiCorner(OrigImg_M.get_ImgSize(), 1);
+        ComputeEpiCorner(0);
+        ComputeEpiCorner(1);
 
         DetermEpiImgSize();
+
+        //---Step 4. Generate Epipolar Images---
+        GenrtEpiImg(_OrigImg_B.m_Img_TexturePtr, 0);
+        GenrtEpiImg(_OrigImg_M.m_Img_TexturePtr, 1);
     }
 
     //---Assistant Functions---
@@ -307,68 +311,98 @@ namespace FutoGCV
         m_Homography_M.m_EpiCorner_UL = EpiImgConerUL;
         m_Homography_M.m_EpiCorner_DR = EpiImgConerDR;
 
+        glm::ivec2 EpiImgFrame = m_Homography_B.m_EpiCorner_DR - m_Homography_B.m_EpiCorner_UL;
 
-
-        glm::ivec2 RectPlane = m_Homography_B.m_EpiCorner_DR - m_Homography_B.m_EpiCorner_UL;
-
-        if (RectPlane.x > 5000 || RectPlane.y > 5000)
+        if (EpiImgFrame.x > 5000 || EpiImgFrame.y > 5000)
         {
             m_Is_LargeSize = true;
         }
 
-        if (m_Is_FixSize)
+        if (m_EpiType == SUBIMG)
         {
-            glm::ivec2 AddShift = m_ImgSize_Rect - RectPlane;
-            AddShift /= 2;
+            glm::ivec2 SubShift = m_EpiImgSize - EpiImgFrame;
+            SubShift /= 2;
 
-            m_Homography_B.m_EpiCorner_UL -= AddShift;
-            m_Homography_B.m_EpiCorner_DR -= AddShift;
+            m_Homography_B.m_EpiCorner_UL -= SubShift;
+            m_Homography_B.m_EpiCorner_DR -= SubShift;
 
-            m_Homography_M.m_EpiCorner_UL -= AddShift;
-            m_Homography_M.m_EpiCorner_DR -= AddShift;
+            m_Homography_M.m_EpiCorner_UL -= SubShift;
+            m_Homography_M.m_EpiCorner_DR -= SubShift;
+        }
+        else if (m_EpiType == DOWNSAMPLE)
+        {
+
         }
         else
         {
-            m_ImgSize_Rect = RectPlane;
+            m_EpiImgSize = EpiImgFrame;
 
             //---Initialize Output Texture Manager---
-            Gfx::STextureDescriptor TextureDescriptor_RectImg = {};
+            Gfx::STextureDescriptor TextDesc_EpiImg = {};
 
-            TextureDescriptor_RectImg.m_NumberOfPixelsU = m_ImgSize_Rect.x;
-            TextureDescriptor_RectImg.m_NumberOfPixelsV = m_ImgSize_Rect.y;
-            TextureDescriptor_RectImg.m_NumberOfPixelsW = 1;
-            TextureDescriptor_RectImg.m_NumberOfMipMaps = 1;
-            TextureDescriptor_RectImg.m_NumberOfTextures = 1;
-            TextureDescriptor_RectImg.m_Binding = Gfx::CTexture::ShaderResource;
-            TextureDescriptor_RectImg.m_Access = Gfx::CTexture::EAccess::CPUWrite;
-            TextureDescriptor_RectImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-            TextureDescriptor_RectImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-            TextureDescriptor_RectImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
+            TextDesc_EpiImg.m_NumberOfPixelsU = m_EpiImgSize.x;
+            TextDesc_EpiImg.m_NumberOfPixelsV = m_EpiImgSize.y;
+            TextDesc_EpiImg.m_NumberOfPixelsW = 1;
+            TextDesc_EpiImg.m_NumberOfMipMaps = 1;
+            TextDesc_EpiImg.m_NumberOfTextures = 1;
+            TextDesc_EpiImg.m_Binding = Gfx::CTexture::ShaderResource;
+            TextDesc_EpiImg.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+            TextDesc_EpiImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+            TextDesc_EpiImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+            TextDesc_EpiImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
 
-            m_RectImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
-            m_RectImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
+            m_EpiImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
+            m_EpiImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
         }
+    }
+
+    void CPlanarRectification::GenrtEpiImg(Gfx::CTexturePtr _OrigImg_TexturePtr, const int Which_Img)
+    {
+        Gfx::ContextManager::SetShaderCS(m_PlanarRectCSPtr);
+
+        Gfx::ContextManager::SetImageTexture(0, _OrigImg_TexturePtr);
+
+        switch (Which_Img)
+        {
+        case 0:
+            Gfx::BufferManager::UploadBufferData(m_HomographyB_BufferPtr, &m_Homography_B);
+            Gfx::ContextManager::SetConstantBuffer(0, m_HomographyB_BufferPtr);
+
+            Gfx::ContextManager::SetImageTexture(1, m_EpiImgB_TexturePtr);
+
+            break;
+        case 1:
+            Gfx::BufferManager::UploadBufferData(m_HomographyM_BufferPtr, &m_Homography_M);
+            Gfx::ContextManager::SetConstantBuffer(0, m_HomographyM_BufferPtr);
+
+            Gfx::ContextManager::SetImageTexture(1, m_EpiImgM_TexturePtr);
+
+            break;
+        }
+
+        //---GPU Computation Start---
+        Gfx::Performance::BeginEvent("Planar Rectification");
+
+        const int WorkGroupsX = DivUp(m_ImgSize_Rect.x, TileSize_2D);
+        const int WorkGroupsY = DivUp(m_ImgSize_Rect.y, TileSize_2D);
+
+        Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        Gfx::ContextManager::ResetShaderCS();
+
+        Gfx::Performance::EndEvent();
+        //---GPU Computation End---
     }
 
 
     // *** OLD ***
-    void CPlanarRectification::execute(const CFutoImg& OrigImg_B, const CFutoImg& OrigImg_M)
-    {
-        m_Is_LargeSize = false;
-
-
-
-        //---Step 4. Generate Rectified Images---
-        genrt_RectImg(OrigImg_B.get_Img(), OrigImg_B.get_ImgSize(), 0);
-        genrt_RectImg(OrigImg_M.get_Img(), OrigImg_M.get_ImgSize(), 1);
-    }
 
     void CPlanarRectification::return_Result(CFutoImg& RectImgB, CFutoImg& RectImgM, SHomography& Homo_B, SHomography& Homo_M)
     {
         const auto RectImgSize_1D = m_ImgSize_Rect.x * m_ImgSize_Rect.y;
         std::vector<char> RectImgB_Vector1D(RectImgSize_1D, 0), RectImgM_Vector1D(RectImgSize_1D, 0);
-        Gfx::TextureManager::CopyTextureToCPU(m_RectImgB_TexturePtr, reinterpret_cast<char*>(RectImgB_Vector1D.data()));
-        Gfx::TextureManager::CopyTextureToCPU(m_RectImgM_TexturePtr, reinterpret_cast<char*>(RectImgM_Vector1D.data()));
+        Gfx::TextureManager::CopyTextureToCPU(m_EpiImgB_TexturePtr, reinterpret_cast<char*>(RectImgB_Vector1D.data()));
+        Gfx::TextureManager::CopyTextureToCPU(m_EpiImgM_TexturePtr, reinterpret_cast<char*>(RectImgM_Vector1D.data()));
 
 
         RectImgB = CFutoImg(RectImgB_Vector1D, m_ImgSize_Rect, 1, m_EpiCamera_B, m_EpiRotation, m_EpiPosition_B);
@@ -388,13 +422,13 @@ namespace FutoGCV
         switch (Which_Img)
         {
         case 0:
-            Gfx::ContextManager::SetImageTexture(0, m_RectImgB_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(0, m_EpiImgB_TexturePtr);
             Gfx::ContextManager::SetImageTexture(1, m_RectImgB_DownSample_TexturePtr);
 
             break;
 
         case 1:
-            Gfx::ContextManager::SetImageTexture(0, m_RectImgM_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(0, m_EpiImgM_TexturePtr);
             Gfx::ContextManager::SetImageTexture(1, m_RectImgM_DownSample_TexturePtr);
 
             break;
@@ -431,54 +465,4 @@ namespace FutoGCV
         RectImg_DownSampling = CFutoImg(RectImg_Vector1D, m_ImgSize_DownSample, 1);
     }
 
-
-    //---Assistant Functions: Generate Rectified Images---
-
-    void CPlanarRectification::genrt_RectImg(const std::vector<char>& Img_Orig, const glm::ivec2& ImgSize_Orig, const int Which_Img)
-    {
-        //---GPU Computation Start---
-        Gfx::Performance::BeginEvent("Planar Rectification");
-
-        //---Put Homography to Buffer & OrigImg to Texture---
-        Base::AABB2UInt TargetRect;
-
-        switch (Which_Img)
-        {
-        case 0: 
-            Gfx::BufferManager::UploadBufferData(m_HomographyB_BufferPtr, &m_Homography_B);
-
-            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(ImgSize_Orig.x, ImgSize_Orig.y));
-            Gfx::TextureManager::CopyToTexture2D(m_OrigImgB_TexturePtr, TargetRect, ImgSize_Orig.x, static_cast<const void*>(Img_Orig.data()));
-
-            Gfx::ContextManager::SetShaderCS(m_PlanarRectCSPtr);
-            Gfx::ContextManager::SetImageTexture(0, m_OrigImgB_TexturePtr);
-            Gfx::ContextManager::SetImageTexture(1, m_RectImgB_TexturePtr);
-            Gfx::ContextManager::SetConstantBuffer(0, m_HomographyB_BufferPtr);
-
-            break;
-        case 1: 
-            Gfx::BufferManager::UploadBufferData(m_HomographyM_BufferPtr, &m_Homography_M);
-
-            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(ImgSize_Orig.x, ImgSize_Orig.y));
-            Gfx::TextureManager::CopyToTexture2D(m_OrigImgM_TexturePtr, TargetRect, ImgSize_Orig.x, static_cast<const void*>(Img_Orig.data()));
-
-            Gfx::ContextManager::SetShaderCS(m_PlanarRectCSPtr);
-            Gfx::ContextManager::SetImageTexture(0, m_OrigImgM_TexturePtr);
-            Gfx::ContextManager::SetImageTexture(1, m_RectImgM_TexturePtr);
-            Gfx::ContextManager::SetConstantBuffer(0, m_HomographyM_BufferPtr);
-
-            break;
-        }
-
-        //---Start GPU Parallel Processing---
-        const int WorkGroupsX = DivUp(m_ImgSize_Rect.x, TileSize_2D);
-        const int WorkGroupsY = DivUp(m_ImgSize_Rect.y, TileSize_2D);
-
-        Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-
-        Gfx::ContextManager::ResetShaderCS();
-
-        Gfx::Performance::EndEvent();
-        //---GPU Computation End---
-    }
 } // FutoGmtCV
