@@ -40,7 +40,23 @@ namespace Stereo
         BASE_UNUSED(_rFocalLength); // Avoid warning about unused variable.
         BASE_UNUSED(_rFocalPoint); // Avoid warning about unused variable.
 
-        m_OrigImgSize = _rImageSize;
+        m_OrigImgSize = glm::ivec3(_rImageSize, 4);
+
+        Gfx::STextureDescriptor TextDesc_OrigImg = {};
+        TextDesc_OrigImg.m_NumberOfPixelsU = m_OrigImgSize.x;
+        TextDesc_OrigImg.m_NumberOfPixelsV = m_OrigImgSize.y;
+        TextDesc_OrigImg.m_NumberOfPixelsW = 1;
+        TextDesc_OrigImg.m_NumberOfMipMaps = 1;
+        TextDesc_OrigImg.m_NumberOfTextures = 1;
+        TextDesc_OrigImg.m_Binding = Gfx::CTexture::ShaderResource;
+        TextDesc_OrigImg.m_Access = Gfx::CTexture::EAccess::CPURead;
+        TextDesc_OrigImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+        TextDesc_OrigImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+        TextDesc_OrigImg.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE; // 4 channels and each channel is 8-bit.
+
+        m_OrigImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_OrigImg);
+
+        // *** OLD ***
 
         if (m_Is_RectSubImg)
         {
@@ -127,22 +143,24 @@ namespace Stereo
     void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::vec2& _FocalLength, const glm::vec2& _FocalPoint, const std::vector<uint16_t>& _rDepthImage)
     {
         //---Setting Orientations from ARKit---
-        glm::mat3 CamMtx = glm::mat3(_FocalLength.x, 0, 0, 0, _FocalLength.y, 0, _FocalPoint.x, _FocalPoint.y, 1); 
+        Base::AABB2UInt TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_OrigImgSize.x, m_OrigImgSize.y));
+        Gfx::TextureManager::CopyToTexture2D(m_OrigImg_TexturePtr, TargetRect, m_OrigImgSize.x, static_cast<const void*>(_rRGBImage.data()));
 
-        glm::mat3 RotMtx = glm::transpose(glm::mat3(_Transform));// ARKit's Rotation is Camera2World (Computer Graphics), but we need Rotation as World2Camera (Computer Vision).
+        glm::mat3 K = glm::mat3(_FocalLength.x, 0, 0, 0, _FocalLength.y, 0, _FocalPoint.x, _FocalPoint.y, 1); 
 
-        glm::vec3 PCVec = glm::vec3(_Transform[3]); // The last column of _Transform given by ARKit is the Position of Camera in World.
+        glm::mat3 R = glm::transpose(glm::mat3(_Transform));// ARKit's Rotation is Camera2World (Computer Graphics), but we need Rotation as World2Camera (Computer Vision).
+
+        glm::vec3 PC = glm::vec3(_Transform[3]); // The last column of _Transform given by ARKit is the Position of Camera in World.
         
         //---Only Compute 2 Keyframes Once---
-        if (!m_Is_KeyFrame)
+        if (!m_IsKeyfExist)
         {
-            m_OrigImg_Curt = FutoGCV::CFutoImg(_rRGBImage, m_OrigImgSize, 4, CamMtx, RotMtx, PCVec);
-            m_Is_KeyFrame = true;
+            m_OrigKeyframe_Curt = FutoGCV::SFutoImg(m_OrigImg_TexturePtr, m_OrigImgSize, K, R, PC);
+            m_IsKeyfExist = true;
         }
         else
         {
-            glm::vec3 BaseLine = PCVec - m_OrigImg_Curt.get_PC();
-            float BaseLineLength = glm::l2Norm(BaseLine);
+            float BaseLineLength = glm::l2Norm(PC - m_OrigKeyframe_Curt.m_Position);
 
             if (BaseLineLength < m_Cdt_Keyf_BaseLineL) // Keyframe Selection: Baseline Length
             {
@@ -151,7 +169,7 @@ namespace Stereo
 
             //---Set Current & Last Keyframe---
             m_OrigImg_Last = m_OrigImg_Curt;
-            m_OrigImg_Curt = FutoGCV::CFutoImg(_rRGBImage, m_OrigImgSize, 4, CamMtx, RotMtx, PCVec);
+            m_OrigImg_Curt = FutoGCV::CFutoImg(_rRGBImage, m_OrigImgSize, 4, K, R, PC);
 
             m_KeyFrameID++;
 
@@ -798,13 +816,10 @@ namespace Stereo
     {
         ENGINE_CONSOLE_INFOV("Stereo matching plugin started!");
 
-        //---00 Input---
-        m_FrameResolution = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_input:frame_resolution", 0.5f); // Full = 1; Half = 0.5;
+        //---00 Input Data---
 
         //---00 Keyframe---
         m_Cdt_Keyf_BaseLineL = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_keyframe:baseline_length", 0.03f); // Unit = meter
-
-        m_Is_KeyFrame = false;
 
         //---01 Rectification-----
         m_Is_RectSubImg = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:extract_sub_image", false);
@@ -865,6 +880,10 @@ namespace Stereo
 
     void CPluginInterface::OnExit()
     {
+        //---00 Input Data---
+        m_OrigImg_TexturePtr = nullptr;
+
+        // *** OLD ***
         //---Release Manager---
         m_Disp2Depth_CSPtr = nullptr;
         m_DispImg_Rect_TexturePtr = nullptr;

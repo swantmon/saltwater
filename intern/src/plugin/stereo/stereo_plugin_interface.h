@@ -30,6 +30,41 @@
 #include "libsgm.h"
 
 
+namespace FutoGCV
+{
+    struct SFutoImg
+    {
+        //---Member---
+        Gfx::CTexturePtr m_Img_TexturePtr; // 2D Texture
+
+        glm::ivec3 m_ImgSize; // Width, Height, Channel
+
+        glm::mat3 m_Camera; // Interior Orientations of Camera.
+        glm::mat3 m_Rotation; // Rotation from World to Camera.
+        glm::vec3 m_Position; // Position of Camera in World.
+        glm::mat4x3 m_PPM; // Perspective Projection Matrix
+
+        //---Constructors & Destructore---
+        SFutoImg(Gfx::CTexturePtr _ImgData, const glm::ivec3& _ImgSize, 
+                const glm::mat3& _Camera, const glm::mat3& _Rotation, const glm::vec3& _Position)
+            : m_Img_TexturePtr(nullptr),
+              m_ImgSize(_ImgSize),
+              m_Camera(_Camera),
+              m_Rotation(_Rotation),
+              m_Position(_Position)
+        {
+            m_Img_TexturePtr = _ImgData;
+
+            m_PPM = glm::mat4x3(m_Rotation[0], m_Rotation[1], m_Rotation[2], -m_Rotation * m_Position);
+            m_PPM = m_Camera * m_PPM;
+        }
+
+        ~SFutoImg()
+        {
+            m_Img_TexturePtr = nullptr;
+        }
+    };
+} // namespace FutoGCV
 
 namespace Stereo
 {
@@ -68,19 +103,29 @@ namespace Stereo
 
     //---plugin_stereo---
     private:
-        //---00 Input---
-        float m_FrameResolution; // Full=1, Half=0.5.
 
-        glm::ivec2 m_OrigImgSize; // Size of original image -> x = width & y = height
+        //---00 Input Data---
+        glm::ivec3 m_OrigImgSize; // Width, Height, Channel
 
-        //---00 Keyframe---
-        FutoGCV::CFutoImg m_OrigImg_Curt, m_OrigImg_Last; // Original Image Pair. -> Only compute 2 frames once.
+        //---00 Keyfrane---
+        Gfx::CTexturePtr m_OrigImg_TexturePtr;
+        FutoGCV::SFutoImg m_OrigKeyframe_Curt, m_OrigKeyframe_Last;
 
-        bool m_Is_KeyFrame; // The status of current keyframe.
+        bool m_IsKeyfExist = false; // The status of current keyframe.
+
+        float m_Cdt_Keyf_BaseLineL; // Keyframe Selection: BaseLine Condition. Unit is meter.
 
         int m_KeyFrameID = 0;
 
-        float m_Cdt_Keyf_BaseLineL; // Keyframe Selection: BaseLine Condition. Unit is meter.
+    // *** OLD ***
+    private:
+        //---00 Input---
+        float m_FrameResolution; // Full=1, Half=0.5.
+
+
+
+        //---00 Keyframe---
+        FutoGCV::CFutoImg m_OrigImg_Curt, m_OrigImg_Last; // Original Image Pair. -> Only compute 2 frames once.
 
         //---01 Rectification---
         FutoGCV::CFutoImg m_RectImg_Curt, m_RectImg_Last; // Rectified Image Pair.
