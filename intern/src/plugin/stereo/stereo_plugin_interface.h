@@ -117,6 +117,13 @@ namespace Stereo
 
         int m_KeyfID = 0;
 
+        //---01 Epipolarization---
+        FutoGCV::SFutoImg m_EpiKeyframe_Curt, m_Keyframe_Last;
+
+        FutoGCV::SHomography m_Homo_Curt, m_Hmom_Last;
+
+        FutoGCV::CPlanarRectification m_Rectifier_Planar; // Implement planar rectification
+
         //--- Output Result---
         CStereoDelegate m_Delegate; // Return results to plugin_slam.
 
@@ -133,12 +140,6 @@ namespace Stereo
     private:
 
         //---01 Rectification---
-        FutoGCV::CFutoImg m_RectImg_Curt, m_RectImg_Last; // Rectified Image Pair.
-
-        FutoGCV::SHomographyTransform m_Homo_Curt, m_Homo_Last; // Homography
-
-        FutoGCV::CPlanarRectification m_Rectifier_Planar; // Implement planar rectification
-
         bool m_Is_RectSubImg, m_Is_Scaling;
         glm::ivec2 m_RectImgSize_Sub, m_RectImgSize_DownSample;
 

@@ -18,14 +18,15 @@ namespace // No specific namespace => Only allowed to use in this file.
 namespace FutoGCV
 {
     //---Constructors & Destructor---
-    CPlanarRectification::CPlanarRectification()
+    CPlanarRectification::CPlanarRectification(const glm::ivec2& _OrigImgSize, EEpiType _EpiType, const glm::ivec2 _EpiImgSize)
+        : m_OrigImgSize(_OrigImgSize), 
+          m_EpiType(_EpiType), 
+          m_EpiImgSize(_EpiImgSize)
     {
-    }
 
-    CPlanarRectification::CPlanarRectification(const glm::ivec2& ImgSize_Orig, const glm::ivec2& ImgSize_Rect, const glm::ivec2& ImgSize_DownSample)
-        : m_ImgSize_Rect(ImgSize_Rect),
-          m_ImgSize_DownSample(ImgSize_DownSample)
-    {
+
+        // *** OLD ***
+
         //---Initialize Shader Manager---
         std::stringstream DefineStream;
         DefineStream
@@ -43,7 +44,7 @@ namespace FutoGCV
         BufferDesc_Homo.m_Usage = Gfx::CBuffer::GPURead;
         BufferDesc_Homo.m_Binding = Gfx::CBuffer::ConstantBuffer;
         BufferDesc_Homo.m_Access = Gfx::CBuffer::CPUWrite;
-        BufferDesc_Homo.m_NumberOfBytes = sizeof(SHomographyTransform);
+        BufferDesc_Homo.m_NumberOfBytes = sizeof(SHomography);
         BufferDesc_Homo.m_pBytes = nullptr;
         BufferDesc_Homo.m_pClassKey = 0;
 
@@ -128,17 +129,72 @@ namespace FutoGCV
     }
 
     //---Execution Functions---
+    void CPlanarRectification::ComputeEpiGeometry(const SFutoImg& _OrigImg_B, const SFutoImg& _OrigImg_M)
+    {
+        //---Step 1. Compute Orientations of Epipolar Images---
+        ComputeEpiCamera(_OrigImg_B.m_Camera, _OrigImg_M.m_Camera);
+        ComputeEpiRotation(_OrigImg_B.m_Position, _OrigImg_M.m_Position, _OrigImg_B.m_Rotation);
+        ComputeEpiPC(_OrigImg_B.m_Position, _OrigImg_M.m_Position);
+        ComputeEpiPPM();
+
+        ComputeHomography(_OrigImg_B.m_PPM, _OrigImg_M.m_PPM);
+    }
+
+    //---Assistant Functions---
+    void CPlanarRectification::ComputeEpiCamera(const glm::mat3& _OrigCamera_B, const glm::mat3& _OrigCamera_M)
+    {
+        m_EpiCamera_B = 0.5 * (_OrigCamera_B + _OrigCamera_M);
+        m_EpiCamera_B[1].x = 0; // Let skew = 0
+
+        m_EpiCamera_M = m_EpiCamera_B; 
+    }
+
+    void CPlanarRectification::ComputeEpiRotation(const glm::vec3 & _OrigPosition_B, const glm::vec3 & _OrigPosition_M, const glm::mat3 & _OrigRotation_B)
+    {
+        glm::vec3 EpiR_row0 = _OrigPosition_M - _OrigPosition_B;
+        EpiR_row0 = (EpiR_row0.x + EpiR_row0.y + EpiR_row0.z) >= 0 ? EpiR_row0 : -EpiR_row0; // Keep EpiImg always along with positive baseline direction
+        EpiR_row0 /= glm::l2Norm(EpiR_row0);
+
+        glm::vec3 EpiR_row1 = glm::cross(glm::transpose(_OrigRotation_B)[2], EpiR_row0);
+        EpiR_row1 /= glm::l2Norm(EpiR_row1);
+
+        glm::vec3 EpiR_row2 = glm::cross(EpiR_row0, EpiR_row1);
+        EpiR_row2 /= glm::l2Norm(EpiR_row2);
+
+        m_EpiRotation = glm::transpose(glm::mat3(EpiR_row0, EpiR_row1, EpiR_row2));
+    }
+
+    void CPlanarRectification::ComputeEpiPC(const glm::vec3 & _OrigPosition_B, const glm::vec3 & _OrigPosition_M)
+    {
+        m_EpiPosition_B = _OrigPosition_B;
+        m_EpiPosition_M = _OrigPosition_M;
+    }
+
+    void CPlanarRectification::ComputeEpiPPM()
+    {
+        m_EpiPPM_B = m_EpiCamera_B * glm::mat4x3(m_EpiRotation[0], m_EpiRotation[1], m_EpiRotation[2], -m_EpiRotation * m_EpiPosition_B);
+        m_EpiPPM_M = m_EpiCamera_M * glm::mat4x3(m_EpiRotation[0], m_EpiRotation[1], m_EpiRotation[2], -m_EpiRotation * m_EpiPosition_M);
+    }
+
+    void CPlanarRectification::ComputeHomography(const glm::mat4x3 & P_Orig_B, const glm::mat4x3 & P_Orig_M)
+    {
+        //---Calculate the Homography---
+        // A simple way to calculate Homography (Also proposed by Fusiello). <= glm::inverse cannot apply on glm::mat4*3
+        glm::mat3 H_B = glm::mat3(m_EpiPPM_B) * glm::inverse(glm::mat3(P_Orig_B));
+        glm::mat3 H_M = glm::mat3(m_EpiPPM_M) * glm::inverse(glm::mat3(P_Orig_M));
+
+        m_Homography_B.m_H_Orig2Epi = glm::mat4(H_B);
+        m_Homography_B.m_H_Epi2Orig = glm::mat4(glm::inverse(H_B));
+
+        m_Homography_M.m_H_Orig2Epi = glm::mat4(H_M);
+        m_Homography_M.m_H_Epi2Orig = glm::mat4(glm::inverse(H_M));
+    }
+
+    // *** OLD ***
     void CPlanarRectification::execute(const CFutoImg& OrigImg_B, const CFutoImg& OrigImg_M)
     {
         m_Is_LargeSize = false;
 
-        //---Step 1. Calculate Orientations of Rectified Images & Homography from Original to Rectified---
-        cal_K_Rect(OrigImg_B.get_Cam(), OrigImg_M.get_Cam());
-        cal_R_Rect(OrigImg_B.get_PC(), OrigImg_M.get_PC(), OrigImg_B.get_Rot());
-        cal_PC_Rect(OrigImg_B.get_PC(), OrigImg_M.get_PC());
-        cal_P_Rect();
-
-        cal_H(OrigImg_B.get_PPM(), OrigImg_M.get_PPM());
 
         //---Step 2. Center Rectified Images---
 
@@ -154,7 +210,7 @@ namespace FutoGCV
 
         imp_CenterShift_K(CenterShift_B, CenterShift_M);
 
-        cal_H(OrigImg_B.get_PPM(), OrigImg_M.get_PPM()); // Update Homography because Rectified Camera mtx has changed.
+        ComputeHomography(OrigImg_B.get_PPM(), OrigImg_M.get_PPM()); // Update Homography because Rectified Camera mtx has changed.
 
         //---Step 3. Calculate the Corners of Rectified Images---
         cal_RectImgBound(OrigImg_B.get_ImgSize(), 0);
@@ -167,7 +223,7 @@ namespace FutoGCV
         genrt_RectImg(OrigImg_M.get_Img(), OrigImg_M.get_ImgSize(), 1);
     }
 
-    void CPlanarRectification::return_Result(CFutoImg& RectImgB, CFutoImg& RectImgM, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M)
+    void CPlanarRectification::return_Result(CFutoImg& RectImgB, CFutoImg& RectImgM, SHomography& Homo_B, SHomography& Homo_M)
     {
         const auto RectImgSize_1D = m_ImgSize_Rect.x * m_ImgSize_Rect.y;
         std::vector<char> RectImgB_Vector1D(RectImgSize_1D, 0), RectImgM_Vector1D(RectImgSize_1D, 0);
@@ -175,8 +231,8 @@ namespace FutoGCV
         Gfx::TextureManager::CopyTextureToCPU(m_RectImgM_TexturePtr, reinterpret_cast<char*>(RectImgM_Vector1D.data()));
 
 
-        RectImgB = CFutoImg(RectImgB_Vector1D, m_ImgSize_Rect, 1, m_K_Rect_B, m_R_Rect, m_PC_Rect_B);
-        RectImgM = CFutoImg(RectImgM_Vector1D, m_ImgSize_Rect, 1, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
+        RectImgB = CFutoImg(RectImgB_Vector1D, m_ImgSize_Rect, 1, m_EpiCamera_B, m_EpiRotation, m_EpiPosition_B);
+        RectImgM = CFutoImg(RectImgM_Vector1D, m_ImgSize_Rect, 1, m_EpiCamera_M, m_EpiRotation, m_EpiPosition_M);
 
         Homo_B = m_Homography_B;
         Homo_M = m_Homography_M;
@@ -235,54 +291,6 @@ namespace FutoGCV
         RectImg_DownSampling = CFutoImg(RectImg_Vector1D, m_ImgSize_DownSample, 1);
     }
 
-    //---Assistant Functions: Compute Orientations---
-    void CPlanarRectification::cal_K_Rect(const glm::mat3& K_Orig_B, const glm::mat3& K_Orig_M)
-    {
-        m_K_Rect_B = 0.5 * (K_Orig_B + K_Orig_M);
-        m_K_Rect_B[1].x = 0; // Let skew = 0
-        m_K_Rect_M = m_K_Rect_B; // Camera mtx of both rectified images are the same.
-    }
-
-    void CPlanarRectification::cal_R_Rect(const glm::vec3& PC_Orig_B, const glm::vec3& PC_Orig_M, const glm::mat3& R_Orig_B)
-    {
-        glm::vec3 R_Rect_row0 = PC_Orig_M - PC_Orig_B;
-        R_Rect_row0 = (R_Rect_row0.x + R_Rect_row0.y + R_Rect_row0.z) >= 0 ? R_Rect_row0 : -R_Rect_row0; // Keep RectImg always along with positive baseline direction
-        R_Rect_row0 /= glm::l2Norm(R_Rect_row0);
-
-        glm::vec3 R_Rect_row1 = glm::cross(glm::transpose(R_Orig_B)[2], R_Rect_row0);
-        R_Rect_row1 /= glm::l2Norm(R_Rect_row1);
-
-        glm::vec3 R_Rect_row2 = glm::cross(R_Rect_row0, R_Rect_row1);
-        R_Rect_row2 /= glm::l2Norm(R_Rect_row2);
-
-        m_R_Rect = glm::transpose(glm::mat3(R_Rect_row0, R_Rect_row1, R_Rect_row2));
-    }
-
-    void CPlanarRectification::cal_PC_Rect(const glm::vec3& PC_Orig_B, const glm::vec3& PC_Orig_M)
-    {
-        m_PC_Rect_B = PC_Orig_B;
-        m_PC_Rect_M = PC_Orig_M;
-    }
-
-    void CPlanarRectification::cal_P_Rect()
-    {
-        m_P_Rect_B = m_K_Rect_B * glm::mat4x3(m_R_Rect[0], m_R_Rect[1], m_R_Rect[2], -m_R_Rect * m_PC_Rect_B);
-        m_P_Rect_M = m_K_Rect_M * glm::mat4x3(m_R_Rect[0], m_R_Rect[1], m_R_Rect[2], -m_R_Rect * m_PC_Rect_M);
-    }
-
-    void CPlanarRectification::cal_H(const glm::mat4x3& P_Orig_B, const glm::mat4x3& P_Orig_M)
-    {
-        //---Calculate the Homography---
-        // A simple way to calculate Homography (Also proposed by Fusiello). <= glm::inverse cannot apply on glm::mat4*3
-        glm::mat3 H_B = glm::mat3(m_P_Rect_B) * glm::inverse(glm::mat3(P_Orig_B));
-        glm::mat3 H_M = glm::mat3(m_P_Rect_M) * glm::inverse(glm::mat3(P_Orig_M));
-
-        m_Homography_B.m_H_Orig2Rect = glm::mat4(H_B);
-        m_Homography_B.m_H_Rect2Orig = glm::mat4(glm::inverse(H_B));
-
-        m_Homography_M.m_H_Orig2Rect = glm::mat4(H_M);
-        m_Homography_M.m_H_Rect2Orig = glm::mat4(glm::inverse(H_M));
-    }
 
     //---Assistant Functions: Center Rectified Images---
     void CPlanarRectification::cal_CenterShift(glm::vec2& CenterDrift, const glm::ivec2& ImgSize_Orig, const int Which_Img)
@@ -290,9 +298,9 @@ namespace FutoGCV
         glm::mat3 H;
         switch (Which_Img)
         {
-        case 0: H = glm::mat3(m_Homography_B.m_H_Orig2Rect);
+        case 0: H = glm::mat3(m_Homography_B.m_H_Orig2Epi);
             break;
-        case 1: H = glm::mat3(m_Homography_M.m_H_Orig2Rect);
+        case 1: H = glm::mat3(m_Homography_M.m_H_Orig2Epi);
             break;
         }
         
@@ -306,10 +314,10 @@ namespace FutoGCV
 
     void CPlanarRectification::imp_CenterShift_K(const glm::vec2& Shift_B, const glm::vec2& Shift_M)
     {
-        m_K_Rect_B[2].x += Shift_B.x;
-        m_K_Rect_B[2].y += Shift_B.y;
-        m_K_Rect_M[2].x += Shift_M.x;
-        m_K_Rect_M[2].y += Shift_M.y;
+        m_EpiCamera_B[2].x += Shift_B.x;
+        m_EpiCamera_B[2].y += Shift_B.y;
+        m_EpiCamera_M[2].x += Shift_M.x;
+        m_EpiCamera_M[2].y += Shift_M.y;
     }
 
     //---Assistant Functions: Generate Rectified Images---
@@ -318,9 +326,9 @@ namespace FutoGCV
         glm::mat3 H;
         switch (Which_Img)
         {
-        case 0: H = glm::mat3(m_Homography_B.m_H_Orig2Rect);
+        case 0: H = glm::mat3(m_Homography_B.m_H_Orig2Epi);
             break;
-        case 1: H = glm::mat3(m_Homography_M.m_H_Orig2Rect);
+        case 1: H = glm::mat3(m_Homography_M.m_H_Orig2Epi);
             break;
         }
 
@@ -355,12 +363,12 @@ namespace FutoGCV
         switch (Which_Img)
         {
         case 0: 
-            m_Homography_B.m_RectImgConer_UL = ImgCnr_Rect_UL;
-            m_Homography_B.m_RectImgConer_DR = ImgCnr_Rect_DR;
+            m_Homography_B.m_EpiCorner_UL = ImgCnr_Rect_UL;
+            m_Homography_B.m_EpiCorner_DR = ImgCnr_Rect_DR;
             break;
         case 1: 
-            m_Homography_M.m_RectImgConer_UL = ImgCnr_Rect_UL;
-            m_Homography_M.m_RectImgConer_DR = ImgCnr_Rect_DR;
+            m_Homography_M.m_EpiCorner_UL = ImgCnr_Rect_UL;
+            m_Homography_M.m_EpiCorner_DR = ImgCnr_Rect_DR;
             break;
         }
     }
@@ -369,18 +377,18 @@ namespace FutoGCV
     {
         glm::ivec2 RectImgConerUL, RectImgConerDR;
 
-        RectImgConerUL.x = m_Homography_B.m_RectImgConer_UL.x <= m_Homography_M.m_RectImgConer_UL.x ? m_Homography_B.m_RectImgConer_UL.x : m_Homography_M.m_RectImgConer_UL.x;
-        RectImgConerUL.y = m_Homography_B.m_RectImgConer_UL.y <= m_Homography_M.m_RectImgConer_UL.y ? m_Homography_B.m_RectImgConer_UL.y : m_Homography_M.m_RectImgConer_UL.y;
-        RectImgConerDR.x = m_Homography_B.m_RectImgConer_DR.x >= m_Homography_M.m_RectImgConer_DR.x ? m_Homography_B.m_RectImgConer_DR.x : m_Homography_M.m_RectImgConer_DR.x;
-        RectImgConerDR.y = m_Homography_B.m_RectImgConer_DR.y >= m_Homography_M.m_RectImgConer_DR.y ? m_Homography_B.m_RectImgConer_DR.y : m_Homography_M.m_RectImgConer_DR.y;
+        RectImgConerUL.x = m_Homography_B.m_EpiCorner_UL.x <= m_Homography_M.m_EpiCorner_UL.x ? m_Homography_B.m_EpiCorner_UL.x : m_Homography_M.m_EpiCorner_UL.x;
+        RectImgConerUL.y = m_Homography_B.m_EpiCorner_UL.y <= m_Homography_M.m_EpiCorner_UL.y ? m_Homography_B.m_EpiCorner_UL.y : m_Homography_M.m_EpiCorner_UL.y;
+        RectImgConerDR.x = m_Homography_B.m_EpiCorner_DR.x >= m_Homography_M.m_EpiCorner_DR.x ? m_Homography_B.m_EpiCorner_DR.x : m_Homography_M.m_EpiCorner_DR.x;
+        RectImgConerDR.y = m_Homography_B.m_EpiCorner_DR.y >= m_Homography_M.m_EpiCorner_DR.y ? m_Homography_B.m_EpiCorner_DR.y : m_Homography_M.m_EpiCorner_DR.y;
 
-        m_Homography_B.m_RectImgConer_UL = RectImgConerUL;
-        m_Homography_B.m_RectImgConer_DR = RectImgConerDR;
+        m_Homography_B.m_EpiCorner_UL = RectImgConerUL;
+        m_Homography_B.m_EpiCorner_DR = RectImgConerDR;
 
-        m_Homography_M.m_RectImgConer_UL = RectImgConerUL;
-        m_Homography_M.m_RectImgConer_DR = RectImgConerDR;
+        m_Homography_M.m_EpiCorner_UL = RectImgConerUL;
+        m_Homography_M.m_EpiCorner_DR = RectImgConerDR;
 
-        glm::ivec2 RectPlane = m_Homography_B.m_RectImgConer_DR - m_Homography_B.m_RectImgConer_UL;
+        glm::ivec2 RectPlane = m_Homography_B.m_EpiCorner_DR - m_Homography_B.m_EpiCorner_UL;
 
         if (RectPlane.x > 5000 || RectPlane.y > 5000)
         {
@@ -392,11 +400,11 @@ namespace FutoGCV
             glm::ivec2 AddShift = m_ImgSize_Rect - RectPlane;
             AddShift /= 2;
 
-            m_Homography_B.m_RectImgConer_UL -= AddShift;
-            m_Homography_B.m_RectImgConer_DR -= AddShift;
+            m_Homography_B.m_EpiCorner_UL -= AddShift;
+            m_Homography_B.m_EpiCorner_DR -= AddShift;
 
-            m_Homography_M.m_RectImgConer_UL -= AddShift;
-            m_Homography_M.m_RectImgConer_DR -= AddShift;
+            m_Homography_M.m_EpiCorner_UL -= AddShift;
+            m_Homography_M.m_EpiCorner_DR -= AddShift;
         }
         else
         {

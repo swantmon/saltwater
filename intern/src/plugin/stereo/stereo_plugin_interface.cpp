@@ -178,6 +178,8 @@ namespace Stereo
                 export_OrigImg();
             }
 
+            // *** OLD ***
+
             //---Epipolarizytion---
             m_Rectifier_Planar.execute(m_OrigImg_Curt, m_OrigImg_Last); // Apply Planar Rectification
 
@@ -857,7 +859,7 @@ namespace Stereo
         Homography_BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
         Homography_BufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
         Homography_BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
-        Homography_BufferDesc.m_NumberOfBytes = sizeof(FutoGCV::SHomographyTransform);
+        Homography_BufferDesc.m_NumberOfBytes = sizeof(FutoGCV::SHomography);
         Homography_BufferDesc.m_pBytes = nullptr;
         Homography_BufferDesc.m_pClassKey = 0;
         m_Homogrampy_BufferPtr = Gfx::BufferManager::CreateBuffer(Homography_BufferDesc);
