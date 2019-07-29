@@ -134,10 +134,30 @@ namespace FutoGCV
         //---Step 1. Compute Orientations of Epipolar Images---
         ComputeEpiCamera(_OrigImg_B.m_Camera, _OrigImg_M.m_Camera);
         ComputeEpiRotation(_OrigImg_B.m_Position, _OrigImg_M.m_Position, _OrigImg_B.m_Rotation);
-        ComputeEpiPC(_OrigImg_B.m_Position, _OrigImg_M.m_Position);
+        ComputeEpiPosition(_OrigImg_B.m_Position, _OrigImg_M.m_Position);
         ComputeEpiPPM();
 
         ComputeHomography(_OrigImg_B.m_PPM, _OrigImg_M.m_PPM);
+
+        //---Step 2. Center Epipolar Images---
+        glm::vec2 CenterShift_B(0.0f), CenterShift_M(0.0f);
+
+        ComputeCenterShift(CenterShift_B, 0);
+        ComputeCenterShift(CenterShift_M, 1);
+
+        float CenterShift_y = (CenterShift_B.y + CenterShift_M.y) / 2;
+        CenterShift_B.y = CenterShift_y;
+        CenterShift_M.y = CenterShift_y;
+
+        ShiftEpiCenter(CenterShift_B, CenterShift_M);
+
+        ComputeHomography(_OrigImg_B.m_PPM, _OrigImg_M.m_PPM); // Update Homography after shifting.
+
+        //---Step 3. Calculate Boundary of Epipolar Images---
+        ComputeEpiCorner(OrigImg_B.get_ImgSize(), 0);
+        ComputeEpiCorner(OrigImg_M.get_ImgSize(), 1);
+
+        DetermEpiImgSize();
     }
 
     //---Assistant Functions---
@@ -164,7 +184,7 @@ namespace FutoGCV
         m_EpiRotation = glm::transpose(glm::mat3(EpiR_row0, EpiR_row1, EpiR_row2));
     }
 
-    void CPlanarRectification::ComputeEpiPC(const glm::vec3 & _OrigPosition_B, const glm::vec3 & _OrigPosition_M)
+    void CPlanarRectification::ComputeEpiPosition(const glm::vec3 & _OrigPosition_B, const glm::vec3 & _OrigPosition_M)
     {
         m_EpiPosition_B = _OrigPosition_B;
         m_EpiPosition_M = _OrigPosition_M;
@@ -176,12 +196,12 @@ namespace FutoGCV
         m_EpiPPM_M = m_EpiCamera_M * glm::mat4x3(m_EpiRotation[0], m_EpiRotation[1], m_EpiRotation[2], -m_EpiRotation * m_EpiPosition_M);
     }
 
-    void CPlanarRectification::ComputeHomography(const glm::mat4x3 & P_Orig_B, const glm::mat4x3 & P_Orig_M)
+    void CPlanarRectification::ComputeHomography(const glm::mat4x3 & _OrigPPM_B, const glm::mat4x3 & _OrigPPM_M)
     {
         //---Calculate the Homography---
         // A simple way to calculate Homography (Also proposed by Fusiello). <= glm::inverse cannot apply on glm::mat4*3
-        glm::mat3 H_B = glm::mat3(m_EpiPPM_B) * glm::inverse(glm::mat3(P_Orig_B));
-        glm::mat3 H_M = glm::mat3(m_EpiPPM_M) * glm::inverse(glm::mat3(P_Orig_M));
+        glm::mat3 H_B = glm::mat3(m_EpiPPM_B) * glm::inverse(glm::mat3(_OrigPPM_B));
+        glm::mat3 H_M = glm::mat3(m_EpiPPM_M) * glm::inverse(glm::mat3(_OrigPPM_M));
 
         m_Homography_B.m_H_Orig2Epi = glm::mat4(H_B);
         m_Homography_B.m_H_Epi2Orig = glm::mat4(glm::inverse(H_B));
@@ -190,33 +210,153 @@ namespace FutoGCV
         m_Homography_M.m_H_Epi2Orig = glm::mat4(glm::inverse(H_M));
     }
 
+    void CPlanarRectification::ComputeCenterShift(glm::vec2& CenterDrift, const int Which_Img)
+    {
+        glm::mat3 H;
+        switch (Which_Img)
+        {
+        case 0: H = glm::mat3(m_Homography_B.m_H_Orig2Epi);
+            break;
+        case 1: H = glm::mat3(m_Homography_M.m_H_Orig2Epi);
+            break;
+        }
+
+        glm::vec3 Center_Orig(m_OrigImgSize.x / 2, m_OrigImgSize.y / 2, 1.0f);
+
+        glm::vec3 Center_Orig2Epi = H * Center_Orig;
+        Center_Orig2Epi /= Center_Orig2Epi.z;
+
+        CenterDrift = glm::vec2(Center_Orig - Center_Orig2Epi);
+    }
+
+    void CPlanarRectification::ShiftEpiCenter(const glm::vec2 & Shift_B, const glm::vec2 & Shift_M)
+    {
+        m_EpiCamera_B[2].x += Shift_B.x;
+        m_EpiCamera_B[2].y += Shift_B.y;
+        m_EpiCamera_M[2].x += Shift_M.x;
+        m_EpiCamera_M[2].y += Shift_M.y;
+    }
+
+    void CPlanarRectification::ComputeEpiCorner(const int Which_Img)
+    {
+        glm::mat3 H;
+        switch (Which_Img)
+        {
+        case 0: H = glm::mat3(m_Homography_B.m_H_Orig2Epi);
+            break;
+        case 1: H = glm::mat3(m_Homography_M.m_H_Orig2Epi);
+            break;
+        }
+
+        //---Select corners in original images---
+        glm::ivec3 ImgCnr_Orig_UL(0, 0, 1), 
+                   ImgCnr_Orig_UR(m_OrigImgSize.x - 1, 0, 1), 
+                   ImgCnr_Orig_DL(0, m_OrigImgSize.y - 1, 1), 
+                   ImgCnr_Orig_DR(m_OrigImgSize.x - 1, m_OrigImgSize.y - 1, 1);
+
+        //---Transform corners from original to rectified---
+        glm::vec3 ImgCnr_Orig2Epi_UL = H * ImgCnr_Orig_UL;
+        ImgCnr_Orig2Epi_UL /= ImgCnr_Orig2Epi_UL.z;
+
+        glm::vec3 ImgCnr_Orig2Epi_UR = H * ImgCnr_Orig_UR;
+        ImgCnr_Orig2Epi_UR /= ImgCnr_Orig2Epi_UR.z;
+
+        glm::vec3 ImgCnr_Orig2Epi_DL = H * ImgCnr_Orig_DL;
+        ImgCnr_Orig2Epi_DL /= ImgCnr_Orig2Epi_DL.z;
+
+        glm::vec3 ImgCnr_Orig2Epi_DR = H * ImgCnr_Orig_DR;
+        ImgCnr_Orig2Epi_DR /= ImgCnr_Orig2Epi_DR.z;
+
+        //---Determine the Co-Corners of Epipolar Image---
+        glm::ivec2 ImgCnr_Epi_UL, ImgCnr_Epi_DR;
+
+        ImgCnr_Epi_UL.x =
+            static_cast<int>(floor(glm::min(glm::min(ImgCnr_Orig2Epi_UL.x, ImgCnr_Orig2Epi_UR.x), glm::min(ImgCnr_Orig2Epi_DL.x, ImgCnr_Orig2Epi_DR.x))));
+        ImgCnr_Epi_UL.y =
+            static_cast<int>(floor(glm::min(glm::min(ImgCnr_Orig2Epi_UL.y, ImgCnr_Orig2Epi_UR.y), glm::min(ImgCnr_Orig2Epi_DL.y, ImgCnr_Orig2Epi_DR.y))));
+        ImgCnr_Epi_DR.x =
+            static_cast<int>(ceil(glm::max(glm::max(ImgCnr_Orig2Epi_UL.x, ImgCnr_Orig2Epi_UR.x), glm::max(ImgCnr_Orig2Epi_DL.x, ImgCnr_Orig2Epi_DR.x))));
+        ImgCnr_Epi_DR.y =
+            static_cast<int>(ceil(glm::max(glm::max(ImgCnr_Orig2Epi_UL.y, ImgCnr_Orig2Epi_UR.y), glm::max(ImgCnr_Orig2Epi_DL.y, ImgCnr_Orig2Epi_DR.y))));
+
+        switch (Which_Img)
+        {
+        case 0:
+            m_Homography_B.m_EpiCorner_UL = ImgCnr_Epi_UL;
+            m_Homography_B.m_EpiCorner_DR = ImgCnr_Epi_DR;
+            break;
+        case 1:
+            m_Homography_M.m_EpiCorner_UL = ImgCnr_Epi_UL;
+            m_Homography_M.m_EpiCorner_DR = ImgCnr_Epi_DR;
+            break;
+        }
+    }
+
+    void CPlanarRectification::DetermEpiImgSize()
+    {
+        glm::ivec2 EpiImgConerUL, EpiImgConerDR;
+
+        EpiImgConerUL.x = m_Homography_B.m_EpiCorner_UL.x <= m_Homography_M.m_EpiCorner_UL.x ? m_Homography_B.m_EpiCorner_UL.x : m_Homography_M.m_EpiCorner_UL.x;
+        EpiImgConerUL.y = m_Homography_B.m_EpiCorner_UL.y <= m_Homography_M.m_EpiCorner_UL.y ? m_Homography_B.m_EpiCorner_UL.y : m_Homography_M.m_EpiCorner_UL.y;
+        EpiImgConerDR.x = m_Homography_B.m_EpiCorner_DR.x >= m_Homography_M.m_EpiCorner_DR.x ? m_Homography_B.m_EpiCorner_DR.x : m_Homography_M.m_EpiCorner_DR.x;
+        EpiImgConerDR.y = m_Homography_B.m_EpiCorner_DR.y >= m_Homography_M.m_EpiCorner_DR.y ? m_Homography_B.m_EpiCorner_DR.y : m_Homography_M.m_EpiCorner_DR.y;
+
+        m_Homography_B.m_EpiCorner_UL = EpiImgConerUL;
+        m_Homography_B.m_EpiCorner_DR = EpiImgConerDR;
+
+        m_Homography_M.m_EpiCorner_UL = EpiImgConerUL;
+        m_Homography_M.m_EpiCorner_DR = EpiImgConerDR;
+
+
+
+        glm::ivec2 RectPlane = m_Homography_B.m_EpiCorner_DR - m_Homography_B.m_EpiCorner_UL;
+
+        if (RectPlane.x > 5000 || RectPlane.y > 5000)
+        {
+            m_Is_LargeSize = true;
+        }
+
+        if (m_Is_FixSize)
+        {
+            glm::ivec2 AddShift = m_ImgSize_Rect - RectPlane;
+            AddShift /= 2;
+
+            m_Homography_B.m_EpiCorner_UL -= AddShift;
+            m_Homography_B.m_EpiCorner_DR -= AddShift;
+
+            m_Homography_M.m_EpiCorner_UL -= AddShift;
+            m_Homography_M.m_EpiCorner_DR -= AddShift;
+        }
+        else
+        {
+            m_ImgSize_Rect = RectPlane;
+
+            //---Initialize Output Texture Manager---
+            Gfx::STextureDescriptor TextureDescriptor_RectImg = {};
+
+            TextureDescriptor_RectImg.m_NumberOfPixelsU = m_ImgSize_Rect.x;
+            TextureDescriptor_RectImg.m_NumberOfPixelsV = m_ImgSize_Rect.y;
+            TextureDescriptor_RectImg.m_NumberOfPixelsW = 1;
+            TextureDescriptor_RectImg.m_NumberOfMipMaps = 1;
+            TextureDescriptor_RectImg.m_NumberOfTextures = 1;
+            TextureDescriptor_RectImg.m_Binding = Gfx::CTexture::ShaderResource;
+            TextureDescriptor_RectImg.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+            TextureDescriptor_RectImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+            TextureDescriptor_RectImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+            TextureDescriptor_RectImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
+
+            m_RectImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
+            m_RectImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
+        }
+    }
+
+
     // *** OLD ***
     void CPlanarRectification::execute(const CFutoImg& OrigImg_B, const CFutoImg& OrigImg_M)
     {
         m_Is_LargeSize = false;
 
 
-        //---Step 2. Center Rectified Images---
-
-        glm::vec2 CenterShift_B(0.0f);
-        glm::vec2 CenterShift_M(0.0f);
-
-        cal_CenterShift(CenterShift_B, OrigImg_B.get_ImgSize(), 0);
-        cal_CenterShift(CenterShift_M, OrigImg_M.get_ImgSize(), 1);
-
-        float CenterShift_y = (CenterShift_B.y + CenterShift_M.y) / 2;
-        CenterShift_B.y = CenterShift_y;
-        CenterShift_M.y = CenterShift_y;
-
-        imp_CenterShift_K(CenterShift_B, CenterShift_M);
-
-        ComputeHomography(OrigImg_B.get_PPM(), OrigImg_M.get_PPM()); // Update Homography because Rectified Camera mtx has changed.
-
-        //---Step 3. Calculate the Corners of Rectified Images---
-        cal_RectImgBound(OrigImg_B.get_ImgSize(), 0);
-        cal_RectImgBound(OrigImg_M.get_ImgSize(), 1);
-
-        determ_RectFrame();
 
         //---Step 4. Generate Rectified Images---
         genrt_RectImg(OrigImg_B.get_Img(), OrigImg_B.get_ImgSize(), 0);
@@ -292,142 +432,7 @@ namespace FutoGCV
     }
 
 
-    //---Assistant Functions: Center Rectified Images---
-    void CPlanarRectification::cal_CenterShift(glm::vec2& CenterDrift, const glm::ivec2& ImgSize_Orig, const int Which_Img)
-    {
-        glm::mat3 H;
-        switch (Which_Img)
-        {
-        case 0: H = glm::mat3(m_Homography_B.m_H_Orig2Epi);
-            break;
-        case 1: H = glm::mat3(m_Homography_M.m_H_Orig2Epi);
-            break;
-        }
-        
-        glm::vec3 Center_Orig(ImgSize_Orig.x/2, ImgSize_Orig.y/2, 1.0f);
-
-        glm::vec3 Center_Orig2Rect = H * Center_Orig;
-        Center_Orig2Rect /= Center_Orig2Rect.z;
-
-        CenterDrift = glm::vec2(Center_Orig - Center_Orig2Rect);
-    }
-
-    void CPlanarRectification::imp_CenterShift_K(const glm::vec2& Shift_B, const glm::vec2& Shift_M)
-    {
-        m_EpiCamera_B[2].x += Shift_B.x;
-        m_EpiCamera_B[2].y += Shift_B.y;
-        m_EpiCamera_M[2].x += Shift_M.x;
-        m_EpiCamera_M[2].y += Shift_M.y;
-    }
-
     //---Assistant Functions: Generate Rectified Images---
-    void CPlanarRectification::cal_RectImgBound(const glm::ivec2& ImgSize_Orig, const int Which_Img)
-    {
-        glm::mat3 H;
-        switch (Which_Img)
-        {
-        case 0: H = glm::mat3(m_Homography_B.m_H_Orig2Epi);
-            break;
-        case 1: H = glm::mat3(m_Homography_M.m_H_Orig2Epi);
-            break;
-        }
-
-        //---Select corners in original images---
-        glm::ivec3 ImgCnr_Orig_UL(0, 0, 1);
-        glm::ivec3 ImgCnr_Orig_UR(ImgSize_Orig.x - 1, 0, 1);
-        glm::ivec3 ImgCnr_Orig_DL(0, ImgSize_Orig.y - 1, 1);
-        glm::ivec3 ImgCnr_Orig_DR(ImgSize_Orig.x - 1, ImgSize_Orig.y - 1, 1);
-
-        //---Transform corners from original to rectified---
-        glm::vec3 ImgCnr_Orig2Rect_UL = H * ImgCnr_Orig_UL;
-        ImgCnr_Orig2Rect_UL /= ImgCnr_Orig2Rect_UL.z;
-        glm::vec3 ImgCnr_Orig2Rect_UR = H * ImgCnr_Orig_UR;
-        ImgCnr_Orig2Rect_UR /= ImgCnr_Orig2Rect_UR.z;
-        glm::vec3 ImgCnr_Orig2Rect_DL = H * ImgCnr_Orig_DL;
-        ImgCnr_Orig2Rect_DL /= ImgCnr_Orig2Rect_DL.z;
-        glm::vec3 ImgCnr_Orig2Rect_DR = H * ImgCnr_Orig_DR;
-        ImgCnr_Orig2Rect_DR /= ImgCnr_Orig2Rect_DR.z;
-
-        //---Determine the Boundary of Epipolar Image---
-        glm::ivec2 ImgCnr_Rect_UL, ImgCnr_Rect_DR;
-
-        ImgCnr_Rect_UL.x = 
-            static_cast<int>(floor(std::min(std::min(ImgCnr_Orig2Rect_UL.x, ImgCnr_Orig2Rect_UR.x), std::min(ImgCnr_Orig2Rect_DL.x, ImgCnr_Orig2Rect_DR.x))));
-        ImgCnr_Rect_UL.y =
-            static_cast<int>(std::floor(std::min(std::min(ImgCnr_Orig2Rect_UL.y, ImgCnr_Orig2Rect_UR.y), std::min(ImgCnr_Orig2Rect_DL.y, ImgCnr_Orig2Rect_DR.y))));
-        ImgCnr_Rect_DR.x =
-            static_cast<int>(std::ceil(std::max(std::max(ImgCnr_Orig2Rect_UL.x, ImgCnr_Orig2Rect_UR.x), std::max(ImgCnr_Orig2Rect_DL.x, ImgCnr_Orig2Rect_DR.x))));
-        ImgCnr_Rect_DR.y =
-            static_cast<int>(std::ceil(std::max(std::max(ImgCnr_Orig2Rect_UL.y, ImgCnr_Orig2Rect_UR.y), std::max(ImgCnr_Orig2Rect_DL.y, ImgCnr_Orig2Rect_DR.y))));
-
-        switch (Which_Img)
-        {
-        case 0: 
-            m_Homography_B.m_EpiCorner_UL = ImgCnr_Rect_UL;
-            m_Homography_B.m_EpiCorner_DR = ImgCnr_Rect_DR;
-            break;
-        case 1: 
-            m_Homography_M.m_EpiCorner_UL = ImgCnr_Rect_UL;
-            m_Homography_M.m_EpiCorner_DR = ImgCnr_Rect_DR;
-            break;
-        }
-    }
-
-    void CPlanarRectification::determ_RectFrame()
-    {
-        glm::ivec2 RectImgConerUL, RectImgConerDR;
-
-        RectImgConerUL.x = m_Homography_B.m_EpiCorner_UL.x <= m_Homography_M.m_EpiCorner_UL.x ? m_Homography_B.m_EpiCorner_UL.x : m_Homography_M.m_EpiCorner_UL.x;
-        RectImgConerUL.y = m_Homography_B.m_EpiCorner_UL.y <= m_Homography_M.m_EpiCorner_UL.y ? m_Homography_B.m_EpiCorner_UL.y : m_Homography_M.m_EpiCorner_UL.y;
-        RectImgConerDR.x = m_Homography_B.m_EpiCorner_DR.x >= m_Homography_M.m_EpiCorner_DR.x ? m_Homography_B.m_EpiCorner_DR.x : m_Homography_M.m_EpiCorner_DR.x;
-        RectImgConerDR.y = m_Homography_B.m_EpiCorner_DR.y >= m_Homography_M.m_EpiCorner_DR.y ? m_Homography_B.m_EpiCorner_DR.y : m_Homography_M.m_EpiCorner_DR.y;
-
-        m_Homography_B.m_EpiCorner_UL = RectImgConerUL;
-        m_Homography_B.m_EpiCorner_DR = RectImgConerDR;
-
-        m_Homography_M.m_EpiCorner_UL = RectImgConerUL;
-        m_Homography_M.m_EpiCorner_DR = RectImgConerDR;
-
-        glm::ivec2 RectPlane = m_Homography_B.m_EpiCorner_DR - m_Homography_B.m_EpiCorner_UL;
-
-        if (RectPlane.x > 5000 || RectPlane.y > 5000)
-        {
-            m_Is_LargeSize = true;
-        }
-
-        if (m_Is_FixSize)
-        {
-            glm::ivec2 AddShift = m_ImgSize_Rect - RectPlane;
-            AddShift /= 2;
-
-            m_Homography_B.m_EpiCorner_UL -= AddShift;
-            m_Homography_B.m_EpiCorner_DR -= AddShift;
-
-            m_Homography_M.m_EpiCorner_UL -= AddShift;
-            m_Homography_M.m_EpiCorner_DR -= AddShift;
-        }
-        else
-        {
-            m_ImgSize_Rect = RectPlane;
-
-            //---Initialize Output Texture Manager---
-            Gfx::STextureDescriptor TextureDescriptor_RectImg = {};
-
-            TextureDescriptor_RectImg.m_NumberOfPixelsU = m_ImgSize_Rect.x;
-            TextureDescriptor_RectImg.m_NumberOfPixelsV = m_ImgSize_Rect.y;
-            TextureDescriptor_RectImg.m_NumberOfPixelsW = 1;
-            TextureDescriptor_RectImg.m_NumberOfMipMaps = 1;
-            TextureDescriptor_RectImg.m_NumberOfTextures = 1;
-            TextureDescriptor_RectImg.m_Binding = Gfx::CTexture::ShaderResource;
-            TextureDescriptor_RectImg.m_Access = Gfx::CTexture::EAccess::CPUWrite;
-            TextureDescriptor_RectImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-            TextureDescriptor_RectImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-            TextureDescriptor_RectImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
-
-            m_RectImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
-            m_RectImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
-        }
-    }
 
     void CPlanarRectification::genrt_RectImg(const std::vector<char>& Img_Orig, const glm::ivec2& ImgSize_Orig, const int Which_Img)
     {

@@ -38,12 +38,18 @@ namespace FutoGCV
 
     //---Assistant Functions---
     private:
-        void ComputeEpiCamera(const glm::mat3& K_Orig_B, const glm::mat3& K_Orig_M);
-        void ComputeEpiRotation(const glm::vec3& PC_Orig_B, const glm::vec3& PC_Orig_M, const glm::mat3& R_Orig_B);
-        void ComputeEpiPC(const glm::vec3& PC_Orig_B, const glm::vec3& PC_Orig_M);
+        void ComputeEpiCamera(const glm::mat3& _OrigCamera_B, const glm::mat3& _OrigCamera_M);
+        void ComputeEpiRotation(const glm::vec3& _OrigPosition_B, const glm::vec3& _OrigPosition_M, const glm::mat3& _OrigRotation_B);
+        void ComputeEpiPosition(const glm::vec3& _OrigPosition_B, const glm::vec3& _OrigPosition_M);
         void ComputeEpiPPM();
-        void ComputeHomography(const glm::mat4x3& P_Orig_B, const glm::mat4x3& P_Orig_M);
 
+        void ComputeHomography(const glm::mat4x3& _OrigPPM_B, const glm::mat4x3& _OrigPPM_M);
+
+        void ComputeCenterShift(glm::vec2& CenterDrift, const int Which_Img = 0);
+        void ShiftEpiCenter(const glm::vec2& Drift_B, const glm::vec2& Drift_M);
+
+        void ComputeEpiCorner(const int Which_Img = 0);
+        void DetermEpiImgSize();
 
     //---Members---
     private:
@@ -56,6 +62,8 @@ namespace FutoGCV
         glm::mat3 m_EpiRotation; // Rotation matrix of Epipolar Images (World -> Image)
         glm::vec3 m_EpiPosition_B, m_EpiPosition_M; // Projection Center of Epipolar Images
         glm::mat4x3 m_EpiPPM_B, m_EpiPPM_M; // Perspective Projection Matrix of Epipolar Images (World -> Image)
+
+        SHomography m_Homography_B, m_Homography_M;
 
     // *** OLD ***
 
@@ -71,13 +79,7 @@ namespace FutoGCV
 
     //---Assistant Functions---
     private:
-        
 
-        void cal_CenterShift(glm::vec2& CenterDrift, const glm::ivec2& ImgSize_Orig, const int Which_Img = 0);
-        void imp_CenterShift_K(const glm::vec2& Drift_B, const glm::vec2& Drift_Mt);
-
-        void cal_RectImgBound(const glm::ivec2& ImgSize_Orig, const int Which_Img = 0);
-        void determ_RectFrame();
         void genrt_RectImg(const std::vector<char>& Img_Orig, const glm::ivec2& ImgSize_Orig, const int Which_Img = 0);
 
     //---Members---
@@ -86,9 +88,6 @@ namespace FutoGCV
         CFutoImg m_Img_Rect_B, m_Img_Rect_M; // Rectified Images
         glm::ivec2 m_ImgSize_Rect, m_ImgSize_DownSample;
         bool m_Is_FixSize, m_Is_DownSample;
-
-        //---Homography---
-        SHomography m_Homography_B, m_Homography_M; 
 
 
         //---GLSL Managers---
