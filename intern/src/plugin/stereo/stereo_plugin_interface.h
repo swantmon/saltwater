@@ -113,19 +113,24 @@ namespace Stereo
 
         bool m_IsKeyfExist = false; // The status of current keyframe.
 
-        float m_Cdt_Keyf_BaseLineL; // Keyframe Selection: BaseLine Condition. Unit is meter.
+        float m_SelectKeyf_BaseLineL; // Keyframe Selection: BaseLine Condition. Unit is meter.
 
-        int m_KeyFrameID = 0;
+        int m_KeyfID = 0;
+
+        //--- Output Result---
+        CStereoDelegate m_Delegate; // Return results to plugin_slam.
+
+        bool m_IsExport_OrigImg;
+        void export_OrigImg();
+
+        bool m_IsExport_EpiImg;
+        void export_RectImg();
+
+        bool m_IsExport_Depth;
+        void export_Depth();
 
     // *** OLD ***
     private:
-        //---00 Input---
-        float m_FrameResolution; // Full=1, Half=0.5.
-
-
-
-        //---00 Keyframe---
-        FutoGCV::CFutoImg m_OrigImg_Curt, m_OrigImg_Last; // Original Image Pair. -> Only compute 2 frames once.
 
         //---01 Rectification---
         FutoGCV::CFutoImg m_RectImg_Curt, m_RectImg_Last; // Rectified Image Pair.
@@ -198,14 +203,6 @@ namespace Stereo
         Gfx::CTexturePtr m_DepthImg_Sensor_TexturePtr;
         Gfx::CTexturePtr m_Depth_Difference_TexturePtr;
 
-        //---06 Return Results---
-        CStereoDelegate m_Delegate; // Return results to plugin_slam.
-
-        bool m_Is_ExportOrigImg, m_Is_ExportRectImg, m_Is_ExportDepth; // Export results
-
-        void export_OrigImg();
-        void export_RectImg();
-        void export_Depth();
     };
 
 } // namespace Stereo
