@@ -40,8 +40,9 @@ namespace Stereo
         BASE_UNUSED(_rFocalLength); // Avoid warning about unused variable.
         BASE_UNUSED(_rFocalPoint); // Avoid warning about unused variable.
 
-        m_OrigImgSize = glm::ivec3(_rImageSize, 4);
+        m_OrigImgSize = glm::ivec3(_rImageSize, 4); // Width, Height, Channel
 
+        //---Initialize OrigImg Texture Manager---
         Gfx::STextureDescriptor TextDesc_OrigImg = {};
         TextDesc_OrigImg.m_NumberOfPixelsU = m_OrigImgSize.x;
         TextDesc_OrigImg.m_NumberOfPixelsV = m_OrigImgSize.y;
@@ -56,14 +57,30 @@ namespace Stereo
 
         m_OrigImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_OrigImg);
 
-        // *** OLD ***
 
-        if (m_Is_RectSubImg)
+        if (m_Strategy == "sub-image")
         {
-            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, m_RectImgSize_Sub);
+            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, FutoGCV::SUBIMG, m_EpiImgSize);
 
             m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_Sub.x, m_RectImgSize_Sub.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
         } 
+        else if (m_Strategy == "scaling")
+        {
+            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, FutoGCV::DOWNSAMPLING, m_EpiImgSize);
+
+            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_Sub.x, m_RectImgSize_Sub.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+        }
+        else
+        {
+            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, FutoGCV::NORMAL);
+
+            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_Sub.x, m_RectImgSize_Sub.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+        }
+
+
+
+        // *** OLD ***
+
         else if (m_Is_Scaling)
         {
             m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, glm::ivec2(0), m_RectImgSize_DownSample);
@@ -86,20 +103,6 @@ namespace Stereo
         else
         {
             m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize);
-        }
-
-        //---Tile-based Stereo Matching---
-        if (m_StereoMatching_Mode == "Tile")
-        {
-            const auto Tile_Size = m_OrigImgSize.x < m_OrigImgSize.y ? m_OrigImgSize.x : m_OrigImgSize.y;;
-            const auto BufferPix = static_cast <int>(Tile_Size * 0.1);
-            const auto BuffTile_Size = Tile_Size + 2 * BufferPix;
-            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(BuffTile_Size, BuffTile_Size, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
-        }
-
-        if (m_StereoMatching_Mode == "Sub")
-        {
-            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_Sub.x, m_RectImgSize_Sub.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
         }
 
         //---Setting Texture of Depth in Original Image for GLSL---
@@ -178,10 +181,12 @@ namespace Stereo
                 export_OrigImg();
             }
 
+            //---Epipolarization---
+            m_Rectifier_Planar.ComputeEpiGeometry(m_OrigKeyframe_Curt, m_OrigKeyframe_Last);
+
             // *** OLD ***
 
             //---Epipolarizytion---
-            m_Rectifier_Planar.execute(m_OrigImg_Curt, m_OrigImg_Last); // Apply Planar Rectification
 
             if (m_Rectifier_Planar.m_Is_LargeSize)
             {
@@ -817,15 +822,15 @@ namespace Stereo
 
         //---00 Input Data---
 
-        //---00 Keyframe---
+        //---00 Select Keyframe---
         m_SelectKeyf_BaseLineL = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_keyframe:baseline_length", 0.03f); // Unit = meter
 
-        //---01 Rectification-----
-        m_Is_RectSubImg = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:extract_sub_image", false);
-        m_RectImgSize_Sub = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:sub_image_size", glm::ivec2(640, 640));
+        //---01 Calculate Disparity-----
+        m_Strategy = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_disparity:strategy", "normal");
 
-        m_Is_Scaling = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:scaling", false);
-        m_RectImgSize_DownSample = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:down_sampling_size", glm::ivec2(256, 256));
+        m_EpiImgSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_disparity:epipolar_image_size", glm::ivec3(256, 256, 1));
+
+        // *** OLD ***
 
         //---02 Stereo Matching---
         m_StereoMatching_Method = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:method", "LibSGM");

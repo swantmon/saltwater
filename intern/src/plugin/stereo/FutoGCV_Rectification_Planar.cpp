@@ -7,7 +7,7 @@
 namespace // No specific namespace => Only allowed to use in this file.
 {
     //---Definition for GPU Parallel Processing---
-    #define TileSize_2D 16
+    #define TileSize_2D 16 // 16 is suggested work group size for 2D image (based on experience).
 
     int DivUp(int TotalShaderCount, int WorkGroupSize)
     {
@@ -23,93 +23,80 @@ namespace FutoGCV
           m_EpiType(_EpiType), 
           m_EpiImgSize(_EpiImgSize)
     {
-
-
-        // *** OLD ***
-
         //---Initialize Shader Manager---
         std::stringstream DefineStream;
         DefineStream
-            << "#define TILE_SIZE_2D " << TileSize_2D << " \n"; // 16 for work group size is suggested for 2D image (based on experience).
+            << "#define TILE_SIZE_2D " << TileSize_2D << " \n"; 
         std::string DefineString = DefineStream.str();
 
-        m_PlanarRectCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Rectification_Planar.glsl", "main", DefineString.c_str());
+        m_PlanarRectCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/01_epipolarization/cs_planar_rectification.glsl", "main", DefineString.c_str());
 
-        m_DownSamplingCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Down_Sampling.glsl", "main", DefineString.c_str());
+        m_DownSamplingCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/01_epipolarization/cs_down_sampling.glsl", "main", DefineString.c_str());
 
         //---Initialize Buffer Manager---
         Gfx::SBufferDescriptor BufferDesc_Homo = {};
-
         BufferDesc_Homo.m_Stride = 0;
         BufferDesc_Homo.m_Usage = Gfx::CBuffer::GPURead;
         BufferDesc_Homo.m_Binding = Gfx::CBuffer::ConstantBuffer;
         BufferDesc_Homo.m_Access = Gfx::CBuffer::CPUWrite;
         BufferDesc_Homo.m_NumberOfBytes = sizeof(SHomography);
         BufferDesc_Homo.m_pBytes = nullptr;
-        BufferDesc_Homo.m_pClassKey = 0;
+        BufferDesc_Homo.m_pClassKey = nullptr;
 
         m_HomographyB_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc_Homo);
         m_HomographyM_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc_Homo);
 
-        //---Initialize Texture Manager for Original Image---
-        Gfx::STextureDescriptor TextureDescriptor_OrigImg = {};
+        //---Initialize Texture Manager---
+        Gfx::STextureDescriptor TextDesc_OrigImg = {};
+        TextDesc_OrigImg.m_NumberOfPixelsU = _OrigImgSize.x;
+        TextDesc_OrigImg.m_NumberOfPixelsV = _OrigImgSize.y;
+        TextDesc_OrigImg.m_NumberOfPixelsW = 1;
+        TextDesc_OrigImg.m_NumberOfMipMaps = 1;
+        TextDesc_OrigImg.m_NumberOfTextures = 1;
+        TextDesc_OrigImg.m_Binding = Gfx::CTexture::ShaderResource;
+        TextDesc_OrigImg.m_Access = Gfx::CTexture::EAccess::CPURead;
+        TextDesc_OrigImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+        TextDesc_OrigImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+        TextDesc_OrigImg.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE; // 4 channels and each channel is 8-bit.
 
-        TextureDescriptor_OrigImg.m_NumberOfPixelsU = ImgSize_Orig.x;
-        TextureDescriptor_OrigImg.m_NumberOfPixelsV = ImgSize_Orig.y;
-        TextureDescriptor_OrigImg.m_NumberOfPixelsW = 1;
-        TextureDescriptor_OrigImg.m_NumberOfMipMaps = 1;
-        TextureDescriptor_OrigImg.m_NumberOfTextures = 1;
-        TextureDescriptor_OrigImg.m_Binding = Gfx::CTexture::ShaderResource;
-        TextureDescriptor_OrigImg.m_Access = Gfx::CTexture::EAccess::CPURead;
-        TextureDescriptor_OrigImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-        TextureDescriptor_OrigImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextureDescriptor_OrigImg.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE; // 4 channels and each channel is 8-bit.
+        m_OrigImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_OrigImg);
+        m_OrigImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_OrigImg);
 
-        m_OrigImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_OrigImg);
-        m_OrigImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_OrigImg);
 
-        if (m_ImgSize_Rect == glm::ivec2(0))
+        if (m_EpiType == SUBIMG)
         {
-            m_Is_FixSize = false;
-        }
-        else
+            Gfx::STextureDescriptor TextDesc_EpiImg = {};
+            TextDesc_EpiImg.m_NumberOfPixelsU = _EpiImgSize.x;
+            TextDesc_EpiImg.m_NumberOfPixelsV = _EpiImgSize.y;
+            TextDesc_EpiImg.m_NumberOfPixelsW = 1;
+            TextDesc_EpiImg.m_NumberOfMipMaps = 1;
+            TextDesc_EpiImg.m_NumberOfTextures = 1;
+            TextDesc_EpiImg.m_Binding = Gfx::CTexture::ShaderResource;
+            TextDesc_EpiImg.m_Access = Gfx::CTexture::EAccess::CPURead;
+            TextDesc_EpiImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+            TextDesc_EpiImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+            TextDesc_EpiImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
+
+            m_EpiImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
+            m_EpiImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
+        } 
+        else if (m_EpiType == DOWNSAMPLING)
         {
-            m_Is_FixSize = true;
+            Gfx::STextureDescriptor TextDesc_EpiImgLR = {};
 
-            //---Initialize Texture Manager for Rectified Image---
-            Gfx::STextureDescriptor TextureDescriptor_RectImg = TextureDescriptor_OrigImg;
+            TextDesc_EpiImgLR.m_NumberOfPixelsU = _EpiImgSize.x;
+            TextDesc_EpiImgLR.m_NumberOfPixelsV = _EpiImgSize.y;
+            TextDesc_EpiImgLR.m_NumberOfPixelsW = 1;
+            TextDesc_EpiImgLR.m_NumberOfMipMaps = 1;
+            TextDesc_EpiImgLR.m_NumberOfTextures = 1;
+            TextDesc_EpiImgLR.m_Binding = Gfx::CTexture::ShaderResource;
+            TextDesc_EpiImgLR.m_Access = Gfx::CTexture::EAccess::CPURead;
+            TextDesc_EpiImgLR.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+            TextDesc_EpiImgLR.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+            TextDesc_EpiImgLR.m_Format = Gfx::CTexture::R8_UBYTE; // Single channel with 8-bit.
 
-            TextureDescriptor_RectImg.m_NumberOfPixelsU = m_ImgSize_Rect.x;
-            TextureDescriptor_RectImg.m_NumberOfPixelsV = m_ImgSize_Rect.y;
-            TextureDescriptor_RectImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels and each channel is 8-bit.
-
-            m_EpiImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
-            m_EpiImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
-        }
-
-        if (m_ImgSize_DownSample == glm::ivec2(0))
-        {
-            m_Is_DownSample = false;
-        }
-        else
-        {
-            m_Is_DownSample = true;
-
-            Gfx::STextureDescriptor TextureDescriptor_DownSampling = {};
-
-            TextureDescriptor_DownSampling.m_NumberOfPixelsU = m_ImgSize_DownSample.x;
-            TextureDescriptor_DownSampling.m_NumberOfPixelsV = m_ImgSize_DownSample.y;
-            TextureDescriptor_DownSampling.m_NumberOfPixelsW = 1;
-            TextureDescriptor_DownSampling.m_NumberOfMipMaps = 1;
-            TextureDescriptor_DownSampling.m_NumberOfTextures = 1;
-            TextureDescriptor_DownSampling.m_Binding = Gfx::CTexture::ShaderResource;
-            TextureDescriptor_DownSampling.m_Access = Gfx::CTexture::EAccess::CPURead;
-            TextureDescriptor_DownSampling.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-            TextureDescriptor_DownSampling.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-            TextureDescriptor_DownSampling.m_Format = Gfx::CTexture::R8_UBYTE; // Single channel with 8-bit.
-
-            m_RectImgB_DownSample_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_DownSampling);
-            m_RectImgM_DownSample_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_DownSampling);
+            m_EpiImgB_LR_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImgLR);
+            m_EpiImgM_LR_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImgLR);
         }
     }
 
@@ -117,15 +104,17 @@ namespace FutoGCV
     {
         //---Release Manager---
         m_PlanarRectCSPtr = nullptr;
-
-        m_OrigImgB_TexturePtr = nullptr;
-        m_OrigImgM_TexturePtr = nullptr;
-
-        m_EpiImgB_TexturePtr = nullptr;
-        m_EpiImgM_TexturePtr = nullptr;
+        m_DownSamplingCSPtr = nullptr;
 
         m_HomographyB_BufferPtr = nullptr;
         m_HomographyM_BufferPtr = nullptr;
+
+        m_OrigImgB_TexturePtr = nullptr;
+        m_OrigImgM_TexturePtr = nullptr;
+        m_EpiImgB_TexturePtr = nullptr;
+        m_EpiImgM_TexturePtr = nullptr;
+        m_EpiImgB_LR_TexturePtr = nullptr;
+        m_EpiImgM_LR_TexturePtr = nullptr;
     }
 
     //---Execution Functions---
@@ -298,48 +287,32 @@ namespace FutoGCV
 
     void CPlanarRectification::DetermEpiImgSize()
     {
-        glm::ivec2 EpiImgConerUL, EpiImgConerDR;
+        glm::ivec2 EpiFrameUL, EpiFrameDR;
 
-        EpiImgConerUL.x = m_Homography_B.m_EpiCorner_UL.x <= m_Homography_M.m_EpiCorner_UL.x ? m_Homography_B.m_EpiCorner_UL.x : m_Homography_M.m_EpiCorner_UL.x;
-        EpiImgConerUL.y = m_Homography_B.m_EpiCorner_UL.y <= m_Homography_M.m_EpiCorner_UL.y ? m_Homography_B.m_EpiCorner_UL.y : m_Homography_M.m_EpiCorner_UL.y;
-        EpiImgConerDR.x = m_Homography_B.m_EpiCorner_DR.x >= m_Homography_M.m_EpiCorner_DR.x ? m_Homography_B.m_EpiCorner_DR.x : m_Homography_M.m_EpiCorner_DR.x;
-        EpiImgConerDR.y = m_Homography_B.m_EpiCorner_DR.y >= m_Homography_M.m_EpiCorner_DR.y ? m_Homography_B.m_EpiCorner_DR.y : m_Homography_M.m_EpiCorner_DR.y;
+        EpiFrameUL.x = m_Homography_B.m_EpiCorner_UL.x <= m_Homography_M.m_EpiCorner_UL.x ? m_Homography_B.m_EpiCorner_UL.x : m_Homography_M.m_EpiCorner_UL.x;
+        EpiFrameUL.y = m_Homography_B.m_EpiCorner_UL.y <= m_Homography_M.m_EpiCorner_UL.y ? m_Homography_B.m_EpiCorner_UL.y : m_Homography_M.m_EpiCorner_UL.y;
+        EpiFrameDR.x = m_Homography_B.m_EpiCorner_DR.x >= m_Homography_M.m_EpiCorner_DR.x ? m_Homography_B.m_EpiCorner_DR.x : m_Homography_M.m_EpiCorner_DR.x;
+        EpiFrameDR.y = m_Homography_B.m_EpiCorner_DR.y >= m_Homography_M.m_EpiCorner_DR.y ? m_Homography_B.m_EpiCorner_DR.y : m_Homography_M.m_EpiCorner_DR.y;
 
-        m_Homography_B.m_EpiCorner_UL = EpiImgConerUL;
-        m_Homography_B.m_EpiCorner_DR = EpiImgConerDR;
+        m_Homography_B.m_EpiCorner_UL = EpiFrameUL;
+        m_Homography_B.m_EpiCorner_DR = EpiFrameDR;
 
-        m_Homography_M.m_EpiCorner_UL = EpiImgConerUL;
-        m_Homography_M.m_EpiCorner_DR = EpiImgConerDR;
+        m_Homography_M.m_EpiCorner_UL = EpiFrameUL;
+        m_Homography_M.m_EpiCorner_DR = EpiFrameDR;
 
-        glm::ivec2 EpiImgFrame = m_Homography_B.m_EpiCorner_DR - m_Homography_B.m_EpiCorner_UL;
+        glm::ivec2 EpiFrame = m_Homography_B.m_EpiCorner_DR - m_Homography_B.m_EpiCorner_UL;
 
-        if (EpiImgFrame.x > 5000 || EpiImgFrame.y > 5000)
+        if (EpiFrame.x > 5000 || EpiFrame.y > 5000)
         {
             m_Is_LargeSize = true;
         }
 
-        if (m_EpiType == SUBIMG)
+        if (m_EpiType == NORMAL)
         {
-            glm::ivec2 SubShift = m_EpiImgSize - EpiImgFrame;
-            SubShift /= 2;
-
-            m_Homography_B.m_EpiCorner_UL -= SubShift;
-            m_Homography_B.m_EpiCorner_DR -= SubShift;
-
-            m_Homography_M.m_EpiCorner_UL -= SubShift;
-            m_Homography_M.m_EpiCorner_DR -= SubShift;
-        }
-        else if (m_EpiType == DOWNSAMPLE)
-        {
-
-        }
-        else
-        {
-            m_EpiImgSize = EpiImgFrame;
+            m_EpiImgSize = EpiFrame;
 
             //---Initialize Output Texture Manager---
             Gfx::STextureDescriptor TextDesc_EpiImg = {};
-
             TextDesc_EpiImg.m_NumberOfPixelsU = m_EpiImgSize.x;
             TextDesc_EpiImg.m_NumberOfPixelsV = m_EpiImgSize.y;
             TextDesc_EpiImg.m_NumberOfPixelsW = 1;
@@ -353,6 +326,21 @@ namespace FutoGCV
 
             m_EpiImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
             m_EpiImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
+        }
+        else if (m_EpiType == SUBIMG)
+        {
+            glm::ivec2 SubShift = EpiFrame - m_EpiImgSize;
+            SubShift /= 2;
+
+            m_Homography_B.m_EpiCorner_UL += SubShift;
+            m_Homography_B.m_EpiCorner_DR -= SubShift;
+
+            m_Homography_M.m_EpiCorner_UL += SubShift;
+            m_Homography_M.m_EpiCorner_DR -= SubShift;
+        }
+        else if (m_EpiType == DOWNSAMPLING)
+        {
+
         }
     }
 
@@ -423,13 +411,13 @@ namespace FutoGCV
         {
         case 0:
             Gfx::ContextManager::SetImageTexture(0, m_EpiImgB_TexturePtr);
-            Gfx::ContextManager::SetImageTexture(1, m_RectImgB_DownSample_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(1, m_EpiImgB_LR_TexturePtr);
 
             break;
 
         case 1:
             Gfx::ContextManager::SetImageTexture(0, m_EpiImgM_TexturePtr);
-            Gfx::ContextManager::SetImageTexture(1, m_RectImgM_DownSample_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(1, m_EpiImgM_LR_TexturePtr);
 
             break;
         }
@@ -452,12 +440,12 @@ namespace FutoGCV
         switch (Which_Img)
         {
         case 0:
-            Gfx::TextureManager::CopyTextureToCPU(m_RectImgB_DownSample_TexturePtr, reinterpret_cast<char*>(RectImg_Vector1D.data()));
+            Gfx::TextureManager::CopyTextureToCPU(m_EpiImgB_LR_TexturePtr, reinterpret_cast<char*>(RectImg_Vector1D.data()));
 
             break;
 
         case 1:
-            Gfx::TextureManager::CopyTextureToCPU(m_RectImgM_DownSample_TexturePtr, reinterpret_cast<char*>(RectImg_Vector1D.data()));
+            Gfx::TextureManager::CopyTextureToCPU(m_EpiImgM_LR_TexturePtr, reinterpret_cast<char*>(RectImg_Vector1D.data()));
 
             break;
         }

@@ -107,22 +107,28 @@ namespace Stereo
         //---00 Input Data---
         glm::ivec3 m_OrigImgSize; // Width, Height, Channel
 
-        //---00 Keyfrane---
-        Gfx::CTexturePtr m_OrigImg_TexturePtr;
-        FutoGCV::SFutoImg m_OrigKeyframe_Curt, m_OrigKeyframe_Last;
+        //---00 Select Keyframe---
+        Gfx::CTexturePtr m_OrigImg_TexturePtr; // Temporary TexturePtr for each input frame.
+        FutoGCV::SFutoImg m_OrigKeyframe_Curt, m_OrigKeyframe_Last; // Original images of keyframes.
 
         bool m_IsKeyfExist = false; // The status of current keyframe.
 
-        float m_SelectKeyf_BaseLineL; // Keyframe Selection: BaseLine Condition. Unit is meter.
+        float m_SelectKeyf_BaseLineL; // BaseLine Condition. Unit is meter.
 
         int m_KeyfID = 0;
 
-        //---01 Epipolarization---
-        FutoGCV::SFutoImg m_EpiKeyframe_Curt, m_Keyframe_Last;
+        //---01 Calculate Disparity---
+        std::string m_Strategy;
+        glm::ivec3 m_EpiImgSize; // Width, Height, Channel
+
+        FutoGCV::CPlanarRectification m_Rectifier_Planar; // Implement planar rectification
+
+        FutoGCV::SFutoImg m_EpiKeyframe_Curt, m_Keyframe_Last; // Epipolar images of keyframes.
 
         FutoGCV::SHomography m_Homo_Curt, m_Hmom_Last;
 
-        FutoGCV::CPlanarRectification m_Rectifier_Planar; // Implement planar rectification
+
+
 
         //--- Output Result---
         CStereoDelegate m_Delegate; // Return results to plugin_slam.
@@ -138,10 +144,6 @@ namespace Stereo
 
     // *** OLD ***
     private:
-
-        //---01 Rectification---
-        bool m_Is_RectSubImg, m_Is_Scaling;
-        glm::ivec2 m_RectImgSize_Sub, m_RectImgSize_DownSample;
 
         //---02 Stereo Matching---
         void imp_StereoMatching();
