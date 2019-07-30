@@ -87,11 +87,17 @@ namespace Stereo
 
         FutoGCV::CPlanarRectification m_Rectifier_Planar; // Implement planar rectification
 
-        FutoGCV::SFutoImg m_EpiKeyframe_Curt, m_Keyframe_Last; // Epipolar images of keyframes.
+        FutoGCV::SFutoImg m_EpiKeyframe_Curt, m_EpiKeyframe_Last; // Epipolar images of keyframes.
 
-        FutoGCV::SHomography m_Homo_Curt, m_Hmom_Last;
+        FutoGCV::SHomography m_Homo_Curt, m_Homo_Last;
 
+        int m_DispRange; // Disparity Searching Range for Stereo Matching
 
+        std::unique_ptr<sgm::StereoSGM> m_pStereoMatcher_LibSGM;
+
+        Gfx::CTexturePtr m_EpiDisparity_TexturePtr;
+
+        //---02 Disparity to Depth
 
 
         //--- Output Result---
@@ -116,15 +122,8 @@ namespace Stereo
         void imp_StereoMatching_Fix();
         void imp_StereoMatching_Scaling(const std::vector<char>& RectImg_Curt_DownSample, const std::vector<char>& RectImg_Last_DownSample);
 
-        std::vector<float> m_DispImg_Rect; // Disparity in Rectified Image => Using float because disparity is pixel or sub-pixel.
 
-        int m_DispRange; // Disparity Searching Range for Stereo Matching
-
-        std::string m_StereoMatching_Method; // Select stereo matching method.
-
-        std::string m_StereoMatching_Mode; // Select calculation mode of stereo matching.
-
-        std::unique_ptr<sgm::StereoSGM> m_pStereoMatcher_LibSGM;
+        
         cv::Ptr<cv::StereoSGBM> m_pStereoMatcher_cvSGBM;
         cv::Ptr<cv::StereoBM> m_pStereoMatcher_cvBM;
         cv::Ptr<cv::cuda::StereoBM> m_pStereoMatcher_cvBM_cuda;
@@ -155,7 +154,7 @@ namespace Stereo
         cv::Ptr<cv::ximgproc::FastBilateralSolverFilter> m_pFilter_cvFGS;
 
         Gfx::CShaderPtr m_Depth_Rect2Orig_CSPtr;
-        Gfx::CTexturePtr m_DepthImg_Orig_TexturePtr;
+        Gfx::CTexturePtr m_OrigDepth_TexturePtr;
         Gfx::CBufferPtr m_Homogrampy_BufferPtr;
 
         cv::Ptr<cv::ximgproc::FastGlobalSmootherFilter> m_pSmoother_cvFGS;
@@ -167,8 +166,8 @@ namespace Stereo
         void cmp_Depth(); 
 
         Gfx::CShaderPtr m_Compare_Depth_CSPtr;
-        Gfx::CTexturePtr m_DepthImg_Sensor_TexturePtr;
-        Gfx::CTexturePtr m_Depth_Difference_TexturePtr;
+        Gfx::CTexturePtr m_OrigDepth_Sensor_TexturePtr;
+        Gfx::CTexturePtr m_OrigDepth_Diff_TexturePtr;
 
     };
 
