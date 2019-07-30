@@ -38,8 +38,11 @@ namespace FutoGCV
 
         void ComputeEpiGeometry(const SFutoImg& OrigImg_B, const SFutoImg& OrigImg_M);
 
+        void ReturnResult(SFutoImg& EpiImg_B, SFutoImg& EpiImg_M, SHomography& Homo_B, SHomography& Homo_M);
+
     //---Assistant Functions---
     private:
+
         void ComputeEpiCamera(const glm::mat3& _OrigCamera_B, const glm::mat3& _OrigCamera_M);
         void ComputeEpiRotation(const glm::vec3& _OrigPosition_B, const glm::vec3& _OrigPosition_M, const glm::mat3& _OrigRotation_B);
         void ComputeEpiPosition(const glm::vec3& _OrigPosition_B, const glm::vec3& _OrigPosition_M);

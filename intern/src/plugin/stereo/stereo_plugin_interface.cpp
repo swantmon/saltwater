@@ -57,78 +57,60 @@ namespace Stereo
 
         m_OrigImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_OrigImg);
 
-
-        if (m_Strategy == "sub-image")
+        //---Disparity Computation (Epipolarization & Stereo Matching)---
+        if (m_Strategy == "normal")
+        {
+            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, FutoGCV::NORMAL);
+        }
+        else if (m_Strategy == "sub-image")
         {
             m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, FutoGCV::SUBIMG, m_EpiImgSize);
 
-            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_Sub.x, m_RectImgSize_Sub.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_EpiImgSize.x, m_EpiImgSize.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
         } 
         else if (m_Strategy == "scaling")
         {
             m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, FutoGCV::DOWNSAMPLING, m_EpiImgSize);
 
-            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_Sub.x, m_RectImgSize_Sub.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
-        }
-        else
-        {
-            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, FutoGCV::NORMAL);
-
-            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_Sub.x, m_RectImgSize_Sub.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_EpiImgSize.x, m_EpiImgSize.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
         }
 
+        //---Initialize EpiDisparity Texture Manager---
+        Gfx::STextureDescriptor TextDesc_EpiDisp = {};
+        TextDesc_EpiDisp.m_NumberOfPixelsU = m_OrigImgSize.x;
+        TextDesc_EpiDisp.m_NumberOfPixelsV = m_OrigImgSize.y;
+        TextDesc_EpiDisp.m_NumberOfPixelsW = 1;
+        TextDesc_EpiDisp.m_NumberOfMipMaps = 1;
+        TextDesc_EpiDisp.m_NumberOfTextures = 1;
+        TextDesc_EpiDisp.m_Binding = Gfx::CTexture::ShaderResource;
+        TextDesc_EpiDisp.m_Access = Gfx::CTexture::EAccess::CPURead;
+        TextDesc_EpiDisp.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+        TextDesc_EpiDisp.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+        TextDesc_EpiDisp.m_Format = Gfx::CTexture::R32_FLOAT; // 1 channels with 32-bit float.
 
+        m_EpiDisparity_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiDisp);
 
-        // *** OLD ***
+        //---Depth from EpiImg to OrigImg---
+        Gfx::STextureDescriptor TextDesc_OrigDepth = {};
+        TextDesc_OrigDepth.m_NumberOfPixelsU = m_OrigImgSize.x;
+        TextDesc_OrigDepth.m_NumberOfPixelsV = m_OrigImgSize.y;
+        TextDesc_OrigDepth.m_NumberOfPixelsW = 1;
+        TextDesc_OrigDepth.m_NumberOfMipMaps = 1;
+        TextDesc_OrigDepth.m_NumberOfTextures = 1;
+        TextDesc_OrigDepth.m_Binding = Gfx::CTexture::ShaderResource;
+        TextDesc_OrigDepth.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+        TextDesc_OrigDepth.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+        TextDesc_OrigDepth.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+        TextDesc_OrigDepth.m_Format = Gfx::CTexture::R16_UINT; // 1 channels with 16-bit uint.
+        TextDesc_OrigDepth.m_pFileName = nullptr;
+        TextDesc_OrigDepth.m_pPixels = nullptr;
 
-        else if (m_Is_Scaling)
-        {
-            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, glm::ivec2(0), m_RectImgSize_DownSample);
+        m_OrigDepth_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_OrigDepth);
+        m_OrigDepth_Sensor_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_OrigDepth);
 
-            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_DownSample.x, m_RectImgSize_DownSample.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+        TextDesc_OrigDepth.m_Format = Gfx::CTexture::R16_INT; // 1 channels with 16-bit int.
 
-            Gfx::STextureDescriptor TextureDesc_DownSample = {};
-            TextureDesc_DownSample.m_NumberOfPixelsU = m_RectImgSize_DownSample.x;
-            TextureDesc_DownSample.m_NumberOfPixelsV = m_RectImgSize_DownSample.y;
-            TextureDesc_DownSample.m_NumberOfPixelsW = 1;
-            TextureDesc_DownSample.m_NumberOfMipMaps = 1;
-            TextureDesc_DownSample.m_NumberOfTextures = 1;
-            TextureDesc_DownSample.m_Binding = Gfx::CTexture::ShaderResource;
-            TextureDesc_DownSample.m_Access = Gfx::CTexture::EAccess::CPUWrite;
-            TextureDesc_DownSample.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-            TextureDesc_DownSample.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-            TextureDesc_DownSample.m_Format = Gfx::CTexture::R32_FLOAT; // 1 channels with 32-bit float.
-            m_Disp_LR_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DownSample);
-        }
-        else
-        {
-            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize);
-        }
-
-        //---Setting Texture of Depth in Original Image for GLSL---
-        Gfx::STextureDescriptor TextureDesc_DepthImg_Orig = {};
-
-        TextureDesc_DepthImg_Orig.m_NumberOfPixelsU = m_OrigImgSize.x;
-        TextureDesc_DepthImg_Orig.m_NumberOfPixelsV = m_OrigImgSize.y;
-        TextureDesc_DepthImg_Orig.m_NumberOfPixelsW = 1;
-        TextureDesc_DepthImg_Orig.m_NumberOfMipMaps = 1;
-        TextureDesc_DepthImg_Orig.m_NumberOfTextures = 1;
-        TextureDesc_DepthImg_Orig.m_Binding = Gfx::CTexture::ShaderResource;
-        TextureDesc_DepthImg_Orig.m_Access = Gfx::CTexture::EAccess::CPUWrite;
-        TextureDesc_DepthImg_Orig.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-        TextureDesc_DepthImg_Orig.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextureDesc_DepthImg_Orig.m_Format = Gfx::CTexture::R16_UINT; // 1 channels with 16-bit uint.
-        TextureDesc_DepthImg_Orig.m_pFileName = nullptr;
-        TextureDesc_DepthImg_Orig.m_pPixels = nullptr;
-
-        m_DepthImg_Orig_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DepthImg_Orig);
-
-        m_DepthImg_Sensor_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DepthImg_Orig);
-
-        //---Setting Texture of Depth Difference for GLSL---
-        Gfx::STextureDescriptor TextureDesc_DepthDiff = TextureDesc_DepthImg_Orig;
-        TextureDesc_DepthDiff.m_Format = Gfx::CTexture::R16_INT; // 1 channels with 16-bit int.
-        m_Depth_Difference_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DepthDiff);
+        m_OrigDepth_Diff_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_OrigDepth);
     }
 
     // -----------------------------------------------------------------------------
@@ -184,46 +166,61 @@ namespace Stereo
             //---Epipolarization---
             m_Rectifier_Planar.ComputeEpiGeometry(m_OrigKeyframe_Curt, m_OrigKeyframe_Last);
 
-            // *** OLD ***
-
-            //---Epipolarizytion---
-
             if (m_Rectifier_Planar.m_Is_LargeSize)
             {
                 return; // LibSGM will break if the size of rectified image is too large.
             }
 
-            m_Rectifier_Planar.return_Result(m_RectImg_Curt, m_RectImg_Last, m_Homo_Curt, m_Homo_Last);
+            m_Rectifier_Planar.ReturnResult(m_EpiKeyframe_Curt, m_EpiKeyframe_Last, m_Homo_Curt, m_Homo_Last);
 
-            FutoGCV::CFutoImg RectImg_Curt_DownSample, RectImg_Last_DownSample;
-            if (m_Is_Scaling)
-            {
-                m_Rectifier_Planar.imp_DownSampling(RectImg_Curt_DownSample, 0);
-                m_Rectifier_Planar.imp_DownSampling(RectImg_Last_DownSample, 1);
+            std::vector<char> vecEpiImg_Curt(m_EpiKeyframe_Curt.m_ImgSize.x * m_EpiKeyframe_Curt.m_ImgSize.y, 0);
+            Gfx::TextureManager::CopyTextureToCPU(m_EpiKeyframe_Curt.m_Img_TexturePtr, reinterpret_cast<char*>(vecEpiImg_Curt.data()));
 
-                /*
-                std::string ExportStr;
-                uint MemCpySize = 0;
-
-                cv::Mat cvRectImg_Curt(RectImg_Curt_DownSample.get_ImgSize().y, RectImg_Curt_DownSample.get_ImgSize().x, CV_8UC1);
-                memcpy(cvRectImg_Curt.data, RectImg_Curt_DownSample.get_Img().data(), RectImg_Curt_DownSample.get_Img().size());
-
-                ExportStr = "E:\\Project_ARCHITECT\\RectImg_Curt_Down_" + std::to_string(m_KeyFrameID) + ".png";
-                cv::imwrite(ExportStr, cvRectImg_Curt);
-
-
-                cv::Mat cvRectImg_Last(RectImg_Last_DownSample.get_ImgSize().y, RectImg_Last_DownSample.get_ImgSize().x, CV_8UC1);
-                memcpy(cvRectImg_Last.data, RectImg_Last_DownSample.get_Img().data(), RectImg_Last_DownSample.get_Img().size());
-
-                ExportStr = "E:\\Project_ARCHITECT\\RectImg_Last_Down_" + std::to_string(m_KeyFrameID) + ".png";
-                cv::imwrite(ExportStr, cvRectImg_Last);
-                */
-            }
+            std::vector<char> vecEpiImg_Last(m_EpiKeyframe_Curt.m_ImgSize.x * m_EpiKeyframe_Curt.m_ImgSize.y, 0);
+            Gfx::TextureManager::CopyTextureToCPU(m_EpiKeyframe_Last.m_Img_TexturePtr, reinterpret_cast<char*>(vecEpiImg_Last.data()));
 
             if (m_IsExport_EpiImg)
             {
-                export_RectImg();
+                std::string ExportStr;
+
+                cv::Mat cvEpiImg_Curt(m_EpiKeyframe_Curt.m_ImgSize.y, m_EpiKeyframe_Curt.m_ImgSize.x, CV_8UC1);
+                memcpy(cvEpiImg_Curt.data, vecEpiImg_Curt.data(), vecEpiImg_Curt.size() * sizeof(vecEpiImg_Curt[0]));
+                ExportStr = "E:\\Project_ARCHITECT\\EpiImg_Curt_" + std::to_string(m_KeyfID) + ".png";
+                cv::imwrite(ExportStr, cvEpiImg_Curt);
+
+                cv::Mat cvEpiImg_Last(m_EpiKeyframe_Last.m_ImgSize.y, m_EpiKeyframe_Last.m_ImgSize.x, CV_8UC1);
+                memcpy(cvEpiImg_Last.data, vecEpiImg_Last.data(), vecEpiImg_Last.size() * sizeof(vecEpiImg_Last[0]));
+                ExportStr = "E:\\Project_ARCHITECT\\EpiImg_Last_" + std::to_string(m_KeyfID) + ".png";
+                cv::imwrite(ExportStr, cvEpiImg_Last);
             }
+
+            //---Stereo Matching---
+
+            std::vector<uint16_t> vecEpiDisparity_uint16(m_EpiKeyframe_Curt.m_ImgSize.x * m_EpiKeyframe_Curt.m_ImgSize.y, 0);
+
+            
+
+            if (m_Strategy == "normal")
+            {
+                m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_EpiKeyframe_Curt.m_ImgSize.x, m_EpiKeyframe_Curt.m_ImgSize.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+                    // Default disparity is pixel level => Disparity is the same in 8-bit & 16-bit.
+                    // If turn on sub-pixel => Output disparity must be 16-bit. => Divided by 16 to derive true disparity!!!
+                m_pStereoMatcher_LibSGM->execute(vecEpiImg_Curt.data(), vecEpiImg_Last.data(), vecEpiDisparity_uint16.data());
+            }
+            else if (m_Strategy == "sub-image")
+            {
+                
+            }
+            else if (m_Strategy == "scaling")
+            {
+
+            }
+
+            std::vector<float> vecEpiDisparity = std::vector<float>::vector(vecEpiDisparity_uint16.begin(), vecEpiDisparity_uint16.end());
+
+            
+
+            // *** OLD ***
 
             //---Stereo Matching---
             // * Calculate Disparity in Rectified Current Image
@@ -337,15 +334,7 @@ namespace Stereo
     {
         if (m_StereoMatching_Method == "LibSGM")
         {
-            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImg_Curt.get_ImgSize().x, m_RectImg_Curt.get_ImgSize().y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
-            // Default disparity is pixel level => Disparity is the same in 8-bit & 16-bit.
-            // If turn on sub-pixel => Output disparity must be 16-bit. => Divided by 16 to derive true disparity!!!
-
-            std::vector<uint16_t> DispImg_Rect_uint16(m_RectImg_Curt.get_Img().size(), 0);
-
-            m_pStereoMatcher_LibSGM->execute(m_RectImg_Curt.get_Img().data(), m_RectImg_Last.get_Img().data(), DispImg_Rect_uint16.data());
-
-            m_DispImg_Rect = std::vector<float>::vector(DispImg_Rect_uint16.begin(), DispImg_Rect_uint16.end());
+            
         }
         else if (m_StereoMatching_Method == "FuSGM")
         {
@@ -710,7 +699,7 @@ namespace Stereo
         // Connecting Managers (@CPU) & GLSL (@GPU)
         Gfx::ContextManager::SetShaderCS(m_Depth_Rect2Orig_CSPtr);
         Gfx::ContextManager::SetImageTexture(0, m_DepthImg_Rect_TexturePtr);
-        Gfx::ContextManager::SetImageTexture(1, m_DepthImg_Orig_TexturePtr);
+        Gfx::ContextManager::SetImageTexture(1, m_OrigDepth_TexturePtr);
         Gfx::ContextManager::SetConstantBuffer(0, m_Homogrampy_BufferPtr);
 
         // Start GPU Parallel Processing
@@ -725,23 +714,23 @@ namespace Stereo
         Gfx::Performance::EndEvent();
         // GPU End
 
-        const auto MemSize = m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsU() * m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t);
+        const auto MemSize = m_OrigDepth_TexturePtr->GetNumberOfPixelsU() * m_OrigDepth_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t);
         m_DepthImg_Orig.resize(MemSize);
-        Gfx::TextureManager::CopyTextureToCPU(m_DepthImg_Orig_TexturePtr, reinterpret_cast<char*>(m_DepthImg_Orig.data()));
+        Gfx::TextureManager::CopyTextureToCPU(m_OrigDepth_TexturePtr, reinterpret_cast<char*>(m_DepthImg_Orig.data()));
     }
 
     void CPluginInterface::cmp_Depth()
     {
         Base::AABB2UInt TargetRect;
         TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_OrigImgSize.x, m_OrigImgSize.y));
-        Gfx::TextureManager::CopyToTexture2D(m_DepthImg_Sensor_TexturePtr, TargetRect, m_OrigImgSize.x, static_cast<const void*>(m_DepthImg_Sensor.data()));
+        Gfx::TextureManager::CopyToTexture2D(m_OrigDepth_Sensor_TexturePtr, TargetRect, m_OrigImgSize.x, static_cast<const void*>(m_DepthImg_Sensor.data()));
 
         Gfx::Performance::BeginEvent("Compare Depth");
 
         Gfx::ContextManager::SetShaderCS(m_Compare_Depth_CSPtr);
-        Gfx::ContextManager::SetImageTexture(0, m_DepthImg_Orig_TexturePtr);
-        Gfx::ContextManager::SetImageTexture(1, m_DepthImg_Sensor_TexturePtr);
-        Gfx::ContextManager::SetImageTexture(2, m_Depth_Difference_TexturePtr);
+        Gfx::ContextManager::SetImageTexture(0, m_OrigDepth_TexturePtr);
+        Gfx::ContextManager::SetImageTexture(1, m_OrigDepth_Sensor_TexturePtr);
+        Gfx::ContextManager::SetImageTexture(2, m_OrigDepth_Diff_TexturePtr);
 
         const int WorkGroupsX = DivUp(m_OrigImgSize.x, TileSize_2D);
         const int WorkGroupsY = DivUp(m_OrigImgSize.y, TileSize_2D);
@@ -774,20 +763,7 @@ namespace Stereo
 
     void CPluginInterface::export_RectImg()
     {
-        std::string ExportStr;
-
-        cv::Mat cvRectImg_Curt(m_RectImg_Curt.get_ImgSize().y, m_RectImg_Curt.get_ImgSize().x, CV_8UC1);
-        memcpy(cvRectImg_Curt.data, m_RectImg_Curt.get_Img().data(), m_RectImg_Curt.get_Img().size());
-
-        ExportStr = "E:\\Project_ARCHITECT\\RectImg_Curt_" + std::to_string(m_KeyfID) + ".png";
-        cv::imwrite(ExportStr, cvRectImg_Curt);
-
-
-        cv::Mat cvRectImg_Last(m_RectImg_Last.get_ImgSize().y, m_RectImg_Last.get_ImgSize().x, CV_8UC1);
-        memcpy(cvRectImg_Last.data, m_RectImg_Last.get_Img().data(), m_RectImg_Last.get_Img().size());
-
-        ExportStr = "E:\\Project_ARCHITECT\\RectImg_Last_" + std::to_string(m_KeyfID) + ".png";
-        cv::imwrite(ExportStr, cvRectImg_Last);
+        
     }
 
     void CPluginInterface::export_Depth()
@@ -895,12 +871,12 @@ namespace Stereo
         m_ParaxEq_BufferPtr = nullptr;
 
         m_Depth_Rect2Orig_CSPtr = nullptr;
-        m_DepthImg_Orig_TexturePtr = nullptr;
+        m_OrigDepth_TexturePtr = nullptr;
         m_Homogrampy_BufferPtr = nullptr;
 
         m_Compare_Depth_CSPtr = nullptr;
-        m_DepthImg_Sensor_TexturePtr = nullptr;
-        m_Depth_Difference_TexturePtr = nullptr;
+        m_OrigDepth_Sensor_TexturePtr = nullptr;
+        m_OrigDepth_Diff_TexturePtr = nullptr;
 
         //---plugin_stereo Finish !!!---
         ENGINE_CONSOLE_INFOV("Stereo matching plugin exited!");
