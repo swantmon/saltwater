@@ -18,7 +18,7 @@ namespace // No specific namespace => Only allowed to use in this file.
 namespace FutoGCV
 {
     //---Constructors & Destructor---
-    CPlanarRectification::CPlanarRectification(const glm::ivec2& _OrigImgSize, EEpiType _EpiType, const glm::ivec2 _EpiImgSize)
+    CPlanarRectification::CPlanarRectification(const glm::ivec2& _OrigImgSize, EEpiType _EpiType, const glm::ivec2& _EpiImgSize)
         : m_OrigImgSize(_OrigImgSize), 
           m_EpiType(_EpiType), 
           m_EpiImgSize(_EpiImgSize)
@@ -48,8 +48,8 @@ namespace FutoGCV
 
         //---Initialize Texture Manager---
         Gfx::STextureDescriptor TextDesc_OrigImg = {};
-        TextDesc_OrigImg.m_NumberOfPixelsU = _OrigImgSize.x;
-        TextDesc_OrigImg.m_NumberOfPixelsV = _OrigImgSize.y;
+        TextDesc_OrigImg.m_NumberOfPixelsU = m_OrigImgSize.x;
+        TextDesc_OrigImg.m_NumberOfPixelsV = m_OrigImgSize.y;
         TextDesc_OrigImg.m_NumberOfPixelsW = 1;
         TextDesc_OrigImg.m_NumberOfMipMaps = 1;
         TextDesc_OrigImg.m_NumberOfTextures = 1;
@@ -62,12 +62,11 @@ namespace FutoGCV
         m_OrigImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_OrigImg);
         m_OrigImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_OrigImg);
 
-
-        if (m_EpiType == SUBIMG)
+        if (m_EpiType != NORMAL)
         {
             Gfx::STextureDescriptor TextDesc_EpiImg = {};
-            TextDesc_EpiImg.m_NumberOfPixelsU = _EpiImgSize.x;
-            TextDesc_EpiImg.m_NumberOfPixelsV = _EpiImgSize.y;
+            TextDesc_EpiImg.m_NumberOfPixelsU = m_EpiImgSize.x;
+            TextDesc_EpiImg.m_NumberOfPixelsV = m_EpiImgSize.y;
             TextDesc_EpiImg.m_NumberOfPixelsW = 1;
             TextDesc_EpiImg.m_NumberOfMipMaps = 1;
             TextDesc_EpiImg.m_NumberOfTextures = 1;
@@ -80,24 +79,6 @@ namespace FutoGCV
             m_EpiImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
             m_EpiImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
         } 
-        else if (m_EpiType == DOWNSAMPLING)
-        {
-            Gfx::STextureDescriptor TextDesc_EpiImgLR = {};
-
-            TextDesc_EpiImgLR.m_NumberOfPixelsU = _EpiImgSize.x;
-            TextDesc_EpiImgLR.m_NumberOfPixelsV = _EpiImgSize.y;
-            TextDesc_EpiImgLR.m_NumberOfPixelsW = 1;
-            TextDesc_EpiImgLR.m_NumberOfMipMaps = 1;
-            TextDesc_EpiImgLR.m_NumberOfTextures = 1;
-            TextDesc_EpiImgLR.m_Binding = Gfx::CTexture::ShaderResource;
-            TextDesc_EpiImgLR.m_Access = Gfx::CTexture::EAccess::CPURead;
-            TextDesc_EpiImgLR.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-            TextDesc_EpiImgLR.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-            TextDesc_EpiImgLR.m_Format = Gfx::CTexture::R8_UBYTE; // Single channel with 8-bit.
-
-            m_EpiImgB_LR_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImgLR);
-            m_EpiImgM_LR_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImgLR);
-        }
     }
 
     CPlanarRectification::~CPlanarRectification()
@@ -111,8 +92,10 @@ namespace FutoGCV
 
         m_OrigImgB_TexturePtr = nullptr;
         m_OrigImgM_TexturePtr = nullptr;
+
         m_EpiImgB_TexturePtr = nullptr;
         m_EpiImgM_TexturePtr = nullptr;
+
         m_EpiImgB_LR_TexturePtr = nullptr;
         m_EpiImgM_LR_TexturePtr = nullptr;
     }
@@ -148,9 +131,26 @@ namespace FutoGCV
 
         DetermEpiImgSize();
 
+        if (m_EpiType == DOWNSAMPLING)
+        {
+            m_EpiCamera_B *= m_ScalingRatio;
+            m_EpiCamera_B[2].z = 1;
+            m_EpiCamera_M *= m_ScalingRatio;
+            m_EpiCamera_M[2].z = 1;
+
+            ComputeEpiPPM();
+
+            ComputeHomography(_OrigImg_B.m_PPM, _OrigImg_M.m_PPM);
+
+            ComputeEpiCorner(0);
+            ComputeEpiCorner(1);
+
+            DetermEpiImgSize();
+        }
+
         //---Step 4. Generate Epipolar Images---
-        GenrtEpiImg(_OrigImg_B.m_Img_TexturePtr, 0);
-        GenrtEpiImg(_OrigImg_M.m_Img_TexturePtr, 1);
+        GenrtEpiImg(0);
+        GenrtEpiImg(1);
     }
 
     //---Assistant Functions---
@@ -340,15 +340,17 @@ namespace FutoGCV
         }
         else if (m_EpiType == DOWNSAMPLING)
         {
-
+            m_ScalingRatio = m_EpiImgSize / EpiFrame;
         }
     }
 
-    void CPlanarRectification::GenrtEpiImg(Gfx::CTexturePtr _OrigImg_TexturePtr, const int Which_Img)
+    void CPlanarRectification::ScaleEpiGeometry()
+    {
+    }
+
+    void CPlanarRectification::GenrtEpiImg(const int Which_Img)
     {
         Gfx::ContextManager::SetShaderCS(m_PlanarRectCSPtr);
-
-        Gfx::ContextManager::SetImageTexture(0, _OrigImg_TexturePtr);
 
         switch (Which_Img)
         {
@@ -356,6 +358,7 @@ namespace FutoGCV
             Gfx::BufferManager::UploadBufferData(m_HomographyB_BufferPtr, &m_Homography_B);
             Gfx::ContextManager::SetConstantBuffer(0, m_HomographyB_BufferPtr);
 
+            Gfx::ContextManager::SetImageTexture(0, m_OrigImgB_TexturePtr);
             Gfx::ContextManager::SetImageTexture(1, m_EpiImgB_TexturePtr);
 
             break;
@@ -363,6 +366,7 @@ namespace FutoGCV
             Gfx::BufferManager::UploadBufferData(m_HomographyM_BufferPtr, &m_Homography_M);
             Gfx::ContextManager::SetConstantBuffer(0, m_HomographyM_BufferPtr);
 
+            Gfx::ContextManager::SetImageTexture(0, m_OrigImgM_TexturePtr);
             Gfx::ContextManager::SetImageTexture(1, m_EpiImgM_TexturePtr);
 
             break;
@@ -371,8 +375,8 @@ namespace FutoGCV
         //---GPU Computation Start---
         Gfx::Performance::BeginEvent("Planar Rectification");
 
-        const int WorkGroupsX = DivUp(m_ImgSize_Rect.x, TileSize_2D);
-        const int WorkGroupsY = DivUp(m_ImgSize_Rect.y, TileSize_2D);
+        const int WorkGroupsX = DivUp(m_EpiImgSize.x, TileSize_2D);
+        const int WorkGroupsY = DivUp(m_EpiImgSize.y, TileSize_2D);
 
         Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
@@ -380,77 +384,6 @@ namespace FutoGCV
 
         Gfx::Performance::EndEvent();
         //---GPU Computation End---
-    }
-
-
-    // *** OLD ***
-
-    void CPlanarRectification::return_Result(CFutoImg& RectImgB, CFutoImg& RectImgM, SHomography& Homo_B, SHomography& Homo_M)
-    {
-        const auto RectImgSize_1D = m_ImgSize_Rect.x * m_ImgSize_Rect.y;
-        std::vector<char> RectImgB_Vector1D(RectImgSize_1D, 0), RectImgM_Vector1D(RectImgSize_1D, 0);
-        Gfx::TextureManager::CopyTextureToCPU(m_EpiImgB_TexturePtr, reinterpret_cast<char*>(RectImgB_Vector1D.data()));
-        Gfx::TextureManager::CopyTextureToCPU(m_EpiImgM_TexturePtr, reinterpret_cast<char*>(RectImgM_Vector1D.data()));
-
-
-        RectImgB = CFutoImg(RectImgB_Vector1D, m_ImgSize_Rect, 1, m_EpiCamera_B, m_EpiRotation, m_EpiPosition_B);
-        RectImgM = CFutoImg(RectImgM_Vector1D, m_ImgSize_Rect, 1, m_EpiCamera_M, m_EpiRotation, m_EpiPosition_M);
-
-        Homo_B = m_Homography_B;
-        Homo_M = m_Homography_M;
-    }
-
-    void CPlanarRectification::imp_DownSampling(CFutoImg& RectImg_DownSampling, const int Which_Img)
-    {
-        //---GPU Computation Start---
-        Gfx::Performance::BeginEvent("Down-Sampling Rectified Image");
-
-        Gfx::ContextManager::SetShaderCS(m_DownSamplingCSPtr);
-
-        switch (Which_Img)
-        {
-        case 0:
-            Gfx::ContextManager::SetImageTexture(0, m_EpiImgB_TexturePtr);
-            Gfx::ContextManager::SetImageTexture(1, m_EpiImgB_LR_TexturePtr);
-
-            break;
-
-        case 1:
-            Gfx::ContextManager::SetImageTexture(0, m_EpiImgM_TexturePtr);
-            Gfx::ContextManager::SetImageTexture(1, m_EpiImgM_LR_TexturePtr);
-
-            break;
-        }
-
-        //---Start GPU Parallel Processing---
-        const int WorkGroupsX = DivUp(m_ImgSize_DownSample.x, TileSize_2D);
-        const int WorkGroupsY = DivUp(m_ImgSize_DownSample.y, TileSize_2D);
-
-        Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-
-        Gfx::ContextManager::ResetShaderCS();
-
-        Gfx::Performance::EndEvent();
-        //---GPU Computation End---
-
-        //---Return Down-Sampled Rectified Images---
-        const int RectImgSize_1D = m_ImgSize_DownSample.x * m_ImgSize_DownSample.y;
-        std::vector<char> RectImg_Vector1D(RectImgSize_1D, 0);
-
-        switch (Which_Img)
-        {
-        case 0:
-            Gfx::TextureManager::CopyTextureToCPU(m_EpiImgB_LR_TexturePtr, reinterpret_cast<char*>(RectImg_Vector1D.data()));
-
-            break;
-
-        case 1:
-            Gfx::TextureManager::CopyTextureToCPU(m_EpiImgM_LR_TexturePtr, reinterpret_cast<char*>(RectImg_Vector1D.data()));
-
-            break;
-        }
-
-        RectImg_DownSampling = CFutoImg(RectImg_Vector1D, m_ImgSize_DownSample, 1);
     }
 
 } // FutoGmtCV

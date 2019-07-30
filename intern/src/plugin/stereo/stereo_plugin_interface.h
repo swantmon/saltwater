@@ -12,7 +12,7 @@
 #include "engine/graphic/gfx_buffer_manager.h"
 
 //---FutoGmtCV---
-#include "plugin\stereo\FutoGCV_Img.h"
+#include "plugin\stereo\FutoGCV_FutoImg.h"
 #include "plugin\stereo\FutoGCV_Rectification_Planar.h"
 #include "plugin\stereo\FutoGCV_upsampling_fgi.h"
 
@@ -29,42 +29,6 @@
 
 #include "libsgm.h"
 
-
-namespace FutoGCV
-{
-    struct SFutoImg
-    {
-        //---Member---
-        Gfx::CTexturePtr m_Img_TexturePtr; // 2D Texture
-
-        glm::ivec3 m_ImgSize; // Width, Height, Channel
-
-        glm::mat3 m_Camera; // Interior Orientations of Camera.
-        glm::mat3 m_Rotation; // Rotation from World to Camera.
-        glm::vec3 m_Position; // Position of Camera in World.
-        glm::mat4x3 m_PPM; // Perspective Projection Matrix
-
-        //---Constructors & Destructore---
-        SFutoImg(Gfx::CTexturePtr _ImgData, const glm::ivec3& _ImgSize, 
-                const glm::mat3& _Camera, const glm::mat3& _Rotation, const glm::vec3& _Position)
-            : m_Img_TexturePtr(nullptr),
-              m_ImgSize(_ImgSize),
-              m_Camera(_Camera),
-              m_Rotation(_Rotation),
-              m_Position(_Position)
-        {
-            m_Img_TexturePtr = _ImgData;
-
-            m_PPM = glm::mat4x3(m_Rotation[0], m_Rotation[1], m_Rotation[2], -m_Rotation * m_Position);
-            m_PPM = m_Camera * m_PPM;
-        }
-
-        ~SFutoImg()
-        {
-            m_Img_TexturePtr = nullptr;
-        }
-    };
-} // namespace FutoGCV
 
 namespace Stereo
 {

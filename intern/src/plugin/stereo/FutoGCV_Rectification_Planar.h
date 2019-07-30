@@ -5,6 +5,8 @@
 #include "engine/graphic/gfx_texture_manager.h" // To manage GPU Texture (Data in GPU processing) 
 #include "engine/graphic/gfx_buffer_manager.h" // To manage GPU Buffer (Memory in GPU) 
 
+#include "plugin\stereo\FutoGCV_FutoImg.h"
+
 namespace FutoGCV
 {
     enum EEpiType
@@ -27,7 +29,7 @@ namespace FutoGCV
     //---Constructors & Destructor---
     public:
 
-        CPlanarRectification(const glm::ivec2& _OrigImgSize, EEpiType _EpiType, const glm::ivec2 _EpiImgSize = glm::ivec2(0));
+        CPlanarRectification(const glm::ivec2& _OrigImgSize, EEpiType _EpiType = NORMAL, const glm::ivec2& _EpiImgSize = glm::ivec2(0));
 
         ~CPlanarRectification();
 
@@ -51,13 +53,16 @@ namespace FutoGCV
         void ComputeEpiCorner(const int Which_Img = 0);
         void DetermEpiImgSize();
 
-        void GenrtEpiImg(Gfx::CTexturePtr _OrigImg_TexturePtr, const int Which_Img = 0);
+        void ScaleEpiGeometry();
+
+        void GenrtEpiImg(const int Which_Img = 0);
 
     //---Members---
     private:
 
         EEpiType m_EpiType;
         glm::ivec2 m_OrigImgSize, m_EpiImgSize;
+        glm::vec2 m_ScalingRatio;
 
         glm::mat3 m_EpiCamera_B, m_EpiCamera_M; // Camera matrix of Epipolar Images
         glm::mat3 m_EpiRotation; // Rotation matrix of Epipolar Images (World -> Image)
@@ -81,12 +86,7 @@ namespace FutoGCV
 
     // *** OLD ***
 
-    //---Execution Functions---
     public:
-
-        void return_Result(CFutoImg& RectImg_Curt, CFutoImg& RectImg_Last, SHomography& Homo_B, SHomography& Homo_M);
-
-        void imp_DownSampling(CFutoImg& RectImg_DownSampling, const int Which_Img = 0);
 
         bool m_Is_LargeSize;
 
