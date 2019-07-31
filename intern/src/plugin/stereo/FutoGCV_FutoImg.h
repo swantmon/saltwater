@@ -21,14 +21,12 @@ namespace FutoGCV
         //---Constructors & Destructore---
         SFutoImg(Gfx::CTexturePtr _ImgData, const glm::ivec3& _ImgSize,
             const glm::mat3& _Camera, const glm::mat3& _Rotation, const glm::vec3& _Position)
-            : m_Img_TexturePtr(nullptr),
+            : m_Img_TexturePtr(_ImgData),
               m_ImgSize(_ImgSize),
               m_Camera(_Camera),
               m_Rotation(_Rotation),
               m_Position(_Position)
         {
-            m_Img_TexturePtr = _ImgData;
-
             m_PPM = glm::mat4x3(m_Rotation[0], m_Rotation[1], m_Rotation[2], -m_Rotation * m_Position);
             m_PPM = m_Camera * m_PPM;
         }

@@ -17,11 +17,10 @@ namespace // No specific namespace => Only allowed to use in this file.
 
 namespace FutoGCV
 {
-    //---Constructors & Destructor---
-    CPlanarRectification::CPlanarRectification(const glm::ivec2& _OrigImgSize, EEpiType _EpiType, const glm::ivec2& _EpiImgSize)
-        : m_OrigImgSize(_OrigImgSize), 
-          m_EpiType(_EpiType), 
-          m_EpiImgSize(_EpiImgSize)
+    //===== Constructors & Destructor =====
+
+    CPlanarRectification::CPlanarRectification(const glm::ivec2& _OrigImgSize)
+        : m_OrigImgSize(_OrigImgSize) 
     {
         //---Initialize Shader Manager---
         std::stringstream DefineStream;
@@ -29,79 +28,21 @@ namespace FutoGCV
             << "#define TILE_SIZE_2D " << TileSize_2D << " \n"; 
         std::string DefineString = DefineStream.str();
 
-        m_PlanarRectCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/01_epipolarization/cs_planar_rectification.glsl", "main", DefineString.c_str());
-
-        m_DownSamplingCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/01_epipolarization/cs_down_sampling.glsl", "main", DefineString.c_str());
-
-        //---Initialize Buffer Manager---
-        Gfx::SBufferDescriptor BufferDesc_Homo = {};
-        BufferDesc_Homo.m_Stride = 0;
-        BufferDesc_Homo.m_Usage = Gfx::CBuffer::GPURead;
-        BufferDesc_Homo.m_Binding = Gfx::CBuffer::ConstantBuffer;
-        BufferDesc_Homo.m_Access = Gfx::CBuffer::CPUWrite;
-        BufferDesc_Homo.m_NumberOfBytes = sizeof(SHomography);
-        BufferDesc_Homo.m_pBytes = nullptr;
-        BufferDesc_Homo.m_pClassKey = nullptr;
-
-        m_HomographyB_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc_Homo);
-        m_HomographyM_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc_Homo);
-
-        //---Initialize Texture Manager---
-        Gfx::STextureDescriptor TextDesc_OrigImg = {};
-        TextDesc_OrigImg.m_NumberOfPixelsU = m_OrigImgSize.x;
-        TextDesc_OrigImg.m_NumberOfPixelsV = m_OrigImgSize.y;
-        TextDesc_OrigImg.m_NumberOfPixelsW = 1;
-        TextDesc_OrigImg.m_NumberOfMipMaps = 1;
-        TextDesc_OrigImg.m_NumberOfTextures = 1;
-        TextDesc_OrigImg.m_Binding = Gfx::CTexture::ShaderResource;
-        TextDesc_OrigImg.m_Access = Gfx::CTexture::EAccess::CPURead;
-        TextDesc_OrigImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-        TextDesc_OrigImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextDesc_OrigImg.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE; // 4 channels and each channel is 8-bit.
-
-        m_OrigImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_OrigImg);
-        m_OrigImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_OrigImg);
-
-        if (m_EpiType != NORMAL)
-        {
-            Gfx::STextureDescriptor TextDesc_EpiImg = {};
-            TextDesc_EpiImg.m_NumberOfPixelsU = m_EpiImgSize.x;
-            TextDesc_EpiImg.m_NumberOfPixelsV = m_EpiImgSize.y;
-            TextDesc_EpiImg.m_NumberOfPixelsW = 1;
-            TextDesc_EpiImg.m_NumberOfMipMaps = 1;
-            TextDesc_EpiImg.m_NumberOfTextures = 1;
-            TextDesc_EpiImg.m_Binding = Gfx::CTexture::ShaderResource;
-            TextDesc_EpiImg.m_Access = Gfx::CTexture::EAccess::CPURead;
-            TextDesc_EpiImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-            TextDesc_EpiImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-            TextDesc_EpiImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
-
-            m_EpiImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
-            m_EpiImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
-        } 
+        m_PlanarRectificationCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/01_epipolarization/cs_planar_rectification.glsl", "main", DefineString.c_str());
     }
 
     CPlanarRectification::~CPlanarRectification()
     {
         //---Release Manager---
-        m_PlanarRectCSPtr = nullptr;
-        m_DownSamplingCSPtr = nullptr;
-
-        m_HomographyB_BufferPtr = nullptr;
-        m_HomographyM_BufferPtr = nullptr;
-
-        m_OrigImgB_TexturePtr = nullptr;
-        m_OrigImgM_TexturePtr = nullptr;
+        m_PlanarRectificationCSPtr = nullptr;
 
         m_EpiImgB_TexturePtr = nullptr;
         m_EpiImgM_TexturePtr = nullptr;
-
-        m_EpiImgB_LR_TexturePtr = nullptr;
-        m_EpiImgM_LR_TexturePtr = nullptr;
     }
 
-    //---Execution Functions---
-    void CPlanarRectification::ComputeEpiGeometry(const SFutoImg& _OrigImg_B, const SFutoImg& _OrigImg_M)
+    //===== Execution Functions =====
+
+    void CPlanarRectification::ComputeEpiGeometry(Gfx::CBufferPtr HomoB_BufferPtr, Gfx::CBufferPtr HomoM_BufferPtr, const SFutoImg& _OrigImg_B, const SFutoImg& _OrigImg_M)
     {
         //---Step 1. Compute Orientations of Epipolar Images---
         ComputeEpiCamera(_OrigImg_B.m_Camera, _OrigImg_M.m_Camera);
@@ -131,29 +72,19 @@ namespace FutoGCV
 
         DetermEpiImgSize();
 
-        if (m_EpiType == DOWNSAMPLING)
-        {
-            m_EpiCamera_B *= m_ScalingRatio;
-            m_EpiCamera_B[2].z = 1;
-            m_EpiCamera_M *= m_ScalingRatio;
-            m_EpiCamera_M[2].z = 1;
-
-            ComputeEpiPPM();
-
-            ComputeHomography(_OrigImg_B.m_PPM, _OrigImg_M.m_PPM);
-
-            ComputeEpiCorner(0);
-            ComputeEpiCorner(1);
-
-            DetermEpiImgSize();
-        }
-
         //---Step 4. Generate Epipolar Images---
-        GenrtEpiImg(0);
-        GenrtEpiImg(1);
+        HomoTransform(_OrigImg_B.m_Img_TexturePtr, HomoB_BufferPtr, 0);
+        HomoTransform(_OrigImg_B.m_Img_TexturePtr, HomoM_BufferPtr, 1);
     }
 
-    //---Assistant Functions---
+    void CPlanarRectification::ReturnEpiImg(SFutoImg& EpiImg_B, SFutoImg& EpiImg_M)
+    {
+        EpiImg_B = SFutoImg(m_EpiImgB_TexturePtr, glm::ivec3(m_EpiImgSize, 1), m_EpiCamera_B, m_EpiRotation, m_EpiPosition_B);
+        EpiImg_M = SFutoImg(m_EpiImgM_TexturePtr, glm::ivec3(m_EpiImgSize, 1), m_EpiCamera_M, m_EpiRotation, m_EpiPosition_M);
+    }
+
+    //===== Assistant Functions =====
+
     void CPlanarRectification::ComputeEpiCamera(const glm::mat3& _OrigCamera_B, const glm::mat3& _OrigCamera_M)
     {
         m_EpiCamera_B = 0.5 * (_OrigCamera_B + _OrigCamera_M);
@@ -242,45 +173,45 @@ namespace FutoGCV
         }
 
         //---Select corners in original images---
-        glm::ivec3 ImgCnr_Orig_UL(0, 0, 1), 
-                   ImgCnr_Orig_UR(m_OrigImgSize.x - 1, 0, 1), 
-                   ImgCnr_Orig_DL(0, m_OrigImgSize.y - 1, 1), 
-                   ImgCnr_Orig_DR(m_OrigImgSize.x - 1, m_OrigImgSize.y - 1, 1);
+        glm::ivec3 CnrUL_Orig(0, 0, 1), 
+                   CnrUR_Orig(m_OrigImgSize.x - 1, 0, 1), 
+                   CnrDL_Orig(0, m_OrigImgSize.y - 1, 1), 
+                   CnrDR_Orig(m_OrigImgSize.x - 1, m_OrigImgSize.y - 1, 1);
 
         //---Transform corners from original to rectified---
-        glm::vec3 ImgCnr_Orig2Epi_UL = H * ImgCnr_Orig_UL;
-        ImgCnr_Orig2Epi_UL /= ImgCnr_Orig2Epi_UL.z;
+        glm::vec3 CnrUL_Orig2Epi = H * CnrUL_Orig;
+        CnrUL_Orig2Epi /= CnrUL_Orig2Epi.z;
 
-        glm::vec3 ImgCnr_Orig2Epi_UR = H * ImgCnr_Orig_UR;
-        ImgCnr_Orig2Epi_UR /= ImgCnr_Orig2Epi_UR.z;
+        glm::vec3 CnrUR_Orig2Epi = H * CnrUR_Orig;
+        CnrUR_Orig2Epi /= CnrUR_Orig2Epi.z;
 
-        glm::vec3 ImgCnr_Orig2Epi_DL = H * ImgCnr_Orig_DL;
-        ImgCnr_Orig2Epi_DL /= ImgCnr_Orig2Epi_DL.z;
+        glm::vec3 CnrDL_Orig2Epi = H * CnrDL_Orig;
+        CnrDL_Orig2Epi /= CnrDL_Orig2Epi.z;
 
-        glm::vec3 ImgCnr_Orig2Epi_DR = H * ImgCnr_Orig_DR;
-        ImgCnr_Orig2Epi_DR /= ImgCnr_Orig2Epi_DR.z;
+        glm::vec3 CnrDR_Orig2Epi = H * CnrDR_Orig;
+        CnrDR_Orig2Epi /= CnrDR_Orig2Epi.z;
 
         //---Determine the Co-Corners of Epipolar Image---
-        glm::ivec2 ImgCnr_Epi_UL, ImgCnr_Epi_DR;
+        glm::ivec2 CnrUL_Epi, CnrDR_Epi;
 
-        ImgCnr_Epi_UL.x =
-            static_cast<int>(floor(glm::min(glm::min(ImgCnr_Orig2Epi_UL.x, ImgCnr_Orig2Epi_UR.x), glm::min(ImgCnr_Orig2Epi_DL.x, ImgCnr_Orig2Epi_DR.x))));
-        ImgCnr_Epi_UL.y =
-            static_cast<int>(floor(glm::min(glm::min(ImgCnr_Orig2Epi_UL.y, ImgCnr_Orig2Epi_UR.y), glm::min(ImgCnr_Orig2Epi_DL.y, ImgCnr_Orig2Epi_DR.y))));
-        ImgCnr_Epi_DR.x =
-            static_cast<int>(ceil(glm::max(glm::max(ImgCnr_Orig2Epi_UL.x, ImgCnr_Orig2Epi_UR.x), glm::max(ImgCnr_Orig2Epi_DL.x, ImgCnr_Orig2Epi_DR.x))));
-        ImgCnr_Epi_DR.y =
-            static_cast<int>(ceil(glm::max(glm::max(ImgCnr_Orig2Epi_UL.y, ImgCnr_Orig2Epi_UR.y), glm::max(ImgCnr_Orig2Epi_DL.y, ImgCnr_Orig2Epi_DR.y))));
+        CnrUL_Epi.x =
+            static_cast<int>(floor(glm::min(glm::min(CnrUL_Orig2Epi.x, CnrUR_Orig2Epi.x), glm::min(CnrDL_Orig2Epi.x, CnrDR_Orig2Epi.x))));
+        CnrUL_Epi.y =
+            static_cast<int>(floor(glm::min(glm::min(CnrUL_Orig2Epi.y, CnrUR_Orig2Epi.y), glm::min(CnrDL_Orig2Epi.y, CnrDR_Orig2Epi.y))));
+        CnrDR_Epi.x =
+            static_cast<int>(ceil(glm::max(glm::max(CnrUL_Orig2Epi.x, CnrUR_Orig2Epi.x), glm::max(CnrDL_Orig2Epi.x, CnrDR_Orig2Epi.x))));
+        CnrDR_Epi.y =
+            static_cast<int>(ceil(glm::max(glm::max(CnrUL_Orig2Epi.y, CnrUR_Orig2Epi.y), glm::max(CnrDL_Orig2Epi.y, CnrDR_Orig2Epi.y))));
 
         switch (Which_Img)
         {
         case 0:
-            m_Homography_B.m_EpiCorner_UL = ImgCnr_Epi_UL;
-            m_Homography_B.m_EpiCorner_DR = ImgCnr_Epi_DR;
+            m_Homography_B.m_EpiCorner_UL = CnrUL_Epi;
+            m_Homography_B.m_EpiCorner_DR = CnrDR_Epi;
             break;
         case 1:
-            m_Homography_M.m_EpiCorner_UL = ImgCnr_Epi_UL;
-            m_Homography_M.m_EpiCorner_DR = ImgCnr_Epi_DR;
+            m_Homography_M.m_EpiCorner_UL = CnrUL_Epi;
+            m_Homography_M.m_EpiCorner_DR = CnrDR_Epi;
             break;
         }
     }
@@ -300,77 +231,54 @@ namespace FutoGCV
         m_Homography_M.m_EpiCorner_UL = EpiFrameUL;
         m_Homography_M.m_EpiCorner_DR = EpiFrameDR;
 
-        glm::ivec2 EpiFrame = m_Homography_B.m_EpiCorner_DR - m_Homography_B.m_EpiCorner_UL;
+        m_EpiImgSize = m_Homography_B.m_EpiCorner_DR - m_Homography_B.m_EpiCorner_UL;
 
-        if (EpiFrame.x > 5000 || EpiFrame.y > 5000)
+        if (m_EpiImgSize.x > 5000 || m_EpiImgSize.y > 5000)
         {
-            m_Is_LargeSize = true;
+            return;
         }
 
-        if (m_EpiType == NORMAL)
-        {
-            m_EpiImgSize = EpiFrame;
+        //---Initialize EpiImg Texture Manager---
+        Gfx::STextureDescriptor TextDesc_EpiImg = {};
+        TextDesc_EpiImg.m_NumberOfPixelsU = m_EpiImgSize.x;
+        TextDesc_EpiImg.m_NumberOfPixelsV = m_EpiImgSize.y;
+        TextDesc_EpiImg.m_NumberOfPixelsW = 1;
+        TextDesc_EpiImg.m_NumberOfMipMaps = 1;
+        TextDesc_EpiImg.m_NumberOfTextures = 1;
+        TextDesc_EpiImg.m_Binding = Gfx::CTexture::ShaderResource;
+        TextDesc_EpiImg.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+        TextDesc_EpiImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+        TextDesc_EpiImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+        TextDesc_EpiImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
 
-            //---Initialize Output Texture Manager---
-            Gfx::STextureDescriptor TextDesc_EpiImg = {};
-            TextDesc_EpiImg.m_NumberOfPixelsU = m_EpiImgSize.x;
-            TextDesc_EpiImg.m_NumberOfPixelsV = m_EpiImgSize.y;
-            TextDesc_EpiImg.m_NumberOfPixelsW = 1;
-            TextDesc_EpiImg.m_NumberOfMipMaps = 1;
-            TextDesc_EpiImg.m_NumberOfTextures = 1;
-            TextDesc_EpiImg.m_Binding = Gfx::CTexture::ShaderResource;
-            TextDesc_EpiImg.m_Access = Gfx::CTexture::EAccess::CPUWrite;
-            TextDesc_EpiImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-            TextDesc_EpiImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-            TextDesc_EpiImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
-
-            m_EpiImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
-            m_EpiImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
-        }
-        else if (m_EpiType == SUBIMG)
-        {
-            glm::ivec2 SubShift = EpiFrame - m_EpiImgSize;
-            SubShift /= 2;
-
-            m_Homography_B.m_EpiCorner_UL += SubShift;
-            m_Homography_B.m_EpiCorner_DR -= SubShift;
-
-            m_Homography_M.m_EpiCorner_UL += SubShift;
-            m_Homography_M.m_EpiCorner_DR -= SubShift;
-        }
-        else if (m_EpiType == DOWNSAMPLING)
-        {
-            m_ScalingRatio = m_EpiImgSize / EpiFrame;
-        }
+        m_EpiImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
+        m_EpiImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
     }
 
-    void CPlanarRectification::ScaleEpiGeometry()
+    void CPlanarRectification::HomoTransform(Gfx::CTexturePtr OrigImg_TexturePtr, Gfx::CBufferPtr Homo_BufferPtr, const int Which_Img = 0)
     {
-    }
-
-    void CPlanarRectification::GenrtEpiImg(const int Which_Img)
-    {
-        Gfx::ContextManager::SetShaderCS(m_PlanarRectCSPtr);
+        Gfx::ContextManager::SetShaderCS(m_PlanarRectificationCSPtr);
 
         switch (Which_Img)
         {
         case 0:
-            Gfx::BufferManager::UploadBufferData(m_HomographyB_BufferPtr, &m_Homography_B);
-            Gfx::ContextManager::SetConstantBuffer(0, m_HomographyB_BufferPtr);
+            Gfx::BufferManager::UploadBufferData(Homo_BufferPtr, &m_Homography_B);
 
-            Gfx::ContextManager::SetImageTexture(0, m_OrigImgB_TexturePtr);
             Gfx::ContextManager::SetImageTexture(1, m_EpiImgB_TexturePtr);
 
             break;
-        case 1:
-            Gfx::BufferManager::UploadBufferData(m_HomographyM_BufferPtr, &m_Homography_M);
-            Gfx::ContextManager::SetConstantBuffer(0, m_HomographyM_BufferPtr);
 
-            Gfx::ContextManager::SetImageTexture(0, m_OrigImgM_TexturePtr);
+        case 1:
+            Gfx::BufferManager::UploadBufferData(Homo_BufferPtr, &m_Homography_M);
+
             Gfx::ContextManager::SetImageTexture(1, m_EpiImgM_TexturePtr);
 
             break;
         }
+
+        Gfx::ContextManager::SetConstantBuffer(0, Homo_BufferPtr);
+
+        Gfx::ContextManager::SetImageTexture(0, OrigImg_TexturePtr);
 
         //---GPU Computation Start---
         Gfx::Performance::BeginEvent("Planar Rectification");

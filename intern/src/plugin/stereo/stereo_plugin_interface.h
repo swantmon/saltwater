@@ -12,9 +12,9 @@
 #include "engine/graphic/gfx_buffer_manager.h"
 
 //---FutoGmtCV---
-#include "plugin\stereo\FutoGCV_FutoImg.h"
-#include "plugin\stereo\FutoGCV_Rectification_Planar.h"
-#include "plugin\stereo\FutoGCV_upsampling_fgi.h"
+#include "plugin\stereo\futogcv_futoimg.h"
+#include "plugin\stereo\futogcv_rectification_planar.h"
+#include "plugin\stereo\futogcv_upsampling_fgi.h"
 
 //---Basic Processing---
 #include <vector>
@@ -34,7 +34,8 @@ namespace Stereo
 {
     class CPluginInterface : public Core::IPlugin
     {
-    //---Engine---
+    //===== Engine =====
+
     public:
 
         void OnStart() override;
@@ -47,7 +48,8 @@ namespace Stereo
 
         void EventHook();
 
-    //---plugin_slam---
+    //===== plugin_slam =====
+
     public:
 
         void SetIntrinsics(const glm::vec2 &_rFocalLength, const glm::vec2 &_rFocalPoint, const glm::ivec2 &_rImageSize);
@@ -65,31 +67,39 @@ namespace Stereo
         using CStereoDelegate = Base::CDelegate<const std::vector<char>&, const std::vector<char>&, const glm::mat4&, const glm::vec2&, const glm::vec2&>;
         CStereoDelegate::HandleType Register(Stereo::CPluginInterface::CStereoDelegate::FunctionType _Function);
 
-    //---plugin_stereo---
+    //===== plugin_stereo =====
+
     private:
 
-        //---00 Input Data---
+        //===== 00. Input Data =====
+
         glm::ivec3 m_OrigImgSize; // Width, Height, Channel
 
-        //---00 Select Keyframe---
         Gfx::CTexturePtr m_OrigImg_TexturePtr; // Temporary TexturePtr for each input frame.
+
+        //===== 00. Select Keyframe =====
+
         FutoGCV::SFutoImg m_OrigKeyframe_Curt, m_OrigKeyframe_Last; // Original images of keyframes.
 
-        bool m_IsKeyfExist = false; // The status of current keyframe.
+        bool m_KeyfStatus = false; // The status of current keyframe.
 
-        float m_SelectKeyf_BaseLineL; // BaseLine Condition. Unit is meter.
+        float m_KeyfCondition_BaseLineL; // BaseLine Condition. Unit is meter.
 
         int m_KeyfID = 0;
 
+        //===== 01. Epipolarization =====
+
+        FutoGCV::CPlanarRectification m_Rectifier_Planar; 
+
+        FutoGCV::SFutoImg m_EpiKeyframe_Curt, m_EpiKeyframe_Last;
+
+        Gfx::CBufferPtr m_Homography_Curt_BufferPtr, m_Homography_Last_BufferPtr;
+
+
+
+
         //---01 Calculate Disparity---
         std::string m_Strategy;
-        glm::ivec3 m_EpiImgSize; // Width, Height, Channel
-
-        FutoGCV::CPlanarRectification m_Rectifier_Planar; // Implement planar rectification
-
-        FutoGCV::SFutoImg m_EpiKeyframe_Curt, m_EpiKeyframe_Last; // Epipolar images of keyframes.
-
-        FutoGCV::SHomography m_Homo_Curt, m_Homo_Last;
 
         int m_DispRange; // Disparity Searching Range for Stereo Matching
 

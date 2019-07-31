@@ -5,17 +5,10 @@
 #include "engine/graphic/gfx_texture_manager.h" // To manage GPU Texture (Data in GPU processing) 
 #include "engine/graphic/gfx_buffer_manager.h" // To manage GPU Buffer (Memory in GPU) 
 
-#include "plugin\stereo\FutoGCV_FutoImg.h"
+#include "plugin\stereo\futogcv_futoimg.h"
 
 namespace FutoGCV
 {
-    enum EEpiType
-    {
-        NORMAL,
-        SUBIMG,
-        DOWNSAMPLING
-    };
-
     struct SHomography // Always make sure whole structure is the multiple of 4*float
     {
         glm::mat4 m_H_Orig2Epi; // GPU memory transmission is based on 4. => Using mat3 will adress wrong memory.
@@ -26,23 +19,28 @@ namespace FutoGCV
 
     class CPlanarRectification
     {
-    //---Constructors & Destructor---
+
+    //===== Constructors & Destructor =====
+
     public:
 
-        CPlanarRectification(const glm::ivec2& _OrigImgSize, EEpiType _EpiType = NORMAL, const glm::ivec2& _EpiImgSize = glm::ivec2(0));
+        CPlanarRectification(const glm::ivec2& _OrigImgSize);
 
         ~CPlanarRectification();
 
-    //---Execution Functions---
+    //===== Execution Functions =====
+
     public:
 
-        void ComputeEpiGeometry(const SFutoImg& OrigImg_B, const SFutoImg& OrigImg_M);
+        void ComputeEpiGeometry(Gfx::CBufferPtr HomoB_BufferPtr, Gfx::CBufferPtr HomoM_BufferPtr, const SFutoImg& _OrigImg_B, const SFutoImg& _OrigImg_M);
 
-        void ReturnResult(SFutoImg& EpiImg_B, SFutoImg& EpiImg_M, SHomography& Homo_B, SHomography& Homo_M);
+        void ReturnEpiImg(SFutoImg& EpiImg_B, SFutoImg& EpiImg_M);
 
-    //---Assistant Functions---
+    //===== Assistant Functions =====
+
     private:
 
+        //---Compute Homography based on Epipolar Geometry---
         void ComputeEpiCamera(const glm::mat3& _OrigCamera_B, const glm::mat3& _OrigCamera_M);
         void ComputeEpiRotation(const glm::vec3& _OrigPosition_B, const glm::vec3& _OrigPosition_M, const glm::mat3& _OrigRotation_B);
         void ComputeEpiPosition(const glm::vec3& _OrigPosition_B, const glm::vec3& _OrigPosition_M);
@@ -50,49 +48,33 @@ namespace FutoGCV
 
         void ComputeHomography(const glm::mat4x3& _OrigPPM_B, const glm::mat4x3& _OrigPPM_M);
 
+        //---Center Epipolar Images---
         void ComputeCenterShift(glm::vec2& CenterDrift, const int Which_Img = 0);
         void ShiftEpiCenter(const glm::vec2& Drift_B, const glm::vec2& Drift_M);
 
+        //---Determine Epipolar Image Size---
         void ComputeEpiCorner(const int Which_Img = 0);
         void DetermEpiImgSize();
 
-        void ScaleEpiGeometry();
+        //---Generate Epipolar Images---
+        void HomoTransform(Gfx::CTexturePtr OrigImg_TexturePtr, Gfx::CBufferPtr m_Homo_BufferPtr, const int Which_Img = 0);
 
-        void GenrtEpiImg(const int Which_Img = 0);
+    // ===== Members =====
 
-    //---Members---
     private:
 
-        EEpiType m_EpiType;
         glm::ivec2 m_OrigImgSize, m_EpiImgSize;
-        glm::vec2 m_ScalingRatio;
 
         glm::mat3 m_EpiCamera_B, m_EpiCamera_M; // Camera matrix of Epipolar Images
         glm::mat3 m_EpiRotation; // Rotation matrix of Epipolar Images (World -> Image)
         glm::vec3 m_EpiPosition_B, m_EpiPosition_M; // Projection Center of Epipolar Images
         glm::mat4x3 m_EpiPPM_B, m_EpiPPM_M; // Perspective Projection Matrix of Epipolar Images (World -> Image)
 
-        Gfx::CShaderPtr m_PlanarRectCSPtr, m_DownSamplingCSPtr;
-
-        Gfx::CBufferPtr m_HomographyB_BufferPtr, m_HomographyM_BufferPtr;
         SHomography m_Homography_B, m_Homography_M;
 
-        Gfx::CTexturePtr m_OrigImgB_TexturePtr, m_OrigImgM_TexturePtr;
+        Gfx::CShaderPtr m_PlanarRectificationCSPtr;
+
         Gfx::CTexturePtr m_EpiImgB_TexturePtr, m_EpiImgM_TexturePtr;
-
-
-
-        Gfx::CTexturePtr m_EpiImgB_LR_TexturePtr, m_EpiImgM_LR_TexturePtr;
-
-
-
-
-    // *** OLD ***
-
-    public:
-
-        bool m_Is_LargeSize;
-
     };
 
 } // namespace FutoGmtCV

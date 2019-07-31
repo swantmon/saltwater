@@ -40,6 +40,8 @@ namespace Stereo
         BASE_UNUSED(_rFocalLength); // Avoid warning about unused variable.
         BASE_UNUSED(_rFocalPoint); // Avoid warning about unused variable.
 
+        //===== 00. Input Data =====
+
         m_OrigImgSize = glm::ivec3(_rImageSize, 4); // Width, Height, Channel
 
         //---Initialize OrigImg Texture Manager---
@@ -57,23 +59,26 @@ namespace Stereo
 
         m_OrigImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_OrigImg);
 
-        //---Disparity Computation (Epipolarization & Stereo Matching)---
-        if (m_Strategy == "normal")
-        {
-            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, FutoGCV::NORMAL);
-        }
-        else if (m_Strategy == "sub-image")
-        {
-            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, FutoGCV::SUBIMG, m_EpiImgSize);
+        //===== 00. Select Keyframe =====
 
-            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_EpiImgSize.x, m_EpiImgSize.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
-        } 
-        else if (m_Strategy == "scaling")
-        {
-            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, FutoGCV::DOWNSAMPLING, m_EpiImgSize);
+        //===== 01. Epipolarization =====
 
-            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_EpiImgSize.x, m_EpiImgSize.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
-        }
+        m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize);
+
+        //---Initialize Buffer Manager---
+        Gfx::SBufferDescriptor BufferDesc_Homo = {};
+        BufferDesc_Homo.m_Stride = 0;
+        BufferDesc_Homo.m_Usage = Gfx::CBuffer::GPURead;
+        BufferDesc_Homo.m_Binding = Gfx::CBuffer::ConstantBuffer;
+        BufferDesc_Homo.m_Access = Gfx::CBuffer::CPUWrite;
+        BufferDesc_Homo.m_NumberOfBytes = sizeof(FutoGCV::SHomography);
+        BufferDesc_Homo.m_pBytes = nullptr;
+        BufferDesc_Homo.m_pClassKey = nullptr;
+
+        m_Homography_Curt_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc_Homo);
+        m_Homography_Last_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc_Homo);
+
+        //===== 02. Stereo Matching =====
 
         //---Initialize EpiDisparity Texture Manager---
         Gfx::STextureDescriptor TextDesc_EpiDisp = {};
@@ -127,76 +132,87 @@ namespace Stereo
 
     void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::vec2& _FocalLength, const glm::vec2& _FocalPoint, const std::vector<uint16_t>& _rDepthImage)
     {
-        //---Setting Orientations from ARKit---
+        //=====00 Input Data from ARKit=====
+
+        //---Image Data---
         Base::AABB2UInt TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_OrigImgSize.x, m_OrigImgSize.y));
         Gfx::TextureManager::CopyToTexture2D(m_OrigImg_TexturePtr, TargetRect, m_OrigImgSize.x, static_cast<const void*>(_rRGBImage.data()));
 
-        glm::mat3 K = glm::mat3(_FocalLength.x, 0, 0, 0, _FocalLength.y, 0, _FocalPoint.x, _FocalPoint.y, 1); 
+        //---Interior Orientations---
+        glm::mat3 K = glm::mat3(_FocalLength.x, 0, 0, 0, _FocalLength.y, 0, _FocalPoint.x, _FocalPoint.y, 1); // ARKit's Intrinsic
 
+        //---Exterior Orientations---
         glm::mat3 R = glm::transpose(glm::mat3(_Transform));// ARKit's Rotation is Camera2World (Computer Graphics), but we need Rotation as World2Camera (Computer Vision).
-
         glm::vec3 PC = glm::vec3(_Transform[3]); // The last column of _Transform given by ARKit is the Position of Camera in World.
         
-        //---Only Compute 2 Keyframes Once---
-        if (!m_IsKeyfExist)
+        //=====00 Keyframe Selection=====
+
+        //---Set 1st Keyframe---
+        if (!m_KeyfStatus)
         {
             m_OrigKeyframe_Curt = FutoGCV::SFutoImg(m_OrigImg_TexturePtr, m_OrigImgSize, K, R, PC);
-            m_IsKeyfExist = true;
+            m_KeyfStatus = true;
+
+            return;
         }
-        else
+
+        //---Select 2nd Keyframe based on BaseLine Length---
+        float BaseLineLength = glm::l2Norm(PC - m_OrigKeyframe_Curt.m_Position);
+
+        if (BaseLineLength < m_KeyfCondition_BaseLineL) 
         {
-            //---Keyframe Selection---
-            float BaseLineLength = glm::l2Norm(PC - m_OrigKeyframe_Curt.m_Position);
+            return;
+        }
 
-            if (BaseLineLength < m_SelectKeyf_BaseLineL) // Keyframe Selection: Baseline Length
-            {
-                return;
-            }
+        m_OrigKeyframe_Last = m_OrigKeyframe_Curt;
+        m_OrigKeyframe_Curt = FutoGCV::SFutoImg(m_OrigImg_TexturePtr, m_OrigImgSize, K, R, PC);
 
-            m_OrigKeyframe_Last = m_OrigKeyframe_Curt;
-            m_OrigKeyframe_Curt = FutoGCV::SFutoImg(m_OrigImg_TexturePtr, m_OrigImgSize, K, R, PC);
+        m_KeyfID++;
 
-            m_KeyfID++;
+        //---Export Result ?---
+        if (m_IsExport_OrigImg)
+        {
+            export_OrigImg();
+        }
 
-            if (m_IsExport_OrigImg)
-            {
-                export_OrigImg();
-            }
+        //===== 01 Epipolarization =====
 
-            //---Epipolarization---
-            m_Rectifier_Planar.ComputeEpiGeometry(m_OrigKeyframe_Curt, m_OrigKeyframe_Last);
+        m_Rectifier_Planar.ComputeEpiGeometry(m_Homography_Curt_BufferPtr, m_Homography_Last_BufferPtr, m_OrigKeyframe_Curt, m_OrigKeyframe_Last);
 
-            if (m_Rectifier_Planar.m_Is_LargeSize)
-            {
-                return; // LibSGM will break if the size of rectified image is too large.
-            }
+        m_Rectifier_Planar.ReturnEpiImg(m_EpiKeyframe_Curt, m_EpiKeyframe_Last);
 
-            m_Rectifier_Planar.ReturnResult(m_EpiKeyframe_Curt, m_EpiKeyframe_Last, m_Homo_Curt, m_Homo_Last);
+        std::vector<char> vecEpiImg_Curt(m_EpiKeyframe_Curt.m_ImgSize.x * m_EpiKeyframe_Curt.m_ImgSize.y, 0);
+        Gfx::TextureManager::CopyTextureToCPU(m_EpiKeyframe_Curt.m_Img_TexturePtr, reinterpret_cast<char*>(vecEpiImg_Curt.data()));
 
-            std::vector<char> vecEpiImg_Curt(m_EpiKeyframe_Curt.m_ImgSize.x * m_EpiKeyframe_Curt.m_ImgSize.y, 0);
-            Gfx::TextureManager::CopyTextureToCPU(m_EpiKeyframe_Curt.m_Img_TexturePtr, reinterpret_cast<char*>(vecEpiImg_Curt.data()));
+        std::vector<char> vecEpiImg_Last(m_EpiKeyframe_Curt.m_ImgSize.x * m_EpiKeyframe_Curt.m_ImgSize.y, 0);
+        Gfx::TextureManager::CopyTextureToCPU(m_EpiKeyframe_Last.m_Img_TexturePtr, reinterpret_cast<char*>(vecEpiImg_Last.data()));
 
-            std::vector<char> vecEpiImg_Last(m_EpiKeyframe_Curt.m_ImgSize.x * m_EpiKeyframe_Curt.m_ImgSize.y, 0);
-            Gfx::TextureManager::CopyTextureToCPU(m_EpiKeyframe_Last.m_Img_TexturePtr, reinterpret_cast<char*>(vecEpiImg_Last.data()));
+        if (m_IsExport_EpiImg)
+        {
+            std::string ExportStr;
 
-            if (m_IsExport_EpiImg)
-            {
-                std::string ExportStr;
+            cv::Mat cvEpiImg_Curt(m_EpiKeyframe_Curt.m_ImgSize.y, m_EpiKeyframe_Curt.m_ImgSize.x, CV_8UC1);
+            memcpy(cvEpiImg_Curt.data, vecEpiImg_Curt.data(), vecEpiImg_Curt.size() * sizeof(vecEpiImg_Curt[0]));
+            ExportStr = "E:\\Project_ARCHITECT\\EpiImg_Curt_" + std::to_string(m_KeyfID) + ".png";
+            cv::imwrite(ExportStr, cvEpiImg_Curt);
 
-                cv::Mat cvEpiImg_Curt(m_EpiKeyframe_Curt.m_ImgSize.y, m_EpiKeyframe_Curt.m_ImgSize.x, CV_8UC1);
-                memcpy(cvEpiImg_Curt.data, vecEpiImg_Curt.data(), vecEpiImg_Curt.size() * sizeof(vecEpiImg_Curt[0]));
-                ExportStr = "E:\\Project_ARCHITECT\\EpiImg_Curt_" + std::to_string(m_KeyfID) + ".png";
-                cv::imwrite(ExportStr, cvEpiImg_Curt);
+            cv::Mat cvEpiImg_Last(m_EpiKeyframe_Last.m_ImgSize.y, m_EpiKeyframe_Last.m_ImgSize.x, CV_8UC1);
+            memcpy(cvEpiImg_Last.data, vecEpiImg_Last.data(), vecEpiImg_Last.size() * sizeof(vecEpiImg_Last[0]));
+            ExportStr = "E:\\Project_ARCHITECT\\EpiImg_Last_" + std::to_string(m_KeyfID) + ".png";
+            cv::imwrite(ExportStr, cvEpiImg_Last);
+        }
 
-                cv::Mat cvEpiImg_Last(m_EpiKeyframe_Last.m_ImgSize.y, m_EpiKeyframe_Last.m_ImgSize.x, CV_8UC1);
-                memcpy(cvEpiImg_Last.data, vecEpiImg_Last.data(), vecEpiImg_Last.size() * sizeof(vecEpiImg_Last[0]));
-                ExportStr = "E:\\Project_ARCHITECT\\EpiImg_Last_" + std::to_string(m_KeyfID) + ".png";
-                cv::imwrite(ExportStr, cvEpiImg_Last);
-            }
+        //===== 02. Stereo Matching =====
+
+        std::vector<uint16_t> vecEpiDisparity_uint16(m_EpiKeyframe_Curt.m_ImgSize.x * m_EpiKeyframe_Curt.m_ImgSize.y, 0);
+
+
+
+        {
 
             //---Stereo Matching---
 
-            std::vector<uint16_t> vecEpiDisparity_uint16(m_EpiKeyframe_Curt.m_ImgSize.x * m_EpiKeyframe_Curt.m_ImgSize.y, 0);
+
 
             
 
@@ -206,10 +222,6 @@ namespace Stereo
                     // Default disparity is pixel level => Disparity is the same in 8-bit & 16-bit.
                     // If turn on sub-pixel => Output disparity must be 16-bit. => Divided by 16 to derive true disparity!!!
                 m_pStereoMatcher_LibSGM->execute(vecEpiImg_Curt.data(), vecEpiImg_Last.data(), vecEpiDisparity_uint16.data());
-            }
-            else if (m_Strategy == "sub-image")
-            {
-                
             }
             else if (m_Strategy == "scaling")
             {
@@ -796,21 +808,19 @@ namespace Stereo
     {
         ENGINE_CONSOLE_INFOV("Stereo matching plugin started!");
 
-        //---00 Input Data---
+        //===== 00. Input Data =====
 
-        //---00 Select Keyframe---
-        m_SelectKeyf_BaseLineL = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_keyframe:baseline_length", 0.03f); // Unit = meter
+        //===== 00. Select Keyframe =====
+        m_KeyfCondition_BaseLineL = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_keyframe:baseline_length(m)", 0.03f); // Unit = meter
+
+
 
         //---01 Calculate Disparity-----
         m_Strategy = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_disparity:strategy", "normal");
 
-        m_EpiImgSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_disparity:epipolar_image_size", glm::ivec3(256, 256, 1));
-
         // *** OLD ***
 
         //---02 Stereo Matching---
-        m_StereoMatching_Method = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:method", "LibSGM");
-        m_StereoMatching_Mode = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:mode", "Original");
 
         m_DispRange = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:disparity_range", 128);
 
@@ -860,8 +870,17 @@ namespace Stereo
 
     void CPluginInterface::OnExit()
     {
-        //---00 Input Data---
+        //===== 00. Input Data =====
+
         m_OrigImg_TexturePtr = nullptr;
+
+        //===== 00. Select Keyframe =====
+
+        //===== 01. Epipolarization =====
+
+        m_Homography_Curt_BufferPtr = nullptr;
+        m_Homography_Last_BufferPtr = nullptr;
+
 
         // *** OLD ***
         //---Release Manager---
