@@ -28,7 +28,7 @@ namespace FutoGCV
             << "#define TILE_SIZE_2D " << TileSize_2D << " \n"; 
         std::string DefineString = DefineStream.str();
 
-        m_PlanarRectificationCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/01_epipolarization/cs_planar_rectification.glsl", "main", DefineString.c_str());
+        m_PlanarRectificationCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_rectification_planar.glsl", "main", DefineString.c_str());
     }
 
     CPlanarRectification::~CPlanarRectification()

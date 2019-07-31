@@ -87,6 +87,13 @@ namespace Stereo
 
         int m_KeyfID = 0;
 
+
+        //===== 00. Scaling =====
+
+        bool m_IsScaling;
+
+        glm::ivec2 m_EpiImgSize_LR;
+
         //===== 01. Epipolarization =====
 
         FutoGCV::CPlanarRectification m_Rectifier_Planar; 
@@ -95,17 +102,18 @@ namespace Stereo
 
         Gfx::CBufferPtr m_Homography_Curt_BufferPtr, m_Homography_Last_BufferPtr;
 
+        //===== 02. Stereo Matching =====
 
-
-
-        //---01 Calculate Disparity---
-        std::string m_Strategy;
-
-        int m_DispRange; // Disparity Searching Range for Stereo Matching
+        void DownSamplingEpiImg();
 
         std::unique_ptr<sgm::StereoSGM> m_pStereoMatcher_LibSGM;
 
         Gfx::CTexturePtr m_EpiDisparity_TexturePtr;
+
+        int m_DispRange; 
+
+
+
 
         //---02 Disparity to Depth
 

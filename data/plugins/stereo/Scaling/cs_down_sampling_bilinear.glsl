@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_CS_down_sampling_GLSL__
-#define __INCLUDE_CS_down_sampling_GLSL__
+#ifndef __INCLUDE_CS_DOWN_SAMPLING_BILINEAR_GLSL__
+#define __INCLUDE_CS_DOWN_SAMPLING_BILINEAR_GLSL__
 
 layout (binding = 0, r8) readonly uniform image2D cs_Img_OrigScale; // Pixel in image2D(rg8) is 8-bit float (0~255 -> 0~1)
 layout (binding = 1, r8) writeonly uniform image2D cs_Img_DownSample; // Pixel in image2D(r8) is 8-bit float (0~255 -> 0~1)
@@ -42,4 +42,4 @@ void main()
 	imageStore(cs_Img_DownSample, ivec2(gl_GlobalInvocationID.xy), vec4(pixValue)); 
 }
 
-#endif //__INCLUDE_CS_CS_down_sampling_GLSL__
+#endif //__INCLUDE_CS_DOWN_SAMPLING_BILINEAR_GLSL__

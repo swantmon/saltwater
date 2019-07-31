@@ -80,6 +80,15 @@ namespace Stereo
 
         //===== 02. Stereo Matching =====
 
+        if (m_IsScaling)
+        {
+            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_EpiImgSize_LR.x, m_EpiImgSize_LR.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+                // Default disparity is pixel level => Disparity is the same in 8-bit & 16-bit.
+                // If turn on sub-pixel => Output disparity must be 16-bit. => Divided by 16 to derive true disparity!!!;
+        }
+
+
+
         //---Initialize EpiDisparity Texture Manager---
         Gfx::STextureDescriptor TextDesc_EpiDisp = {};
         TextDesc_EpiDisp.m_NumberOfPixelsU = m_OrigImgSize.x;
@@ -204,125 +213,52 @@ namespace Stereo
 
         //===== 02. Stereo Matching =====
 
-        std::vector<uint16_t> vecEpiDisparity_uint16(m_EpiKeyframe_Curt.m_ImgSize.x * m_EpiKeyframe_Curt.m_ImgSize.y, 0);
+        std::vector<uint16_t> vecEpiDisparity_uint16;
 
-
-
+        if (m_IsScaling)
         {
+            DownSamplingEpiImg();
 
-            //---Stereo Matching---
+            vecEpiDisparity_uint16.resize(m_EpiImgSize_LR.x * m_EpiImgSize_LR.y, 0);
 
-
-
-            
-
-            if (m_Strategy == "normal")
-            {
-                m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_EpiKeyframe_Curt.m_ImgSize.x, m_EpiKeyframe_Curt.m_ImgSize.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
-                    // Default disparity is pixel level => Disparity is the same in 8-bit & 16-bit.
-                    // If turn on sub-pixel => Output disparity must be 16-bit. => Divided by 16 to derive true disparity!!!
-                m_pStereoMatcher_LibSGM->execute(vecEpiImg_Curt.data(), vecEpiImg_Last.data(), vecEpiDisparity_uint16.data());
-            }
-            else if (m_Strategy == "scaling")
-            {
-
-            }
-
-            std::vector<float> vecEpiDisparity = std::vector<float>::vector(vecEpiDisparity_uint16.begin(), vecEpiDisparity_uint16.end());
-
-            
-
-            // *** OLD ***
-
-            //---Stereo Matching---
-            // * Calculate Disparity in Rectified Current Image
-
-            //const clock_t Time_SM_begin = clock();
-            if (m_Is_Scaling)
-            {
-                m_DispImg_Rect.resize(RectImg_Curt_DownSample.get_Img().size(), 0.0f);
-            } 
-            else
-            {
-                m_DispImg_Rect.resize(m_RectImg_Curt.get_Img().size(), 0.0f);
-            }
-
-            if (m_StereoMatching_Mode == "Original")
-            {
-                if (m_Is_RectSubImg)
-                {
-                    imp_StereoMatching_Fix();
-                } 
-                else if (m_Is_Scaling)
-                {
-                    imp_StereoMatching_Scaling(RectImg_Curt_DownSample.get_Img(), RectImg_Last_DownSample.get_Img());
-                }
-                else
-                {
-                    imp_StereoMatching();
-                }
-            }
-            else if (m_StereoMatching_Mode == "Tile")
-            {
-                imp_StereoMatching_Tile();
-            }
-            else if (m_StereoMatching_Mode == "Sub")
-            {
-                imp_StereoMatching_Sub();
-            }
-
-            //const clock_t Time_SM_end = clock();
-
-            //float CalTime_SM = float(Time_SM_end - Time_SM_begin) / CLOCKS_PER_SEC;
-
-            //---Disparity to Depth---
-            // * Using Parallax Equation to Transform Disparity to Depth
-            // * Depth is in Rectified Current Image
-
-            imp_Disp2Depth();
-
-            //---Depth from Rectified to Original---
-            // * Based on Inverse Homography calculated in Rectification
-            // * Depth is in Original Current Image & Horizontal Flipped (for Reconstruction)
-
-            imp_Depth_Rect2Orig();
-
-            //---Depth Analysis---
-            if (m_Is_CompareDepth) // Compare Depth from plugin_stereo & Sensor
-            {
-                m_DepthImg_Sensor = _rDepthImage;
-
-                cmp_Depth();
-            }
-
-            //---Test: Apply cvFGS---
-            /*
-            {
-                cv::Mat cvOrigImg_Curt_BGRA(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4), cvOrigImg_Curt_Gray(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC1);
-                memcpy(cvOrigImg_Curt_BGRA.data, m_OrigImg_Curt.get_Img().data(), m_OrigImg_Curt.get_Img().size() * sizeof(m_OrigImg_Curt.get_Img()[0]));
-                cv::cvtColor(cvOrigImg_Curt_BGRA, cvOrigImg_Curt_Gray, cv::COLOR_BGRA2GRAY); // Transform to RGB before imshow & imwrite
-
-                m_pSmoother_cvFGS = cv::ximgproc::createFastGlobalSmootherFilter(cvOrigImg_Curt_Gray, 30, 0.01);
-
-                cv::Mat cvDepthIn(m_OrigImgSize.y, m_OrigImgSize.x, CV_16SC1), cvDepthOut(m_OrigImgSize.y, m_OrigImgSize.x, CV_16SC1);
-                memcpy(cvDepthIn.data, DepthImage.data(), MemCpySize);
-
-                m_pSmoother_cvFGS->filter(cvDepthIn, cvDepthOut);
-
-                DepthImage.clear();
-                memcpy(DepthImage.data(), cvDepthOut.data, cvDepthOut.cols * cvDepthOut.rows * cvDepthOut.elemSize());
-            }
-            */
-
-            //---Return Depth to plugin_slam---
-            m_Delegate.Notify(_rRGBImage, m_DepthImg_Orig, _Transform, _FocalLength, _FocalPoint);
-
-            if (m_IsExport_Depth)
-            {
-                export_Depth();
-            }
+            m_pStereoMatcher_LibSGM->execute(vecEpiImg_Curt.data(), vecEpiImg_Last.data(), vecEpiDisparity_uint16.data());
         }
-        
+        else
+        {
+            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_EpiKeyframe_Curt.m_ImgSize.x, m_EpiKeyframe_Curt.m_ImgSize.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+                // Default disparity is pixel level => Disparity is the same in 8-bit & 16-bit.
+                // If turn on sub-pixel => Output disparity must be 16-bit. => Divided by 16 to derive true disparity!!!
+
+            vecEpiDisparity_uint16.resize(m_EpiKeyframe_Curt.m_ImgSize.x * m_EpiKeyframe_Curt.m_ImgSize.y, 0);
+
+            m_pStereoMatcher_LibSGM->execute(vecEpiImg_Curt.data(), vecEpiImg_Last.data(), vecEpiDisparity_uint16.data());
+        }
+
+        std::vector<float> vecEpiDisparity = std::vector<float>::vector(vecEpiDisparity_uint16.begin(), vecEpiDisparity_uint16.end());
+
+        //===== 03. Disparity to Depth =====
+
+        imp_Disp2Depth();
+
+        //===== 04. Depth from EpiImg to OrigImg =====
+
+        imp_Depth_Rect2Orig();
+
+        if (m_Is_CompareDepth) // Compare Depth from plugin_stereo & Sensor
+        {
+            m_DepthImg_Sensor = _rDepthImage;
+
+            cmp_Depth();
+        }
+
+        //===== 05. Output Result =====
+
+        m_Delegate.Notify(_rRGBImage, m_DepthImg_Orig, _Transform, _FocalLength, _FocalPoint);
+
+        if (m_IsExport_Depth)
+        {
+            export_Depth();
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -341,6 +277,13 @@ namespace Stereo
     }
 
     // -----------------------------------------------------------------------------
+
+    void CPluginInterface::DownSamplingEpiImg()
+    {
+
+    }
+
+    // *** OLD ***
 
     void CPluginInterface::imp_StereoMatching()
     {
@@ -813,10 +756,20 @@ namespace Stereo
         //===== 00. Select Keyframe =====
         m_KeyfCondition_BaseLineL = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_keyframe:baseline_length(m)", 0.03f); // Unit = meter
 
+        //===== 00. Scaling =====
+
+        m_IsScaling = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_scaling:enable", false);
+
+        m_EpiImgSize_LR = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_scaling:low_resolution_size", glm::ivec2(256, 256));
+
+        //===== 01. Epipolarization =====
 
 
-        //---01 Calculate Disparity-----
-        m_Strategy = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_disparity:strategy", "normal");
+        //===== 02. Stereo Matching =====
+
+
+
+
 
         // *** OLD ***
 
