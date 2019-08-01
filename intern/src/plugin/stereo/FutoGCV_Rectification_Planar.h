@@ -32,9 +32,9 @@ namespace FutoGCV
 
     public:
 
-        void ComputeEpiGeometry(Gfx::CBufferPtr HomoB_BufferPtr, Gfx::CBufferPtr HomoM_BufferPtr, const SFutoImg& _OrigImg_B, const SFutoImg& _OrigImg_M);
-
-        void ReturnEpiImg(SFutoImg& EpiImg_B, SFutoImg& EpiImg_M);
+        void execute(SFutoImg& EpiImg_B, Gfx::CBufferPtr HomoB_BufferPtr, 
+                     SFutoImg& EpiImg_M, Gfx::CBufferPtr HomoM_BufferPtr, 
+                     const SFutoImg& _OrigImg_B, const SFutoImg& _OrigImg_M);
 
     //===== Assistant Functions =====
 
@@ -54,10 +54,10 @@ namespace FutoGCV
 
         //---Determine Epipolar Image Size---
         void ComputeEpiCorner(const int Which_Img = 0);
-        void DetermEpiImgSize();
+        void DetermEpiImgSize(Gfx::CTexturePtr EpiImg_B_TexturePtr, Gfx::CTexturePtr EpiImg_M_TexturePtr);
 
         //---Generate Epipolar Images---
-        void HomoTransform(Gfx::CTexturePtr OrigImg_TexturePtr, Gfx::CBufferPtr m_Homo_BufferPtr, const int Which_Img = 0);
+        void HomoTransform(Gfx::CTexturePtr EpiImg_TexturePtr, Gfx::CBufferPtr Homo_BufferPtr, Gfx::CTexturePtr OrigImg_TexturePtr, const int Which_Img = 0);
 
     // ===== Members =====
 

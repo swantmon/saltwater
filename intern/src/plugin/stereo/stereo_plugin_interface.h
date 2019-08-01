@@ -34,6 +34,7 @@ namespace Stereo
 {
     class CPluginInterface : public Core::IPlugin
     {
+
     //===== Engine =====
 
     public:
@@ -87,13 +88,6 @@ namespace Stereo
 
         int m_KeyfID = 0;
 
-
-        //===== 00. Scaling =====
-
-        bool m_IsScaling;
-
-        glm::ivec2 m_EpiImgSize_LR;
-
         //===== 01. Epipolarization =====
 
         FutoGCV::CPlanarRectification m_Rectifier_Planar; 
@@ -104,18 +98,30 @@ namespace Stereo
 
         //===== 02. Stereo Matching =====
 
-        void DownSamplingEpiImg();
+        int m_DisparityRange;
 
         std::unique_ptr<sgm::StereoSGM> m_pStereoMatcher_LibSGM;
 
         Gfx::CTexturePtr m_EpiDisparity_TexturePtr;
 
-        int m_DispRange; 
+        //===== 03. Disparity to Depth =====
 
+        void imp_Disp2Depth();
 
+        Gfx::CShaderPtr m_Disp2Depth_CSPtr;
 
+        Gfx::CTexturePtr m_EpiDepth_TexturePtr;
 
-        //---02 Disparity to Depth
+        Gfx::CBufferPtr m_ParaxEq_BufferPtr;
+
+        //===== EpiDepth to OrigDepth =====
+
+        void imp_Depth_Epi2Orig();
+
+        Gfx::CShaderPtr m_Depth_Rect2Orig_CSPtr;
+
+        Gfx::CTexturePtr m_OrigDepth_TexturePtr;
+
 
 
         //--- Output Result---
@@ -133,47 +139,22 @@ namespace Stereo
     // *** OLD ***
     private:
 
-        //---02 Stereo Matching---
-        void imp_StereoMatching();
-        void imp_StereoMatching_Tile();
-        void imp_StereoMatching_Sub();
-        void imp_StereoMatching_Fix();
-        void imp_StereoMatching_Scaling(const std::vector<char>& RectImg_Curt_DownSample, const std::vector<char>& RectImg_Last_DownSample);
-
-
-        
-        cv::Ptr<cv::StereoSGBM> m_pStereoMatcher_cvSGBM;
-        cv::Ptr<cv::StereoBM> m_pStereoMatcher_cvBM;
-        cv::Ptr<cv::cuda::StereoBM> m_pStereoMatcher_cvBM_cuda;
-        cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvBP_cuda;
-        cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvConstBP_cuda;
-
         //---03 Disparity Up-Sampling---
+        void UpSampling();
         Gfx::CTexturePtr m_Disp_HR_BiLinear_TexturePtr;
 
         FutoGCV::CFGI m_FGI_UpSampler;
 
         //---03 Disparity to Depth in Rectified Current Image---
-        void imp_Disp2Depth(); 
-
-        Gfx::CShaderPtr m_Disp2Depth_CSPtr;
-        Gfx::CTexturePtr m_DispImg_Rect_TexturePtr;
-        Gfx::CTexturePtr m_DepthImg_Rect_TexturePtr;
-        Gfx::CBufferPtr m_ParaxEq_BufferPtr;
 
         Gfx::CShaderPtr m_UpSampling_BiLinear_CSPtr;
         Gfx::CTexturePtr m_Disp_LR_TexturePtr;
 
         //---04 Depth from Rectified to Original Current Image---
-        void imp_Depth_Rect2Orig();
 
         std::vector<char> m_DepthImg_Orig; // Horizontal flip for reconstruction in plugin_slam.
 
         cv::Ptr<cv::ximgproc::FastBilateralSolverFilter> m_pFilter_cvFGS;
-
-        Gfx::CShaderPtr m_Depth_Rect2Orig_CSPtr;
-        Gfx::CTexturePtr m_OrigDepth_TexturePtr;
-        Gfx::CBufferPtr m_Homogrampy_BufferPtr;
 
         cv::Ptr<cv::ximgproc::FastGlobalSmootherFilter> m_pSmoother_cvFGS;
 

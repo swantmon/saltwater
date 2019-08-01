@@ -35,14 +35,13 @@ namespace FutoGCV
     {
         //---Release Manager---
         m_PlanarRectificationCSPtr = nullptr;
-
-        m_EpiImgB_TexturePtr = nullptr;
-        m_EpiImgM_TexturePtr = nullptr;
     }
 
     //===== Execution Functions =====
 
-    void CPlanarRectification::ComputeEpiGeometry(Gfx::CBufferPtr HomoB_BufferPtr, Gfx::CBufferPtr HomoM_BufferPtr, const SFutoImg& _OrigImg_B, const SFutoImg& _OrigImg_M)
+    void CPlanarRectification::execute(SFutoImg& EpiImg_B, Gfx::CBufferPtr HomoB_BufferPtr, 
+                                       SFutoImg& EpiImg_M, Gfx::CBufferPtr HomoM_BufferPtr, 
+                                       const SFutoImg& _OrigImg_B, const SFutoImg& _OrigImg_M)
     {
         //---Step 1. Compute Orientations of Epipolar Images---
         ComputeEpiCamera(_OrigImg_B.m_Camera, _OrigImg_M.m_Camera);
@@ -66,21 +65,15 @@ namespace FutoGCV
 
         ComputeHomography(_OrigImg_B.m_PPM, _OrigImg_M.m_PPM); // Update Homography after shifting.
 
-        //---Step 3. Calculate Boundary of Epipolar Images---
+        //---Step 3. Determine Epipolar Image Frame---
         ComputeEpiCorner(0);
         ComputeEpiCorner(1);
 
-        DetermEpiImgSize();
+        DetermEpiImgSize(EpiImg_B.m_Img_TexturePtr, EpiImg_M.m_Img_TexturePtr);
 
         //---Step 4. Generate Epipolar Images---
-        HomoTransform(_OrigImg_B.m_Img_TexturePtr, HomoB_BufferPtr, 0);
-        HomoTransform(_OrigImg_B.m_Img_TexturePtr, HomoM_BufferPtr, 1);
-    }
-
-    void CPlanarRectification::ReturnEpiImg(SFutoImg& EpiImg_B, SFutoImg& EpiImg_M)
-    {
-        EpiImg_B = SFutoImg(m_EpiImgB_TexturePtr, glm::ivec3(m_EpiImgSize, 1), m_EpiCamera_B, m_EpiRotation, m_EpiPosition_B);
-        EpiImg_M = SFutoImg(m_EpiImgM_TexturePtr, glm::ivec3(m_EpiImgSize, 1), m_EpiCamera_M, m_EpiRotation, m_EpiPosition_M);
+        HomoTransform(EpiImg_B.m_Img_TexturePtr, HomoB_BufferPtr, _OrigImg_B.m_Img_TexturePtr, 0);
+        HomoTransform(EpiImg_M.m_Img_TexturePtr, HomoM_BufferPtr, _OrigImg_M.m_Img_TexturePtr, 1);
     }
 
     //===== Assistant Functions =====
@@ -216,7 +209,7 @@ namespace FutoGCV
         }
     }
 
-    void CPlanarRectification::DetermEpiImgSize()
+    void CPlanarRectification::DetermEpiImgSize(Gfx::CTexturePtr EpiImg_B_TexturePtr, Gfx::CTexturePtr EpiImg_M_TexturePtr)
     {
         glm::ivec2 EpiFrameUL, EpiFrameDR;
 
@@ -251,11 +244,11 @@ namespace FutoGCV
         TextDesc_EpiImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
         TextDesc_EpiImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
 
-        m_EpiImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
-        m_EpiImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
+        EpiImg_B_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
+        EpiImg_M_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
     }
 
-    void CPlanarRectification::HomoTransform(Gfx::CTexturePtr OrigImg_TexturePtr, Gfx::CBufferPtr Homo_BufferPtr, const int Which_Img = 0)
+    void CPlanarRectification::HomoTransform(Gfx::CTexturePtr EpiImg_TexturePtr, Gfx::CBufferPtr Homo_BufferPtr, Gfx::CTexturePtr OrigImg_TexturePtr, const int Which_Img)
     {
         Gfx::ContextManager::SetShaderCS(m_PlanarRectificationCSPtr);
 
@@ -264,14 +257,10 @@ namespace FutoGCV
         case 0:
             Gfx::BufferManager::UploadBufferData(Homo_BufferPtr, &m_Homography_B);
 
-            Gfx::ContextManager::SetImageTexture(1, m_EpiImgB_TexturePtr);
-
             break;
 
         case 1:
             Gfx::BufferManager::UploadBufferData(Homo_BufferPtr, &m_Homography_M);
-
-            Gfx::ContextManager::SetImageTexture(1, m_EpiImgM_TexturePtr);
 
             break;
         }
@@ -279,6 +268,7 @@ namespace FutoGCV
         Gfx::ContextManager::SetConstantBuffer(0, Homo_BufferPtr);
 
         Gfx::ContextManager::SetImageTexture(0, OrigImg_TexturePtr);
+        Gfx::ContextManager::SetImageTexture(1, EpiImg_TexturePtr);
 
         //---GPU Computation Start---
         Gfx::Performance::BeginEvent("Planar Rectification");
