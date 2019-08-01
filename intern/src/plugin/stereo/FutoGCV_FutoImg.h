@@ -19,7 +19,12 @@ namespace FutoGCV
         glm::mat4x3 m_PPM; // Perspective Projection Matrix
 
         //---Constructors & Destructore---
-        SFutoImg(Gfx::CTexturePtr _ImgData, const glm::ivec3& _ImgSize,
+        SFutoImg()
+            : m_Img_TexturePtr(nullptr)
+        {
+        }
+
+        SFutoImg(const Gfx::CTexturePtr _ImgData, const glm::ivec3& _ImgSize,
             const glm::mat3& _Camera, const glm::mat3& _Rotation, const glm::vec3& _Position)
             : m_Img_TexturePtr(_ImgData),
               m_ImgSize(_ImgSize),

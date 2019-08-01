@@ -19,6 +19,11 @@ namespace FutoGCV
 {
     //===== Constructors & Destructor =====
 
+    CPlanarRectification::CPlanarRectification()
+    {
+
+    }
+
     CPlanarRectification::CPlanarRectification(const glm::ivec2& _OrigImgSize)
         : m_OrigImgSize(_OrigImgSize) 
     {

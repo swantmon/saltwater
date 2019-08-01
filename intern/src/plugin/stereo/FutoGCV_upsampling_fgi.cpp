@@ -111,7 +111,7 @@ namespace FutoGCV
     void CFGI::WLS_1D(Gfx::CTexturePtr Output_TexturePtr, const Gfx::CTexturePtr Input_TexturePtr, const Gfx::CTexturePtr Guide_TexturePtr)
     {
         
-        auto UnitMemSize = m_GaussEliminCalcInitial.size() * sizeof(m_GaussEliminCalcInitial[0]);
+        auto UnitMemSize = static_cast<int>(m_GaussEliminCalcInitial.size() * sizeof(m_GaussEliminCalcInitial[0]));
 
         for (int iter = 1; iter <= m_Iteration; iter++)
         {

@@ -24,6 +24,7 @@ namespace FutoGCV
 
     public:
 
+        CPlanarRectification();
         CPlanarRectification(const glm::ivec2& _OrigImgSize);
 
         ~CPlanarRectification();

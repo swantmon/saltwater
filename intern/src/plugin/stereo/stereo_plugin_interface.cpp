@@ -271,7 +271,7 @@ namespace Stereo
 
         m_EpiDisparity_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_EpiDisp);
 
-        Base::AABB2UInt TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_EpiKeyframe_Curt.m_ImgSize.x, m_EpiKeyframe_Curt.m_ImgSize.y));
+        TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_EpiKeyframe_Curt.m_ImgSize.x, m_EpiKeyframe_Curt.m_ImgSize.y));
         Gfx::TextureManager::CopyToTexture2D(m_EpiDisparity_TexturePtr, TargetRect, m_EpiKeyframe_Curt.m_ImgSize.x, static_cast<const void*>(vecEpiDisparity.data()));
 
         //===== 03. EpiDisparity to EpiDepth =====
@@ -311,12 +311,14 @@ namespace Stereo
         //---GPU Start---
         Gfx::Performance::BeginEvent("Disparity to Depth");
 
-        const int WorkGroupsX = DivUp(m_EpiKeyframe_Curt.m_ImgSize.x, TileSize_2D);
-        const int WorkGroupsY = DivUp(m_EpiKeyframe_Curt.m_ImgSize.y, TileSize_2D);
+        {
+            const int WorkGroupsX = DivUp(m_EpiKeyframe_Curt.m_ImgSize.x, TileSize_2D);
+            const int WorkGroupsY = DivUp(m_EpiKeyframe_Curt.m_ImgSize.y, TileSize_2D);
 
-        Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+            Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
-        Gfx::ContextManager::ResetShaderCS();
+            Gfx::ContextManager::ResetShaderCS();
+        }
 
         Gfx::Performance::EndEvent();
         //---GPU End---
@@ -336,14 +338,15 @@ namespace Stereo
         //---GPU Start---
         Gfx::Performance::BeginEvent("Depth from EpiImg to OrigImg");
 
-        // Start GPU Parallel Processing
-        const int WorkGroupsX = DivUp(m_OrigImgSize.x, TileSize_2D);
-        const int WorkGroupsY = DivUp(m_OrigImgSize.y, TileSize_2D);
+        {
+            const int WorkGroupsX = DivUp(m_OrigImgSize.x, TileSize_2D);
+            const int WorkGroupsY = DivUp(m_OrigImgSize.y, TileSize_2D);
 
-        Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+            Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
-        Gfx::ContextManager::ResetShaderCS();
-        Gfx::ContextManager::ResetImageTexture(1);
+            Gfx::ContextManager::ResetShaderCS();
+            Gfx::ContextManager::ResetImageTexture(1);
+        }
 
         Gfx::Performance::EndEvent();
         // GPU End
@@ -387,13 +390,10 @@ namespace Stereo
     }
 
     // -----------------------------------------------------------------------------
-
-    // *** OLD ***
-
-    // -----------------------------------------------------------------------------
-
+    
     void CPluginInterface::UpSampling()
     {
+        /*
         //---Initialize Texture Manager for Disparity in Rectified Image---
         Gfx::STextureDescriptor TextureDesc_DispImg_Rect = {};
         TextureDesc_DispImg_Rect.m_NumberOfPixelsU = m_RectImg_Curt.get_ImgSize().x;
@@ -420,7 +420,7 @@ namespace Stereo
         if (m_Is_Scaling)
         {
 
-            /*
+            
 
             Strategy Design
 
@@ -434,7 +434,7 @@ namespace Stereo
                 * Still need to think about the strategy (Research Contribution !!!)
                 * Consensus Check + Weighted Average / Weighted Least Square
 
-            */
+            
 
             //---Up-Sampling by BiLinear Interpolation---
             {
@@ -477,6 +477,7 @@ namespace Stereo
             TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_RectImg_Curt.get_ImgSize()));
             Gfx::TextureManager::CopyToTexture2D(m_EpiDisparity_TexturePtr, TargetRect, m_RectImg_Curt.get_ImgSize().x, static_cast<const void*>(m_DispImg_Rect.data()));
         }
+        */
     }
 
     void CPluginInterface::imp_Disp2Depth()
@@ -542,22 +543,22 @@ namespace Stereo
 
         int MemCpySize = 0;
 
-        cv::Mat cvDepthImg_Orig(m_OrigImg_Curt.get_ImgSize().y, m_OrigImg_Curt.get_ImgSize().x, CV_16UC1);
+        cv::Mat cvOrigDepth_SM(m_EpiKeyframe_Curt.m_ImgSize.y, m_EpiKeyframe_Curt.m_ImgSize.x, CV_16UC1);
 
         MemCpySize = static_cast<int>(m_DepthImg_Orig.size() * sizeof(m_DepthImg_Orig[0]));
-        memcpy(cvDepthImg_Orig.data, m_DepthImg_Orig.data(), MemCpySize);
+        memcpy(cvOrigDepth_SM.data, m_DepthImg_Orig.data(), MemCpySize);
 
         ExportStr = "E:\\Project_ARCHITECT\\DepthImg_Orig_" + std::to_string(m_KeyfID) + ".png";
-        cv::imwrite(ExportStr, cvDepthImg_Orig);
+        cv::imwrite(ExportStr, cvOrigDepth_SM);
 
 
-        cv::Mat cvDepthImg_Sensor(m_OrigImg_Curt.get_ImgSize().y, m_OrigImg_Curt.get_ImgSize().x, CV_16UC1);
+        cv::Mat cvOrigDepth_Sensor(cvOrigDepth_SM.size(), CV_16UC1);
 
         MemCpySize = static_cast<int>(m_DepthImg_Sensor.size() * sizeof(m_DepthImg_Sensor[0]));
-        memcpy(cvDepthImg_Sensor.data, m_DepthImg_Sensor.data(), MemCpySize);
+        memcpy(cvOrigDepth_Sensor.data, m_DepthImg_Sensor.data(), MemCpySize);
 
         ExportStr = "E:\\Project_ARCHITECT\\DepthImg_Sensor_" + std::to_string(m_KeyfID) + ".png";
-        cv::imwrite(ExportStr, cvDepthImg_Sensor);
+        cv::imwrite(ExportStr, cvOrigDepth_Sensor);
     }
 
     // -----------------------------------------------------------------------------
