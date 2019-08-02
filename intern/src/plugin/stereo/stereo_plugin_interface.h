@@ -74,7 +74,7 @@ namespace Stereo
 
         //===== 00. Input Data =====
 
-        glm::ivec3 m_OrigImgSize; // Width, Height, Channel
+        glm::ivec2 m_OrigImgSize; // Width, Height
 
         Gfx::CTexturePtr m_OrigImg_TexturePtr; // Temporary TexturePtr for each input frame.
 
@@ -84,7 +84,7 @@ namespace Stereo
 
         bool m_KeyfStatus = false; // The status of current keyframe.
 
-        float m_KeyfCondition_BaseLineL; // BaseLine Condition. Unit is meter.
+        float m_KeyfSelect_BaseLineL; // BaseLine Condition. Unit is meter.
 
         int m_KeyfID = 0;
 
@@ -96,6 +96,8 @@ namespace Stereo
 
         Gfx::CBufferPtr m_Homography_Curt_BufferPtr, m_Homography_Last_BufferPtr;
 
+        glm::ivec2 m_EpiImgSize;
+
         //===== 02. Stereo Matching =====
 
         int m_DisparityRange;
@@ -104,37 +106,45 @@ namespace Stereo
 
         Gfx::CTexturePtr m_EpiDisparity_TexturePtr;
 
-        //===== 03. Disparity to Depth =====
+        //===== 03. EpiDisparity to EpiDepth =====
 
         void imp_Disp2Depth();
 
         Gfx::CShaderPtr m_Disp2Depth_CSPtr;
-
         Gfx::CTexturePtr m_EpiDepth_TexturePtr;
-
         Gfx::CBufferPtr m_ParaxEq_BufferPtr;
 
-        //===== EpiDepth to OrigDepth =====
+        Gfx::CShaderPtr m_UpSampling_BiLinear_CSPtr;
+
+        //===== 04. EpiDepth to OrigDepth =====
 
         void imp_Depth_Epi2Orig();
 
-        Gfx::CShaderPtr m_Depth_Rect2Orig_CSPtr;
-
+        Gfx::CShaderPtr m_Depth_Epi2Orig_CSPtr;
         Gfx::CTexturePtr m_OrigDepth_TexturePtr;
 
+        std::vector<char> m_vecOrigDepth;
 
+        void cmp_Depth();
+
+        bool m_IsCompareDepth;
+
+        Gfx::CShaderPtr m_CmpDepth_CSPtr;
+        Gfx::CTexturePtr m_OrigDepth_Sensor_TexturePtr;
+        Gfx::CTexturePtr m_OrigDepth_Diff_TexturePtr;
+
+        std::vector<uint16_t> m_DepthImg_Sensor;
 
         //--- Output Result---
         CStereoDelegate m_Delegate; // Return results to plugin_slam.
 
         bool m_IsExport_OrigImg;
-        void export_OrigImg();
+        void ExportOrigImg();
 
         bool m_IsExport_EpiImg;
-        void export_RectImg();
 
         bool m_IsExport_Depth;
-        void export_Depth();
+        void ExportDepth();
 
     // *** OLD ***
     private:
@@ -147,26 +157,15 @@ namespace Stereo
 
         //---03 Disparity to Depth in Rectified Current Image---
 
-        Gfx::CShaderPtr m_UpSampling_BiLinear_CSPtr;
         Gfx::CTexturePtr m_Disp_LR_TexturePtr;
 
         //---04 Depth from Rectified to Original Current Image---
-
-        std::vector<char> m_DepthImg_Orig; // Horizontal flip for reconstruction in plugin_slam.
 
         cv::Ptr<cv::ximgproc::FastBilateralSolverFilter> m_pFilter_cvFGS;
 
         cv::Ptr<cv::ximgproc::FastGlobalSmootherFilter> m_pSmoother_cvFGS;
 
         //---05 Compare Depth between plugin_stereo & Sensor---
-        std::vector<uint16_t> m_DepthImg_Sensor;
-
-        bool m_Is_CompareDepth;
-        void cmp_Depth(); 
-
-        Gfx::CShaderPtr m_Compare_Depth_CSPtr;
-        Gfx::CTexturePtr m_OrigDepth_Sensor_TexturePtr;
-        Gfx::CTexturePtr m_OrigDepth_Diff_TexturePtr;
 
     };
 

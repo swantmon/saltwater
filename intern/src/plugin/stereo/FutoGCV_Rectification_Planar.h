@@ -51,14 +51,14 @@ namespace FutoGCV
 
         //---Center Epipolar Images---
         void ComputeCenterShift(glm::vec2& CenterDrift, const int Which_Img = 0);
-        void ShiftEpiCenter(const glm::vec2& Drift_B, const glm::vec2& Drift_M);
+        void ShiftEpiCenter(glm::vec2& Drift_B, glm::vec2& Drift_M);
 
         //---Determine Epipolar Image Size---
         void ComputeEpiCorner(const int Which_Img = 0);
-        void DetermEpiImgSize(Gfx::CTexturePtr EpiImg_B_TexturePtr, Gfx::CTexturePtr EpiImg_M_TexturePtr);
+        void DetermEpiImgSize();
 
         //---Generate Epipolar Images---
-        void HomoTransform(Gfx::CTexturePtr EpiImg_TexturePtr, Gfx::CBufferPtr Homo_BufferPtr, Gfx::CTexturePtr OrigImg_TexturePtr, const int Which_Img = 0);
+        void GenerateEpiImg(SFutoImg& EpiImg, Gfx::CBufferPtr Homo_BufferPtr, Gfx::CTexturePtr OrigImg_TexturePtr, const int Which_Img = 0);
 
     // ===== Members =====
 
@@ -74,8 +74,7 @@ namespace FutoGCV
         SHomography m_Homography_B, m_Homography_M;
 
         Gfx::CShaderPtr m_PlanarRectificationCSPtr;
-
-        Gfx::CTexturePtr m_EpiImgB_TexturePtr, m_EpiImgM_TexturePtr;
+        Gfx::CTexturePtr m_EpiImg_TexturePtr;
     };
 
 } // namespace FutoGmtCV

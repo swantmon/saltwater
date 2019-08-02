@@ -21,7 +21,6 @@ namespace FutoGCV
 
     CPlanarRectification::CPlanarRectification()
     {
-
     }
 
     CPlanarRectification::CPlanarRectification(const glm::ivec2& _OrigImgSize)
@@ -40,6 +39,7 @@ namespace FutoGCV
     {
         //---Release Manager---
         m_PlanarRectificationCSPtr = nullptr;
+        m_EpiImg_TexturePtr = nullptr;
     }
 
     //===== Execution Functions =====
@@ -59,14 +59,9 @@ namespace FutoGCV
         //---Step 2. Center Epipolar Images---
         glm::vec2 CenterShift_B(0.0f), CenterShift_M(0.0f);
 
-        ComputeCenterShift(CenterShift_B, 0);
-        ComputeCenterShift(CenterShift_M, 1);
-
-        float CenterShift_y = (CenterShift_B.y + CenterShift_M.y) / 2;
-        CenterShift_B.y = CenterShift_y;
-        CenterShift_M.y = CenterShift_y;
-
         ShiftEpiCenter(CenterShift_B, CenterShift_M);
+
+        ComputeEpiPPM(); // Update PPM after shifting.
 
         ComputeHomography(_OrigImg_B.m_PPM, _OrigImg_M.m_PPM); // Update Homography after shifting.
 
@@ -74,11 +69,11 @@ namespace FutoGCV
         ComputeEpiCorner(0);
         ComputeEpiCorner(1);
 
-        DetermEpiImgSize(EpiImg_B.m_Img_TexturePtr, EpiImg_M.m_Img_TexturePtr);
+        DetermEpiImgSize();
 
         //---Step 4. Generate Epipolar Images---
-        HomoTransform(EpiImg_B.m_Img_TexturePtr, HomoB_BufferPtr, _OrigImg_B.m_Img_TexturePtr, 0);
-        HomoTransform(EpiImg_M.m_Img_TexturePtr, HomoM_BufferPtr, _OrigImg_M.m_Img_TexturePtr, 1);
+        GenerateEpiImg(EpiImg_B, HomoB_BufferPtr, _OrigImg_B.m_Img_TexturePtr, 0);
+        GenerateEpiImg(EpiImg_M, HomoM_BufferPtr, _OrigImg_M.m_Img_TexturePtr, 1);
     }
 
     //===== Assistant Functions =====
@@ -151,8 +146,18 @@ namespace FutoGCV
         CenterDrift = glm::vec2(Center_Orig - Center_Orig2Epi);
     }
 
-    void CPlanarRectification::ShiftEpiCenter(const glm::vec2 & Shift_B, const glm::vec2 & Shift_M)
+    void CPlanarRectification::ShiftEpiCenter(glm::vec2 & Shift_B, glm::vec2 & Shift_M)
     {
+        ComputeCenterShift(Shift_B, 0);
+        ComputeCenterShift(Shift_M, 1);
+
+        if (Shift_B.y != Shift_M.y)
+        {
+            float CenterShift_y = (Shift_B.y + Shift_M.y) / 2;
+            Shift_B.y = CenterShift_y;
+            Shift_M.y = CenterShift_y;
+        }
+
         m_EpiCamera_B[2].x += Shift_B.x;
         m_EpiCamera_B[2].y += Shift_B.y;
         m_EpiCamera_M[2].x += Shift_M.x;
@@ -214,7 +219,7 @@ namespace FutoGCV
         }
     }
 
-    void CPlanarRectification::DetermEpiImgSize(Gfx::CTexturePtr EpiImg_B_TexturePtr, Gfx::CTexturePtr EpiImg_M_TexturePtr)
+    void CPlanarRectification::DetermEpiImgSize()
     {
         glm::ivec2 EpiFrameUL, EpiFrameDR;
 
@@ -229,7 +234,7 @@ namespace FutoGCV
         m_Homography_M.m_EpiCorner_UL = EpiFrameUL;
         m_Homography_M.m_EpiCorner_DR = EpiFrameDR;
 
-        m_EpiImgSize = m_Homography_B.m_EpiCorner_DR - m_Homography_B.m_EpiCorner_UL;
+        m_EpiImgSize = EpiFrameDR - EpiFrameUL;
 
         if (m_EpiImgSize.x > 5000 || m_EpiImgSize.y > 5000)
         {
@@ -249,11 +254,10 @@ namespace FutoGCV
         TextDesc_EpiImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
         TextDesc_EpiImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
 
-        EpiImg_B_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
-        EpiImg_M_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
+        m_EpiImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
     }
 
-    void CPlanarRectification::HomoTransform(Gfx::CTexturePtr EpiImg_TexturePtr, Gfx::CBufferPtr Homo_BufferPtr, Gfx::CTexturePtr OrigImg_TexturePtr, const int Which_Img)
+    void CPlanarRectification::GenerateEpiImg(SFutoImg& EpiImg, Gfx::CBufferPtr Homo_BufferPtr, Gfx::CTexturePtr _OrigImg_TexturePtr, const int Which_Img)
     {
         Gfx::ContextManager::SetShaderCS(m_PlanarRectificationCSPtr);
 
@@ -272,8 +276,8 @@ namespace FutoGCV
 
         Gfx::ContextManager::SetConstantBuffer(0, Homo_BufferPtr);
 
-        Gfx::ContextManager::SetImageTexture(0, OrigImg_TexturePtr);
-        Gfx::ContextManager::SetImageTexture(1, EpiImg_TexturePtr);
+        Gfx::ContextManager::SetImageTexture(0, _OrigImg_TexturePtr);
+        Gfx::ContextManager::SetImageTexture(1, m_EpiImg_TexturePtr);
 
         //---GPU Computation Start---
         Gfx::Performance::BeginEvent("Planar Rectification");
@@ -287,6 +291,19 @@ namespace FutoGCV
 
         Gfx::Performance::EndEvent();
         //---GPU Computation End---
+
+        switch (Which_Img)
+        {
+        case 0:
+            EpiImg = SFutoImg(m_EpiImg_TexturePtr, glm::ivec3(m_EpiImgSize, 1), m_EpiCamera_B, m_EpiRotation, m_EpiPosition_B);
+
+            break;
+
+        case 1:
+            EpiImg = SFutoImg(m_EpiImg_TexturePtr, glm::ivec3(m_EpiImgSize, 1), m_EpiCamera_M, m_EpiRotation, m_EpiPosition_M);
+
+            break;
+        }
     }
 
 } // FutoGmtCV
