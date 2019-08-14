@@ -39,6 +39,7 @@ namespace Scpt
         {
             Stitching,
             LUT,
+            Framework,
             NumberOfEstimationTypes,
         };
 
@@ -198,11 +199,14 @@ namespace Scpt
 
                 // -----------------------------------------------------------------------------
 
-                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
+                if (m_Mode == Framework)
+                {
+                    Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
 
-                auto pGfxSky = static_cast<Gfx::CSky*>(m_pSkyComponent->GetFacet(Dt::CSkyComponent::Graphic));
+                    auto pGfxSky = static_cast<Gfx::CSky*>(m_pSkyComponent->GetFacet(Dt::CSkyComponent::Graphic));
 
-                pGfxSky->SetInputTexture(GetHDRCubemap(pObject));
+                    pGfxSky->SetInputTexture(GetHDRCubemap(pObject));
+                }
             }
         }
 
