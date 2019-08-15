@@ -1,5 +1,5 @@
 #include "plugin\stereo\stereo_precompiled.h"
-#include "plugin\stereo\FutoGCV_Rectification_Planar.h"
+#include "plugin\stereo\futogcv_rectification_planar.h"
 
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_performance.h"

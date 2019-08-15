@@ -37,6 +37,7 @@ namespace Stereo
 {
     void CPluginInterface::SetIntrinsics(const glm::vec2& _rFocalLength, const glm::vec2& _rFocalPoint, const glm::ivec2& _rImageSize)
     {
+
         BASE_UNUSED(_rFocalLength); // Avoid warning about unused variable.
         BASE_UNUSED(_rFocalPoint); // Avoid warning about unused variable.
 
@@ -111,7 +112,6 @@ namespace Stereo
             m_ParaxEq_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDescriptor);
         }
 
-
         //===== 04 EpiDepth to OrigDepth =====
 
         m_Depth_Epi2Orig_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Depth_Rect2Orig.glsl", "main", DefineString.c_str());
@@ -136,9 +136,11 @@ namespace Stereo
         m_CmpDepth_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Compare_Depth.glsl", "main", DefineString.c_str());
 
         //===== 05 Return Results =====
+
         m_IsExport_OrigImg = Core::CProgramParameters::GetInstance().Get("mr:stereo:05_output:export_orig_img", false);
         m_IsExport_EpiImg = Core::CProgramParameters::GetInstance().Get("mr:stereo:05_output:export_epi_img", false);
         m_IsExport_Depth = Core::CProgramParameters::GetInstance().Get("mr:stereo:05_output:export_depth", false);
+
     }
 
     // -----------------------------------------------------------------------------
@@ -148,6 +150,7 @@ namespace Stereo
         BASE_UNUSED(_ColorImage);
         BASE_UNUSED(_rDepthImage);
         BASE_UNUSED(_rTransform);
+
         return false;
     }
 
@@ -190,7 +193,7 @@ namespace Stereo
             return;
         }
 
-        m_OrigKeyframe_Last = m_OrigKeyframe_Curt;
+        m_OrigKeyframe_Last = FutoGCV::SFutoImg(m_OrigKeyframe_Curt);
         m_OrigKeyframe_Curt = FutoGCV::SFutoImg(m_OrigImg_TexturePtr, glm::ivec3(m_OrigImgSize, 4), K, R, PC);
 
         m_KeyfID++;
@@ -228,12 +231,24 @@ namespace Stereo
             memcpy(cvEpiImg_Last.data, vecEpiImg_Last.data(), vecEpiImg_Last.size() * sizeof(vecEpiImg_Last[0]));
             ExportStr = "E:\\Project_ARCHITECT\\EpiImg_Last_" + std::to_string(m_KeyfID) + ".png";
             cv::imwrite(ExportStr, cvEpiImg_Last);
+
+            cv::Ptr<cv::StereoSGBM> cvSGBM_Ptr = cv::StereoSGBM::create();
+
+            cv::Mat cvDisp;
+            cvSGBM_Ptr->compute(cvEpiImg_Curt, cvEpiImg_Last, cvDisp);
+            cvDisp.convertTo(cvDisp, CV_32F, 1.0 / 16);
+
+            cv::Mat cvDisp_8U(cvDisp.size(), CV_8UC1);
+            cv::normalize(cvDisp, cvDisp_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+
+            //cv::imshow("cvDisparity", cvDisp_8U);
+            //cv::waitKey();
         }
 
         //===== 02. Stereo Matching =====
 
         //---Compute EpiDisparity by Implementing LibSGM---
-        std::vector<uint16_t> vecEpiDisparity_uint16(m_EpiImgSize.x * m_EpiImgSize.y, 0);
+        std::vector<uint16_t> vecEpiDisparity_uint16(vecEpiImg_Curt.size(), 0);
 
         m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_EpiImgSize.x, m_EpiImgSize.y, m_DisparityRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
             // Default disparity is pixel level => Disparity is the same in 8-bit & 16-bit.
@@ -507,7 +522,7 @@ namespace Stereo
     void CPluginInterface::ExportOrigImg()
     {
         cv::Mat cvOrigImg_Curt(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4);
-        std::vector<char> vecOrigImg_Curt(m_OrigImgSize.x * m_OrigImgSize.y, 0);
+        std::vector<char> vecOrigImg_Curt(m_OrigImgSize.x * m_OrigImgSize.y * 4, 0);
 
         Gfx::TextureManager::CopyTextureToCPU(m_OrigKeyframe_Curt.m_Img_TexturePtr, reinterpret_cast<char*>(vecOrigImg_Curt.data()));
 

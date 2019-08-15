@@ -36,6 +36,16 @@ namespace FutoGCV
             m_PPM = m_Camera * m_PPM;
         }
 
+        SFutoImg(const SFutoImg& InputFutoImg) // Copy Constructor: Input must be const and called by reference.
+            : m_Img_TexturePtr(InputFutoImg.m_Img_TexturePtr),
+              m_ImgSize(InputFutoImg.m_ImgSize),
+              m_Camera(InputFutoImg.m_Camera),
+              m_Rotation(InputFutoImg.m_Rotation),
+              m_Position(InputFutoImg.m_Position),
+              m_PPM(InputFutoImg.m_PPM)
+        {
+        }
+
         ~SFutoImg()
         {
             m_Img_TexturePtr = nullptr;

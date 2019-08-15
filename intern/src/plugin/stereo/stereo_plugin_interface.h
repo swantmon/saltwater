@@ -22,7 +22,7 @@
 
 #include "base/base_include_glm.h" // Some warnings appears when directly #include "glm" in Engine
 
-//---Additional Processing---
+//---External Library---
 #include "opencv2/opencv.hpp" 
 #include "opencv2/cudastereo.hpp"
 #include "opencv2/ximgproc/edge_filter.hpp"
@@ -135,7 +135,8 @@ namespace Stereo
 
         std::vector<uint16_t> m_DepthImg_Sensor;
 
-        //--- Output Result---
+        //===== 05. Return Result =====
+
         CStereoDelegate m_Delegate; // Return results to plugin_slam.
 
         bool m_IsExport_OrigImg;
