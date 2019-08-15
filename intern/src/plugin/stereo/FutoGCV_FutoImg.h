@@ -4,6 +4,7 @@
 
 #include "base/base_include_glm.h" // Some warnings appears when directly #include "glm" in Engine
 
+
 namespace FutoGCV
 {
     struct SFutoImg
@@ -18,37 +19,25 @@ namespace FutoGCV
         glm::vec3 m_Position; // Position of Camera in World.
         glm::mat4x3 m_PPM; // Perspective Projection Matrix
 
-        //---Constructors & Destructore---
+        //---Constructors & Destructor---
         SFutoImg()
-            : m_Img_TexturePtr(nullptr)
-        {
-        }
-
-        SFutoImg(const Gfx::CTexturePtr _ImgData, const glm::ivec3& _ImgSize,
-            const glm::mat3& _Camera, const glm::mat3& _Rotation, const glm::vec3& _Position)
-            : m_Img_TexturePtr(_ImgData),
-              m_ImgSize(_ImgSize),
-              m_Camera(_Camera),
-              m_Rotation(_Rotation),
-              m_Position(_Position)
-        {
-            m_PPM = glm::mat4x3(m_Rotation[0], m_Rotation[1], m_Rotation[2], -m_Rotation * m_Position);
-            m_PPM = m_Camera * m_PPM;
-        }
-
-        SFutoImg(const SFutoImg& InputFutoImg) // Copy Constructor: Input must be const and called by reference.
-            : m_Img_TexturePtr(InputFutoImg.m_Img_TexturePtr),
-              m_ImgSize(InputFutoImg.m_ImgSize),
-              m_Camera(InputFutoImg.m_Camera),
-              m_Rotation(InputFutoImg.m_Rotation),
-              m_Position(InputFutoImg.m_Position),
-              m_PPM(InputFutoImg.m_PPM)
         {
         }
 
         ~SFutoImg()
         {
             m_Img_TexturePtr = nullptr;
+        }
+
+        void SetOrientation(const glm::ivec3& _ImgSize, const glm::mat3& _Camera, const glm::mat3& _Rotation, const glm::vec3& _Position)
+        {
+            m_ImgSize = _ImgSize;
+            m_Camera = _Camera;
+            m_Rotation = _Rotation;
+            m_Position = _Position;
+
+            m_PPM = glm::mat4x3(m_Rotation[0], m_Rotation[1], m_Rotation[2], -m_Rotation * m_Position);
+            m_PPM = m_Camera * m_PPM;
         }
     };
 } // namespace FutoGCV

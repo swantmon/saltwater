@@ -240,21 +240,6 @@ namespace FutoGCV
         {
             return;
         }
-
-        //---Initialize EpiImg Texture Manager---
-        Gfx::STextureDescriptor TextDesc_EpiImg = {};
-        TextDesc_EpiImg.m_NumberOfPixelsU = m_EpiImgSize.x;
-        TextDesc_EpiImg.m_NumberOfPixelsV = m_EpiImgSize.y;
-        TextDesc_EpiImg.m_NumberOfPixelsW = 1;
-        TextDesc_EpiImg.m_NumberOfMipMaps = 1;
-        TextDesc_EpiImg.m_NumberOfTextures = 1;
-        TextDesc_EpiImg.m_Binding = Gfx::CTexture::ShaderResource;
-        TextDesc_EpiImg.m_Access = Gfx::CTexture::EAccess::CPUWrite;
-        TextDesc_EpiImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-        TextDesc_EpiImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextDesc_EpiImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
-
-        m_EpiImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
     }
 
     void CPlanarRectification::GenerateEpiImg(SFutoImg& EpiImg, Gfx::CBufferPtr Homo_BufferPtr, Gfx::CTexturePtr _OrigImg_TexturePtr, const int Which_Img)
@@ -264,11 +249,15 @@ namespace FutoGCV
         switch (Which_Img)
         {
         case 0:
+            EpiImg.SetOrientation(glm::ivec3(m_EpiImgSize, 1), m_EpiCamera_B, m_EpiRotation, m_EpiPosition_B);
+
             Gfx::BufferManager::UploadBufferData(Homo_BufferPtr, &m_Homography_B);
 
             break;
 
         case 1:
+            EpiImg.SetOrientation(glm::ivec3(m_EpiImgSize, 1), m_EpiCamera_M, m_EpiRotation, m_EpiPosition_M);
+
             Gfx::BufferManager::UploadBufferData(Homo_BufferPtr, &m_Homography_M);
 
             break;
@@ -277,7 +266,22 @@ namespace FutoGCV
         Gfx::ContextManager::SetConstantBuffer(0, Homo_BufferPtr);
 
         Gfx::ContextManager::SetImageTexture(0, _OrigImg_TexturePtr);
-        Gfx::ContextManager::SetImageTexture(1, m_EpiImg_TexturePtr);
+
+        {
+            Gfx::STextureDescriptor TextDesc_EpiImg = {};
+            TextDesc_EpiImg.m_NumberOfPixelsU = m_EpiImgSize.x;
+            TextDesc_EpiImg.m_NumberOfPixelsV = m_EpiImgSize.y;
+            TextDesc_EpiImg.m_NumberOfPixelsW = 1;
+            TextDesc_EpiImg.m_NumberOfMipMaps = 1;
+            TextDesc_EpiImg.m_NumberOfTextures = 1;
+            TextDesc_EpiImg.m_Binding = Gfx::CTexture::ShaderResource;
+            TextDesc_EpiImg.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+            TextDesc_EpiImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+            TextDesc_EpiImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+            TextDesc_EpiImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
+            EpiImg.m_Img_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextDesc_EpiImg);
+        }
+        Gfx::ContextManager::SetImageTexture(1, EpiImg.m_Img_TexturePtr);
 
         //---GPU Computation Start---
         Gfx::Performance::BeginEvent("Planar Rectification");
@@ -291,19 +295,6 @@ namespace FutoGCV
 
         Gfx::Performance::EndEvent();
         //---GPU Computation End---
-
-        switch (Which_Img)
-        {
-        case 0:
-            EpiImg = SFutoImg(m_EpiImg_TexturePtr, glm::ivec3(m_EpiImgSize, 1), m_EpiCamera_B, m_EpiRotation, m_EpiPosition_B);
-
-            break;
-
-        case 1:
-            EpiImg = SFutoImg(m_EpiImg_TexturePtr, glm::ivec3(m_EpiImgSize, 1), m_EpiCamera_M, m_EpiRotation, m_EpiPosition_M);
-
-            break;
-        }
     }
 
 } // FutoGmtCV
