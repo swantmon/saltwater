@@ -88,6 +88,9 @@ namespace Stereo
 
         int m_KeyfID = 0;
 
+        Gfx::CShaderPtr m_CopyTexture_OrigImg_CSPtr;
+        void CopyOrigImgTexturePtr(Gfx::CTexturePtr src, Gfx::CTexturePtr dst);
+
         //===== 01. Epipolarization =====
 
         FutoGCV::CPlanarRectification m_Rectifier_Planar; 
