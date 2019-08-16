@@ -1,5 +1,5 @@
 //
-//  gfx_post_effect_after_tonemapping_renderer.h
+//  gfx_postfx_renderer.h
 //  graphic
 //
 //  Created by Tobias Schwandt on 12/12/14.
@@ -12,24 +12,26 @@ namespace Gfx
 {
 namespace PostFX
 {
-    void OnStart();
-    void OnExit();
+    ENGINE_API void OnStart();
+    ENGINE_API void OnExit();
     
-    void OnSetupShader();
-    void OnSetupKernels();
-    void OnSetupRenderTargets();
-    void OnSetupStates();
-    void OnSetupTextures();
-    void OnSetupBuffers();
-    void OnSetupModels();
-    void OnSetupResources();
-    void OnSetupEnd();
+    ENGINE_API void OnSetupShader();
+    ENGINE_API void OnSetupKernels();
+    ENGINE_API void OnSetupRenderTargets();
+    ENGINE_API void OnSetupStates();
+    ENGINE_API void OnSetupTextures();
+    ENGINE_API void OnSetupBuffers();
+    ENGINE_API void OnSetupModels();
+    ENGINE_API void OnSetupResources();
+    ENGINE_API void OnSetupEnd();
     
-    void OnReload();
-    void OnNewMap();
-    void OnUnloadMap();
+    ENGINE_API void OnReload();
+    ENGINE_API void OnNewMap();
+    ENGINE_API void OnUnloadMap();
     
-    void Update();
-    void Render();
+    ENGINE_API void Update();
+    ENGINE_API void Render();
+
+    ENGINE_API void DebugAlbedo(bool _Flag);
 } // namespace PostFX
 } // namespace Gfx

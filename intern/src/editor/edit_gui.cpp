@@ -42,6 +42,7 @@
 
 #include "engine/graphic/gfx_pipeline.h"
 #include "engine/graphic/gfx_performance.h"
+#include "engine/graphic/gfx_postfx_renderer.h"
 #include "engine/graphic/gfx_shader_manager.h"
 
 #include "engine/gui/gui_event_handler.h"
@@ -126,6 +127,8 @@ namespace
         bool m_WantsToOpenScene;
         bool m_WantsToSaveScene;
 
+        bool m_DebugAlbedo = false;
+
         std::string m_OpenSceneName;
 
         Engine::CEventDelegates::HandleType m_GfxOnRenderGUIDelegate;
@@ -184,6 +187,8 @@ namespace
 		m_ShowGUI = Core::CProgramParameters::GetInstance().Get("application:show_gui", true);
 
 		auto WindowSize = Core::CProgramParameters::GetInstance().Get("application:window_size", glm::ivec2(1280, 720));
+
+        m_DebugAlbedo = Core::CProgramParameters::GetInstance().Get("graphics:debug:render_albedo", false);
 
         // -----------------------------------------------------------------------------
         // SDL
@@ -697,11 +702,14 @@ namespace
 
             if (ImGui::BeginMenu("Rendering"))
             {
-                if (ImGui::MenuItem("Reload All Shader"))
+                if (ImGui::MenuItem("Reload All Shaders"))
                 {
                     Gfx::ShaderManager::ReloadAllShaders();
                 }
 
+                ImGui::Checkbox("Debug Albedo", &m_DebugAlbedo);
+                Gfx::PostFX::DebugAlbedo(m_DebugAlbedo);
+                
                 ImGui::EndMenu();
             }
 
