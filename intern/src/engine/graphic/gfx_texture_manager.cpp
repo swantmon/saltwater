@@ -67,6 +67,9 @@ namespace
         void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels);
         void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels);
 
+        void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr);
+        void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec3& _rSourceMin, const glm::ivec3& _rTargetMin, const glm::ivec3& _Size, int _SourceLevel, int _TargetLevel);
+
         void CopyActiveTargetSetToTexture(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect);
 
         CTexturePtr GetMipmapFromTexture2D(CTexturePtr _TexturePtr, unsigned int _Mipmap);
@@ -284,8 +287,8 @@ namespace
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_pFileName != nullptr && strlen(_rDescriptor.m_pFileName))
         {
-            NumberOfBytes     = static_cast<unsigned int>(strlen(_rDescriptor.m_pFileName) * sizeof(char));
-            const auto* pData = static_cast<const void*>(_rDescriptor.m_pFileName);
+            NumberOfBytes    = static_cast<unsigned int>(strlen(_rDescriptor.m_pFileName) * sizeof(char));
+            const auto pData = static_cast<const void*>(_rDescriptor.m_pFileName);
             
             Hash = Base::CRC32(pData, NumberOfBytes);
             
@@ -300,7 +303,7 @@ namespace
         // -----------------------------------------------------------------------------
         CTexturePtr Texture2DPtr = InternCreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
 
-        auto* pInternTexture2D = static_cast<CInternTexture*>(Texture2DPtr.GetPtr());
+        auto pInternTexture2D = static_cast<CInternTexture*>(Texture2DPtr.GetPtr());
 
         if (pInternTexture2D == nullptr)
         {
@@ -397,7 +400,7 @@ namespace
             _pData = &Dummy;
         }
 
-        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
         Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
         
         assert(_Layer <= static_cast<int>(pInternTexture->GetNumberOfTextures()));
@@ -436,7 +439,7 @@ namespace
             _pData = &Dummy;
         }
 
-        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
         Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
 
         const int Format = ConvertGLImageFormat(_TexturePtr->GetFormat());
@@ -476,7 +479,7 @@ namespace
         assert(_TexturePtr->GetNumberOfPixelsU() >= UpdateSize[0] + Offset[0]);
         assert(_TexturePtr->GetNumberOfPixelsV() >= UpdateSize[1] + Offset[1]);
         
-        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
         
         Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
         
@@ -518,7 +521,7 @@ namespace
         assert(Size[0] >= UpdateSize[0] + Offset[0]);
         assert(Size[1] >= UpdateSize[1] + Offset[1]);
         
-        auto* pInternTextureArray = static_cast<CInternTexture*>(_TextureArrayPtr.GetPtr());
+        auto pInternTextureArray = static_cast<CInternTexture*>(_TextureArrayPtr.GetPtr());
         
         int Format = ConvertGLImageFormat(pInternTextureArray->GetFormat());
         int Type   = ConvertGLImageType  (pInternTextureArray->GetFormat());
@@ -583,6 +586,57 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxTextureManager::CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr)
+    {
+        assert(_SourceTexturePtr != nullptr && _TargetTexturePtr != nullptr);
+
+        auto pInternSourceTexture = static_cast<CInternTexture*>(_SourceTexturePtr.GetPtr());
+        auto pInternTargetTexture = static_cast<CInternTexture*>(_TargetTexturePtr.GetPtr());
+
+        assert(pInternSourceTexture && pInternTargetTexture);
+
+        assert(pInternSourceTexture->GetNumberOfPixelsU() == pInternTargetTexture->GetNumberOfPixelsU());
+        assert(pInternSourceTexture->GetNumberOfPixelsV() == pInternTargetTexture->GetNumberOfPixelsV());
+        assert(pInternSourceTexture->GetNumberOfPixelsW() == pInternTargetTexture->GetNumberOfPixelsW());
+        assert(pInternSourceTexture->GetNumberOfTextures() == pInternTargetTexture->GetNumberOfTextures());
+        assert(pInternSourceTexture->GetNumberOfMipLevels() == pInternTargetTexture->GetNumberOfMipLevels());
+
+        auto Min = glm::ivec3(0);
+        
+        for (int LevelIndex = 0; LevelIndex < static_cast<int>(pInternTargetTexture->GetNumberOfMipLevels()); ++ LevelIndex)
+        {
+            auto Size = glm::ivec3(
+                pInternSourceTexture->GetNumberOfPixelsU() << LevelIndex,
+                pInternSourceTexture->GetNumberOfPixelsV() << LevelIndex,
+                pInternSourceTexture->GetNumberOfPixelsW() << LevelIndex
+            );
+
+            CopyTexture(_SourceTexturePtr, _TargetTexturePtr, Min, Min, Size, LevelIndex, LevelIndex);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxTextureManager::CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec3& _rSourceMin, const glm::ivec3& _rTargetMin, const glm::ivec3& _rSize, int _SourceLevel, int _TargetLevel)
+    {
+        assert(_SourceTexturePtr != nullptr && _TargetTexturePtr != nullptr);
+
+        auto pInternSourceTexture = static_cast<CInternTexture*>(_SourceTexturePtr.GetPtr());
+        auto pInternTargetTexture = static_cast<CInternTexture*>(_TargetTexturePtr.GetPtr());
+
+        assert(pInternSourceTexture && pInternTargetTexture);
+
+        glCopyImageSubData(
+            pInternSourceTexture->GetNativeHandle(), pInternSourceTexture->GetNativeBinding(),
+            _SourceLevel, _rSourceMin.x, _rSourceMin.y, _rSourceMin.z,
+            pInternTargetTexture->GetNativeHandle(), pInternTargetTexture->GetNativeBinding(),
+            _TargetLevel, _rTargetMin.x, _rTargetMin.y, _rTargetMin.z,
+            _rSize.x, _rSize.y, _rSize.z
+        );
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxTextureManager::CopyActiveTargetSetToTexture(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect)
     {
         assert(_TexturePtr.IsValid());
@@ -593,7 +647,7 @@ namespace
         assert(_TexturePtr->GetNumberOfPixelsU() >= UpdateSize[0] + Offset[0]);
         assert(_TexturePtr->GetNumberOfPixelsV() >= UpdateSize[1] + Offset[1]);
 
-        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
         Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
 
@@ -639,7 +693,7 @@ namespace
             rTexture.m_Info.m_Semantic          = _TexturePtr->GetSemantic();
             rTexture.m_Info.m_Usage             = _TexturePtr->GetUsage();
             
-            auto* pInternalTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+            auto pInternalTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
             rTexture.m_NativeTexture        = pInternalTexture->m_NativeTexture;
             rTexture.m_NativeBinding        = pInternalTexture->m_NativeBinding;
@@ -660,7 +714,7 @@ namespace
     {
         assert(_TexturePtr != nullptr);
         
-        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
         assert(pInternTexture);
 
@@ -684,7 +738,7 @@ namespace
     {
         assert(_TexturePtr != nullptr);
 
-        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
         assert(pInternTexture);
 
@@ -806,7 +860,7 @@ namespace
         // -----------------------------------------------------------------------------
         assert(_TexturePtr != nullptr);
 
-        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
         assert(pInternTexture);
 
@@ -886,7 +940,7 @@ namespace
     {
         assert(_pLabel != nullptr);
 
-        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
         assert(pInternTexture != nullptr);
         
@@ -2657,6 +2711,20 @@ namespace TextureManager
     void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels)
     {
         CGfxTextureManager::GetInstance().CopyToTextureArray2D(_TextureArrayPtr, _IndexOfSlice, _TexturePtr, _UpdateMipLevels);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr)
+    {
+        CGfxTextureManager::GetInstance().CopyTexture(_SourceTexturePtr, _TargetTexturePtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec3& _rSourceMin, const glm::ivec3& _rTargetMin, const glm::ivec3& _rSize, int _SourceLevel, int _TargetLevel)
+    {
+        CGfxTextureManager::GetInstance().CopyTexture(_SourceTexturePtr, _TargetTexturePtr, _rSourceMin, _rTargetMin, _rSize, _SourceLevel, _TargetLevel);
     }
 
     // -----------------------------------------------------------------------------
