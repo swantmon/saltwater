@@ -68,6 +68,7 @@ namespace
         void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels);
 
         void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr);
+        void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec3& _rSourceMin, const glm::ivec3& _rTargetMin, const glm::ivec3& _Size, int _SourceLevel, int _TargetLevel);
 
         void CopyActiveTargetSetToTexture(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect);
 
@@ -594,14 +595,43 @@ namespace
 
         assert(pInternSourceTexture && pInternTargetTexture);
 
-        // -----------------------------------------------------------------------------
+        assert(pInternSourceTexture->GetNumberOfPixelsU() == pInternTargetTexture->GetNumberOfPixelsU());
+        assert(pInternSourceTexture->GetNumberOfPixelsV() == pInternTargetTexture->GetNumberOfPixelsV());
+        assert(pInternSourceTexture->GetNumberOfPixelsW() == pInternTargetTexture->GetNumberOfPixelsW());
+        assert(pInternSourceTexture->GetNumberOfTextures() == pInternTargetTexture->GetNumberOfTextures());
+        assert(pInternSourceTexture->GetNumberOfMipLevels() == pInternTargetTexture->GetNumberOfMipLevels());
+
+        auto Min = glm::ivec3(0);
+        
+        for (int LevelIndex = 0; LevelIndex < static_cast<int>(pInternTargetTexture->GetNumberOfMipLevels()); ++ LevelIndex)
+        {
+            auto Size = glm::ivec3(
+                pInternSourceTexture->GetNumberOfPixelsU() << LevelIndex,
+                pInternSourceTexture->GetNumberOfPixelsV() << LevelIndex,
+                pInternSourceTexture->GetNumberOfPixelsW() << LevelIndex
+            );
+
+            CopyTexture(_SourceTexturePtr, _TargetTexturePtr, Min, Min, Size, LevelIndex, LevelIndex);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxTextureManager::CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec3& _rSourceMin, const glm::ivec3& _rTargetMin, const glm::ivec3& _rSize, int _SourceLevel, int _TargetLevel)
+    {
+        assert(_SourceTexturePtr != nullptr && _TargetTexturePtr != nullptr);
+
+        auto pInternSourceTexture = static_cast<CInternTexture*>(_SourceTexturePtr.GetPtr());
+        auto pInternTargetTexture = static_cast<CInternTexture*>(_TargetTexturePtr.GetPtr());
+
+        assert(pInternSourceTexture && pInternTargetTexture);
 
         glCopyImageSubData(
             pInternSourceTexture->GetNativeHandle(), pInternSourceTexture->GetNativeBinding(),
-            0, 0, 0, 0,
+            _SourceLevel, _rSourceMin.x, _rSourceMin.y, _rSourceMin.z,
             pInternTargetTexture->GetNativeHandle(), pInternTargetTexture->GetNativeBinding(),
-            0, 0, 0, 0,
-            pInternSourceTexture->GetNumberOfPixelsU(), pInternSourceTexture->GetNumberOfPixelsV(), pInternSourceTexture->GetNumberOfPixelsW()
+            _TargetLevel, _rTargetMin.x, _rTargetMin.y, _rTargetMin.z,
+            _rSize.x, _rSize.y, _rSize.z
         );
     }
 
@@ -2688,6 +2718,13 @@ namespace TextureManager
     void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr)
     {
         CGfxTextureManager::GetInstance().CopyTexture(_SourceTexturePtr, _TargetTexturePtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec3& _rSourceMin, const glm::ivec3& _rTargetMin, const glm::ivec3& _rSize, int _SourceLevel, int _TargetLevel)
+    {
+        CGfxTextureManager::GetInstance().CopyTexture(_SourceTexturePtr, _TargetTexturePtr, _rSourceMin, _rTargetMin, _rSize, _SourceLevel, _TargetLevel);
     }
 
     // -----------------------------------------------------------------------------

@@ -70,6 +70,7 @@ namespace TextureManager
     ENGINE_API void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels = false);
 
     ENGINE_API void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr);
+    ENGINE_API void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec3& _rSourceMin, const glm::ivec3& _rTargetMin, const glm::ivec3& _rSize, int _SourceLevel, int _TargetLevel);
 
     ENGINE_API void CopyActiveTargetSetToTexture(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect);
 
