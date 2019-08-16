@@ -707,8 +707,10 @@ namespace
                     Gfx::ShaderManager::ReloadAllShaders();
                 }
 
-                ImGui::Checkbox("Debug Albedo", &m_DebugAlbedo);
-                Gfx::PostFX::DebugAlbedo(m_DebugAlbedo);
+                if (ImGui::Checkbox("Debug Albedo", &m_DebugAlbedo))
+                {
+                    Gfx::PostFX::DebugAlbedo(m_DebugAlbedo);
+                }
                 
                 ImGui::EndMenu();
             }
