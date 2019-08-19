@@ -68,7 +68,8 @@ namespace
         void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels);
 
         void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr);
-        void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec3& _rSourceMin, const glm::ivec3& _rTargetMin, const glm::ivec3& _Size, int _SourceLevel, int _TargetLevel);
+        void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec2& _rSourceMin, const glm::ivec2& _rTargetMin, const glm::ivec2& _rSize, int _SourceLevel, int _TargetLevel);
+        void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec3& _rSourceMin, const glm::ivec3& _rTargetMin, const glm::ivec3& _rSize, int _SourceLevel, int _TargetLevel);
 
         void CopyActiveTargetSetToTexture(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect);
 
@@ -613,6 +614,15 @@ namespace
 
             CopyTexture(_SourceTexturePtr, _TargetTexturePtr, Min, Min, Size, LevelIndex, LevelIndex);
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxTextureManager::CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec2& _rSourceMin, const glm::ivec2& _rTargetMin, const glm::ivec2& _rSize, int _SourceLevel, int _TargetLevel)
+    {
+        assert(_SourceTexturePtr->GetDimension() == 2 && _TargetTexturePtr->GetDimension() == 2);
+
+        CopyTexture(_SourceTexturePtr, _TargetTexturePtr, glm::ivec3(_rSourceMin, 0), glm::ivec3(_rTargetMin, 0), glm::ivec3(_rSize, 1), _SourceLevel, _TargetLevel);
     }
 
     // -----------------------------------------------------------------------------
@@ -2718,6 +2728,13 @@ namespace TextureManager
     void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr)
     {
         CGfxTextureManager::GetInstance().CopyTexture(_SourceTexturePtr, _TargetTexturePtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec2& _rSourceMin, const glm::ivec2& _rTargetMin, const glm::ivec2& _rSize, int _SourceLevel, int _TargetLevel)
+    {
+        CGfxTextureManager::GetInstance().CopyTexture(_SourceTexturePtr, _TargetTexturePtr, _rSourceMin, _rTargetMin, _rSize, _SourceLevel, _TargetLevel);
     }
 
     // -----------------------------------------------------------------------------
