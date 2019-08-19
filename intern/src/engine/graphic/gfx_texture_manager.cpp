@@ -1195,7 +1195,7 @@ namespace
             rTexture.m_Info.m_IsCubeTexture     = false;
             rTexture.m_Info.m_IsDeletable       = _IsDeleteable;
             rTexture.m_Info.m_IsDummyTexture    = false;
-            rTexture.m_Info.m_NumberOfTextures  = _rDescriptor.m_NumberOfTextures;
+            rTexture.m_Info.m_NumberOfTextures  = _rDescriptor.m_NumberOfTextures == STextureDescriptor::s_NumberOfTexturesFromSource ? 1 : _rDescriptor.m_NumberOfTextures;
             rTexture.m_Info.m_NumberOfMipLevels = NumberOfMipmaps;
             rTexture.m_Info.m_CurrentMipLevel   = 0;
             rTexture.m_Info.m_Semantic          = _rDescriptor.m_Semantic;
