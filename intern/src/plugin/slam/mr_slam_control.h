@@ -29,7 +29,7 @@
 
 #include "engine/core/core_asset_manager.h"
 
-#include "plugin/slam/mr_plane_colorizer.h"
+#include "plugin/slam/mr_plane_colorization.h"
 
 #include "engine/script/script_script.h"
 
