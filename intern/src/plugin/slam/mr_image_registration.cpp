@@ -47,11 +47,32 @@ namespace
 
 namespace MR
 {
+    using namespace Gfx;
+
+    void CImageRegistrator::Register()
+    {
+        Performance::BeginEvent("Image registration");
+
+        ContextManager::SetImageTexture(0, m_Texture1);
+        ContextManager::SetImageTexture(1, m_Texture2);
+        ContextManager::SetShaderCS(m_RegistrationCSPtr);
+
+        ContextManager::Dispatch(1024 / 16, 1024 / 16, 1);
+
+        ContextManager::ResetImageTexture(0);
+        ContextManager::ResetImageTexture(1);
+        ContextManager::ResetShaderCS();
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CImageRegistrator::SetupShaders()
     {
         std::string DefineString = "";
 
-        m_RegistrationCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/vs_register_image.glsl", "main", DefineString.c_str());
+        m_RegistrationCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/cs_register_image.glsl", "main", DefineString.c_str());
     }
 
     // -----------------------------------------------------------------------------
@@ -80,11 +101,43 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CImageRegistrator::SetupTextures()
+    {
+        const int TextureWidth = 1024;
+
+        std::vector<glm::u8vec4> Pixels(TextureWidth * TextureWidth);
+
+        for (auto& Pixel : Pixels)
+        {
+            Pixel = glm::u8vec4(127);
+        }
+
+        STextureDescriptor TextureDescriptor = {};
+
+        TextureDescriptor.m_NumberOfPixelsU = TextureWidth;
+        TextureDescriptor.m_NumberOfPixelsV = TextureWidth;
+        TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = CTexture::ShaderResource;
+        TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
+        TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
+        TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
+        TextureDescriptor.m_pPixels = Pixels.data();
+
+        m_Texture1 = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_Texture2 = TextureManager::CreateTexture2D(TextureDescriptor);
+    }
+
+    // -----------------------------------------------------------------------------
+
     CImageRegistrator::CImageRegistrator()
     {
-        SetupShaders();
         SetupBuffers();
+        SetupShaders();
         SetupStates();
+        SetupTextures();
     }
 
     // -----------------------------------------------------------------------------

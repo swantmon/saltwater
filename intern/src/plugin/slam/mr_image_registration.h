@@ -27,19 +27,27 @@ namespace MR
     {
     public:
 
+        void Register();
+
+    public:
+
         CImageRegistrator();
         ~CImageRegistrator();
 
     private:
 
-        void SetupShaders();
         void SetupBuffers();
+        void SetupShaders();
         void SetupStates();
+        void SetupTextures();
 
     private:
         
         Gfx::CShaderPtr m_RegistrationCSPtr;
 
         Gfx::CBufferPtr m_ConstantBufferPtr;
+
+        Gfx::CTexturePtr m_Texture1;
+        Gfx::CTexturePtr m_Texture2;
     };
 } // namespace Scpt
