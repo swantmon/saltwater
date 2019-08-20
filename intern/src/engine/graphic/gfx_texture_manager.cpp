@@ -620,7 +620,7 @@ namespace
 
     void CGfxTextureManager::CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec2& _rSourceMin, const glm::ivec2& _rTargetMin, const glm::ivec2& _rSize, int _SourceLevel, int _TargetLevel)
     {
-        assert(_SourceTexturePtr->GetDimension() == 2 && _TargetTexturePtr->GetDimension() == 2);
+        assert(_SourceTexturePtr->GetDimension() == CTexture::Dim2D && _TargetTexturePtr->GetDimension() == CTexture::Dim2D);
 
         CopyTexture(_SourceTexturePtr, _TargetTexturePtr, glm::ivec3(_rSourceMin, 0), glm::ivec3(_rTargetMin, 0), glm::ivec3(_rSize, 1), _SourceLevel, _TargetLevel);
     }
