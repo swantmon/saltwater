@@ -10,9 +10,24 @@ void main()
 {
     ivec2 Coords = ivec2(gl_GlobalInvocationID.xy);
 
-    ivec4 Target = ivec4(imageLoad(cs_Target, Coords));
-    ivec4 Source = ivec4(imageLoad(cs_Source, Coords));
-    vec4 Debug = imageLoad(cs_Debug, Coords);
+    float ErrorSum = 0.0f;
+
+    for (int x = Coords.x - 2; x <= Coords.x + 2; ++ x)
+    {
+        for (int y = Coords.y - 2; y <= Coords.y + 2; ++ y)
+        {
+            ivec3 Target = ivec3(imageLoad(cs_Target, ivec2(x, y))).rgb;
+            ivec3 Source = ivec3(imageLoad(cs_Source, ivec2(x, y))).rgb;
+
+            float TargetIntensity = (Target.x + Target.y + Target.z) / 3.0f;
+            float SourceIntensity = (Source.x + Source.y + Source.z) / 3.0f;
+
+            float Error = (TargetIntensity - SourceIntensity);
+            ErrorSum += Error * Error;
+        }
+    }
+
+    imageStore(cs_Debug, Coords, vec4(ErrorSum));
 }
 
 #endif //__INCLUDE_CS_SHIFT_DEPTH_GLSL__
