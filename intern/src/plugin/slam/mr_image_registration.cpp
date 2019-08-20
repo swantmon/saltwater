@@ -42,6 +42,9 @@ namespace
     {
         glm::vec4 Dummy;
     };
+
+    const int g_TextureWidth = 1024;
+    const int g_TileSize2D = 16;
     
 } // namespace
 
@@ -57,7 +60,7 @@ namespace MR
         ContextManager::SetImageTexture(1, m_Texture2);
         ContextManager::SetShaderCS(m_RegistrationCSPtr);
 
-        ContextManager::Dispatch(1024 / 16, 1024 / 16, 1);
+        ContextManager::Dispatch(DivUp(g_TextureWidth, g_TileSize2D), DivUp(g_TextureWidth, g_TileSize2D), 1);
 
         ContextManager::ResetImageTexture(0);
         ContextManager::ResetImageTexture(1);
@@ -70,7 +73,11 @@ namespace MR
 
     void CImageRegistrator::SetupShaders()
     {
-        std::string DefineString = "";
+        std::stringstream DefineStream;
+
+        DefineStream << "#define TILE_SIZE2D " << g_TileSize2D << " \n";
+
+        std::string DefineString = DefineStream.str();
 
         m_RegistrationCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/cs_register_image.glsl", "main", DefineString.c_str());
     }
@@ -103,9 +110,7 @@ namespace MR
 
     void CImageRegistrator::SetupTextures()
     {
-        const int TextureWidth = 1024;
-
-        std::vector<glm::u8vec4> Pixels(TextureWidth * TextureWidth);
+        std::vector<glm::u8vec4> Pixels(g_TextureWidth * g_TextureWidth);
 
         for (auto& Pixel : Pixels)
         {
@@ -114,20 +119,30 @@ namespace MR
 
         STextureDescriptor TextureDescriptor = {};
 
-        TextureDescriptor.m_NumberOfPixelsU = TextureWidth;
-        TextureDescriptor.m_NumberOfPixelsV = TextureWidth;
-        TextureDescriptor.m_NumberOfPixelsW = 1;
-        TextureDescriptor.m_NumberOfMipMaps = 1;
-        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_NumberOfPixelsU = STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsV = STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsW = STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfMipMaps = STextureDescriptor::s_NumberOfMipMapsFromSource;
+        TextureDescriptor.m_NumberOfTextures = STextureDescriptor::s_NumberOfTexturesFromSource;
         TextureDescriptor.m_Binding = CTexture::ShaderResource;
         TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
         TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
-        TextureDescriptor.m_pPixels = Pixels.data();
+        TextureDescriptor.m_pFileName = "textures/lines_d.dds";
 
         m_Texture1 = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        TextureDescriptor.m_NumberOfPixelsU = m_Texture1->GetNumberOfPixelsU();
+        TextureDescriptor.m_NumberOfPixelsV = m_Texture1->GetNumberOfPixelsV();
+        TextureDescriptor.m_NumberOfPixelsW = m_Texture1->GetNumberOfPixelsW();
+        TextureDescriptor.m_NumberOfMipMaps = m_Texture1->GetNumberOfMipLevels();
+        TextureDescriptor.m_NumberOfTextures = m_Texture1->GetNumberOfTextures();
+        TextureDescriptor.m_pFileName = nullptr;
+
         m_Texture2 = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        TextureManager::CopyTexture(m_Texture1, m_Texture2, glm::ivec2(0), glm::ivec2(10), glm::ivec2(1014));
     }
 
     // -----------------------------------------------------------------------------
