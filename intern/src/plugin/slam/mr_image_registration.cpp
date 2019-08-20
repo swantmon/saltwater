@@ -43,7 +43,6 @@ namespace
         glm::vec4 Dummy;
     };
 
-    const int g_TextureWidth = 1024;
     const int g_TileSize2D = 16;
     
 } // namespace
@@ -58,12 +57,14 @@ namespace MR
 
         ContextManager::SetImageTexture(0, m_Texture1);
         ContextManager::SetImageTexture(1, m_Texture2);
+        ContextManager::SetImageTexture(2, m_DebugTexture);
         ContextManager::SetShaderCS(m_RegistrationCSPtr);
 
-        ContextManager::Dispatch(DivUp(g_TextureWidth, g_TileSize2D), DivUp(g_TextureWidth, g_TileSize2D), 1);
+        ContextManager::Dispatch(DivUp(m_Texture1->GetNumberOfPixelsU(), g_TileSize2D), DivUp(m_Texture1->GetNumberOfPixelsV(), g_TileSize2D), 1);
 
         ContextManager::ResetImageTexture(0);
         ContextManager::ResetImageTexture(1);
+        ContextManager::ResetImageTexture(2);
         ContextManager::ResetShaderCS();
 
         Performance::EndEvent();
@@ -110,13 +111,6 @@ namespace MR
 
     void CImageRegistrator::SetupTextures()
     {
-        std::vector<glm::u8vec4> Pixels(g_TextureWidth * g_TextureWidth);
-
-        for (auto& Pixel : Pixels)
-        {
-            Pixel = glm::u8vec4(127);
-        }
-
         STextureDescriptor TextureDescriptor = {};
 
         TextureDescriptor.m_NumberOfPixelsU = STextureDescriptor::s_NumberOfPixelsFromSource;
@@ -129,7 +123,7 @@ namespace MR
         TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
-        TextureDescriptor.m_pFileName = "textures/lines_d.dds";
+        TextureDescriptor.m_pFileName = "textures/Lenna.png";
 
         m_Texture1 = TextureManager::CreateTexture2D(TextureDescriptor);
 
@@ -142,7 +136,19 @@ namespace MR
 
         m_Texture2 = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        TextureManager::CopyTexture(m_Texture1, m_Texture2, glm::ivec2(0), glm::ivec2(10), glm::ivec2(1014));
+        const auto Offset = glm::ivec2(10);
+        const auto ImageSize = glm::ivec2(m_Texture1->GetNumberOfPixelsU(), m_Texture1->GetNumberOfPixelsV());
+
+        TextureManager::CopyTexture(m_Texture1, m_Texture2, glm::ivec2(0), Offset, glm::ivec2(ImageSize - Offset));
+
+        TextureDescriptor.m_NumberOfPixelsU = m_Texture1->GetNumberOfPixelsU();
+        TextureDescriptor.m_NumberOfPixelsV = m_Texture1->GetNumberOfPixelsV();
+        TextureDescriptor.m_NumberOfPixelsW = m_Texture1->GetNumberOfPixelsW();
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Format = CTexture::R32G32B32A32_FLOAT;
+
+        m_DebugTexture = TextureManager::CreateTexture2D(TextureDescriptor);
     }
 
     // -----------------------------------------------------------------------------
@@ -161,6 +167,11 @@ namespace MR
     {
         m_RegistrationCSPtr = nullptr;
         m_ConstantBufferPtr = nullptr;
+
+        m_Texture1 = nullptr;
+        m_Texture2 = nullptr;
+
+        m_DebugTexture = nullptr;
     }
 
 } // namespace MR

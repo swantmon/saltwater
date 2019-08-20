@@ -49,5 +49,7 @@ namespace MR
 
         Gfx::CTexturePtr m_Texture1;
         Gfx::CTexturePtr m_Texture2;
+
+        Gfx::CTexturePtr m_DebugTexture;
     };
 } // namespace Scpt
