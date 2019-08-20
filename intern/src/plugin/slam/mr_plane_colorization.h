@@ -23,23 +23,52 @@
 
 namespace MR
 {
-    class CImageRegistrator
+    class CPlaneColorizer
     {
     public:
 
-        CImageRegistrator();
-        ~CImageRegistrator();
+        CPlaneColorizer(MR::CSLAMReconstructor* _pReconstructor);
+        ~CPlaneColorizer();
+
+        void UpdatePlane(const std::string& _ID);
+        void UpdatePlane(CSLAMReconstructor::SPlane& _rPlane);
+
+        void ColorizeAllPlanes();
 
     private:
+
+        void ColorizePlane(CSLAMReconstructor::SPlane& _rPlane);
+
+        enum EPLANETYPE
+        {
+            FLOOR,
+            WALL,
+            CEILING
+        };
 
         void SetupShaders();
         void SetupBuffers();
         void SetupStates();
 
     private:
-        
-        Gfx::CShaderPtr m_RegistrationCSPtr;
+
+        MR::CSLAMReconstructor* m_pReconstructor;
+
+        int m_PlaneTextureSize;
+        float m_CameraOffset;
+        float m_MaxRaycastLength;
+
+        Gfx::CTexturePtr m_DummyTexturePtr;
+
+        Gfx::CShaderPtr m_ColorizationVSPtr;
+        Gfx::CShaderPtr m_ColorizationFSPtr;
 
         Gfx::CBufferPtr m_ConstantBufferPtr;
+        
+        Gfx::CInputLayoutPtr m_PlaneMeshLayoutPtr;
+
+        Gfx::CViewPortSetPtr m_ViewPortSetPtr;
+
+        Gfx::CTargetSetPtr m_TargetSetPtr;
     };
 } // namespace Scpt
