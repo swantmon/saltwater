@@ -67,6 +67,8 @@ namespace
         void Update();
         void Render();
         
+        void DebugAlbedo(bool _Flag);
+
     private:
         
         enum EPostEffectShader
@@ -1758,6 +1760,14 @@ namespace
             m_DOFRenderJobs.push_back(NewRenderJob);
         }
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxPostFXRenderer::DebugAlbedo(bool _Flag)
+    {
+        m_DebugAlbedo = _Flag;
+    }
+
 } // namespace
 
 namespace Gfx
@@ -1873,6 +1883,14 @@ namespace PostFX
     {
         CGfxPostFXRenderer::GetInstance().Render();
     }
+
+    // -----------------------------------------------------------------------------
+
+    void DebugAlbedo(bool _Flag)
+    {
+        CGfxPostFXRenderer::GetInstance().DebugAlbedo(_Flag);
+    }
+
 } // namespace PostFX
 } // namespace Gfx
 
