@@ -66,16 +66,6 @@ namespace Stereo
 
         m_KeyfSelect_BaseLineL = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_keyframe:baseline_length(m)", 0.03f); // Unit = meter
 
-        {
-            std::stringstream DefineStream;
-            DefineStream
-                << "#define TILE_SIZE_2D " << TileSize_2D << " \n";
-            std::string DefineString = DefineStream.str();
-
-            m_CopyTexture_OrigImg_CSPtr = Gfx::ShaderManager::CompileCS(
-                "../../plugins/stereo/cs_texture_copy_origimg.glsl", "main", DefineString.c_str());
-        }
-
         //===== 01. Epipolarization =====
 
         m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize);
@@ -202,8 +192,7 @@ namespace Stereo
         //---Set 1st Keyframe---
         if (!m_KeyfStatus)
         {
-            m_OrigKeyframe_Curt.SetOrientation(glm::ivec3(m_OrigImgSize, 4), K, R, PC);
-            CopyOrigImgTexturePtr(m_OrigImg_TexturePtr, m_OrigKeyframe_Curt.m_Img_TexturePtr);
+            m_OrigKeyframe_Curt = FutoGCV::SFutoImg(m_OrigImg_TexturePtr, glm::ivec3(m_OrigImgSize, 4), K, R, PC);
 
             m_KeyfStatus = true;
 
@@ -218,11 +207,10 @@ namespace Stereo
             return;
         }
 
-        m_OrigKeyframe_Last = m_OrigKeyframe_Curt;
-        CopyOrigImgTexturePtr(m_OrigKeyframe_Curt.m_Img_TexturePtr, m_OrigKeyframe_Last.m_Img_TexturePtr);
+        m_OrigKeyframe_Last = FutoGCV::SFutoImg(m_OrigKeyframe_Curt);
 
-        m_OrigKeyframe_Curt.SetOrientation(glm::ivec3(m_OrigImgSize, 4), K, R, PC);
-        CopyOrigImgTexturePtr(m_OrigImg_TexturePtr, m_OrigKeyframe_Curt.m_Img_TexturePtr);
+        m_OrigKeyframe_Curt = FutoGCV::SFutoImg(m_OrigImg_TexturePtr, glm::ivec3(m_OrigImgSize, 4), K, R, PC);
+
 
         m_KeyfID++;
 
@@ -420,28 +408,6 @@ namespace Stereo
     }
 
     // -----------------------------------------------------------------------------
-
-    void CPluginInterface::CopyOrigImgTexturePtr(Gfx::CTexturePtr src, Gfx::CTexturePtr dst)
-    {
-        Gfx::ContextManager::SetShaderCS(m_CopyTexture_OrigImg_CSPtr);
-
-        Gfx::ContextManager::SetImageTexture(0, src);
-        Gfx::ContextManager::SetImageTexture(1, dst);
-
-        //---GPU Start---
-        Gfx::Performance::BeginEvent("Copy OrigImg_TexturePtr");
-        {
-            const int WorkGroupsX = DivUp(m_OrigImgSize.x, TileSize_2D);
-            const int WorkGroupsY = DivUp(m_OrigImgSize.y, TileSize_2D);
-
-            Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-
-            Gfx::ContextManager::ResetShaderCS();
-            Gfx::ContextManager::ResetImageTexture(1);
-        }
-        Gfx::Performance::EndEvent();
-        //---GPU End---
-    }
 
     void CPluginInterface::UpSampling()
     {
