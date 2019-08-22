@@ -247,18 +247,6 @@ namespace Stereo
             memcpy(cvEpiImg_Last.data, vecEpiImg_Last.data(), vecEpiImg_Last.size() * sizeof(vecEpiImg_Last[0]));
             ExportStr = "E:\\Project_ARCHITECT\\EpiImg_Last_" + std::to_string(m_KeyfID) + ".png";
             cv::imwrite(ExportStr, cvEpiImg_Last);
-
-            cv::Ptr<cv::StereoSGBM> cvSGBM_Ptr = cv::StereoSGBM::create();
-
-            cv::Mat cvDisp;
-            cvSGBM_Ptr->compute(cvEpiImg_Curt, cvEpiImg_Last, cvDisp);
-            cvDisp.convertTo(cvDisp, CV_32F, 1.0 / 16);
-
-            cv::Mat cvDisp_8U(cvDisp.size(), CV_8UC1);
-            cv::normalize(cvDisp, cvDisp_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-
-            //cv::imshow("cvDisparity", cvDisp_8U);
-            //cv::waitKey();
         }
 
         //===== 02. Stereo Matching =====
@@ -301,8 +289,8 @@ namespace Stereo
         //---Set Texture Manager---
         {
             Gfx::STextureDescriptor TextureDescriptor = {};
-            TextureDescriptor.m_NumberOfPixelsU = m_EpiKeyframe_Curt.m_ImgSize.x;
-            TextureDescriptor.m_NumberOfPixelsV = m_EpiKeyframe_Curt.m_ImgSize.y;
+            TextureDescriptor.m_NumberOfPixelsU = m_EpiImgSize.x;
+            TextureDescriptor.m_NumberOfPixelsV = m_EpiImgSize.y;
             TextureDescriptor.m_NumberOfPixelsW = 1;
             TextureDescriptor.m_NumberOfMipMaps = 1;
             TextureDescriptor.m_NumberOfTextures = 1;
@@ -556,7 +544,7 @@ namespace Stereo
 
         int MemCpySize = 0;
 
-        cv::Mat cvOrigDepth_SM(m_EpiKeyframe_Curt.m_ImgSize.y, m_EpiKeyframe_Curt.m_ImgSize.x, CV_16UC1);
+        cv::Mat cvOrigDepth_SM(m_EpiImgSize.y, m_EpiImgSize.x, CV_16UC1);
 
         MemCpySize = static_cast<int>(m_vecOrigDepth.size() * sizeof(m_vecOrigDepth[0]));
         memcpy(cvOrigDepth_SM.data, m_vecOrigDepth.data(), MemCpySize);
