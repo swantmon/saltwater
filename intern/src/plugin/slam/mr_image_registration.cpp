@@ -58,6 +58,8 @@ namespace MR
 
         // Setup data
 
+        auto Offset = glm::vec2(10.0f);
+
         const int WorkGroupsX = DivUp(m_Texture1->GetNumberOfPixelsU(), g_TileSize2D);
         const int WorkGroupsY = DivUp(m_Texture1->GetNumberOfPixelsV(), g_TileSize2D);
         
@@ -69,29 +71,41 @@ namespace MR
         ContextManager::SetImageTexture(2, m_SDTexture);
         ContextManager::SetImageTexture(3, m_GradientTexture);
 
-        SRegistrationBuffer RegistrationBuffer;
-        RegistrationBuffer.m_Offset = glm::vec2(0.0f);
-        BufferManager::UploadBufferData(m_ConstantBuffer, &RegistrationBuffer);
+        for (int i = 0; i < 100000; ++ i)
+        {
+            SRegistrationBuffer RegistrationBuffer;
+            RegistrationBuffer.m_Offset = Offset;
+            BufferManager::UploadBufferData(m_ConstantBuffer, &RegistrationBuffer);
 
-        // Compute squared differences
+            // Compute squared differences
 
-        ContextManager::SetShaderCS(m_SDCSPtr);
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+            ContextManager::SetShaderCS(m_SDCSPtr);
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
-        // Compute gradient image
+            // Compute gradient image
 
-        ContextManager::SetShaderCS(m_GradientCSPtr);
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+            ContextManager::SetShaderCS(m_GradientCSPtr);
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
-        // Sum tiles
+            // Sum tiles
 
-        ContextManager::SetShaderCS(m_SumTilesCSPtr);
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+            ContextManager::SetShaderCS(m_SumTilesCSPtr);
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
-        // Compute final sum
+            // Compute final sum
 
-        ContextManager::SetShaderCS(m_SumFinalCSPtr);
-        ContextManager::Dispatch(1, 1, 1);
+            ContextManager::SetShaderCS(m_SumFinalCSPtr);
+            ContextManager::Dispatch(1, 1, 1);
+
+            // Compute new registration parameter
+
+            glm::vec4 Gradient = *static_cast<glm::vec4*>(BufferManager::MapBufferRange(m_SumBufferPtr, CBuffer::Read, 0, sizeof(glm::vec4)));
+            BufferManager::UnmapBuffer(m_SumBufferPtr);
+
+            Gradient /= glm::vec4(static_cast<float>(m_Texture1->GetNumberOfPixelsU() * m_Texture1->GetNumberOfPixelsV()));
+
+            Offset = Offset - 10 * glm::vec2(Gradient.x, Gradient.y);
+        }
 
         // Reset
 
@@ -103,11 +117,6 @@ namespace MR
         ContextManager::ResetImageTexture(3);
         ContextManager::ResetShaderCS();
         
-        glm::vec4 Gradient = *static_cast<glm::vec4*>(BufferManager::MapBufferRange(m_SumBufferPtr, CBuffer::Read, 0, sizeof(glm::vec4)));
-        BufferManager::UnmapBuffer(m_SumBufferPtr);
-
-        Gradient /= m_Texture1->GetNumberOfPixelsU() * m_Texture1->GetNumberOfPixelsV();
-
         Performance::EndEvent();
     }
 
