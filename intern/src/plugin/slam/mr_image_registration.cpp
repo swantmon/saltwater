@@ -38,9 +38,10 @@ namespace
         return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
     }
 
-    struct SConstantBuffer
+    struct SRegistrationBuffer
     {
-        glm::vec4 Dummy;
+        glm::vec2 m_Offset;
+        glm::vec2 Dummy;
     };
 
     const int g_TileSize2D = 16;
@@ -60,12 +61,17 @@ namespace MR
         const int WorkGroupsX = DivUp(m_Texture1->GetNumberOfPixelsU(), g_TileSize2D);
         const int WorkGroupsY = DivUp(m_Texture1->GetNumberOfPixelsV(), g_TileSize2D);
         
-        ContextManager::SetResourceBuffer(0, m_BufferPtr);
+        ContextManager::SetConstantBuffer(0, m_ConstantBuffer);
+        ContextManager::SetResourceBuffer(0, m_SumBufferPtr);
 
         ContextManager::SetImageTexture(0, m_Texture1);
         ContextManager::SetImageTexture(1, m_Texture2);
         ContextManager::SetImageTexture(2, m_SDTexture);
         ContextManager::SetImageTexture(3, m_GradientTexture);
+
+        SRegistrationBuffer RegistrationBuffer;
+        RegistrationBuffer.m_Offset = glm::vec2(0.0f);
+        BufferManager::UploadBufferData(m_ConstantBuffer, &RegistrationBuffer);
 
         // Compute squared differences
 
@@ -97,6 +103,11 @@ namespace MR
         ContextManager::ResetImageTexture(3);
         ContextManager::ResetShaderCS();
         
+        glm::vec4 Gradient = *static_cast<glm::vec4*>(BufferManager::MapBufferRange(m_SumBufferPtr, CBuffer::Read, 0, sizeof(glm::vec4)));
+        BufferManager::UnmapBuffer(m_SumBufferPtr);
+
+        Gradient /= m_Texture1->GetNumberOfPixelsU() * m_Texture1->GetNumberOfPixelsV();
+
         Performance::EndEvent();
     }
 
@@ -143,7 +154,12 @@ namespace MR
         BufferDesc.m_pBytes = nullptr;
         BufferDesc.m_pClassKey = nullptr;
 
-        m_BufferPtr = BufferManager::CreateBuffer(BufferDesc);
+        m_SumBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+
+        BufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        BufferDesc.m_NumberOfBytes = sizeof(SRegistrationBuffer);
+
+        m_ConstantBuffer = BufferManager::CreateBuffer(BufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -182,10 +198,7 @@ namespace MR
 
         m_Texture2 = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        const auto Offset = glm::ivec2(10);
-        const auto ImageSize = glm::ivec2(m_Texture1->GetNumberOfPixelsU(), m_Texture1->GetNumberOfPixelsV());
-
-        TextureManager::CopyTexture(m_Texture1, m_Texture2, Offset, glm::ivec2(0), ImageSize - Offset);
+        TextureManager::CopyTexture(m_Texture1, m_Texture2);
 
         TextureDescriptor.m_NumberOfPixelsU = m_Texture1->GetNumberOfPixelsU();
         TextureDescriptor.m_NumberOfPixelsV = m_Texture1->GetNumberOfPixelsV();
@@ -213,9 +226,12 @@ namespace MR
     CImageRegistrator::~CImageRegistrator()
     {
         m_SDCSPtr = nullptr;
-        m_BufferPtr = nullptr;
+        m_GradientCSPtr = nullptr;
         m_SumTilesCSPtr = nullptr;
         m_SumFinalCSPtr = nullptr;
+
+        m_ConstantBuffer = nullptr;
+        m_SumBufferPtr = nullptr;
 
         m_Texture1 = nullptr;
         m_Texture2 = nullptr;

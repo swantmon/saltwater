@@ -48,7 +48,8 @@ namespace MR
         Gfx::CShaderPtr m_SumTilesCSPtr;
         Gfx::CShaderPtr m_SumFinalCSPtr;
 
-        Gfx::CBufferPtr m_BufferPtr;
+        Gfx::CBufferPtr m_ConstantBuffer;
+        Gfx::CBufferPtr m_SumBufferPtr;
 
         Gfx::CTexturePtr m_Texture1;
         Gfx::CTexturePtr m_Texture2;

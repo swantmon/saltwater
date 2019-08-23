@@ -1,6 +1,11 @@
 #ifndef __INCLUDE_CS_REGISTRATION_COMMON_GLSL__
 #define __INCLUDE_CS_REGISTRATION_COMMON_GLSL__
 
+layout(std140, binding = 0) uniform ConstantBuffer
+{
+    vec2 g_Offset;
+};
+
 layout(std430, binding = 0) buffer Buffer
 {
     vec4 g_Sum[TILE_COUNT_X * TILE_COUNT_Y];
