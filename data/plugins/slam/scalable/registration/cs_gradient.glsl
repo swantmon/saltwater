@@ -34,7 +34,7 @@ void main()
     }
     
     vec2 G = vec2(ComputeConvolution(A, KernelX), ComputeConvolution(A, KernelY));
-    imageStore(cs_Gradient, Coords, vec4(G, 0.0f, 0.0f));
+    imageStore(cs_Gradient, Coords, vec4(G, length(G), atan(G.y, G.x)));
 }
 
 #endif //__INCLUDE_CS_SOBEL_GLSL__

@@ -53,23 +53,43 @@ namespace MR
 
     void CImageRegistrator::Register()
     {
+        Performance::BeginEvent("Image registration");
+
+        // Setup data
+
         const int WorkGroupsX = DivUp(m_Texture1->GetNumberOfPixelsU(), g_TileSize2D);
         const int WorkGroupsY = DivUp(m_Texture1->GetNumberOfPixelsV(), g_TileSize2D);
-
-        Performance::BeginEvent("Image registration");
+        
+        ContextManager::SetResourceBuffer(0, m_BufferPtr);
 
         ContextManager::SetImageTexture(0, m_Texture1);
         ContextManager::SetImageTexture(1, m_Texture2);
-        ContextManager::SetImageTexture(2, m_SSDTexture);
+        ContextManager::SetImageTexture(2, m_SDTexture);
         ContextManager::SetImageTexture(3, m_GradientTexture);
 
-        ContextManager::SetShaderCS(m_SSDCSPtr);
+        // Compute squared differences
 
+        ContextManager::SetShaderCS(m_SDCSPtr);
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
-        ContextManager::SetShaderCS(m_SobelCSPtr);
+        // Compute gradient image
 
+        ContextManager::SetShaderCS(m_GradientCSPtr);
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        // Sum tiles
+
+        ContextManager::SetShaderCS(m_SumTilesCSPtr);
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        // Compute final sum
+
+        ContextManager::SetShaderCS(m_SumFinalCSPtr);
+        ContextManager::Dispatch(WorkGroupsX * WorkGroupsY, 1, 1);
+
+        // Reset
+
+        ContextManager::ResetResourceBuffer(0);
 
         ContextManager::ResetImageTexture(0);
         ContextManager::ResetImageTexture(1);
@@ -84,31 +104,42 @@ namespace MR
 
     void CImageRegistrator::SetupShaders()
     {
+        assert(m_Texture1->GetNumberOfPixelsU() > 0);
+        assert(m_Texture1->GetNumberOfPixelsU() > 1);
+
         std::stringstream DefineStream;
 
-        DefineStream << "#define TILE_SIZE2D " << g_TileSize2D << " \n";
+        DefineStream
+            << "#define TILE_SIZE2D " << g_TileSize2D << " \n"
+            << "#define TILE_COUNT_X " << DivUp(m_Texture1->GetNumberOfPixelsU(), g_TileSize2D) << " \n"
+            << "#define TILE_COUNT_Y " << DivUp(m_Texture1->GetNumberOfPixelsV(), g_TileSize2D) << " \n";
 
         std::string DefineString = DefineStream.str();
 
-        m_SSDCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/cs_ssd.glsl", "main", DefineString.c_str());
-        m_SobelCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/cs_sobel.glsl", "main", DefineString.c_str());
+        m_SDCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/cs_sd.glsl", "main", DefineString.c_str());
+        m_GradientCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/cs_gradient.glsl", "main", DefineString.c_str());
+        m_SumTilesCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/cs_sum_tiles.glsl", "main", DefineString.c_str());
+        m_SumFinalCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/cs_sum_final.glsl", "main", DefineString.c_str());
     }
 
     // -----------------------------------------------------------------------------
 
     void CImageRegistrator::SetupBuffers()
     {
+        assert(m_Texture1->GetNumberOfPixelsU() > 0);
+        assert(m_Texture1->GetNumberOfPixelsU() > 1);
+
         SBufferDescriptor BufferDesc = {};
 
         BufferDesc.m_Stride = 0;
         BufferDesc.m_Usage = CBuffer::GPURead;
-        BufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        BufferDesc.m_Binding = CBuffer::ResourceBuffer;
         BufferDesc.m_Access = CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = sizeof(SConstantBuffer);
+        BufferDesc.m_NumberOfBytes = m_Texture1->GetNumberOfPixelsU() * m_Texture1->GetNumberOfPixelsV() * sizeof(glm::vec4);
         BufferDesc.m_pBytes = nullptr;
         BufferDesc.m_pClassKey = nullptr;
 
-        m_ConstantBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+        m_BufferPtr = BufferManager::CreateBuffer(BufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -159,7 +190,7 @@ namespace MR
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Format = CTexture::R32G32B32A32_FLOAT;
 
-        m_SSDTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_SDTexture = TextureManager::CreateTexture2D(TextureDescriptor);
         m_GradientTexture = TextureManager::CreateTexture2D(TextureDescriptor);
     }
 
@@ -167,23 +198,25 @@ namespace MR
 
     CImageRegistrator::CImageRegistrator()
     {
-        SetupBuffers();
-        SetupShaders();
         SetupStates();
         SetupTextures();
+        SetupBuffers();
+        SetupShaders();
     }
 
     // -----------------------------------------------------------------------------
 
     CImageRegistrator::~CImageRegistrator()
     {
-        m_SSDCSPtr = nullptr;
-        m_ConstantBufferPtr = nullptr;
+        m_SDCSPtr = nullptr;
+        m_BufferPtr = nullptr;
+        m_SumTilesCSPtr = nullptr;
+        m_SumFinalCSPtr = nullptr;
 
         m_Texture1 = nullptr;
         m_Texture2 = nullptr;
 
-        m_SSDTexture = nullptr;
+        m_SDTexture = nullptr;
     }
 
 } // namespace MR

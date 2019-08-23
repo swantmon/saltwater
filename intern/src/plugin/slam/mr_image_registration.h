@@ -43,15 +43,17 @@ namespace MR
 
     private:
         
-        Gfx::CShaderPtr m_SSDCSPtr;
-        Gfx::CShaderPtr m_SobelCSPtr;
+        Gfx::CShaderPtr m_SDCSPtr;
+        Gfx::CShaderPtr m_GradientCSPtr;
+        Gfx::CShaderPtr m_SumTilesCSPtr;
+        Gfx::CShaderPtr m_SumFinalCSPtr;
 
-        Gfx::CBufferPtr m_ConstantBufferPtr;
+        Gfx::CBufferPtr m_BufferPtr;
 
         Gfx::CTexturePtr m_Texture1;
         Gfx::CTexturePtr m_Texture2;
 
-        Gfx::CTexturePtr m_SSDTexture;
+        Gfx::CTexturePtr m_SDTexture;
         Gfx::CTexturePtr m_GradientTexture;
     };
 } // namespace Scpt
