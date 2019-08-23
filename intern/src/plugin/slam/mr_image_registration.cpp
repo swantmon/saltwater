@@ -85,7 +85,7 @@ namespace MR
         // Compute final sum
 
         ContextManager::SetShaderCS(m_SumFinalCSPtr);
-        ContextManager::Dispatch(WorkGroupsX * WorkGroupsY, 1, 1);
+        ContextManager::Dispatch(1, 1, 1);
 
         // Reset
 
@@ -96,7 +96,7 @@ namespace MR
         ContextManager::ResetImageTexture(2);
         ContextManager::ResetImageTexture(3);
         ContextManager::ResetShaderCS();
-
+        
         Performance::EndEvent();
     }
 
@@ -107,12 +107,16 @@ namespace MR
         assert(m_Texture1->GetNumberOfPixelsU() > 0);
         assert(m_Texture1->GetNumberOfPixelsU() > 1);
 
+        const int WorkGroupsX = DivUp(m_Texture1->GetNumberOfPixelsU(), g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_Texture1->GetNumberOfPixelsV(), g_TileSize2D);
+
         std::stringstream DefineStream;
 
         DefineStream
             << "#define TILE_SIZE2D " << g_TileSize2D << " \n"
-            << "#define TILE_COUNT_X " << DivUp(m_Texture1->GetNumberOfPixelsU(), g_TileSize2D) << " \n"
-            << "#define TILE_COUNT_Y " << DivUp(m_Texture1->GetNumberOfPixelsV(), g_TileSize2D) << " \n";
+            << "#define TILE_COUNT_X " << WorkGroupsX << " \n"
+            << "#define TILE_COUNT_Y " << WorkGroupsY << " \n"
+            << "#define REDUCTION_SHADER_COUNT " << WorkGroupsX * WorkGroupsY << " \n";
 
         std::string DefineString = DefineStream.str();
 
