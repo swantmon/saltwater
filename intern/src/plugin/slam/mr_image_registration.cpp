@@ -53,18 +53,28 @@ namespace MR
 
     void CImageRegistrator::Register()
     {
+        const int WorkGroupsX = DivUp(m_Texture1->GetNumberOfPixelsU(), g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_Texture1->GetNumberOfPixelsV(), g_TileSize2D);
+
         Performance::BeginEvent("Image registration");
 
         ContextManager::SetImageTexture(0, m_Texture1);
         ContextManager::SetImageTexture(1, m_Texture2);
-        ContextManager::SetImageTexture(2, m_DebugTexture);
-        ContextManager::SetShaderCS(m_RegistrationCSPtr);
+        ContextManager::SetImageTexture(2, m_SSDTexture);
+        ContextManager::SetImageTexture(3, m_GradientTexture);
 
-        ContextManager::Dispatch(DivUp(m_Texture1->GetNumberOfPixelsU(), g_TileSize2D), DivUp(m_Texture1->GetNumberOfPixelsV(), g_TileSize2D), 1);
+        ContextManager::SetShaderCS(m_SSDCSPtr);
+
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        ContextManager::SetShaderCS(m_SobelCSPtr);
+
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
         ContextManager::ResetImageTexture(0);
         ContextManager::ResetImageTexture(1);
         ContextManager::ResetImageTexture(2);
+        ContextManager::ResetImageTexture(3);
         ContextManager::ResetShaderCS();
 
         Performance::EndEvent();
@@ -80,7 +90,8 @@ namespace MR
 
         std::string DefineString = DefineStream.str();
 
-        m_RegistrationCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/cs_register_image.glsl", "main", DefineString.c_str());
+        m_SSDCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/cs_ssd.glsl", "main", DefineString.c_str());
+        m_SobelCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/cs_sobel.glsl", "main", DefineString.c_str());
     }
 
     // -----------------------------------------------------------------------------
@@ -139,7 +150,7 @@ namespace MR
         const auto Offset = glm::ivec2(10);
         const auto ImageSize = glm::ivec2(m_Texture1->GetNumberOfPixelsU(), m_Texture1->GetNumberOfPixelsV());
 
-        TextureManager::CopyTexture(m_Texture1, m_Texture2, glm::ivec2(0), Offset, glm::ivec2(ImageSize - Offset));
+        TextureManager::CopyTexture(m_Texture1, m_Texture2, Offset, glm::ivec2(0), ImageSize - Offset);
 
         TextureDescriptor.m_NumberOfPixelsU = m_Texture1->GetNumberOfPixelsU();
         TextureDescriptor.m_NumberOfPixelsV = m_Texture1->GetNumberOfPixelsV();
@@ -148,7 +159,8 @@ namespace MR
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Format = CTexture::R32G32B32A32_FLOAT;
 
-        m_DebugTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_SSDTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_GradientTexture = TextureManager::CreateTexture2D(TextureDescriptor);
     }
 
     // -----------------------------------------------------------------------------
@@ -165,13 +177,13 @@ namespace MR
 
     CImageRegistrator::~CImageRegistrator()
     {
-        m_RegistrationCSPtr = nullptr;
+        m_SSDCSPtr = nullptr;
         m_ConstantBufferPtr = nullptr;
 
         m_Texture1 = nullptr;
         m_Texture2 = nullptr;
 
-        m_DebugTexture = nullptr;
+        m_SSDTexture = nullptr;
     }
 
 } // namespace MR
