@@ -43,7 +43,6 @@ namespace MR
 
     private:
         
-        Gfx::CShaderPtr m_SDCSPtr;
         Gfx::CShaderPtr m_GradientCSPtr;
         Gfx::CShaderPtr m_SumTilesCSPtr;
         Gfx::CShaderPtr m_SumFinalCSPtr;
@@ -51,10 +50,9 @@ namespace MR
         Gfx::CBufferPtr m_ConstantBuffer;
         Gfx::CBufferPtr m_SumBufferPtr;
 
-        Gfx::CTexturePtr m_Texture1;
-        Gfx::CTexturePtr m_Texture2;
+        Gfx::CTexturePtr m_FixedTexture;
+        Gfx::CTexturePtr m_MovingTexture;
 
-        Gfx::CTexturePtr m_SDTexture;
         Gfx::CTexturePtr m_GradientTexture;
     };
 } // namespace Scpt

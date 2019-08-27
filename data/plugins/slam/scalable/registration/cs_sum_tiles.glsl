@@ -17,12 +17,31 @@ void reduce()
     }
 }
 
+// Every thread relates to a pixel in the moving image (just a convention)
+
+// Evaluated per pixel and then summed:
+// -2 * (Fixed(p) - Moving(T(p;theta))) * Gradient * dT/dtheta
+
+// T(p; theta): ax - by + tx
+// T(p; theta): bx + ay + ty
+// theta = (a b tx ty)
+// p = (x y)
+// dT/dtheta: x -y 1 0
+// dT/dtheta: y  x 0 1
+
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
-    ivec2 Coords = ivec2(gl_GlobalInvocationID.xy);
+    vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy) / g_MovingImageSize;
+    vec2 FixedCoords = (g_Transform * vec3(MovingCoords, 1.0f)).xy;
 
-    g_SharedData[gl_LocalInvocationIndex] = imageLoad(cs_Gradient, Coords);
+    float MovingColor = RGBToGrey(texture(GradientTexture, MovingCoords).rgb);
+    float FixedColor = RGBToGrey(texture(GradientTexture, FixedCoords).rgb);
+    vec2 Gradient = texture(GradientTexture, MovingCoords).rg;
+
+    float IntensityDiff = FixedColor - MovingColor;
+
+    g_SharedData[gl_LocalInvocationIndex] = imageLoad(GradientImage, Coords);
     barrier();
 
     reduce();

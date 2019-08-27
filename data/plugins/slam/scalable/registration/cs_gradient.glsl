@@ -29,12 +29,12 @@ void main()
     {
         for (int j = 0; j < 3; ++ j)
         {
-            A[i][j] = imageLoad(cs_SSD, Coords + ivec2(i, j) - 1).x;
+            A[i][j] = imageLoad(MovingImage, Coords + ivec2(i, j) - 1).x;
         }
     }
     
     vec2 G = vec2(ComputeConvolution(A, KernelX), ComputeConvolution(A, KernelY));
-    imageStore(cs_Gradient, Coords, vec4(G, length(G), atan(G.y, G.x)));
+    imageStore(GradientImage, Coords, vec4(G, length(G), atan(G.y, G.x)));
 }
 
 #endif //__INCLUDE_CS_SOBEL_GLSL__
