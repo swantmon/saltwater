@@ -35,15 +35,30 @@ void main()
     vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy) / g_MovingImageSize;
     vec2 FixedCoords = (mat3(g_Transform) * vec3(MovingCoords, 1.0f)).xy;
 
-    float MovingColor = RGBToGrey(texture(MovingTex, MovingCoords).rgb);
-    float FixedColor = RGBToGrey(texture(FixedTex, FixedCoords).rgb);
-    vec2 Gradient = texture(GradientTex, MovingCoords).rg;
+    if (FixedCoords.x >= 0.0f && FixedCoords.x <= 1.0f && FixedCoords.y >= 0.0f && FixedCoords.y <= 1.0f)
+    {
+        float MovingColor = RGBToGrey(texture(MovingTex, MovingCoords).rgb);
+        float FixedColor = RGBToGrey(texture(FixedTex, FixedCoords).rgb);
+        vec2 ImageGradient = texture(GradientTex, MovingCoords).rg;
 
-    float IntensityDiff = FixedColor - MovingColor; // Fixed(p) - Moving(T(p;theta))
+        float IntensityDiff = FixedColor - MovingColor; // Fixed(p) - Moving(T(p;theta))
 
-    vec2 Factor = -2.0f * IntensityDiff * Gradient; // -2 * (Fixed(p) - Moving(T(p;theta))) * Gradient
+        vec2 Factor = -2.0f * IntensityDiff * ImageGradient; // -2 * (Fixed(p) - Moving(T(p;theta))) * Gradient
 
-    //g_SharedData[gl_LocalInvocationIndex] = ;
+        float x = g_Transform[2].x;
+        float y = g_Transform[2].y;
+        mat4x2 Jacobi = mat4x2(x, y, -y, x, 1.0f, 0.0f, 0.0f, 1.0f);
+        
+        g_SharedData[gl_LocalInvocationIndex].x = dot(Factor, Jacobi[0]);
+        g_SharedData[gl_LocalInvocationIndex].y = dot(Factor, Jacobi[1]);
+        g_SharedData[gl_LocalInvocationIndex].z = dot(Factor, Jacobi[2]);
+        g_SharedData[gl_LocalInvocationIndex].w = dot(Factor, Jacobi[3]);
+    }
+    else
+    {
+        g_SharedData[gl_LocalInvocationIndex] = vec4(0.0f);
+    }
+
     barrier();
 
     reduce();

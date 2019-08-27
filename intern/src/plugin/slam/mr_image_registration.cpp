@@ -103,8 +103,8 @@ namespace MR
 
             // Sum tiles
 
-            //ContextManager::SetShaderCS(m_SumTilesCSPtr);
-            //ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+            ContextManager::SetShaderCS(m_SumTilesCSPtr);
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
             // Compute final sum
 
