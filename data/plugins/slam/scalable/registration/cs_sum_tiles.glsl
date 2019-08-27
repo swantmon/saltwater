@@ -33,15 +33,17 @@ layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1
 void main()
 {
     vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy) / g_MovingImageSize;
-    vec2 FixedCoords = (g_Transform * vec3(MovingCoords, 1.0f)).xy;
+    vec2 FixedCoords = (mat3(g_Transform) * vec3(MovingCoords, 1.0f)).xy;
 
-    float MovingColor = RGBToGrey(texture(GradientTexture, MovingCoords).rgb);
-    float FixedColor = RGBToGrey(texture(GradientTexture, FixedCoords).rgb);
-    vec2 Gradient = texture(GradientTexture, MovingCoords).rg;
+    float MovingColor = RGBToGrey(texture(MovingTex, MovingCoords).rgb);
+    float FixedColor = RGBToGrey(texture(FixedTex, FixedCoords).rgb);
+    vec2 Gradient = texture(GradientTex, MovingCoords).rg;
 
-    float IntensityDiff = FixedColor - MovingColor;
+    float IntensityDiff = FixedColor - MovingColor; // Fixed(p) - Moving(T(p;theta))
 
-    g_SharedData[gl_LocalInvocationIndex] = imageLoad(GradientImage, Coords);
+    vec2 Factor = -2.0f * IntensityDiff * Gradient; // -2 * (Fixed(p) - Moving(T(p;theta))) * Gradient
+
+    //g_SharedData[gl_LocalInvocationIndex] = ;
     barrier();
 
     reduce();
