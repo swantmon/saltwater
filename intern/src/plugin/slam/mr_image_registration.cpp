@@ -108,8 +108,8 @@ namespace MR
 
             // Compute final sum
 
-            //ContextManager::SetShaderCS(m_SumFinalCSPtr);
-            //ContextManager::Dispatch(1, 1, 1);
+            ContextManager::SetShaderCS(m_SumFinalCSPtr);
+            ContextManager::Dispatch(1, 1, 1);
 
             // Compute new registration parameter
 
