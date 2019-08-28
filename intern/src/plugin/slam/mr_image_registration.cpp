@@ -40,8 +40,7 @@ namespace
 
     struct SRegistrationBuffer
     {
-        glm::mat4 m_Transform;    // Transform coordinates from moving to fixed image
-        glm::mat4 m_InvTransform; // Transform coordinates from fixed to moving image
+        glm::vec4 m_Theta;    // (Angle, Scale, Translation)
         glm::ivec2 m_FixedImageSize;
         glm::ivec2 m_MovingImageSize;
     };
@@ -61,12 +60,8 @@ namespace MR
         // Setup data
 
         float Angle = glm::radians(0.0f);
-        auto Rotation = glm::mat2(glm::cos(Angle), glm::sin(Angle), -glm::sin(Angle), glm::cos(Angle));
         auto Translation = glm::vec2(0.0f);
-
-        auto Transform = glm::mat3(Rotation);
-        Transform[2] = glm::vec3(Translation, 1.0f);
-
+        
         const int WorkGroupsX = DivUp(m_FixedTexture->GetNumberOfPixelsU(), g_TileSize2D);
         const int WorkGroupsY = DivUp(m_FixedTexture->GetNumberOfPixelsV(), g_TileSize2D);
         
@@ -93,8 +88,7 @@ namespace MR
         for (int i = 0; i < 1; ++ i)
         {
             SRegistrationBuffer RegistrationBuffer;
-            RegistrationBuffer.m_Transform = glm::mat4(Transform);
-            RegistrationBuffer.m_InvTransform = glm::inverse(RegistrationBuffer.m_Transform);
+            RegistrationBuffer.m_Theta = glm::vec4(Angle, 1.0f, Translation);
             RegistrationBuffer.m_FixedImageSize.x = m_FixedTexture->GetNumberOfPixelsU();
             RegistrationBuffer.m_FixedImageSize.y = m_FixedTexture->GetNumberOfPixelsV();
             RegistrationBuffer.m_MovingImageSize.x = m_MovingTexture->GetNumberOfPixelsU();
@@ -205,7 +199,7 @@ namespace MR
 
         m_FixedTexture = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        TextureDescriptor.m_pFileName = "textures/Lenna_moving.png";
+        TextureDescriptor.m_pFileName = "textures/Lenna.png";
 
         m_MovingTexture = TextureManager::CreateTexture2D(TextureDescriptor);
         

@@ -33,7 +33,7 @@ layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1
 void main()
 {
     vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy) / g_MovingImageSize;
-    vec2 FixedCoords = (mat3(g_Transform) * vec3(MovingCoords, 1.0f)).xy;
+    vec2 FixedCoords = g_Rotation * MovingCoords + g_Translation;
 
     if (FixedCoords.x >= 0.0f && FixedCoords.x <= 1.0f && FixedCoords.y >= 0.0f && FixedCoords.y <= 1.0f)
     {
@@ -45,8 +45,8 @@ void main()
 
         vec2 Factor = -2.0f * IntensityDiff * ImageGradient; // -2 * (Fixed(p) - Moving(T(p;theta))) * Gradient
 
-        float x = g_Transform[2].x;
-        float y = g_Transform[2].y;
+        float x = g_Translation.x;
+        float y = g_Translation.y;
         mat4x2 Jacobi = mat4x2(x, y, -y, x, 1.0f, 0.0f, 0.0f, 1.0f);
         
         g_SharedData[gl_LocalInvocationIndex].x = dot(Factor, Jacobi[0]);

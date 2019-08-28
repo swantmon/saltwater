@@ -3,11 +3,14 @@
 
 layout(std140, binding = 0) uniform ConstantBuffer
 {
-    mat4 g_Transform;    // Transform coordinates from moving to fixed image
-    mat4 g_InvTransform; // Transform coordinates from fixed to moving image
+    vec4  g_Theta;    // Transform coordinates from moving to fixed image
     ivec2 g_FixedImageSize;
     ivec2 g_MovingImageSize;
 };
+
+#define g_Rotation g_Theta.x
+#define g_Scaling g_Theta.y
+#define g_Translation g_Theta.xy
 
 layout(std430, binding = 0) buffer Buffer
 {
