@@ -238,6 +238,9 @@ namespace MR
 
         m_FixedTexture = nullptr;
         m_MovingTexture = nullptr;
+
+        m_GradientTexture = nullptr;
+
     }
 
 } // namespace MR

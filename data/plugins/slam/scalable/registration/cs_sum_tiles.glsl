@@ -34,21 +34,21 @@ void main()
 {
     mat2 RotationMatrix = mat2(cos(g_Rotation), sin(g_Rotation), -sin(g_Rotation), cos(g_Rotation));
 
-    vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy) / g_MovingImageSize;
+    vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy);
     vec2 FixedCoords = RotationMatrix * MovingCoords + g_Translation;
 
-    if (FixedCoords.x >= 0.0f && FixedCoords.x <= 1.0f && FixedCoords.y >= 0.0f && FixedCoords.y <= 1.0f)
+    if (FixedCoords.x >= 0.0f && FixedCoords.x <= g_FixedImageSize.x && FixedCoords.y >= 0.0f && FixedCoords.y <= g_FixedImageSize.y)
     {
-        float MovingColor = RGBToGrey(texture(MovingTex, MovingCoords).rgb);
-        float FixedColor = RGBToGrey(texture(FixedTex, FixedCoords).rgb);
-        vec2 ImageGradient = texture(GradientTex, MovingCoords).rg;
+        float MovingColor = RGBToGrey(texture(MovingTex, MovingCoords / g_MovingImageSize).rgb);
+        float FixedColor = RGBToGrey(texture(FixedTex, FixedCoords / g_FixedImageSize).rgb);
+        vec2 ImageGradient = texture(GradientTex, MovingCoords / g_MovingImageSize).rg;
 
         float IntensityDiff = FixedColor - MovingColor; // Fixed(p) - Moving(T(p;theta))
 
         vec2 Factor = -2.0f * IntensityDiff * ImageGradient; // -2 * (Fixed(p) - Moving(T(p;theta))) * Gradient
 
-        float x = g_Translation.x;
-        float y = g_Translation.y;
+        float x = gl_GlobalInvocationID.x;
+        float y = gl_GlobalInvocationID.y;
         mat4x2 Jacobi = mat4x2(x, y, -y, x, 1.0f, 0.0f, 0.0f, 1.0f);
         
         g_SharedData[gl_LocalInvocationIndex].x = dot(Factor, Jacobi[0]);

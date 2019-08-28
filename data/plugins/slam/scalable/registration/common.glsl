@@ -10,7 +10,7 @@ layout(std140, binding = 0) uniform ConstantBuffer
 
 #define g_Rotation g_Theta.x
 #define g_Scaling g_Theta.y
-#define g_Translation g_Theta.xy
+#define g_Translation g_Theta.zw
 
 layout(std430, binding = 0) buffer Buffer
 {
