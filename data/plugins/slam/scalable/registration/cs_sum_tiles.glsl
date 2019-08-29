@@ -32,7 +32,7 @@ void reduce()
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
-    mat2 RotationMatrix = mat2(cos(g_Rotation), sin(g_Rotation), -sin(g_Rotation), cos(g_Rotation));
+    mat2 RotationMatrix = mat2(g_A, g_B, -g_B, g_A);
 
     vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy);
     vec2 FixedCoords = RotationMatrix * MovingCoords + g_Translation;

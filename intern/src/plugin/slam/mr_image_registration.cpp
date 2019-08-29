@@ -59,9 +59,10 @@ namespace MR
 
         // Setup data
 
-        float Angle = glm::radians(0.0f);
+		float Angle = glm::radians(0.0f);
+		float Scale = 1.0f;
         auto Translation = glm::vec2(0.0f);
-        
+
         const int WorkGroupsX = DivUp(m_FixedTexture->GetNumberOfPixelsU(), g_TileSize2D);
         const int WorkGroupsY = DivUp(m_FixedTexture->GetNumberOfPixelsV(), g_TileSize2D);
         
@@ -87,8 +88,11 @@ namespace MR
 
         for (int i = 0; i < 1; ++ i)
         {
+			float a = Scale * glm::cos(Angle);
+			float b = Scale * glm::sin(Angle);
+
             SRegistrationBuffer RegistrationBuffer;
-            RegistrationBuffer.m_Theta = glm::vec4(Angle, 1.0f, Translation);
+            RegistrationBuffer.m_Theta = glm::vec4(a, b, Translation);
             RegistrationBuffer.m_FixedImageSize.x = m_FixedTexture->GetNumberOfPixelsU();
             RegistrationBuffer.m_FixedImageSize.y = m_FixedTexture->GetNumberOfPixelsV();
             RegistrationBuffer.m_MovingImageSize.x = m_MovingTexture->GetNumberOfPixelsU();
@@ -109,6 +113,10 @@ namespace MR
 
             glm::vec4 Gradient = *static_cast<glm::vec4*>(BufferManager::MapBufferRange(m_SumBufferPtr, CBuffer::Read, 0, sizeof(glm::vec4)));
             BufferManager::UnmapBuffer(m_SumBufferPtr);
+
+			a -= Gradient.x;
+			b -= Gradient.y;
+			Translation -= glm::vec2(Gradient.z, Gradient.w);
         }
 
         // Reset
@@ -199,7 +207,7 @@ namespace MR
 
         m_FixedTexture = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        TextureDescriptor.m_pFileName = "textures/Lenna.png";
+        TextureDescriptor.m_pFileName = "textures/Lenna_moving.png";
 
         m_MovingTexture = TextureManager::CreateTexture2D(TextureDescriptor);
         
