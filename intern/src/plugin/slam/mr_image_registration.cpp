@@ -87,12 +87,14 @@ namespace MR
         ContextManager::SetShaderCS(m_GradientCSPtr);
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
+        float a = Scale * glm::cos(Angle);
+        float b = Scale * glm::sin(Angle);
+
+        glm::vec4 Gradient;
+
         for (int i = 0; i < 10000; ++ i)
         {
-			std::cout << Translation.x << '\t' << Translation.y << '\n';
-
-			float a = Scale * glm::cos(Angle);
-			float b = Scale * glm::sin(Angle);
+			//std::cout << Translation.x << '\t' << Translation.y << '\n';
 
             SRegistrationBuffer RegistrationBuffer;
             RegistrationBuffer.m_Theta = glm::vec4(a, b, Translation);
@@ -114,15 +116,18 @@ namespace MR
 
             // Compute new registration parameter
 
-            glm::vec4 Gradient = *static_cast<glm::vec4*>(BufferManager::MapBufferRange(m_SumBufferPtr, CBuffer::Read, 0, sizeof(glm::vec4)));
+            Gradient = *static_cast<glm::vec4*>(BufferManager::MapBufferRange(m_SumBufferPtr, CBuffer::Read, 0, sizeof(glm::vec4)));
             BufferManager::UnmapBuffer(m_SumBufferPtr);
 
-			Gradient = glm::normalize(Gradient) * 10.0f;
+            Gradient /= static_cast<float>(m_FixedTexture->GetNumberOfPixelsU() * m_FixedTexture->GetNumberOfPixelsV());
 
 			a += Gradient.x;
 			b += Gradient.y;
 			Translation += glm::vec2(Gradient.z, Gradient.w);
         }
+
+        //std::cout << Gradient.x << "\t" << Gradient.y << "\t" << Gradient.z << "\t" << Gradient.w << '\n';
+        //std::cout << a << "\t" << b << "\t" << Translation.x << "\t" << Translation.y << '\n';
 
         // Reset
 

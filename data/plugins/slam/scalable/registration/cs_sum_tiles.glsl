@@ -37,7 +37,7 @@ void main()
     vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy);
     vec2 FixedCoords = RotationMatrix * MovingCoords + g_Translation;
 
-    if (FixedCoords.x > 0.0f && FixedCoords.x < g_FixedImageSize.x && FixedCoords.y > 0.0f && FixedCoords.y < g_FixedImageSize.y)
+    if (FixedCoords.x > 10.0f && FixedCoords.x < g_FixedImageSize.x - 10.0f && FixedCoords.y > 10.0f && FixedCoords.y < g_FixedImageSize.y  - 10.0f)
     {
         float MovingColor = RGBToGrey(texture(MovingTex, MovingCoords / g_MovingImageSize).rgb);
         float FixedColor = RGBToGrey(texture(FixedTex, FixedCoords / g_FixedImageSize).rgb);
@@ -47,8 +47,8 @@ void main()
 
         vec2 Factor = -2.0f * IntensityDiff * ImageGradient; // -2 * (Fixed(p) - Moving(T(p;theta))) * Gradient
 
-        float x = gl_GlobalInvocationID.x;
-        float y = gl_GlobalInvocationID.y;
+        float x = gl_GlobalInvocationID.x / 512.0f;
+        float y = gl_GlobalInvocationID.y / 512.0f;
         mat4x2 Jacobi = mat4x2(x, y, -y, x, 1.0f, 0.0f, 0.0f, 1.0f);
         
         g_SharedData[gl_LocalInvocationIndex].x = dot(Factor, Jacobi[0]);
