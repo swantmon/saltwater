@@ -87,8 +87,10 @@ namespace MR
         ContextManager::SetShaderCS(m_GradientCSPtr);
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
-        for (int i = 0; i < 1; ++ i)
+        for (int i = 0; i < 10000; ++ i)
         {
+			std::cout << Translation.x << '\t' << Translation.y << '\n';
+
 			float a = Scale * glm::cos(Angle);
 			float b = Scale * glm::sin(Angle);
 
@@ -115,9 +117,11 @@ namespace MR
             glm::vec4 Gradient = *static_cast<glm::vec4*>(BufferManager::MapBufferRange(m_SumBufferPtr, CBuffer::Read, 0, sizeof(glm::vec4)));
             BufferManager::UnmapBuffer(m_SumBufferPtr);
 
-			a -= Gradient.x;
-			b -= Gradient.y;
-			Translation -= glm::vec2(Gradient.z, Gradient.w);
+			Gradient = glm::normalize(Gradient) * 10.0f;
+
+			a += Gradient.x;
+			b += Gradient.y;
+			Translation += glm::vec2(Gradient.z, Gradient.w);
         }
 
         // Reset
