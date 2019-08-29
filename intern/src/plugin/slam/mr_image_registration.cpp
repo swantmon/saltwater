@@ -71,7 +71,8 @@ namespace MR
 
         ContextManager::SetImageTexture(0, m_FixedTexture);
         ContextManager::SetImageTexture(1, m_MovingTexture);
-        ContextManager::SetImageTexture(2, m_GradientTexture);
+		ContextManager::SetImageTexture(2, m_GradientTexture);
+		ContextManager::SetImageTexture(3, m_DebugTexture);
 
         ContextManager::SetTexture(0, m_FixedTexture);
         ContextManager::SetTexture(1, m_MovingTexture);
@@ -124,7 +125,7 @@ namespace MR
         ContextManager::ResetConstantBuffer(0);
         ContextManager::ResetResourceBuffer(0);
 
-        for (int i = 0; i < 3; ++ i)
+        for (int i = 0; i < 4; ++ i)
         {
             ContextManager::ResetImageTexture(i);
             ContextManager::ResetTexture(i);
@@ -207,7 +208,7 @@ namespace MR
 
         m_FixedTexture = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        TextureDescriptor.m_pFileName = "textures/Lenna_moving.png";
+        TextureDescriptor.m_pFileName = "textures/Lenna_moving2.png";
 
         m_MovingTexture = TextureManager::CreateTexture2D(TextureDescriptor);
         
@@ -221,6 +222,10 @@ namespace MR
         TextureDescriptor.m_Format = CTexture::R32G32_FLOAT;
 
         m_GradientTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+
+		TextureDescriptor.m_Format = CTexture::R32G32B32A32_FLOAT;
+
+		m_DebugTexture = TextureManager::CreateTexture2D(TextureDescriptor);
     }
 
     // -----------------------------------------------------------------------------
@@ -249,6 +254,7 @@ namespace MR
 
         m_GradientTexture = nullptr;
 
+		m_DebugTexture = nullptr;
     }
 
 } // namespace MR

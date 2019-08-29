@@ -53,6 +53,8 @@ namespace MR
         Gfx::CTexturePtr m_FixedTexture;
         Gfx::CTexturePtr m_MovingTexture;
 
-        Gfx::CTexturePtr m_GradientTexture;
+		Gfx::CTexturePtr m_GradientTexture;
+
+		Gfx::CTexturePtr m_DebugTexture;
     };
 } // namespace Scpt

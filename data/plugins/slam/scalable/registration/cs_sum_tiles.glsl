@@ -37,7 +37,7 @@ void main()
     vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy);
     vec2 FixedCoords = RotationMatrix * MovingCoords + g_Translation;
 
-    if (FixedCoords.x >= 0.0f && FixedCoords.x <= g_FixedImageSize.x && FixedCoords.y >= 0.0f && FixedCoords.y <= g_FixedImageSize.y)
+    if (FixedCoords.x > 0.0f && FixedCoords.x < g_FixedImageSize.x && FixedCoords.y > 0.0f && FixedCoords.y < g_FixedImageSize.y)
     {
         float MovingColor = RGBToGrey(texture(MovingTex, MovingCoords / g_MovingImageSize).rgb);
         float FixedColor = RGBToGrey(texture(FixedTex, FixedCoords / g_FixedImageSize).rgb);
@@ -60,6 +60,8 @@ void main()
     {
         g_SharedData[gl_LocalInvocationIndex] = vec4(0.0f);
     }
+
+    imageStore(DebugImage, ivec2(gl_GlobalInvocationID.xy), g_SharedData[gl_LocalInvocationIndex]);
 
     barrier();
 
