@@ -21,8 +21,8 @@ void main()
 {
     ivec2 Coords = ivec2(gl_GlobalInvocationID.xy);
 
-    mat3 KernelX = mat3(-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
-    mat3 KernelY = mat3(-1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f);
+    mat3 KernelX = mat3(-1.0f, -2.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 2.0f, 1.0f);
+    mat3 KernelY = mat3(-1.0f, 0.0f, 1.0f, -2.0f, 0.0f, 2.0f, -1.0f, 0.0f, 1.0f);
 
     mat3 A; 
     for (int i = 0; i < 3; ++ i)
@@ -34,7 +34,7 @@ void main()
     }
     
     vec2 G = vec2(ComputeConvolution(A, KernelX), ComputeConvolution(A, KernelY));
-    imageStore(GradientImage, Coords, vec4(G, length(G), atan(G.y, G.x)));
+    imageStore(GradientImage, Coords, vec4(G / 8.0f, 0.0f, 0.0f));
 }
 
 #endif //__INCLUDE_CS_SOBEL_GLSL__

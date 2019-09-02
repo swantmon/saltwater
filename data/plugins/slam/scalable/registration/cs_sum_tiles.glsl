@@ -32,10 +32,10 @@ void reduce()
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
-    mat2 RotationMatrix = mat2(g_A, g_B, -g_B, g_A);
+    mat2 Transform = mat2(g_A, g_B, -g_B, g_A);
 
     vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy);
-    vec2 FixedCoords = RotationMatrix * MovingCoords + g_Translation;
+    vec2 FixedCoords = Transform * MovingCoords + g_Translation;
 
     if (FixedCoords.x > 10.0f && FixedCoords.x < g_FixedImageSize.x - 10.0f && FixedCoords.y > 10.0f && FixedCoords.y < g_FixedImageSize.y  - 10.0f)
     {
