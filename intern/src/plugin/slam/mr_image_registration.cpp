@@ -91,8 +91,13 @@ namespace MR
         float b = Scale * glm::sin(Angle);
 
         glm::vec4 Gradient;
+        const int MaxIterations = 50000;
+        const float MinGradientLength = 0.0001f;
 
-        for (int i = 0; i < 10000; ++ i)
+        float gamma = 1.0f;
+
+        int Iteration = 0;
+        for (Iteration = 0; Iteration < MaxIterations; ++ Iteration)
         {
 			//std::cout << Translation.x << '\t' << Translation.y << '\n';
 
@@ -121,13 +126,24 @@ namespace MR
 
             Gradient /= static_cast<float>(m_FixedTexture->GetNumberOfPixelsU() * m_FixedTexture->GetNumberOfPixelsV());
 
-			a += Gradient.x;
-			b += Gradient.y;
-			Translation += glm::vec2(Gradient.z, Gradient.w);
+            if (glm::length(Gradient) > MinGradientLength)
+            {
+                Gradient *= gamma;
+
+                a += Gradient.x;
+                b += Gradient.y;
+                Translation += glm::vec2(Gradient.z, Gradient.w);
+            }
+            else
+            {
+                break;
+            }
         }
 
-        //std::cout << Gradient.x << "\t" << Gradient.y << "\t" << Gradient.z << "\t" << Gradient.w << '\n';
-        //std::cout << a << "\t" << b << "\t" << Translation.x << "\t" << Translation.y << '\n';
+        std::cout << "Iterations:      " << Iteration << '\n';
+        std::cout << "Gradient:        " << Gradient.x << "\t" << Gradient.y << "\t" << Gradient.z << "\t" << Gradient.w << '\n';
+        std::cout << "Gradient length: " << glm::length(Gradient) << '\n';
+        std::cout << "Theta:           " << a << "\t" << b << "\t" << Translation.x << "\t" << Translation.y << '\n';
 
         // Reset
 
@@ -217,7 +233,7 @@ namespace MR
 
         m_FixedTexture = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        TextureDescriptor.m_pFileName = "textures/Lenna_moving2.png";
+        TextureDescriptor.m_pFileName = "textures/Lenna_moving.png";
 
         m_MovingTexture = TextureManager::CreateTexture2D(TextureDescriptor);
         
