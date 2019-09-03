@@ -35,7 +35,7 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 #define VERSION 0
 
-#if VERSION = 0
+#if VERSION == 0
 vec4 GetTextureSpherical(in vec3 _Normal, in float _LOD)
 {
     float NormalLength = length(_Normal.xz);
@@ -50,7 +50,7 @@ vec4 GetTextureSpherical(in vec3 _Normal, in float _LOD)
 
     return textureLod(PSEnvironmentTexture, TexCoord, _LOD);
 }
-#elif VERSION = 1
+#elif VERSION == 1
 vec4 GetTextureSpherical(in vec3 _Normal, in float _LOD)
 {
     float Phi   = acos(_Normal.y);
