@@ -28,6 +28,7 @@ layout(binding = 0, rgba8) uniform image2D FixedImage;
 layout(binding = 1, rgba8) uniform image2D MovingImage;
 layout(binding = 2, rg32f) uniform image2D GradientImage;
 layout(binding = 3, rgba32f) uniform image2D DebugImage;
+layout(binding = 4, rgba8) uniform image2D OutputImage;
 
 layout(binding = 0) uniform sampler2D FixedTex;
 layout(binding = 1) uniform sampler2D MovingTex;

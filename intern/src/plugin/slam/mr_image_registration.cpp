@@ -45,6 +45,11 @@ namespace
         glm::ivec2 m_MovingImageSize;
     };
 
+    float Sigmoid(float x)
+    {
+        return 1.0f / (1.0f + glm::exp(-x));
+    }
+
     const int g_TileSize2D = 16;
     
 } // namespace
@@ -73,6 +78,7 @@ namespace MR
         ContextManager::SetImageTexture(1, m_MovingTexture);
 		ContextManager::SetImageTexture(2, m_GradientTexture);
 		ContextManager::SetImageTexture(3, m_DebugTexture);
+        ContextManager::SetImageTexture(4, m_OutputTexture);
 
         ContextManager::SetTexture(0, m_FixedTexture);
         ContextManager::SetTexture(1, m_MovingTexture);
@@ -91,11 +97,9 @@ namespace MR
         float b = Scale * glm::sin(Angle);
 
         glm::vec4 Gradient;
-        const int MaxIterations = 50000;
+        const int MaxIterations = 1000000;
         const float MinGradientLength = 0.0001f;
-
-        float gamma = 1.0f;
-
+        
         int Iteration = 0;
         for (Iteration = 0; Iteration < MaxIterations; ++ Iteration)
         {
@@ -121,36 +125,56 @@ namespace MR
 
             // Compute new registration parameter
 
-            Gradient = *static_cast<glm::vec4*>(BufferManager::MapBufferRange(m_SumBufferPtr, CBuffer::Read, 0, sizeof(glm::vec4)));
+            glm::vec4 NewGradient = *static_cast<glm::vec4*>(BufferManager::MapBufferRange(m_SumBufferPtr, CBuffer::Read, 0, sizeof(glm::vec4)));
             BufferManager::UnmapBuffer(m_SumBufferPtr);
 
-            Gradient /= static_cast<float>(m_FixedTexture->GetNumberOfPixelsU() * m_FixedTexture->GetNumberOfPixelsV());
+            NewGradient /= static_cast<float>(m_FixedTexture->GetNumberOfPixelsU() * m_FixedTexture->GetNumberOfPixelsV());
 
-            if (glm::length(Gradient) > MinGradientLength)
+            if (glm::length(NewGradient) > MinGradientLength)
             {
-                Gradient *= gamma;
+                Gradient = NewGradient;
 
-                a += Gradient.x;
-                b += Gradient.y;
-                Translation += glm::vec2(Gradient.z, Gradient.w);
+                float Gamma = (MaxIterations - Iteration) / static_cast<float>(MaxIterations);
+
+                NewGradient *= Gamma;
+
+                a += NewGradient.x;
+                b += NewGradient.y;
+                Translation += glm::vec2(NewGradient.z, NewGradient.w) * 512.0f;
+
+                if (Iteration % 3 == 0)
+                {
+                    // Output texture
+
+                    TextureManager::ClearTexture(m_OutputTexture);
+
+                    ContextManager::SetShaderCS(m_OutputCSPtr);
+                    ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+                    std::stringstream Stream;
+                    Stream << "registration/texture" << Iteration << ".png";
+                    TextureManager::SaveTexture(m_OutputTexture, Stream.str().c_str());
+                }
             }
             else
             {
+                Gradient = NewGradient;
                 break;
             }
         }
 
         std::cout << "Iterations:      " << Iteration << '\n';
-        std::cout << "Gradient:        " << Gradient.x << "\t" << Gradient.y << "\t" << Gradient.z << "\t" << Gradient.w << '\n';
+        std::cout << "Gradient:        " << Gradient.x << '\t' << Gradient.y << '\t' << Gradient.z << '\t' << Gradient.w << '\n';
         std::cout << "Gradient length: " << glm::length(Gradient) << '\n';
-        std::cout << "Theta:           " << a << "\t" << b << "\t" << Translation.x << "\t" << Translation.y << '\n';
+        std::cout << "Theta:           " << a << '\t' << b << '\t' << Translation.x << '\t' << Translation.y << '\n';
+        std::cout << "Angle:           " << glm::degrees(glm::acos(a)) << '\n';
 
         // Reset
 
         ContextManager::ResetConstantBuffer(0);
         ContextManager::ResetResourceBuffer(0);
 
-        for (int i = 0; i < 4; ++ i)
+        for (int i = 0; i < 5; ++ i)
         {
             ContextManager::ResetImageTexture(i);
             ContextManager::ResetTexture(i);
@@ -182,6 +206,7 @@ namespace MR
         m_GradientCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/cs_gradient.glsl", "main", DefineString.c_str());
         m_SumTilesCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/cs_sum_tiles.glsl", "main", DefineString.c_str());
         m_SumFinalCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/cs_sum_final.glsl", "main", DefineString.c_str());
+        m_OutputCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/registration/cs_output.glsl", "main", DefineString.c_str());
     }
 
     // -----------------------------------------------------------------------------
@@ -245,12 +270,13 @@ namespace MR
         TextureDescriptor.m_NumberOfMipMaps = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Format = CTexture::R32G32_FLOAT;
-
         m_GradientTexture = TextureManager::CreateTexture2D(TextureDescriptor);
 
 		TextureDescriptor.m_Format = CTexture::R32G32B32A32_FLOAT;
-
 		m_DebugTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
+        m_OutputTexture = TextureManager::CreateTexture2D(TextureDescriptor);
     }
 
     // -----------------------------------------------------------------------------
@@ -270,6 +296,7 @@ namespace MR
         m_GradientCSPtr = nullptr;
         m_SumTilesCSPtr = nullptr;
         m_SumFinalCSPtr = nullptr;
+        m_OutputCSPtr = nullptr;
 
         m_ConstantBuffer = nullptr;
         m_SumBufferPtr = nullptr;
@@ -280,6 +307,7 @@ namespace MR
         m_GradientTexture = nullptr;
 
 		m_DebugTexture = nullptr;
+        m_OutputTexture = nullptr;
     }
 
 } // namespace MR

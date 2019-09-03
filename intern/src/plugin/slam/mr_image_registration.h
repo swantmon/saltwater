@@ -46,6 +46,7 @@ namespace MR
         Gfx::CShaderPtr m_GradientCSPtr;
         Gfx::CShaderPtr m_SumTilesCSPtr;
         Gfx::CShaderPtr m_SumFinalCSPtr;
+        Gfx::CShaderPtr m_OutputCSPtr;
 
         Gfx::CBufferPtr m_ConstantBuffer;
         Gfx::CBufferPtr m_SumBufferPtr;
@@ -55,6 +56,7 @@ namespace MR
 
 		Gfx::CTexturePtr m_GradientTexture;
 
-		Gfx::CTexturePtr m_DebugTexture;
+        Gfx::CTexturePtr m_DebugTexture;
+        Gfx::CTexturePtr m_OutputTexture;
     };
 } // namespace Scpt

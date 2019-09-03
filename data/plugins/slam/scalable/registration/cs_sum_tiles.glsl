@@ -37,7 +37,7 @@ void main()
     vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy);
     vec2 FixedCoords = Transform * MovingCoords + g_Translation;
 
-    if (FixedCoords.x > 10.0f && FixedCoords.x < g_FixedImageSize.x - 10.0f && FixedCoords.y > 10.0f && FixedCoords.y < g_FixedImageSize.y  - 10.0f)
+    if (FixedCoords.x > 10.0f && FixedCoords.x < g_FixedImageSize.x - 10.0f && FixedCoords.y > 10.0f && FixedCoords.y < g_FixedImageSize.y - 10.0f)
     {
         float MovingColor = RGBToGrey(texture(MovingTex, MovingCoords / g_MovingImageSize).rgb);
         float FixedColor = RGBToGrey(texture(FixedTex, FixedCoords / g_FixedImageSize).rgb);
