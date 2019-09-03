@@ -33,6 +33,9 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 // Functions
 // -----------------------------------------------------------------------------
+#define VERSION 0
+
+#if VERSION = 0
 vec4 GetTextureSpherical(in vec3 _Normal, in float _LOD)
 {
     float NormalLength = length(_Normal.xz);
@@ -47,6 +50,17 @@ vec4 GetTextureSpherical(in vec3 _Normal, in float _LOD)
 
     return textureLod(PSEnvironmentTexture, TexCoord, _LOD);
 }
+#elif VERSION = 1
+vec4 GetTextureSpherical(in vec3 _Normal, in float _LOD)
+{
+    float Phi   = acos(_Normal.y);
+    float Theta = atan(-1.0f * _Normal.x, _Normal.z) + PI;
+
+    vec2 UV = vec2(Theta / (2.0f * PI), 1.0f - Phi / PI);
+
+    return textureLod(PSEnvironmentTexture, UV, _LOD);
+}
+#endif
 
 // -----------------------------------------------------------------------------
 // Main
