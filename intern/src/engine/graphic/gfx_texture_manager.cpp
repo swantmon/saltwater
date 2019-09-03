@@ -856,6 +856,7 @@ namespace
 		glDeleteFramebuffers(1, &Framebuffer);
 #endif
 
+        ilDeleteImage(TemporaryImage);
 		// -----------------------------------------------------------------------------
 
 		Base::CMemory::Free(pData);
