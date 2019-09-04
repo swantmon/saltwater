@@ -81,6 +81,7 @@ namespace
         jmethodID m_GetDeviceDimensionHeightMethod;
         jmethodID m_CheckPermissionMethod;
         jmethodID m_AcquirePermissionMethod;
+        jmethodID m_GetLibraryPathMethod;
 
         glm::ivec2 m_Dimension;
 
@@ -103,6 +104,7 @@ namespace
         , m_GetDeviceRotationMethod       (0)
         , m_GetDeviceDimensionWidthMethod (0)
         , m_GetDeviceDimensionHeightMethod(0)
+        , m_GetLibraryPathMethod          (0)
         , m_Dimension                     (0)
         , m_OnAcquirePermissionDelegates  ()
     {
@@ -183,6 +185,8 @@ namespace
         m_GetDeviceDimensionWidthMethod = pEnvironment->GetMethodID(m_GameActivityID, "GetDeviceDimensionWidth", "()I");
 
         m_GetDeviceDimensionHeightMethod = pEnvironment->GetMethodID(m_GameActivityID, "GetDeviceDimensionHeight", "()I");
+
+        m_GetLibraryPathMethod = pEnvironment->GetMethodID(m_GameActivityID, "GetLibraryPath", "()Ljava/lang/String;");
     }
 
     // -----------------------------------------------------------------------------
@@ -272,12 +276,16 @@ namespace
 
     std::string CJNIInterface::GetLibraryPath()
     {
-        auto Env = GetJavaEnvironment();
-        auto JNIMethod = Env->GetMethodID(m_GameActivityID, "GetLibraryPath", "()Ljava/lang/String;");
-        auto JNIString = static_cast<jstring>(Env->CallObjectMethod(m_GameActivityThiz, JNIMethod));
-        const char* pTempPath = Env->GetStringUTFChars(JNIString, 0);
+        auto pEnvironment = GetJavaEnvironment();
+
+        auto JNIString = static_cast<jstring>(pEnvironment->CallObjectMethod(m_GameActivityThiz, m_GetLibraryPathMethod));
+
+        const char* pTempPath = pEnvironment->GetStringUTFChars(JNIString, 0);
+
         std::string Path = pTempPath;
-        Env->ReleaseStringUTFChars(JNIString, pTempPath);
+
+        pEnvironment->ReleaseStringUTFChars(JNIString, pTempPath);
+
         return Path;
     }
 
