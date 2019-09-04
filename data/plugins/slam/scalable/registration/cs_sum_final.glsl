@@ -47,7 +47,7 @@ void main()
 layout (local_size_x = REDUCTION_SHADER_COUNT, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
-    const int LoopCount = int(float(REDUCTION_SHADER_COUNT) / WORKGROUP_SUMMANDS + 0.5f);
+    const int LoopCount = int(float(WORKGROUP_SUMMANDS) / REDUCTION_SHADER_COUNT + 0.5f);
 
     vec4 Sum = vec4(0.0f);
 
