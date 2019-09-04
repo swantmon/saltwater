@@ -10,11 +10,11 @@ def external_libs = "${buildDir}/external_libs"
 configurations { natives }
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         applicationId "de.tuilmenau.saltwater"
         minSdkVersion 28
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         externalNativeBuild {
