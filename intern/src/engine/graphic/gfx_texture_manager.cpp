@@ -784,6 +784,17 @@ namespace
 		const GLuint Format		   = ConvertGLImageFormat(pInternTexture->GetFormat());
 		const GLuint ImageType	   = ConvertGLImageType(pInternTexture->GetFormat());
 
+		GLint OldTex;
+
+		if (pInternTexture->IsCube())
+		{
+			glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &OldTex);
+		}
+		else
+		{
+			glGetIntegerv(GL_TEXTURE_BINDING_2D, &OldTex);
+		}
+
 		glBindTexture(NativeBinding, pInternTexture->m_NativeTexture);
 
 		const auto NumberOfLayers = pInternTexture->IsCube() ? 6 : 1;
@@ -856,6 +867,7 @@ namespace
 		glDeleteFramebuffers(1, &Framebuffer);
 #endif
 
+		glBindTexture(NativeBinding, OldTex);
         ilDeleteImage(TemporaryImage);
 		// -----------------------------------------------------------------------------
 
@@ -1094,7 +1106,10 @@ namespace
         }
         else if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_NumberOfMipMapsFromSource)
         {
-            NumberOfMipmaps = ilGetInteger(IL_NUM_MIPMAPS);
+			// Devil reports zero mip maps when loading a png or jpg even though the rest is correct
+			// so we just manually assure that the number is at least one
+
+            NumberOfMipmaps = std::max(1, ilGetInteger(IL_NUM_MIPMAPS));
         }
         
         // -----------------------------------------------------------------------------
