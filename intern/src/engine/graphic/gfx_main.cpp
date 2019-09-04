@@ -67,6 +67,8 @@ namespace
 
         const CGraphicsInfo& GetGraphicsAPI();
         bool IsExtensionAvailable(const std::string& _Name);
+        int GetMaxWorkGroupSize();
+        glm::ivec3 GetMaxWorkGroupDimensions();
         
     public:
         
@@ -456,6 +458,31 @@ namespace
     {
         return m_AvailableExtensions.count(_Name) == 1;
     }
+
+    // -----------------------------------------------------------------------------
+
+    int CGfxMain::GetMaxWorkGroupSize()
+    {
+        int Size;
+
+        glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &Size);
+
+        return Size;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    glm::ivec3 CGfxMain::GetMaxWorkGroupDimensions()
+    {
+        glm::ivec3 Dimensions;
+
+        glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &Dimensions.x);
+        glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &Dimensions.y);
+        glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &Dimensions.z);
+
+        return Dimensions;
+    }
+
 
     // -----------------------------------------------------------------------------
     
@@ -1075,7 +1102,21 @@ namespace Main
     {
         return CGfxMain::GetInstance().IsExtensionAvailable(_Name);
     }
+
+    // -----------------------------------------------------------------------------
+
+    int GetMaxWorkGroupSize()
+    {
+        return CGfxMain::GetInstance().GetMaxWorkGroupSize();
+    }
     
+    // -----------------------------------------------------------------------------
+
+    glm::ivec3 GetMaxWorkGroupDimensions()
+    {
+        return CGfxMain::GetInstance().GetMaxWorkGroupDimensions();
+    }
+
     // -----------------------------------------------------------------------------
     
     void BeginFrame()
