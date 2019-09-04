@@ -97,8 +97,8 @@ namespace MR
         float b = Scale * glm::sin(Angle);
 
         glm::vec4 Gradient;
-        const int MaxIterations = 1000000;
-        const float MinGradientLength = 0.0001f;
+        const int MaxIterations = 300000;
+        const float MinGradientLength = 0.00005f;
 
         auto OutputImage = [&](int Iteration) {
             TextureManager::ClearTexture(m_OutputTexture);
@@ -153,7 +153,7 @@ namespace MR
                 b += NewGradient.y;
                 Translation += glm::vec2(NewGradient.z, NewGradient.w) * 512.0f;
 
-                if (Iteration % 10 == 0)
+                if (Iteration % 50 == 0)
                 {
                     OutputImage(Iteration);
                 }
@@ -268,11 +268,11 @@ namespace MR
         TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
-        TextureDescriptor.m_pFileName = "textures/Lenna.png";
+        TextureDescriptor.m_pFileName = "textures/registration/horizon.png";
 
         m_FixedTexture = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        TextureDescriptor.m_pFileName = "textures/Lenna_moving.png";
+        TextureDescriptor.m_pFileName = "textures/registration/horizon_moving.png";
 
         m_MovingTexture = TextureManager::CreateTexture2D(TextureDescriptor);
         
