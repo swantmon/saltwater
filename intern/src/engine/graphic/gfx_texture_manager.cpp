@@ -784,6 +784,17 @@ namespace
 		const GLuint Format		   = ConvertGLImageFormat(pInternTexture->GetFormat());
 		const GLuint ImageType	   = ConvertGLImageType(pInternTexture->GetFormat());
 
+		GLint OldTex;
+
+		if (pInternTexture->IsCube())
+		{
+			glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &OldTex);
+		}
+		else
+		{
+			glGetIntegerv(GL_TEXTURE_BINDING_2D, &OldTex);
+		}
+
 		glBindTexture(NativeBinding, pInternTexture->m_NativeTexture);
 
 		const auto NumberOfLayers = pInternTexture->IsCube() ? 6 : 1;
@@ -856,6 +867,7 @@ namespace
 		glDeleteFramebuffers(1, &Framebuffer);
 #endif
 
+		glBindTexture(NativeBinding, OldTex);
         ilDeleteImage(TemporaryImage);
 		// -----------------------------------------------------------------------------
 
