@@ -750,40 +750,44 @@ namespace
         // -----------------------------------------------------------------------------
         // Calculate data
         // -----------------------------------------------------------------------------
-        std::vector<glm::vec3> LightVertices;
-        std::vector<glm::uvec3>  LightTriangles;
+        std::vector<glm::vec3> Vertices;
+        std::vector<glm::uvec3> Triangles;
 
+		// -----------------------------------------------------------------------------
         // Create a simple tetrahedron
-        LightVertices.emplace_back(-1.0f, -1.0f, -1.0f);
-        LightVertices.emplace_back(1.0f, -1.0f, 1.0f);
-        LightVertices.emplace_back(-1.0f, 1.0f, 1.0f);
-        LightVertices.emplace_back(1.0f, 1.0f, -1.0f);
+		// -----------------------------------------------------------------------------
+        Vertices.emplace_back(-1.0f, -1.0f, -1.0f);
+        Vertices.emplace_back(1.0f, -1.0f, 1.0f);
+        Vertices.emplace_back(-1.0f, 1.0f, 1.0f);
+        Vertices.emplace_back(1.0f, 1.0f, -1.0f);
 
-        LightTriangles.emplace_back(0, 3, 2);
-        LightTriangles.emplace_back(0, 1, 3);
-        LightTriangles.emplace_back(1, 0, 2);
-        LightTriangles.emplace_back(1, 2, 3);
+        Triangles.emplace_back(0, 3, 2);
+        Triangles.emplace_back(0, 1, 3);
+        Triangles.emplace_back(1, 0, 2);
+        Triangles.emplace_back(1, 2, 3);
 
+		// -----------------------------------------------------------------------------
         // Split the faces of the tetrahedron
-        for (unsigned int RefinementStep = 0; RefinementStep < _Refinement; ++RefinementStep)
+		// -----------------------------------------------------------------------------
+        for (auto RefinementStep = 0; RefinementStep < _Refinement; ++RefinementStep)
         {
             std::vector<glm::vec3> Vertices;
-            std::vector<glm::uvec3>  Triangles;
+            std::vector<glm::uvec3> Triangles;
 
-            unsigned int NextVertexIndex = 0;
+			auto NextVertexIndex = 0;
 
-            for (auto & LightTriangle : LightTriangles)
+            for (auto& rTriangle : Triangles)
             {
                 glm::vec3 NewVertices[6];
 
-                for (unsigned int IndexOfVertex = 0; IndexOfVertex < 3; ++IndexOfVertex)
+                for (auto IndexOfVertex = 0; IndexOfVertex < 3; ++IndexOfVertex)
                 {
-                    NewVertices[IndexOfVertex] = LightVertices[LightTriangle[IndexOfVertex]];
+                    NewVertices[IndexOfVertex] = Vertices[rTriangle[IndexOfVertex]];
                 }
 
                 glm::vec3 StartVertex, EndVertex;
 
-                for (unsigned int IndexOfVertex = 0; IndexOfVertex < 3; ++IndexOfVertex)
+                for (auto IndexOfVertex = 0; IndexOfVertex < 3; ++IndexOfVertex)
                 {
                     StartVertex  = NewVertices[IndexOfVertex];
                     EndVertex    = NewVertices[(IndexOfVertex + 1) % 3];
@@ -804,14 +808,16 @@ namespace
                 NextVertexIndex += 6;
             }
 
-            LightVertices  = std::move(Vertices);
-            LightTriangles = std::move(Triangles);
+            Vertices  = std::move(Vertices);
+            Triangles = std::move(Triangles);
         }
 
+		// -----------------------------------------------------------------------------
         // We want a unit sphere
+		// -----------------------------------------------------------------------------
         std::vector<glm::vec3> VerticesNormal;
 
-        for (auto LightVertice : LightVertices)
+        for (auto LightVertice : Vertices)
         {
             glm::vec3 Vertex = glm::normalize(LightVertice);
 
@@ -841,12 +847,12 @@ namespace
         BufferDesc.m_Usage         = CBuffer::GPURead;
         BufferDesc.m_Binding       = CBuffer::IndexBuffer;
         BufferDesc.m_Access        = CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = sizeof(LightTriangles[0]) * static_cast<unsigned int>(LightTriangles.size());
-        BufferDesc.m_pBytes        = LightTriangles.data();
+        BufferDesc.m_NumberOfBytes = sizeof(Triangles[0]) * static_cast<unsigned int>(Triangles.size());
+        BufferDesc.m_pBytes        = Triangles.data();
         BufferDesc.m_pClassKey     = nullptr;
         
         rSurface.m_IndexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
-        rSurface.m_NumberOfIndices = static_cast<unsigned int>(LightTriangles.size()) * 3;
+        rSurface.m_NumberOfIndices = static_cast<unsigned int>(Triangles.size()) * 3;
 
         // -----------------------------------------------------------------------------
         // Vertex Shader
