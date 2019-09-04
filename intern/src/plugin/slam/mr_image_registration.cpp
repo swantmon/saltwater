@@ -99,6 +99,17 @@ namespace MR
         glm::vec4 Gradient;
         const int MaxIterations = 1000000;
         const float MinGradientLength = 0.0001f;
+
+        auto OutputImage = [&](int Iteration) {
+            TextureManager::ClearTexture(m_OutputTexture);
+
+            ContextManager::SetShaderCS(m_OutputCSPtr);
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+            std::stringstream Stream;
+            Stream << "registration/texture" << Iteration << ".bmp";
+            TextureManager::SaveTexture(m_OutputTexture, Stream.str().c_str());
+        };
         
         int Iteration = 0;
         for (Iteration = 0; Iteration < MaxIterations; ++ Iteration)
@@ -142,23 +153,17 @@ namespace MR
                 b += NewGradient.y;
                 Translation += glm::vec2(NewGradient.z, NewGradient.w) * 512.0f;
 
-                if (Iteration % 3 == 0)
+                if (Iteration % 10 == 0)
                 {
-                    // Output texture
-
-                    TextureManager::ClearTexture(m_OutputTexture);
-
-                    ContextManager::SetShaderCS(m_OutputCSPtr);
-                    ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-
-                    std::stringstream Stream;
-                    Stream << "registration/texture" << Iteration << ".png";
-                    TextureManager::SaveTexture(m_OutputTexture, Stream.str().c_str());
+                    OutputImage(Iteration);
                 }
             }
             else
             {
                 Gradient = NewGradient;
+
+                OutputImage(Iteration);
+
                 break;
             }
         }
@@ -190,8 +195,11 @@ namespace MR
 
     void CImageRegistrator::SetupShaders()
     {
+        auto MaxWorkGroupDimensions = Gfx::Main::GetMaxWorkGroupDimensions();
+
         const int WorkGroupsX = DivUp(m_FixedTexture->GetNumberOfPixelsU(), g_TileSize2D);
         const int WorkGroupsY = DivUp(m_FixedTexture->GetNumberOfPixelsV(), g_TileSize2D);
+        const int WorkgroupCount = WorkGroupsX * WorkGroupsY;
 
         std::stringstream DefineStream;
 
@@ -199,7 +207,13 @@ namespace MR
             << "#define TILE_SIZE2D " << g_TileSize2D << " \n"
             << "#define TILE_COUNT_X " << WorkGroupsX << " \n"
             << "#define TILE_COUNT_Y " << WorkGroupsY << " \n"
-            << "#define REDUCTION_SHADER_COUNT " << WorkGroupsX * WorkGroupsY << " \n";
+            << "#define WORKGROUP_SUMMANDS " << WorkgroupCount << " \n"
+            << "#define REDUCTION_SHADER_COUNT " << std::min(WorkgroupCount, MaxWorkGroupDimensions.x) << " \n";
+
+        if (WorkgroupCount > MaxWorkGroupDimensions.x)
+        {
+            DefineStream  << "#define USE_MULTIPLE_SUMMATION_PASSES \n";
+        }
 
         std::string DefineString = DefineStream.str();
 
