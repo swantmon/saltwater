@@ -137,14 +137,9 @@ namespace
         m_AppSetup.m_ParameterFile = Core::AssetManager::GetPathToData() + "/android.config";
 
         // -----------------------------------------------------------------------------
-        // Libraries
-        // -----------------------------------------------------------------------------
-        Core::PluginManager::SetLibraryPath(Core::JNI::GetLibraryPath());
-
-        // -----------------------------------------------------------------------------
         // Prepare to monitor accelerometer
         // -----------------------------------------------------------------------------
-        m_AppSetup.m_SensorManager       = ASensorManager_getInstance();
+        //m_AppSetup.m_SensorManager       = ASensorManager_getInstance();
         //m_AppSetup.m_AccelerometerSensor = ASensorManager_getDefaultSensor(m_AppSetup.m_SensorManager, ASENSOR_TYPE_ACCELEROMETER);
         //m_AppSetup.m_SensorEventQueue    = ASensorManager_createEventQueue(m_AppSetup.m_SensorManager, _pAndroidApp->looper, LOOPER_ID_USER, NULL, NULL);
 
@@ -361,6 +356,11 @@ namespace
                     {
                         if (AppSetup->m_IsStarted == false)
                         {
+                            // -----------------------------------------------------------------------------
+                            // Do JNI stuff
+                            // -----------------------------------------------------------------------------
+                            Core::PluginManager::SetLibraryPath(Core::JNI::GetLibraryPath());
+
                             // -----------------------------------------------------------------------------
                             // Register new native window in engine as a new window
                             // -----------------------------------------------------------------------------
