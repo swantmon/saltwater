@@ -69,7 +69,7 @@ void main()
 
     if (gl_LocalInvocationIndex == 0)
     {
-        g_Sum[gl_WorkGroupID.x * gl_NumWorkGroups.x + gl_WorkGroupID.y] = g_SharedData[0];
+        g_Sum[gl_WorkGroupID.x * gl_NumWorkGroups.y + gl_WorkGroupID.y] = g_SharedData[0];
     }
 }
 
