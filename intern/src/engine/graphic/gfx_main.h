@@ -40,6 +40,8 @@ namespace Main
 
     ENGINE_API const CGraphicsInfo& GetGraphicsAPI();
     ENGINE_API bool IsExtensionAvailable(const std::string& _Name);
+    ENGINE_API int GetMaxWorkGroupSize();
+    ENGINE_API glm::ivec3 GetMaxWorkGroupDimensions();
 
     ENGINE_API void BeginFrame();
     ENGINE_API void EndFrame();
