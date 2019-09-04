@@ -101,7 +101,8 @@ namespace MR
             {
                 ArImage_getPlaneData(pArSession, HDRCubemap[Face], 0, &pFaceData, 0);
 
-                Gfx::TextureManager::CopyToTextureArray2D(m_CubemapHDRPtr, Face, Base::AABB2UInt(glm::ivec2(0, 0), glm::ivec2(W, H)), 0, pFaceData);
+                // TODO by Tobias: This crashes
+                // Gfx::TextureManager::CopyToTextureArray2D(m_CubemapHDRPtr, Face, Base::AABB2UInt(glm::ivec2(0, 0), glm::ivec2(W, H)), 0, pFaceData);
 
                 ArImage_release(HDRCubemap[Face]);
             }

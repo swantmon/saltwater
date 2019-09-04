@@ -995,12 +995,10 @@ namespace
                 }
                 else
                 {
-                    NativeILFormat = CheckILFormat;
-                    NativeILType   = CheckILType;
-
-                    GLInternalFormat = ilGetInteger(IL_IMAGE_CHANNELS) == 4 ? GL_RGBA8 : GL_RGB8;
-                    GLFormat         = NativeILFormat;
-                    GLType           = NativeILType;
+                    // TODO by Tobias: Check HDR textures
+                    GLInternalFormat = GL_RGBA;
+                    GLFormat         = CheckILFormat;
+                    GLType           = CheckILType;
                 }
 
                 pTextureData = ilGetData();
