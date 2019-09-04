@@ -8,17 +8,19 @@ void main()
 {
     mat2 Transform = mat2(g_A, g_B, -g_B, g_A);
 
-    vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy);
-    vec2 FixedCoords = Transform * MovingCoords + g_Translation;
+    vec2 FixedCoords = vec2(gl_GlobalInvocationID.xy);
+    vec2 MovingCoords = inverse(Transform) * (FixedCoords - g_Translation);
 
-    if (FixedCoords.x >= 0.0f && FixedCoords.x < g_FixedImageSize.x && FixedCoords.y >= 0.0f && FixedCoords.y < g_FixedImageSize.y)
+    float FixedColor = RGBToGrey(texture(FixedTex, FixedCoords / g_FixedImageSize).rgb);
+    float MovingColor = 0.0f;
+
+    if (MovingCoords.x >= 0.0f && MovingCoords.x < g_MovingImageSize.x && MovingCoords.y >= 0.0f && MovingCoords.y < g_MovingImageSize.y)
     {
-        float MovingColor = RGBToGrey(texture(MovingTex, MovingCoords / g_MovingImageSize).rgb);
-        float FixedColor = RGBToGrey(texture(FixedTex, FixedCoords / g_FixedImageSize).rgb);
-
-        MovingCoords.y = imageSize(MovingImage).y - MovingCoords.y;
-        imageStore(OutputImage, ivec2(MovingCoords), vec4(MovingColor, FixedColor, 0.0f, 1.0f));
+        MovingColor = RGBToGrey(texture(MovingTex, MovingCoords / g_MovingImageSize).rgb);
     }
+
+    FixedCoords.y = imageSize(FixedImage).y - FixedCoords.y;
+    imageStore(OutputImage, ivec2(FixedCoords), vec4(FixedColor, MovingColor, 0.0f, 1.0f));
 }
 
 #endif //__INCLUDE_CS_SUM_TILES_GLSL__
