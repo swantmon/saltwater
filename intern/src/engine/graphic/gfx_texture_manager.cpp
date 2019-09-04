@@ -1094,7 +1094,10 @@ namespace
         }
         else if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_NumberOfMipMapsFromSource)
         {
-            NumberOfMipmaps = ilGetInteger(IL_NUM_MIPMAPS);
+			// Devil reports zero mip maps when loading a png or jpg even though the rest is correct
+			// so we just manually assure that the number is at least one
+
+            NumberOfMipmaps = std::max(1, ilGetInteger(IL_NUM_MIPMAPS));
         }
         
         // -----------------------------------------------------------------------------
