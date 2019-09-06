@@ -73,6 +73,7 @@ namespace MR
         
         ContextManager::SetConstantBuffer(0, m_ConstantBuffer);
         ContextManager::SetResourceBuffer(0, m_SumBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_SumCountBufferPtr);
 
         ContextManager::SetImageTexture(0, m_FixedTexture);
         ContextManager::SetImageTexture(1, m_MovingTexture);
@@ -107,7 +108,7 @@ namespace MR
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
             std::stringstream Stream;
-            Stream << "registration/texture" << Iteration << ".bmp";
+            Stream << "registration/" << Iteration << ".bmp";
             TextureManager::SaveTexture(m_OutputTexture, Stream.str().c_str());
         };
         
@@ -139,6 +140,9 @@ namespace MR
             glm::vec4 NewGradient = *static_cast<glm::vec4*>(BufferManager::MapBufferRange(m_SumBufferPtr, CBuffer::Read, 0, sizeof(glm::vec4)));
             BufferManager::UnmapBuffer(m_SumBufferPtr);
 
+            float Count = *static_cast<float*>(BufferManager::MapBufferRange(m_SumCountBufferPtr, CBuffer::Read, 0, sizeof(float)));
+            BufferManager::UnmapBuffer(m_SumCountBufferPtr);
+
             NewGradient /= static_cast<float>(m_FixedTexture->GetNumberOfPixelsU() * m_FixedTexture->GetNumberOfPixelsV());
 
             if (glm::length(NewGradient) > MinGradientLength)
@@ -153,7 +157,7 @@ namespace MR
                 b += NewGradient.y;
                 Translation += glm::vec2(NewGradient.z, NewGradient.w) * 512.0f;
 
-                if (Iteration % 50 == 0)
+                if (Iteration % 200 == 0)
                 {
                     OutputImage(Iteration);
                 }
@@ -178,6 +182,7 @@ namespace MR
 
         ContextManager::ResetConstantBuffer(0);
         ContextManager::ResetResourceBuffer(0);
+        ContextManager::ResetResourceBuffer(1);
 
         for (int i = 0; i < 5; ++ i)
         {
@@ -195,7 +200,7 @@ namespace MR
 
     void CImageRegistrator::SetupShaders()
     {
-        auto MaxWorkGroupDimensions = Gfx::Main::GetMaxWorkGroupDimensions();
+        const auto MaxWorkGroupDimensions = Gfx::Main::GetMaxWorkGroupDimensions();
 
         const int WorkGroupsX = DivUp(m_FixedTexture->GetNumberOfPixelsU(), g_TileSize2D);
         const int WorkGroupsY = DivUp(m_FixedTexture->GetNumberOfPixelsV(), g_TileSize2D);
@@ -227,17 +232,24 @@ namespace MR
 
     void CImageRegistrator::SetupBuffers()
     {
+        const int WorkGroupsX = DivUp(m_FixedTexture->GetNumberOfPixelsU(), g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_FixedTexture->GetNumberOfPixelsV(), g_TileSize2D);
+
         SBufferDescriptor BufferDesc = {};
 
         BufferDesc.m_Stride = 0;
         BufferDesc.m_Usage = CBuffer::GPURead;
         BufferDesc.m_Binding = CBuffer::ResourceBuffer;
         BufferDesc.m_Access = CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = m_FixedTexture->GetNumberOfPixelsU() * m_FixedTexture->GetNumberOfPixelsV() * sizeof(glm::vec4);
+        BufferDesc.m_NumberOfBytes = WorkGroupsX * WorkGroupsY * sizeof(glm::vec4);
         BufferDesc.m_pBytes = nullptr;
         BufferDesc.m_pClassKey = nullptr;
 
         m_SumBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+
+        BufferDesc.m_NumberOfBytes = WorkGroupsX * WorkGroupsY * sizeof(float);
+
+        m_SumCountBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
         BufferDesc.m_Binding = CBuffer::ConstantBuffer;
         BufferDesc.m_NumberOfBytes = sizeof(SRegistrationBuffer);
@@ -268,11 +280,11 @@ namespace MR
         TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
-        TextureDescriptor.m_pFileName = "textures/registration/horizon.png";
+        TextureDescriptor.m_pFileName = "textures/registration/Horizon.png";
 
         m_FixedTexture = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        TextureDescriptor.m_pFileName = "textures/registration/horizon_moving.png";
+        TextureDescriptor.m_pFileName = "textures/registration/Horizon_moving.png";
 
         m_MovingTexture = TextureManager::CreateTexture2D(TextureDescriptor);
         
@@ -314,6 +326,7 @@ namespace MR
 
         m_ConstantBuffer = nullptr;
         m_SumBufferPtr = nullptr;
+        m_SumCountBufferPtr = nullptr;
 
         m_FixedTexture = nullptr;
         m_MovingTexture = nullptr;

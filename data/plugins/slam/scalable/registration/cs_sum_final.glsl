@@ -4,6 +4,7 @@
 #include "../../plugins/slam/scalable/registration/common.glsl"
 
 shared vec4 g_SharedData[REDUCTION_SHADER_COUNT];
+shared float g_SharedSum[TILE_SIZE2D * TILE_SIZE2D];
 
 void reduce()
 {
@@ -12,6 +13,7 @@ void reduce()
         if (gl_LocalInvocationIndex < i / 2)
         {
             g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex + i / 2];
+            g_SharedSum[gl_LocalInvocationIndex] += g_SumCount[gl_LocalInvocationIndex + i / 2];
         }
         barrier();
     }
@@ -27,6 +29,7 @@ layout (local_size_x = REDUCTION_SHADER_COUNT, local_size_y = 1, local_size_z = 
 void main()
 {
     g_SharedData[gl_LocalInvocationIndex] = g_Sum[gl_LocalInvocationIndex];
+    g_SharedSum[gl_LocalInvocationIndex] = g_SumCount[gl_LocalInvocationIndex];
 
     barrier();
 
@@ -35,6 +38,7 @@ void main()
     if (gl_LocalInvocationIndex == 0)
     {
         g_Sum[0] = g_SharedData[0];
+        g_SumCount[0] = g_SharedSum[0];
     }
 }
 
@@ -50,6 +54,7 @@ void main()
     const int LoopCount = int(float(WORKGROUP_SUMMANDS) / REDUCTION_SHADER_COUNT + 0.5f);
 
     vec4 Sum = vec4(0.0f);
+    float SumCount = 0.0f;
 
     for (int i = 0; i < LoopCount; ++ i)
     {
@@ -57,10 +62,12 @@ void main()
         if (Index < WORKGROUP_SUMMANDS)
         {
             Sum += g_Sum[Index];
+            SumCount += g_SumCount[Index];
         }
     }
 
     g_SharedData[gl_LocalInvocationIndex] = Sum;
+    g_SharedSum[gl_LocalInvocationIndex] = SumCount;
 
     barrier();
 
@@ -69,6 +76,7 @@ void main()
     if (gl_LocalInvocationIndex == 0)
     {
         g_Sum[0] = g_SharedData[0];
+        g_SumCount[0] = g_SharedSum[0];
     }
 }
 

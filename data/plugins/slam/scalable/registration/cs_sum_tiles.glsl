@@ -4,6 +4,7 @@
 #include "../../plugins/slam/scalable/registration/common.glsl"
 
 shared vec4 g_SharedData[TILE_SIZE2D * TILE_SIZE2D];
+shared float g_SharedSum[TILE_SIZE2D * TILE_SIZE2D];
 
 void reduce()
 {
@@ -12,6 +13,7 @@ void reduce()
         if (gl_LocalInvocationIndex < i / 2)
         {
             g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex + i / 2];
+            g_SharedSum[gl_LocalInvocationIndex] += g_SharedSum[gl_LocalInvocationIndex + i / 2];
         }
         barrier();
     }
@@ -55,10 +57,12 @@ void main()
         g_SharedData[gl_LocalInvocationIndex].y = dot(Factor, Jacobi[1]);
         g_SharedData[gl_LocalInvocationIndex].z = dot(Factor, Jacobi[2]);
         g_SharedData[gl_LocalInvocationIndex].w = dot(Factor, Jacobi[3]);
+        g_SharedSum[gl_LocalInvocationIndex] = 1.0f;
     }
     else
     {
         g_SharedData[gl_LocalInvocationIndex] = vec4(0.0f);
+        g_SharedSum[gl_LocalInvocationIndex] = 0.0f;
     }
 
     imageStore(DebugImage, ivec2(gl_GlobalInvocationID.xy), g_SharedData[gl_LocalInvocationIndex]);
@@ -70,6 +74,7 @@ void main()
     if (gl_LocalInvocationIndex == 0)
     {
         g_Sum[gl_WorkGroupID.x * gl_NumWorkGroups.y + gl_WorkGroupID.y] = g_SharedData[0];
+        g_SumCount[gl_WorkGroupID.x * gl_NumWorkGroups.y + gl_WorkGroupID.y] = g_SharedSum[0];
     }
 }
 

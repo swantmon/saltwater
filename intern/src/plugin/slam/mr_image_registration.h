@@ -50,6 +50,7 @@ namespace MR
 
         Gfx::CBufferPtr m_ConstantBuffer;
         Gfx::CBufferPtr m_SumBufferPtr;
+        Gfx::CBufferPtr m_SumCountBufferPtr;
 
         Gfx::CTexturePtr m_FixedTexture;
         Gfx::CTexturePtr m_MovingTexture;

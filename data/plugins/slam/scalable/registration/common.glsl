@@ -17,6 +17,11 @@ layout(std430, binding = 0) buffer Buffer
     vec4 g_Sum[TILE_COUNT_X * TILE_COUNT_Y];
 };
 
+layout(std430, binding = 1) buffer SumBuffer
+{
+    float g_SumCount[TILE_COUNT_X * TILE_COUNT_Y];
+};
+
 float RGBToGrey(vec3 RGB)
 {
 	return (RGB.r + RGB.g + RGB.b) / 3.0f;
