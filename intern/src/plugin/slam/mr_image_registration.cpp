@@ -143,7 +143,7 @@ namespace MR
             float Count = *static_cast<float*>(BufferManager::MapBufferRange(m_SumCountBufferPtr, CBuffer::Read, 0, sizeof(float)));
             BufferManager::UnmapBuffer(m_SumCountBufferPtr);
 
-            NewGradient /= static_cast<float>(m_FixedTexture->GetNumberOfPixelsU() * m_FixedTexture->GetNumberOfPixelsV());
+            NewGradient /= Count;
 
             if (glm::length(NewGradient) > MinGradientLength)
             {
