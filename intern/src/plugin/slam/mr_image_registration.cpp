@@ -25,6 +25,9 @@
 #include <limits>
 #include <memory>
 #include <sstream>
+#include <string>
+
+using namespace std::string_literals;
 
 #include <gl/glew.h>
 
@@ -51,6 +54,8 @@ namespace
     }
 
     const int g_TileSize2D = 16;
+
+    std::string ImageName = "Lenna";
     
 } // namespace
 
@@ -115,8 +120,6 @@ namespace MR
         int Iteration = 0;
         for (Iteration = 0; Iteration < MaxIterations; ++ Iteration)
         {
-			//std::cout << Translation.x << '\t' << Translation.y << '\n';
-
             SRegistrationBuffer RegistrationBuffer;
             RegistrationBuffer.m_Theta = glm::vec4(a, b, Translation);
             RegistrationBuffer.m_FixedImageSize.x = m_FixedTexture->GetNumberOfPixelsU();
@@ -155,9 +158,9 @@ namespace MR
 
                 a += NewGradient.x;
                 b += NewGradient.y;
-                Translation += glm::vec2(NewGradient.z, NewGradient.w) * 512.0f;
+                Translation += glm::vec2(NewGradient.z, NewGradient.w);
 
-                if (Iteration % 200 == 0)
+                if (Iteration % 10 == 0)
                 {
                     OutputImage(Iteration);
                 }
@@ -268,6 +271,9 @@ namespace MR
 
     void CImageRegistrator::SetupTextures()
     {
+        const auto FixedImage = "textures/registration/"s + ImageName + ".png"s;
+        const auto MovingImage = "textures/registration/"s + ImageName + "_moving.png"s;
+
         STextureDescriptor TextureDescriptor = {};
 
         TextureDescriptor.m_NumberOfPixelsU = STextureDescriptor::s_NumberOfPixelsFromSource;
@@ -280,11 +286,11 @@ namespace MR
         TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
-        TextureDescriptor.m_pFileName = "textures/registration/Horizon.png";
+        TextureDescriptor.m_pFileName = FixedImage.c_str();
 
         m_FixedTexture = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        TextureDescriptor.m_pFileName = "textures/registration/Horizon_moving.png";
+        TextureDescriptor.m_pFileName = MovingImage.c_str();
 
         m_MovingTexture = TextureManager::CreateTexture2D(TextureDescriptor);
         
