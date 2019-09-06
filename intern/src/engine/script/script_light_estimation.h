@@ -88,7 +88,7 @@ namespace Scpt
         Gfx::CTexturePtr m_ArCoreOutputCubemapPtr;
         Gfx::CTexturePtr m_PanoramaTexturePtr;
 
-        std::array<std::string, NumberOfEstimationTypes> m_PluginNames = { "Light Estimation ARCore", "Light Estimation LUT", "Light Estimation Stitching" };
+        std::array<std::string, NumberOfEstimationTypes> m_PluginNames = { "Light Estimation Framework", "Light Estimation LUT", "Light Estimation Stitching" };
 
         Core::IPlugin* m_pCurrentPluginPtr = nullptr;
 
