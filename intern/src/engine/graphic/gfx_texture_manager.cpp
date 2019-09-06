@@ -525,9 +525,9 @@ namespace
         // -----------------------------------------------------------------------------
         if (pInternTextureArray->m_Info.m_IsCubeTexture)
         {
-            GLint64 OldTexture;
+            GLint OldTexture;
 
-            glGetInteger64v(GL_TEXTURE_BINDING_CUBE_MAP, &OldTexture);
+			glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &OldTexture);
 
             glBindTexture(GL_TEXTURE_CUBE_MAP, _TextureArrayPtr->GetNativeHandle());
 
@@ -558,7 +558,7 @@ namespace
         assert(_TextureArrayPtr->GetNumberOfPixelsU() == _TexturePtr->GetNumberOfPixelsU() && _TextureArrayPtr->GetNumberOfPixelsV() == _TexturePtr->GetNumberOfPixelsV());
         
         auto Offset     = glm::uvec2(0);
-        glm::uvec2 UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
+        auto UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
         
         assert(_TexturePtr->GetNumberOfPixelsU() >= UpdateSize[0] + Offset[0]);
         assert(_TexturePtr->GetNumberOfPixelsV() >= UpdateSize[1] + Offset[1]);
@@ -998,8 +998,15 @@ namespace
                 }
                 else
                 {
-                    // TODO by Tobias: Check HDR textures
-                    GLInternalFormat = GL_RGBA;
+					auto Channels = ilGetInteger(IL_IMAGE_CHANNELS);
+					auto BPP = ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
+					auto BPC = BPP / Channels * 8;
+
+					GLInternalFormat = GL_RGBA8; // (BPC == 8) 
+
+					if (BPC == 16)      GLInternalFormat = GL_RGBA16F;
+					else if (BPC == 32) GLInternalFormat = GL_RGBA32F;
+
                     GLFormat         = CheckILFormat;
                     GLType           = CheckILType;
                 }
