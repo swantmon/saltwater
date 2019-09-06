@@ -13,7 +13,7 @@ void reduce()
         if (gl_LocalInvocationIndex < i / 2)
         {
             g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex + i / 2];
-            g_SharedSum[gl_LocalInvocationIndex] += g_SumCount[gl_LocalInvocationIndex + i / 2];
+            g_SharedSum[gl_LocalInvocationIndex] += g_SharedSum[gl_LocalInvocationIndex + i / 2];
         }
         barrier();
     }
