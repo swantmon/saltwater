@@ -88,7 +88,7 @@ namespace Scpt
         Gfx::CTexturePtr m_ArCoreOutputCubemapPtr;
         Gfx::CTexturePtr m_PanoramaTexturePtr;
 
-        std::array<std::string, NumberOfEstimationTypes> m_PluginNames = { "Light Estimation Stitching", "Light Estimation LUT" };
+        std::array<std::string, NumberOfEstimationTypes> m_PluginNames = { "Light Estimation ARCore", "Light Estimation LUT", "Light Estimation Stitching" };
 
         Core::IPlugin* m_pCurrentPluginPtr = nullptr;
 
@@ -146,7 +146,7 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             for (auto& rPluginName : m_PluginNames) Core::PluginManager::LoadPlugin(rPluginName);
             
-            SwitchLightEstimation(Stitching);
+            SwitchLightEstimation(Framework);
 
             std::string IP = Core::CProgramParameters::GetInstance().Get("mr:stitching:server_ip", "127.0.0.1");
             int Port = Core::CProgramParameters::GetInstance().Get("mr:stitching:network_port", 12345);
@@ -162,7 +162,6 @@ namespace Scpt
             m_OutputCubemapPtr = nullptr;
             m_C2PShaderPtr = nullptr;
             m_PanoramaTexturePtr = nullptr;
-
 
             m_ArCoreOutputCubemapPtr = nullptr;
         }
@@ -368,24 +367,25 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             std::string CurrentPluginName = m_PluginNames[_EstimationType];
 
-            if (!Core::PluginManager::LoadPlugin(CurrentPluginName)) return;
+            if (Core::PluginManager::LoadPlugin(CurrentPluginName))
+            {
+                // -----------------------------------------------------------------------------
+                // Pause old plugin
+                // -----------------------------------------------------------------------------
+                if (SetActive != nullptr) SetActive(false);
 
-            // -----------------------------------------------------------------------------
-            // Pause old plugin
-            // -----------------------------------------------------------------------------
-            if (SetActive != nullptr) SetActive(false);
+                // -----------------------------------------------------------------------------
+                // Prepare new plugin
+                // -----------------------------------------------------------------------------
+                SetInputTexture  = (LESetInputTextureFunc)(Core::PluginManager::GetPluginFunction(CurrentPluginName, "SetInputTexture"));
+                SetOutputCubemap = (LESetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction(CurrentPluginName, "SetOutputCubemap"));
+                GetOutputCubemap = (LEGetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction(CurrentPluginName, "GetOutputCubemap"));
+                SetActive        = (LESetActiveFunc)(Core::PluginManager::GetPluginFunction(CurrentPluginName, "SetActive"));
 
-            // -----------------------------------------------------------------------------
-            // Prepare new plugin
-            // -----------------------------------------------------------------------------
-            SetInputTexture  = (LESetInputTextureFunc)(Core::PluginManager::GetPluginFunction(CurrentPluginName, "SetInputTexture"));
-            SetOutputCubemap = (LESetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction(CurrentPluginName, "SetOutputCubemap"));
-            GetOutputCubemap = (LEGetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction(CurrentPluginName, "GetOutputCubemap"));
-            SetActive        = (LESetActiveFunc)(Core::PluginManager::GetPluginFunction(CurrentPluginName, "SetActive"));
+                SetActive(true);
 
-            SetActive(true);
-
-            SetOutputCubemap(m_OutputCubemapPtr);
+                SetOutputCubemap(m_OutputCubemapPtr);
+            }
 
 #ifdef PLATFORM_ANDROID
             std::string ARPluginName = "ArCore";
@@ -399,7 +399,7 @@ namespace Scpt
 
                 GetBackgroundTexture = (ARGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction(ARPluginName, "GetBackgroundTexture"));
 
-                SetInputTexture(GetBackgroundTexture());
+                if (SetInputTexture != nullptr) SetInputTexture(GetBackgroundTexture());
 
                 // -----------------------------------------------------------------------------
 
