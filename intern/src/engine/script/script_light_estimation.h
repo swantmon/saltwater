@@ -37,9 +37,9 @@ namespace Scpt
 
         enum EEstimationType
         {
-            Stitching,
-            LUT,
             Framework,
+            LUT,
+            Stitching,
             NumberOfEstimationTypes,
         };
 
