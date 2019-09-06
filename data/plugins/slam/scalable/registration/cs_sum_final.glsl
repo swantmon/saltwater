@@ -4,7 +4,7 @@
 #include "../../plugins/slam/scalable/registration/common.glsl"
 
 shared vec4 g_SharedData[REDUCTION_SHADER_COUNT];
-shared float g_SharedSum[TILE_SIZE2D * TILE_SIZE2D];
+shared float g_SharedSum[REDUCTION_SHADER_COUNT];
 
 void reduce()
 {
