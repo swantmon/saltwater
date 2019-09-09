@@ -137,6 +137,15 @@ namespace Scpt
                 m_pSunComponent->SetIntensity(glm::length(MainLightIntensity) * 90600.0f);
 
                 m_pSunComponent->UpdateLightness();
+
+                // -----------------------------------------------------------------------------
+
+                if (m_Mode == Framework)
+                {
+                    auto pGfxSky = static_cast<Gfx::CSky*>(m_pSkyComponent->GetFacet(Dt::CSkyComponent::Graphic));
+
+                    pGfxSky->SetInputTexture(GetHDRCubemap(pObject));
+                }
             }
         }
 

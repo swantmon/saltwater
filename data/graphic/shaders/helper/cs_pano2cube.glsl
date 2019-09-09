@@ -24,13 +24,13 @@ vec4 GetTextureSpherical(in vec3 _Normal)
 
     vec2 UV = vec2(Theta / (2.0f * PI), 1.0f - Phi / PI);
 
-    UV.x *= PANORAMA_SIZE_W;
-    UV.y *= PANORAMA_SIZE_H;
+    UV.x *= float(PANORAMA_SIZE_W);
+    UV.y *= float(PANORAMA_SIZE_H);
 
     return imageLoad(in_Panorama, ivec2(UV));
 }
 
-vec3 GetNormal(in uint _Face, in float _u, in float _v)
+vec3 GetNormal(int _Face, in float _u, in float _v)
 {
     vec3 Normal = vec3(0.0, 0.0, 0.0);
 
@@ -63,7 +63,7 @@ void main()
 
     vec2 UnitUV = vec2((float(X) / float(CUBE_SIZE)) * 2.0f - 1.0f, (float(Y) / float(CUBE_SIZE)) * 2.0f - 1.0f);
 
-    vec3 Normal = GetNormal(F, UnitUV.x, UnitUV.y);
+    vec3 Normal = GetNormal(int(F), UnitUV.x, UnitUV.y);
 
     vec4 Texel = GetTextureSpherical(Normal);
 
