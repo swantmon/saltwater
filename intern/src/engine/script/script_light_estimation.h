@@ -93,6 +93,7 @@ namespace Scpt
         Core::IPlugin* m_pCurrentPluginPtr = nullptr;
 
         int m_Mode;
+        int m_SaveIndex = 0;
 
         Net::CNetworkManager::CMessageDelegate::HandleType m_NetworkDelegate;
         Net::SocketHandle m_SocketHandle;
@@ -204,7 +205,13 @@ namespace Scpt
 
                     auto pGfxSky = static_cast<Gfx::CSky*>(m_pSkyComponent->GetFacet(Dt::CSkyComponent::Graphic));
 
+                    m_pSkyComponent->SetIntensity(12000 * 3.14f);
+
                     pGfxSky->SetInputTexture(GetHDRCubemap(pObject));
+                }
+                else
+                {
+                    m_pSkyComponent->SetIntensity(12000);
                 }
             }
         }
@@ -435,9 +442,16 @@ namespace Scpt
 
             // -----------------------------------------------------------------------------
 
-            Gfx::TextureManager::SaveTexture(m_PanoramaTexturePtr, Core::AssetManager::GetPathToAssets() + "/env_panorama.png");
+            auto NameOfPano = "env_panorama_" + std::to_string(m_SaveIndex) + ".png";
+            auto NameOfCube = "env_cubemap_" + std::to_string(m_SaveIndex) + ".png";
 
-            Gfx::TextureManager::SaveTexture(m_OutputCubemapPtr, Core::AssetManager::GetPathToAssets() + "/env_cubemap.png");
+            ++m_SaveIndex;
+
+            // -----------------------------------------------------------------------------
+
+            Gfx::TextureManager::SaveTexture(m_PanoramaTexturePtr, Core::AssetManager::GetPathToAssets() + "/" + NameOfPano);
+
+            Gfx::TextureManager::SaveTexture(m_OutputCubemapPtr, Core::AssetManager::GetPathToAssets() + "/" + NameOfCube);
         }
 
         // -----------------------------------------------------------------------------
