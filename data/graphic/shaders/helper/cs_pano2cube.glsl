@@ -35,17 +35,17 @@ vec3 GetNormal(in uint _Face, in float _u, in float _v)
     vec3 Normal = vec3(0.0, 0.0, 0.0);
 
     if (_Face == 0)
-        Normal = vec3( 1.0,  -_v,   _u);           // XP
-    else if (_Face == 1)
-        Normal = vec3(-1.0,  -_v,  -_u);           // XM
-    else if (_Face == 2)
-        Normal = vec3(  _u,  1.0,  -_v);           // YP
-    else if (_Face == 3)
-        Normal = vec3(  _u, -1.0,   _v);           // YM
-    else if (_Face == 4)
         Normal = vec3( -_u,  -_v,  1.0);           // ZP
-    else if (_Face == 5)
+    else if (_Face == 1)
         Normal = vec3(  _u,  -_v, -1.0);           // ZM
+    else if (_Face == 2)
+        Normal = vec3(  _v,  1.0,  _u);            // YP
+    else if (_Face == 3)
+        Normal = vec3( -_v, -1.0,   _u);           // YM
+    else if (_Face == 4)
+        Normal = vec3( 1.0,  -_v,   _u);           // XP
+    else if (_Face == 5)
+        Normal = vec3(-1.0,  -_v,  -_u);           // XM
 
     return normalize(Normal);
 }
