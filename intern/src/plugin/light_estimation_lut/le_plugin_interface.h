@@ -27,12 +27,15 @@ namespace LE
 
         void SetInputTexture(Gfx::CTexturePtr _InputTexturePtr);
 
-        void SetOutputCubemap(Gfx::CTexturePtr _OutputCubemapPtr);
         Gfx::CTexturePtr GetOutputCubemap();
 
         void SetActive(bool _Flag);
 
-    private:
+	private:
+
+		static const unsigned int s_CubemapSize = 512;
+
+	private:
 
         struct SCubemapBuffer
         {

@@ -13,6 +13,8 @@
 #include "engine/graphic/gfx_target_set.h"
 #include "engine/graphic/gfx_texture.h"
 
+#include "engine/network/core_network_manager.h"
+
 namespace LE
 {
     class CPluginInterface : private Base::CUncopyable, public Core::IPlugin
@@ -27,10 +29,17 @@ namespace LE
 
         void SetInputTexture(Gfx::CTexturePtr _InputTexturePtr);
 
-        void SetOutputCubemap(Gfx::CTexturePtr _OutputCubemapPtr);
         Gfx::CTexturePtr GetOutputCubemap();
 
         void SetActive(bool _Flag);
+
+		void FillEnvironmentWithNN();
+
+	private:
+
+		static const unsigned int s_PanoramaWidth = 256;
+		static const unsigned int s_PanoramaHeight = 128;
+		static const unsigned int s_CubemapSize = 512;
 
     private:
 
@@ -49,7 +58,11 @@ namespace LE
 
         Gfx::CShaderPtr m_VSPtr;
         Gfx::CShaderPtr m_GSPtr;
-        Gfx::CShaderPtr m_PSPtr;
+		Gfx::CShaderPtr m_PSPtr;
+
+		Gfx::CShaderPtr m_C2PShaderPtr;
+		Gfx::CShaderPtr m_P2CShaderPtr;
+		Gfx::CShaderPtr m_FusePanoramaShaderPtr;
 
         Gfx::CBufferPtr m_CubemapBufferPtr;
 
@@ -57,6 +70,7 @@ namespace LE
 
         Gfx::CTexturePtr m_InputTexturePtr;
         Gfx::CTexturePtr m_OutputCubemapPtr;
+		Gfx::CTexturePtr m_PanoramaTexturePtr;
 
         Gfx::CTargetSetPtr m_TargetSetPtr;
 
@@ -64,9 +78,14 @@ namespace LE
 
         bool m_IsActive;
 
-        Engine::CEventDelegates::HandleType m_GfxOnUpdateDelegate;
+		Engine::CEventDelegates::HandleType m_GfxOnUpdateDelegate;
+
+		Net::CNetworkManager::CMessageDelegate::HandleType m_NetworkDelegate;
+		Net::SocketHandle m_SocketHandle;
 
     private:
+
+		void OnNewMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle);
 
         void Gfx_OnUpdate();
     };
