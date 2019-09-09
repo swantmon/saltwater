@@ -4,7 +4,7 @@
 #include "../../plugins/slam/scalable/registration/common.glsl"
 
 shared vec4 g_SharedData[TILE_SIZE2D * TILE_SIZE2D];
-shared float g_SharedSum[TILE_SIZE2D * TILE_SIZE2D];
+shared int g_SharedSum[TILE_SIZE2D * TILE_SIZE2D];
 
 void reduce()
 {
@@ -36,33 +36,34 @@ void main()
 {
     mat2 Transform = mat2(g_A, g_B, -g_B, g_A);
 
-    vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy);
+    vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy) / g_MovingImageSize;
     vec2 FixedCoords = Transform * MovingCoords + g_Translation;
 
-    if (FixedCoords.x > 10.0f && FixedCoords.x < g_FixedImageSize.x - 10.0f && FixedCoords.y > 10.0f && FixedCoords.y < g_FixedImageSize.y - 10.0f)
+    if (FixedCoords.x > 0.01f && FixedCoords.x < 0.99f && FixedCoords.y > 0.01f && FixedCoords.y < 0.99f)
+    //if (FixedCoords.x >= 0.0f && FixedCoords.x < 1.0f && FixedCoords.y >= 0.0f && FixedCoords.y < 1.0f)
     {
-        float MovingColor = RGBToGrey(texture(MovingTex, MovingCoords / g_MovingImageSize).rgb);
-        float FixedColor = RGBToGrey(texture(FixedTex, FixedCoords / g_FixedImageSize).rgb);
-        vec2 ImageGradient = texture(GradientTex, MovingCoords / g_MovingImageSize).rg;
+        float MovingColor = RGBToGrey(texture(MovingTex, MovingCoords).rgb);
+        float FixedColor = RGBToGrey(texture(FixedTex, FixedCoords).rgb);
+        vec2 ImageGradient = texture(GradientTex, MovingCoords).rg;
 
         float IntensityDiff = FixedColor - MovingColor; // Fixed(p) - Moving(T(p;theta))
 
         vec2 Factor = -2.0f * IntensityDiff * ImageGradient; // -2 * (Fixed(p) - Moving(T(p;theta))) * Gradient
 
-        float x = gl_GlobalInvocationID.x / 512.0f;
-        float y = gl_GlobalInvocationID.y / 512.0f;
+        float x = MovingCoords.x;
+        float y = MovingCoords.y;
         mat4x2 Jacobi = mat4x2(x, y, -y, x, 1.0f, 0.0f, 0.0f, 1.0f);
         
         g_SharedData[gl_LocalInvocationIndex].x = dot(Factor, Jacobi[0]);
         g_SharedData[gl_LocalInvocationIndex].y = dot(Factor, Jacobi[1]);
         g_SharedData[gl_LocalInvocationIndex].z = dot(Factor, Jacobi[2]);
         g_SharedData[gl_LocalInvocationIndex].w = dot(Factor, Jacobi[3]);
-        g_SharedSum[gl_LocalInvocationIndex] = 1.0f;
+        g_SharedSum[gl_LocalInvocationIndex] = 1;
     }
     else
     {
         g_SharedData[gl_LocalInvocationIndex] = vec4(0.0f);
-        g_SharedSum[gl_LocalInvocationIndex] = 0.0f;
+        g_SharedSum[gl_LocalInvocationIndex] = 0;
     }
 
     imageStore(DebugImage, ivec2(gl_GlobalInvocationID.xy), g_SharedData[gl_LocalInvocationIndex]);

@@ -4,7 +4,7 @@
 #include "../../plugins/slam/scalable/registration/common.glsl"
 
 shared vec4 g_SharedData[REDUCTION_SHADER_COUNT];
-shared float g_SharedSum[REDUCTION_SHADER_COUNT];
+shared int g_SharedSum[REDUCTION_SHADER_COUNT];
 
 void reduce()
 {
@@ -54,7 +54,7 @@ void main()
     const int LoopCount = int(float(WORKGROUP_SUMMANDS) / REDUCTION_SHADER_COUNT + 0.5f);
 
     vec4 Sum = vec4(0.0f);
-    float SumCount = 0.0f;
+    int SumCount = 0;
 
     for (int i = 0; i < LoopCount; ++ i)
     {

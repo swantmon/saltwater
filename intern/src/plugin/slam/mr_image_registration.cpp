@@ -46,6 +46,8 @@ namespace
         glm::vec4 m_Theta;    // (Angle, Scale, Translation)
         glm::ivec2 m_FixedImageSize;
         glm::ivec2 m_MovingImageSize;
+        int m_Level;
+        float Padding[3];
     };
 
     float Sigmoid(float x)
@@ -55,7 +57,7 @@ namespace
 
     const int g_TileSize2D = 16;
 
-    std::string ImageName = "Lenna";
+    std::string ImageName = "Horizon_square";
     
 } // namespace
 
@@ -98,13 +100,14 @@ namespace MR
 
         ContextManager::SetShaderCS(m_GradientCSPtr);
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+        TextureManager::UpdateMipmap(m_GradientTexture);
 
         float a = Scale * glm::cos(Angle);
         float b = Scale * glm::sin(Angle);
 
         glm::vec4 Gradient;
-        const int MaxIterations = 300000;
-        const float MinGradientLength = 0.00005f;
+        const int MaxIterations = 30000;
+        const float MinGradientLength = 0.0000005f;
 
         auto OutputImage = [&](int Iteration) {
             TextureManager::ClearTexture(m_OutputTexture);
@@ -126,6 +129,7 @@ namespace MR
             RegistrationBuffer.m_FixedImageSize.y = m_FixedTexture->GetNumberOfPixelsV();
             RegistrationBuffer.m_MovingImageSize.x = m_MovingTexture->GetNumberOfPixelsU();
             RegistrationBuffer.m_MovingImageSize.y = m_MovingTexture->GetNumberOfPixelsV();
+            RegistrationBuffer.m_Level = 0;
             BufferManager::UploadBufferData(m_ConstantBuffer, &RegistrationBuffer);
 
             // Sum tiles
@@ -143,10 +147,10 @@ namespace MR
             glm::vec4 NewGradient = *static_cast<glm::vec4*>(BufferManager::MapBufferRange(m_SumBufferPtr, CBuffer::Read, 0, sizeof(glm::vec4)));
             BufferManager::UnmapBuffer(m_SumBufferPtr);
 
-            float Count = *static_cast<float*>(BufferManager::MapBufferRange(m_SumCountBufferPtr, CBuffer::Read, 0, sizeof(float)));
+            int Count = *static_cast<int*>(BufferManager::MapBufferRange(m_SumCountBufferPtr, CBuffer::Read, 0, sizeof(int)));
             BufferManager::UnmapBuffer(m_SumCountBufferPtr);
 
-            NewGradient /= Count;
+            NewGradient /= static_cast<float>(Count);
 
             if (glm::length(NewGradient) > MinGradientLength)
             {
@@ -160,7 +164,7 @@ namespace MR
                 b += NewGradient.y;
                 Translation += glm::vec2(NewGradient.z, NewGradient.w);
 
-                if (Iteration % 10 == 0)
+                if (Iteration % 200 == 0)
                 {
                     OutputImage(Iteration);
                 }
@@ -279,7 +283,7 @@ namespace MR
         TextureDescriptor.m_NumberOfPixelsU = STextureDescriptor::s_NumberOfPixelsFromSource;
         TextureDescriptor.m_NumberOfPixelsV = STextureDescriptor::s_NumberOfPixelsFromSource;
         TextureDescriptor.m_NumberOfPixelsW = STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfMipMaps = STextureDescriptor::s_NumberOfMipMapsFromSource;
+        TextureDescriptor.m_NumberOfMipMaps = STextureDescriptor::s_GenerateAllMipMaps;
         TextureDescriptor.m_NumberOfTextures = STextureDescriptor::s_NumberOfTexturesFromSource;
         TextureDescriptor.m_Binding = CTexture::ShaderResource;
         TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
@@ -299,7 +303,6 @@ namespace MR
         TextureDescriptor.m_NumberOfPixelsU = m_FixedTexture->GetNumberOfPixelsU();
         TextureDescriptor.m_NumberOfPixelsV = m_FixedTexture->GetNumberOfPixelsV();
         TextureDescriptor.m_NumberOfPixelsW = m_FixedTexture->GetNumberOfPixelsW();
-        TextureDescriptor.m_NumberOfMipMaps = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Format = CTexture::R32G32_FLOAT;
         m_GradientTexture = TextureManager::CreateTexture2D(TextureDescriptor);

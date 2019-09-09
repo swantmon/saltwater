@@ -6,6 +6,7 @@ layout(std140, binding = 0) uniform ConstantBuffer
     vec4  g_Theta;    // Transform coordinates from moving to fixed image
     ivec2 g_FixedImageSize;
     ivec2 g_MovingImageSize;
+    int g_Level;
 };
 
 #define g_A g_Theta.x
@@ -19,7 +20,7 @@ layout(std430, binding = 0) buffer Buffer
 
 layout(std430, binding = 1) buffer SumBuffer
 {
-    float g_SumCount[TILE_COUNT_X * TILE_COUNT_Y];
+    int g_SumCount[TILE_COUNT_X * TILE_COUNT_Y];
 };
 
 float RGBToGrey(vec3 RGB)
