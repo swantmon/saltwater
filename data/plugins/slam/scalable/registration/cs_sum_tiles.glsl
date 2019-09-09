@@ -36,15 +36,15 @@ void main()
 {
     mat2 Transform = mat2(g_A, g_B, -g_B, g_A);
 
-    vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy) / g_MovingImageSize;
+    vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy) / (g_MovingImageSize >> g_Level);
     vec2 FixedCoords = Transform * MovingCoords + g_Translation;
 
     if (FixedCoords.x > 0.01f && FixedCoords.x < 0.99f && FixedCoords.y > 0.01f && FixedCoords.y < 0.99f)
     //if (FixedCoords.x >= 0.0f && FixedCoords.x < 1.0f && FixedCoords.y >= 0.0f && FixedCoords.y < 1.0f)
     {
-        float MovingColor = RGBToGrey(texture(MovingTex, MovingCoords).rgb);
-        float FixedColor = RGBToGrey(texture(FixedTex, FixedCoords).rgb);
-        vec2 ImageGradient = texture(GradientTex, MovingCoords).rg;
+        float MovingColor = RGBToGrey(textureLod(MovingTex, MovingCoords, g_Level).rgb);
+        float FixedColor = RGBToGrey(textureLod(FixedTex, FixedCoords, g_Level).rgb);
+        vec2 ImageGradient = textureLod(GradientTex, MovingCoords, g_Level).rg;
 
         float IntensityDiff = FixedColor - MovingColor; // Fixed(p) - Moving(T(p;theta))
 

@@ -57,7 +57,7 @@ namespace
 
     const int g_TileSize2D = 16;
 
-    std::string ImageName = "Horizon_square";
+    std::string ImageName = "Horizon";
     
 } // namespace
 
@@ -75,8 +75,8 @@ namespace MR
 		float Scale = 1.0f;
         auto Translation = glm::vec2(0.0f);
 
-        const int WorkGroupsX = DivUp(m_FixedTexture->GetNumberOfPixelsU(), g_TileSize2D);
-        const int WorkGroupsY = DivUp(m_FixedTexture->GetNumberOfPixelsV(), g_TileSize2D);
+        const int WorkGroupsXFull = DivUp(m_FixedTexture->GetNumberOfPixelsU(), g_TileSize2D);
+        const int WorkGroupsYFull = DivUp(m_FixedTexture->GetNumberOfPixelsV(), g_TileSize2D);
         
         ContextManager::SetConstantBuffer(0, m_ConstantBuffer);
         ContextManager::SetResourceBuffer(0, m_SumBufferPtr);
@@ -99,8 +99,12 @@ namespace MR
         // Precompute derivates in moving image (Sobel operator)
 
         ContextManager::SetShaderCS(m_GradientCSPtr);
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+        ContextManager::Dispatch(WorkGroupsXFull, WorkGroupsYFull, 1);
         TextureManager::UpdateMipmap(m_GradientTexture);
+
+        const int Level = 4;
+        const int WorkGroupsX = DivUp(m_FixedTexture->GetNumberOfPixelsU() >> Level, g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_FixedTexture->GetNumberOfPixelsV() >> Level, g_TileSize2D);
 
         float a = Scale * glm::cos(Angle);
         float b = Scale * glm::sin(Angle);
@@ -113,7 +117,7 @@ namespace MR
             TextureManager::ClearTexture(m_OutputTexture);
 
             ContextManager::SetShaderCS(m_OutputCSPtr);
-            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+            ContextManager::Dispatch(WorkGroupsXFull, WorkGroupsYFull, 1);
 
             std::stringstream Stream;
             Stream << "registration/" << Iteration << ".bmp";
@@ -129,7 +133,7 @@ namespace MR
             RegistrationBuffer.m_FixedImageSize.y = m_FixedTexture->GetNumberOfPixelsV();
             RegistrationBuffer.m_MovingImageSize.x = m_MovingTexture->GetNumberOfPixelsU();
             RegistrationBuffer.m_MovingImageSize.y = m_MovingTexture->GetNumberOfPixelsV();
-            RegistrationBuffer.m_Level = 0;
+            RegistrationBuffer.m_Level = Level;
             BufferManager::UploadBufferData(m_ConstantBuffer, &RegistrationBuffer);
 
             // Sum tiles
