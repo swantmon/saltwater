@@ -230,14 +230,13 @@ namespace Scpt
 
                 // -----------------------------------------------------------------------------
 
-				if (ARPluginName == "ArCore")
-				{
-					GetLightEstimation = (ARGetLightEstimationFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimation"));
-					GetState = (ARGetLightEstimationStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationState"));
-					GetMainLightDirection = (ARGetLightEstimationMainLightDirectionFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationMainLightDirection"));
-					GetMainLightIntensity = (ARGetLightEstimationMainLightIntensityFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationMainLightIntensity"));
-					GetHDRCubemap = (ARGetLightEstimationHDRCubemapFunc)(Core::PluginManager::GetPluginFunction("ArCore", "LightEstimationGetHDRCubemap"));
-				}
+#ifdef PLATFORM_ANDROID
+                GetLightEstimation = (ARGetLightEstimationFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimation"));
+                GetState = (ARGetLightEstimationStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationState"));
+                GetMainLightDirection = (ARGetLightEstimationMainLightDirectionFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationMainLightDirection"));
+                GetMainLightIntensity = (ARGetLightEstimationMainLightIntensityFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationMainLightIntensity"));
+                GetHDRCubemap = (ARGetLightEstimationHDRCubemapFunc)(Core::PluginManager::GetPluginFunction("ArCore", "LightEstimationGetHDRCubemap"));
+#endif
             }
             else
             {
