@@ -295,16 +295,16 @@ namespace Scpt
 			// -----------------------------------------------------------------------------
 			Gfx::STextureDescriptor TextureDescriptor = { };
 
-			TextureDescriptor.m_NumberOfPixelsU = 256;
-			TextureDescriptor.m_NumberOfPixelsV = 128;
-			TextureDescriptor.m_NumberOfPixelsW = 1;
-			TextureDescriptor.m_NumberOfMipMaps = 1;
+			TextureDescriptor.m_NumberOfPixelsU  = 256;
+			TextureDescriptor.m_NumberOfPixelsV  = 128;
+			TextureDescriptor.m_NumberOfPixelsW  = 1;
+			TextureDescriptor.m_NumberOfMipMaps  = 1;
 			TextureDescriptor.m_NumberOfTextures = 1;
-			TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
-			TextureDescriptor.m_Access = Gfx::CTexture::CPUWrite;
-			TextureDescriptor.m_Format = Gfx::CTexture::R8G8B8A8_BYTE;
-			TextureDescriptor.m_Usage = Gfx::CTexture::GPUReadWrite;
-			TextureDescriptor.m_Semantic = Gfx::CTexture::Diffuse;
+			TextureDescriptor.m_Binding			 = Gfx::CTexture::ShaderResource;
+			TextureDescriptor.m_Access			 = Gfx::CTexture::CPUWrite;
+			TextureDescriptor.m_Format			 = Gfx::CTexture::R8G8B8A8_BYTE;
+			TextureDescriptor.m_Usage			 = Gfx::CTexture::GPUReadWrite;
+			TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
 
 			Gfx::CTexturePtr PanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
