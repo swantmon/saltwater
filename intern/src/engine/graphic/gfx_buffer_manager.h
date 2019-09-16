@@ -43,7 +43,7 @@ namespace BufferManager
     ENGINE_API CBufferSetPtr CreateBufferSet(CBufferPtr* _pBufferPtrs, unsigned int _NumberOfBuffers);
     
     ENGINE_API void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr);
-    ENGINE_API void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range);
+    ENGINE_API void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, int _ReadOffset, int _WriteOffset, int _Range);
     
     ENGINE_API void* MapBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
     ENGINE_API void* MapBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
