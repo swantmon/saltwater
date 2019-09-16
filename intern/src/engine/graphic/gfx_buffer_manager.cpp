@@ -56,7 +56,7 @@ namespace
     public:
 
         void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr);
-        void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range);
+        void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, int _ReadOffset, int _WriteOffset, int _Range);
 
     public:
 
@@ -106,10 +106,10 @@ namespace
         };
 
     
-        typedef Base::CManagedPool<CInternBuffer>    CBuffers;
-        typedef CBuffers::CIterator                  CBufferIterator;
-        typedef Base::CManagedPool<CInternBufferSet> CBufferSets;
-        typedef CBufferSets::CIterator               CBufferSetIterator;
+        using CBuffers = Base::CManagedPool<CInternBuffer>;
+        using CBufferIterator = CBuffers::CIterator;
+        using CBufferSets = Base::CManagedPool<CInternBufferSet>;
+        using CBufferSetIterator = CBufferSets::CIterator;
     
     private:
 
@@ -443,20 +443,17 @@ namespace
 
     void CGfxBufferManager::CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr)
     {
-        if (_TargetBufferPtr != _SourceBufferPtr)
-        {
-            CInternBuffer& rTargetBuffer = *static_cast<CInternBuffer*>(&(*_TargetBufferPtr));
-            CInternBuffer& rSourceBuffer = *static_cast<CInternBuffer*>(&(*_SourceBufferPtr));
-            
-            GLsizeiptr NumberOfBytes = glm::min(rTargetBuffer.m_NumberOfBytes, rSourceBuffer.m_NumberOfBytes);
+        CInternBuffer& rTargetBuffer = *static_cast<CInternBuffer*>(&(*_TargetBufferPtr));
+        CInternBuffer& rSourceBuffer = *static_cast<CInternBuffer*>(&(*_SourceBufferPtr));
 
-            glCopyBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, 0, 0, NumberOfBytes);
-        }
+        const auto NumberOfBytes = static_cast<int>(glm::min(rTargetBuffer.m_NumberOfBytes, rSourceBuffer.m_NumberOfBytes));
+
+        CopyBufferToBuffer(_TargetBufferPtr, _SourceBufferPtr, 0, 0, NumberOfBytes);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxBufferManager::CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range)
+    void CGfxBufferManager::CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, int _ReadOffset, int _WriteOffset, int _Range)
     {
         if (_TargetBufferPtr != _SourceBufferPtr)
         {
@@ -466,7 +463,13 @@ namespace
             assert(_ReadOffset + _Range <= rTargetBuffer.m_NumberOfBytes);
             assert(_WriteOffset + _Range <= rSourceBuffer.m_NumberOfBytes);
 
-            glCopyBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, _ReadOffset, _WriteOffset, _Range);
+            glBindBuffer(GL_COPY_WRITE_BUFFER, rTargetBuffer.m_NativeBuffer);
+            glBindBuffer(GL_COPY_READ_BUFFER, rSourceBuffer.m_NativeBuffer);
+
+            glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, _ReadOffset, _WriteOffset, _Range);
+
+            glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+            glBindBuffer(GL_COPY_READ_BUFFER, 0);
         }
     }
 
@@ -476,7 +479,7 @@ namespace
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
 
-        CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+        auto pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         assert(pBuffer != nullptr);
 
@@ -494,7 +497,7 @@ namespace
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
 
-        CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+        auto pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         assert(pBuffer != nullptr);
 
@@ -512,7 +515,7 @@ namespace
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
 
-        CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+        auto pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         assert(pBuffer != nullptr);
 
@@ -529,7 +532,7 @@ namespace
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid() && _pData);
 
-        CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+        auto pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         assert(pBuffer != nullptr);
 
@@ -546,7 +549,7 @@ namespace
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid() && _pData && _Range > 0);
 
-        CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+        auto pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         assert(pBuffer != nullptr);
         assert(_Offset + _Range <= pBuffer->m_NumberOfBytes);
@@ -564,7 +567,7 @@ namespace
     {
         assert(_pLabel != nullptr);
 
-        CInternBuffer* pInternBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+        auto pInternBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         glObjectLabel(GL_BUFFER, pInternBuffer->m_NativeBuffer, -1, _pLabel);
     }
@@ -750,7 +753,7 @@ namespace BufferManager
 
     // -----------------------------------------------------------------------------
 
-    void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range)
+    void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, int _ReadOffset, int _WriteOffset, int _Range)
     {
         CGfxBufferManager::GetInstance().CopyBufferToBuffer(_TargetBufferPtr, _SourceBufferPtr, _ReadOffset, _WriteOffset, _Range);
     }
