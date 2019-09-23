@@ -36,22 +36,21 @@ void main()
 {
     mat2 Transform = mat2(g_A, g_B, -g_B, g_A);
 
-    vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy) / (g_MovingImageSize >> g_Level);
+    vec2 MovingCoords = vec2(gl_GlobalInvocationID.xy) * (g_Level + 1);
     vec2 FixedCoords = Transform * MovingCoords + g_Translation;
 
-    if (FixedCoords.x > 0.01f && FixedCoords.x < 0.99f && FixedCoords.y > 0.01f && FixedCoords.y < 0.99f)
-    //if (FixedCoords.x >= 0.0f && FixedCoords.x < 1.0f && FixedCoords.y >= 0.0f && FixedCoords.y < 1.0f)
+    if (FixedCoords.x > 0.0f && FixedCoords.x < g_FixedImageSize.x && FixedCoords.y > 0.0f && FixedCoords.y < g_FixedImageSize.y)
     {
-        float MovingColor = RGBToGrey(textureLod(MovingTex, MovingCoords, g_Level).rgb);
-        float FixedColor = RGBToGrey(textureLod(FixedTex, FixedCoords, g_Level).rgb);
-        vec2 ImageGradient = textureLod(GradientTex, MovingCoords, g_Level).rg;
+        float MovingColor = RGBToGrey(textureLod(MovingTex, MovingCoords / g_MovingImageSize, g_Level).rgb);
+        float FixedColor = RGBToGrey(textureLod(FixedTex, FixedCoords / g_FixedImageSize, g_Level).rgb);
+        vec2 ImageGradient = textureLod(GradientTex, MovingCoords / g_MovingImageSize, g_Level).rg;
 
         float IntensityDiff = FixedColor - MovingColor; // Fixed(p) - Moving(T(p;theta))
 
         vec2 Factor = -2.0f * IntensityDiff * ImageGradient; // -2 * (Fixed(p) - Moving(T(p;theta))) * Gradient
 
-        float x = MovingCoords.x;
-        float y = MovingCoords.y;
+        float x = MovingCoords.x / g_MovingImageSize.x;
+        float y = MovingCoords.y / g_MovingImageSize.x;
         mat4x2 Jacobi = mat4x2(x, y, -y, x, 1.0f, 0.0f, 0.0f, 1.0f);
         
         g_SharedData[gl_LocalInvocationIndex].x = dot(Factor, Jacobi[0]);

@@ -57,7 +57,7 @@ namespace
 
     const int g_TileSize2D = 16;
 
-    std::string ImageName = "Horizon";
+    std::string ImageName = "Large";
     
 } // namespace
 
@@ -102,7 +102,7 @@ namespace MR
         ContextManager::Dispatch(WorkGroupsXFull, WorkGroupsYFull, 1);
         TextureManager::UpdateMipmap(m_GradientTexture);
 
-        const int Level = 4;
+        const int Level = 0;
         const int WorkGroupsX = DivUp(m_FixedTexture->GetNumberOfPixelsU() >> Level, g_TileSize2D);
         const int WorkGroupsY = DivUp(m_FixedTexture->GetNumberOfPixelsV() >> Level, g_TileSize2D);
 
@@ -111,7 +111,7 @@ namespace MR
 
         glm::vec4 Gradient;
         const int MaxIterations = 30000;
-        const float MinGradientLength = 0.0000005f;
+        const float MinGradientLength = 0.00001f;
 
         auto OutputImage = [&](int Iteration) {
             TextureManager::ClearTexture(m_OutputTexture);
@@ -168,7 +168,7 @@ namespace MR
                 b += NewGradient.y;
                 Translation += glm::vec2(NewGradient.z, NewGradient.w);
 
-                if (Iteration % 200 == 0)
+                if (Iteration % 500 == 0)
                 {
                     OutputImage(Iteration);
                 }
