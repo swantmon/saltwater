@@ -57,7 +57,7 @@ namespace
 
     const int g_TileSize2D = 16;
 
-    std::string ImageName = "Large";
+    std::string ImageName = "Lenna";
     
 } // namespace
 
@@ -78,8 +78,8 @@ namespace MR
 		float Scale = 1.0f;
         auto Translation = glm::vec2(0.0f);
 
-        const int WorkGroupsXFull = DivUp(m_FixedTexture->GetNumberOfPixelsU(), g_TileSize2D);
-        const int WorkGroupsYFull = DivUp(m_FixedTexture->GetNumberOfPixelsV(), g_TileSize2D);
+        const int WorkGroupsXFull = DivUp(m_Width, g_TileSize2D);
+        const int WorkGroupsYFull = DivUp(m_Height, g_TileSize2D);
         
         ContextManager::SetConstantBuffer(0, m_ConstantBuffer);
         ContextManager::SetResourceBuffer(0, m_SumBufferPtr);
@@ -106,15 +106,15 @@ namespace MR
         TextureManager::UpdateMipmap(m_GradientTexture);
 
         const int Level = 0;
-        const int WorkGroupsX = DivUp(m_FixedTexture->GetNumberOfPixelsU() >> Level, g_TileSize2D);
-        const int WorkGroupsY = DivUp(m_FixedTexture->GetNumberOfPixelsV() >> Level, g_TileSize2D);
+        const int WorkGroupsX = DivUp(m_Width >> Level, g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_Height >> Level, g_TileSize2D);
 
         float a = Scale * glm::cos(Angle);
         float b = Scale * glm::sin(Angle);
 
         glm::vec4 Gradient;
         const int MaxIterations = 30000;
-        const float MinGradientLength = 0.00001f;
+        const float MinGradientLength = 0.0001f;
 
         auto OutputImage = [&](int Iteration) {
             TextureManager::ClearTexture(m_OutputTexture);
@@ -212,9 +212,149 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CImageRegistrator::Register(Gfx::CTexturePtr _Source, Gfx::CTexturePtr _Target)
+    void CImageRegistrator::Register(Gfx::CTexturePtr _FixedTexture, Gfx::CTexturePtr _MovingTexture)
     {
+        Performance::BeginEvent("Image registration");
 
+        ContextManager::ResetShaderVS();
+        ContextManager::ResetShaderPS();
+
+        // Setup data
+
+		float Angle = glm::radians(0.0f);
+		float Scale = 1.0f;
+        auto Translation = glm::vec2(0.0f);
+
+        const int WorkGroupsXFull = DivUp(m_FixedTexture->GetNumberOfPixelsU(), g_TileSize2D);
+        const int WorkGroupsYFull = DivUp(m_FixedTexture->GetNumberOfPixelsV(), g_TileSize2D);
+        
+        ContextManager::SetConstantBuffer(0, m_ConstantBuffer);
+        ContextManager::SetResourceBuffer(0, m_SumBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_SumCountBufferPtr);
+
+        ContextManager::SetImageTexture(0, m_FixedTexture);
+        ContextManager::SetImageTexture(1, m_MovingTexture);
+		ContextManager::SetImageTexture(2, m_GradientTexture);
+		ContextManager::SetImageTexture(3, m_DebugTexture);
+        ContextManager::SetImageTexture(4, m_OutputTexture);
+
+        ContextManager::SetTexture(0, m_FixedTexture);
+        ContextManager::SetTexture(1, m_MovingTexture);
+        ContextManager::SetTexture(2, m_GradientTexture);
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp));
+
+        // Precompute derivates in moving image (Sobel operator)
+
+        ContextManager::SetShaderCS(m_GradientCSPtr);
+        ContextManager::Dispatch(WorkGroupsXFull, WorkGroupsYFull, 1);
+        TextureManager::UpdateMipmap(m_GradientTexture);
+
+        const int Level = 0;
+        const int WorkGroupsX = DivUp(m_FixedTexture->GetNumberOfPixelsU() >> Level, g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_FixedTexture->GetNumberOfPixelsV() >> Level, g_TileSize2D);
+
+        float a = Scale * glm::cos(Angle);
+        float b = Scale * glm::sin(Angle);
+
+        glm::vec4 Gradient;
+        const int MaxIterations = 30000;
+        const float MinGradientLength = 0.0001f;
+
+        auto OutputImage = [&](int Iteration) {
+            TextureManager::ClearTexture(m_OutputTexture);
+
+            ContextManager::SetShaderCS(m_OutputCSPtr);
+            ContextManager::Dispatch(WorkGroupsXFull, WorkGroupsYFull, 1);
+
+            std::stringstream Stream;
+            Stream << "registration/" << Iteration << ".bmp";
+            TextureManager::SaveTexture(m_OutputTexture, Stream.str().c_str());
+        };
+        
+        int Iteration = 0;
+        for (Iteration = 0; Iteration < MaxIterations; ++ Iteration)
+        {
+            SRegistrationBuffer RegistrationBuffer;
+            RegistrationBuffer.m_Theta = glm::vec4(a, b, Translation);
+            RegistrationBuffer.m_FixedImageSize.x = m_FixedTexture->GetNumberOfPixelsU();
+            RegistrationBuffer.m_FixedImageSize.y = m_FixedTexture->GetNumberOfPixelsV();
+            RegistrationBuffer.m_MovingImageSize.x = m_MovingTexture->GetNumberOfPixelsU();
+            RegistrationBuffer.m_MovingImageSize.y = m_MovingTexture->GetNumberOfPixelsV();
+            RegistrationBuffer.m_Level = Level;
+            BufferManager::UploadBufferData(m_ConstantBuffer, &RegistrationBuffer);
+
+            // Sum tiles
+
+            ContextManager::SetShaderCS(m_SumTilesCSPtr);
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+            // Compute final sum
+
+            ContextManager::SetShaderCS(m_SumFinalCSPtr);
+            ContextManager::Dispatch(1, 1, 1);
+
+            // Compute new registration parameter
+
+            glm::vec4 NewGradient = *static_cast<glm::vec4*>(BufferManager::MapBufferRange(m_SumBufferPtr, CBuffer::Read, 0, sizeof(glm::vec4)));
+            BufferManager::UnmapBuffer(m_SumBufferPtr);
+
+            int Count = *static_cast<int*>(BufferManager::MapBufferRange(m_SumCountBufferPtr, CBuffer::Read, 0, sizeof(int)));
+            BufferManager::UnmapBuffer(m_SumCountBufferPtr);
+
+            NewGradient /= static_cast<float>(Count);
+
+            if (glm::length(NewGradient) > MinGradientLength)
+            {
+                Gradient = NewGradient;
+
+                float Gamma = (MaxIterations - Iteration) / static_cast<float>(MaxIterations);
+
+                NewGradient *= Gamma;
+
+                a += NewGradient.x;
+                b += NewGradient.y;
+                Translation += glm::vec2(NewGradient.z, NewGradient.w);
+
+                if (Iteration % 500 == 0)
+                {
+                    OutputImage(Iteration);
+                }
+            }
+            else
+            {
+                Gradient = NewGradient;
+
+                OutputImage(Iteration);
+
+                break;
+            }
+        }
+
+        std::cout << "Iterations:      " << Iteration << '\n';
+        std::cout << "Gradient:        " << Gradient.x << '\t' << Gradient.y << '\t' << Gradient.z << '\t' << Gradient.w << '\n';
+        std::cout << "Gradient length: " << glm::length(Gradient) << '\n';
+        std::cout << "Theta:           " << a << '\t' << b << '\t' << Translation.x << '\t' << Translation.y << '\n';
+        std::cout << "Angle:           " << glm::degrees(glm::acos(a)) << '\n';
+
+        // Reset
+
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetResourceBuffer(0);
+        ContextManager::ResetResourceBuffer(1);
+
+        for (int i = 0; i < 5; ++ i)
+        {
+            ContextManager::ResetImageTexture(i);
+            ContextManager::ResetTexture(i);
+            ContextManager::ResetSampler(i);
+        }
+        
+        ContextManager::ResetShaderCS();
+        
+        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
@@ -253,8 +393,8 @@ namespace MR
 
     void CImageRegistrator::SetupBuffers()
     {
-        const int WorkGroupsX = DivUp(m_FixedTexture->GetNumberOfPixelsU(), g_TileSize2D);
-        const int WorkGroupsY = DivUp(m_FixedTexture->GetNumberOfPixelsV(), g_TileSize2D);
+        const int WorkGroupsX = DivUp(m_Width, g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_Height, g_TileSize2D);
 
         SBufferDescriptor BufferDesc = {};
 
@@ -289,36 +429,52 @@ namespace MR
 
     void CImageRegistrator::SetupTextures()
     {
-        const auto FixedImage = "textures/registration/"s + ImageName + ".png"s;
-        const auto MovingImage = "textures/registration/"s + ImageName + "_moving.png"s;
-
         STextureDescriptor TextureDescriptor = {};
 
-        TextureDescriptor.m_NumberOfPixelsU = STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsV = STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsW = STextureDescriptor::s_NumberOfPixelsFromSource;
         TextureDescriptor.m_NumberOfMipMaps = STextureDescriptor::s_GenerateAllMipMaps;
-        TextureDescriptor.m_NumberOfTextures = STextureDescriptor::s_NumberOfTexturesFromSource;
         TextureDescriptor.m_Binding = CTexture::ShaderResource;
         TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
         TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
-        TextureDescriptor.m_pFileName = FixedImage.c_str();
 
-        m_FixedTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+        if (m_UseTestData)
+        {
+            TextureDescriptor.m_NumberOfPixelsU = STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfPixelsV = STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfPixelsW = STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfTextures = STextureDescriptor::s_NumberOfTexturesFromSource;
 
-        TextureDescriptor.m_pFileName = MovingImage.c_str();
+            const auto FixedFile = "textures/registration/"s + ImageName + ".png"s;
+            TextureDescriptor.m_pFileName = FixedFile.c_str();
+            m_FixedTexture = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        m_MovingTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+            const auto MovingFile = "textures/registration/"s + ImageName + "_moving.png"s;
+            TextureDescriptor.m_pFileName = MovingFile.c_str();
+            m_MovingTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+
+            m_Width = m_FixedTexture->GetNumberOfPixelsU();
+            m_Height = m_FixedTexture->GetNumberOfPixelsV();
+        }
+        else
+        {
+            TextureDescriptor.m_NumberOfPixelsU = m_Width;
+            TextureDescriptor.m_NumberOfPixelsV = m_Height;
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            m_FixedTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+            m_MovingTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+        }
+
+        assert(m_FixedTexture->GetNumberOfPixelsU() == m_MovingTexture->GetNumberOfPixelsU());
+        assert(m_FixedTexture->GetNumberOfPixelsV() == m_MovingTexture->GetNumberOfPixelsV());
         
-        TextureDescriptor.m_pFileName = nullptr;
-
-        TextureDescriptor.m_NumberOfPixelsU = m_FixedTexture->GetNumberOfPixelsU();
-        TextureDescriptor.m_NumberOfPixelsV = m_FixedTexture->GetNumberOfPixelsV();
-        TextureDescriptor.m_NumberOfPixelsW = m_FixedTexture->GetNumberOfPixelsW();
+        TextureDescriptor.m_NumberOfPixelsU = m_Width;
+        TextureDescriptor.m_NumberOfPixelsV = m_Height;
+        TextureDescriptor.m_NumberOfPixelsW = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Format = CTexture::R32G32_FLOAT;
+        TextureDescriptor.m_pFileName = nullptr;
         m_GradientTexture = TextureManager::CreateTexture2D(TextureDescriptor);
 
 		TextureDescriptor.m_Format = CTexture::R32G32B32A32_FLOAT;
@@ -330,7 +486,23 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    CImageRegistrator::CImageRegistrator(int _Width, int _Height)
+        : m_Width(_Width)
+        , m_Height(_Height)
+        , m_UseTestData(false)
+    {
+        SetupStates();
+        SetupTextures();
+        SetupBuffers();
+        SetupShaders();
+    }
+
+    // -----------------------------------------------------------------------------
+
     CImageRegistrator::CImageRegistrator()
+        : m_Width(0)
+        , m_Height(0)
+        , m_UseTestData(true)
     {
         SetupStates();
         SetupTextures();

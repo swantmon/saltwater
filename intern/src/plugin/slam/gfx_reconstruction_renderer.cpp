@@ -161,7 +161,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Image registration
         // -----------------------------------------------------------------------------
-        MR::CImageRegistrator m_ImageRegistrator;
+        std::unique_ptr<MR::CImageRegistrator> m_pImageRegistrator;
 
     private:
 
@@ -671,6 +671,8 @@ namespace
         TargetSetManager::SetTargetSetLabel(m_DiminishedRaycastTargetSetPtr, "Diminished Raycast Target Set");
         TargetSetManager::SetTargetSetLabel(m_DiminishedPlaneTargetSetPtr, "Diminished Plane Target Set");
         TargetSetManager::SetTargetSetLabel(m_DiminishedFinalTargetSetPtr, "Diminished Final Target Set");
+
+        m_pImageRegistrator = std::make_unique<MR::CImageRegistrator>();
     }
     
     // -----------------------------------------------------------------------------
@@ -1961,7 +1963,7 @@ namespace
 
             //glDisable(GL_BLEND);
 
-            m_ImageRegistrator.Register();
+            m_pImageRegistrator->Register();
 
             Performance::BeginEvent("Create membrane");
 

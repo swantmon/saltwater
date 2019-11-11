@@ -28,11 +28,12 @@ namespace MR
     public:
 
         void Register();
-        void Register(Gfx::CTexturePtr _Source, Gfx::CTexturePtr _Target);
+        void Register(Gfx::CTexturePtr _FixedTexture, Gfx::CTexturePtr _MovingTexture);
 
     public:
 
         CImageRegistrator();
+        CImageRegistrator(int _Width, int _Height);
         ~CImageRegistrator();
 
     private:
@@ -43,6 +44,9 @@ namespace MR
         void SetupTextures();
 
     private:
+
+        int m_Width, m_Height;
+        bool m_UseTestData;
         
         Gfx::CShaderPtr m_GradientCSPtr;
         Gfx::CShaderPtr m_SumTilesCSPtr;
