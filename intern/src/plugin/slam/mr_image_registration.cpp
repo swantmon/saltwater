@@ -69,6 +69,9 @@ namespace MR
     {
         Performance::BeginEvent("Image registration");
 
+        ContextManager::ResetShaderVS();
+        ContextManager::ResetShaderPS();
+
         // Setup data
 
 		float Angle = glm::radians(0.0f);
