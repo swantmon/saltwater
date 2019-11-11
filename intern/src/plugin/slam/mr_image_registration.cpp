@@ -209,6 +209,13 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CImageRegistrator::Register(Gfx::CTexturePtr _Source, Gfx::CTexturePtr _Target)
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CImageRegistrator::SetupShaders()
     {
         const auto MaxWorkGroupDimensions = Gfx::Main::GetMaxWorkGroupDimensions();

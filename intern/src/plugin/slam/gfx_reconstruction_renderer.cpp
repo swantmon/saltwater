@@ -33,6 +33,8 @@
 #include "plugin/slam/gfx_reconstruction_renderer.h"
 #include "plugin/slam/mr_slam_reconstructor.h"
 
+#include "plugin/slam/mr_image_registration.h"
+
 #include "GL/glew.h"
 
 #include <iostream>
@@ -155,6 +157,11 @@ namespace
         Gfx::CTexturePtr m_InpaintedPlaneTexture;
         Base::AABB3Float m_InpaintedPlaneAABB;
         float m_InpaintedPlaneScale;
+
+        // -----------------------------------------------------------------------------
+        // Image registration
+        // -----------------------------------------------------------------------------
+        MR::CImageRegistrator m_ImageRegistrator;
 
     private:
 
@@ -1953,6 +1960,8 @@ namespace
             Performance::EndEvent();
 
             //glDisable(GL_BLEND);
+
+            m_ImageRegistrator.Register();
 
             Performance::BeginEvent("Create membrane");
 

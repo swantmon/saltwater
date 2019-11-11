@@ -30,7 +30,6 @@
 #include "engine/core/core_asset_manager.h"
 
 #include "plugin/slam/mr_plane_colorization.h"
-#include "plugin/slam/mr_image_registration.h"
 
 #include "engine/script/script_script.h"
 
@@ -249,11 +248,6 @@ namespace MR
         // Plane extraction
         // -----------------------------------------------------------------------------
         std::unique_ptr<MR::CPlaneColorizer> m_pPlaneColorizer;
-
-        // -----------------------------------------------------------------------------
-        // Image registration
-        // -----------------------------------------------------------------------------
-        MR::CImageRegistrator m_ImageRegistrator;
 
     public:
 
@@ -568,8 +562,6 @@ namespace MR
 
                 Gfx::CTexturePtr Texture = Gfx::ReconstructionRenderer::GetInpaintedRendering(m_PoseMatrix, AABB, m_RGBATexture);
             }
-
-            m_ImageRegistrator.Register();
         }
 
         // -----------------------------------------------------------------------------

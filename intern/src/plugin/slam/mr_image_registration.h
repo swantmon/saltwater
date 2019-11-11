@@ -28,6 +28,7 @@ namespace MR
     public:
 
         void Register();
+        void Register(Gfx::CTexturePtr _Source, Gfx::CTexturePtr _Target);
 
     public:
 
