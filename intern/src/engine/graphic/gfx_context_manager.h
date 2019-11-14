@@ -104,7 +104,7 @@ namespace ContextManager
     ENGINE_API CTexturePtr GetTexture(unsigned int _Unit);
 
     ENGINE_API void ResetImageTexture(unsigned int _Unit);
-    ENGINE_API void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr);
+    ENGINE_API void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr, int _Level = 0);
     ENGINE_API CTexturePtr GetImageTexture(unsigned int _Unit);
 
     ENGINE_API void ResetConstantBuffer(unsigned int _Unit);

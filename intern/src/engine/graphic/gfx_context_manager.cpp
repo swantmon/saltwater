@@ -123,7 +123,7 @@ namespace
         CTexturePtr GetTexture(unsigned int _Unit);
 
         void ResetImageTexture(unsigned int _Unit);
-        void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr);
+        void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr, int _Level);
         CTexturePtr GetImageTexture(unsigned int _Unit);
 
         void ResetConstantBuffer(unsigned int _Unit);
@@ -1346,7 +1346,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr)
+    void CGfxContextManager::SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr, int _Level)
     {
         assert(_Unit < s_NumberOfImageUnits);
 
@@ -1363,7 +1363,7 @@ namespace
         if (_TextureBasePtr->GetDimension() == CTexture::Dim3D) IsLayered = GL_TRUE;
         if (_TextureBasePtr->IsCube()) IsLayered = GL_TRUE;
 
-        glBindImageTexture(_Unit, TextureHandle, _TextureBasePtr->GetCurrentMipLevel(), IsLayered, 0, TextureUsage, TextureFormat);
+        glBindImageTexture(_Unit, TextureHandle, _TextureBasePtr->GetCurrentMipLevel(), IsLayered, _Level, TextureUsage, TextureFormat);
 
         m_ImageUnits[_Unit] = _TextureBasePtr;
     }
@@ -2251,9 +2251,9 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
-    void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr)
+    void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr, int _Level)
     {
-        CGfxContextManager::GetInstance().SetImageTexture(_Unit, _TextureBasePtr);
+        CGfxContextManager::GetInstance().SetImageTexture(_Unit, _TextureBasePtr, _Level);
     }
 
     // -----------------------------------------------------------------------------
