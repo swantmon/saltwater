@@ -672,7 +672,7 @@ namespace
         TargetSetManager::SetTargetSetLabel(m_DiminishedPlaneTargetSetPtr, "Diminished Plane Target Set");
         TargetSetManager::SetTargetSetLabel(m_DiminishedFinalTargetSetPtr, "Diminished Final Target Set");
 
-        m_pImageRegistrator = std::make_unique<MR::CImageRegistrator>();
+        m_pImageRegistrator = std::make_unique<MR::CImageRegistrator>(m_DeviceResolution.x, m_DeviceResolution.y);
     }
     
     // -----------------------------------------------------------------------------
@@ -1963,7 +1963,7 @@ namespace
 
             //glDisable(GL_BLEND);
 
-            m_pImageRegistrator->Register();
+            m_pImageRegistrator->Register(_BackgroundTexturePtr, m_DiminishedRaycastTargetPtr);
 
             Performance::BeginEvent("Create membrane");
 

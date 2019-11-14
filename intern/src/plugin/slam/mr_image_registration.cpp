@@ -214,6 +214,11 @@ namespace MR
 
     void CImageRegistrator::Register(Gfx::CTexturePtr _FixedTexture, Gfx::CTexturePtr _MovingTexture)
     {
+        assert(_FixedTexture->GetNumberOfPixelsU() == m_Width);
+        assert(_FixedTexture->GetNumberOfPixelsV() == m_Height);
+        assert(_MovingTexture->GetNumberOfPixelsU() == m_Width);
+        assert(_MovingTexture->GetNumberOfPixelsV() == m_Height);
+
         Performance::BeginEvent("Image registration");
 
         ContextManager::ResetShaderVS();
