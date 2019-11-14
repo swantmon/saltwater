@@ -1363,7 +1363,7 @@ namespace
         if (_TextureBasePtr->GetDimension() == CTexture::Dim3D) IsLayered = GL_TRUE;
         if (_TextureBasePtr->IsCube()) IsLayered = GL_TRUE;
 
-        glBindImageTexture(_Unit, TextureHandle, _TextureBasePtr->GetCurrentMipLevel(), IsLayered, _Level, TextureUsage, TextureFormat);
+        glBindImageTexture(_Unit, TextureHandle, _Level, IsLayered, 0, TextureUsage, TextureFormat);
 
         m_ImageUnits[_Unit] = _TextureBasePtr;
     }
