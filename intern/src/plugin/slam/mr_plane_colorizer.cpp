@@ -195,8 +195,8 @@ namespace MR
 
         std::string DefineString = DefineStream.str();
 
-        m_ColorizationVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/colorization/vs_colorize_plane.glsl", "main", DefineString.c_str());
-        m_ColorizationFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/colorization/fs_colorize_plane.glsl", "main", DefineString.c_str());
+        m_ColorizationVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/colorization/vs_colorize_mesh.glsl", "main", DefineString.c_str());
+        m_ColorizationFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/colorization/fs_colorize_mesh.glsl", "main", DefineString.c_str());
 
         SInputElementDescriptor PlaneMeshLayout[] =
         {
