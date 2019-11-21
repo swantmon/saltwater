@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_VS_COLORIZE_MESH__
-#define __INCLUDE_VS_COLORIZE_MESH__
+#ifndef __INCLUDE_VS_COLORIZE_EXTENT__
+#define __INCLUDE_VS_COLORIZE_EXTENT__
 
 layout(std140, binding = 0) uniform PerDrawCallData
 {
@@ -29,4 +29,4 @@ void main()
     gl_Position = vec4(in_TexCoord * 2.0f - 1.0f, 0.0f, 1.0f);
 }
 
-#endif // __INCLUDE_VS_COLORIZE_MESH__
+#endif // __INCLUDE_VS_COLORIZE_EXTENT__

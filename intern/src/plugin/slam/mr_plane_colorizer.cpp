@@ -80,6 +80,8 @@ namespace MR
 
     void CPlaneColorizer::ColorizeAllPlanes()
     {
+        const bool InpaintExtent = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpaint_extent", false);
+
         Performance::BeginEvent("Plane colorization");
 
         auto& rPlaneMap = m_pReconstructor->GetPlanes();
@@ -88,28 +90,32 @@ namespace MR
         {
             auto& rPlane = Iter.second;
 
-            if (rPlane.m_MeshPtr != nullptr)
+            if (rPlane.m_TexturePtr == m_DummyTexturePtr)
             {
-                if (rPlane.m_TexturePtr == m_DummyTexturePtr)
-                {
-                    STextureDescriptor TextureDescriptor = {};
+                STextureDescriptor TextureDescriptor = {};
 
-                    TextureDescriptor.m_NumberOfPixelsU = m_PlaneTextureSize;
-                    TextureDescriptor.m_NumberOfPixelsV = m_PlaneTextureSize;
-                    TextureDescriptor.m_NumberOfPixelsW = 1;
-                    TextureDescriptor.m_NumberOfMipMaps = 1;
-                    TextureDescriptor.m_NumberOfTextures = 1;
-                    TextureDescriptor.m_Binding = CTexture::ShaderResource;
-                    TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
-                    TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
-                    TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
-                    TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
-                    TextureDescriptor.m_pPixels = nullptr;
+                TextureDescriptor.m_NumberOfPixelsU = m_PlaneTextureSize;
+                TextureDescriptor.m_NumberOfPixelsV = m_PlaneTextureSize;
+                TextureDescriptor.m_NumberOfPixelsW = 1;
+                TextureDescriptor.m_NumberOfMipMaps = 1;
+                TextureDescriptor.m_NumberOfTextures = 1;
+                TextureDescriptor.m_Binding = CTexture::ShaderResource;
+                TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
+                TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
+                TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
+                TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
+                TextureDescriptor.m_pPixels = nullptr;
 
-                    rPlane.m_TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-                }
+                rPlane.m_TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+            }
 
-                ColorizePlane(rPlane);
+            if (rPlane.m_MeshPtr != nullptr && !InpaintExtent)
+            {
+                ColorizePlane(rPlane, false);
+            }
+            else
+            {
+                ColorizePlane(rPlane, true);
             }
         }
 
@@ -118,7 +124,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CPlaneColorizer::ColorizePlane(CSLAMReconstructor::SPlane& _rPlane)
+    void CPlaneColorizer::ColorizePlane(CSLAMReconstructor::SPlane& _rPlane, bool _WholeExtent)
     {
         MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
 
@@ -136,8 +142,8 @@ namespace MR
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
 
-        ContextManager::SetShaderVS(m_ColorizationVSPtr);
-        ContextManager::SetShaderPS(m_ColorizationFSPtr);
+        ContextManager::SetShaderVS(m_PlaneColorizationVSPtr);
+        ContextManager::SetShaderPS(m_PlaneColorizationFSPtr);
         
         const unsigned int Offset = 0;
         ContextManager::SetVertexBuffer(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
@@ -195,8 +201,11 @@ namespace MR
 
         std::string DefineString = DefineStream.str();
 
-        m_ColorizationVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/colorization/vs_colorize_mesh.glsl", "main", DefineString.c_str());
-        m_ColorizationFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/colorization/fs_colorize_mesh.glsl", "main", DefineString.c_str());
+        m_PlaneColorizationVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/colorization/vs_colorize_mesh.glsl", "main", DefineString.c_str());
+        m_PlaneColorizationFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/colorization/fs_colorize_mesh.glsl", "main", DefineString.c_str());
+
+        m_ExtentColorizationVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/colorization/vs_colorize_extent.glsl", "main", DefineString.c_str());
+        m_ExtentColorizationFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/colorization/fs_colorize_extent.glsl", "main", DefineString.c_str());
 
         SInputElementDescriptor PlaneMeshLayout[] =
         {
@@ -204,7 +213,7 @@ namespace MR
             { "TEXCOORD", 1, CInputLayout::Float2Format, 0, 12, 20, CInputLayout::PerVertex, 0 },
         };
 
-        m_PlaneMeshLayoutPtr = ShaderManager::CreateInputLayout(PlaneMeshLayout, sizeof(PlaneMeshLayout) / sizeof(PlaneMeshLayout[0]), m_ColorizationVSPtr);
+        m_PlaneMeshLayoutPtr = ShaderManager::CreateInputLayout(PlaneMeshLayout, sizeof(PlaneMeshLayout) / sizeof(PlaneMeshLayout[0]), m_PlaneColorizationVSPtr);
     }
 
     // -----------------------------------------------------------------------------
@@ -281,8 +290,8 @@ namespace MR
     CPlaneColorizer::~CPlaneColorizer()
     {
         m_DummyTexturePtr = nullptr;
-        m_ColorizationVSPtr = nullptr;
-        m_ColorizationFSPtr = nullptr;
+        m_PlaneColorizationVSPtr = nullptr;
+        m_PlaneColorizationFSPtr = nullptr;
         m_ConstantBufferPtr = nullptr;
         m_PlaneMeshLayoutPtr = nullptr;
         m_ViewPortSetPtr = nullptr;

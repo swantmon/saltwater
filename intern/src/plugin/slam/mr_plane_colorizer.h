@@ -37,7 +37,7 @@ namespace MR
 
     private:
 
-        void ColorizePlane(CSLAMReconstructor::SPlane& _rPlane);
+        void ColorizePlane(CSLAMReconstructor::SPlane& _rPlane, bool _WholeExtent);
 
         enum EPLANETYPE
         {
@@ -60,8 +60,11 @@ namespace MR
 
         Gfx::CTexturePtr m_DummyTexturePtr;
 
-        Gfx::CShaderPtr m_ColorizationVSPtr;
-        Gfx::CShaderPtr m_ColorizationFSPtr;
+        Gfx::CShaderPtr m_PlaneColorizationVSPtr;
+        Gfx::CShaderPtr m_PlaneColorizationFSPtr;
+
+        Gfx::CShaderPtr m_ExtentColorizationVSPtr;
+        Gfx::CShaderPtr m_ExtentColorizationFSPtr;
 
         Gfx::CBufferPtr m_ConstantBufferPtr;
         

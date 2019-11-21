@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_FS_COLORIZE_MESH__
-#define __INCLUDE_FS_COLORIZE_MESH__
+#ifndef __INCLUDE_FS_COLORIZE_EXTENT__
+#define __INCLUDE_FS_COLORIZE_EXTENT__
 
 #include "../../plugins/slam/scalable/common_raycast.glsl"
 
@@ -42,4 +42,4 @@ void main()
     imageStore(cs_Texture, ivec2(gl_FragCoord.xy), vec4(Color, 1.0f));
 }
 
-#endif // __INCLUDE_FS_COLORIZE_MESH__
+#endif // __INCLUDE_FS_COLORIZE_EXTENT__
