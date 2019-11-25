@@ -220,6 +220,9 @@ namespace
         CShaderPtr m_PlaneMeshVSPtr;
         CShaderPtr m_PlaneMeshFSPtr;
 
+        CShaderPtr m_ExtentMeshVSPtr;
+        CShaderPtr m_ExtentMeshFSPtr;
+        
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_RaycastHitProxyBufferPtr;
         CBufferPtr m_RaycastHighLightConstantBufferPtr;
@@ -583,6 +586,9 @@ namespace
 
         m_PlaneMeshVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_plane_mesh.glsl", "main", DefineString.c_str());
         m_PlaneMeshFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_plane_mesh.glsl", "main", DefineString.c_str());
+
+        m_ExtentMeshVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_plane_mesh.glsl", "main", DefineString.c_str());
+        m_ExtentMeshFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_plane_mesh.glsl", "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -1744,24 +1750,27 @@ namespace
 
             if (RenderExtent)
             {
-                ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
+                ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
-                ContextManager::SetShaderVS(m_OutlineVSPtr);
-                ContextManager::SetShaderPS(m_OutlineFSPtr);
+                ContextManager::SetShaderVS(m_ExtentMeshVSPtr);
+                ContextManager::SetShaderPS(m_ExtentMeshFSPtr);
 
                 const unsigned int Offset = 0;
-                ContextManager::SetVertexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-                ContextManager::SetIndexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+                ContextManager::SetVertexBuffer(m_InpaintedPlaneMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+                ContextManager::SetIndexBuffer(m_InpaintedPlaneMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
 
-                ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
-                ContextManager::SetTopology(STopology::TriangleList);
+                ContextManager::SetInputLayout(m_InpaintedPlaneLayoutPtr);
+                ContextManager::SetTopology(STopology::TriangleStrip);
+
+                ContextManager::SetTexture(0, rPlane.second.m_TexturePtr);
 
                 BufferData.m_WorldMatrix = rPlane.second.m_Transform * glm::scale(glm::vec3(rPlane.second.m_Extent));
+                //BufferData.m_WorldMatrix = glm::scale(glm::vec3(1.0f));
                 BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 0.3f);
 
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
-                ContextManager::DrawIndexed(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+                ContextManager::Draw(m_InpaintedPlaneMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
             }
         }
 
