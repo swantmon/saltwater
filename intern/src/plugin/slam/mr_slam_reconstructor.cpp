@@ -1863,7 +1863,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::AddPlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const std::string& _ID)
+    void CSLAMReconstructor::AddPlane(const glm::mat4& _rTransform, const glm::vec2& _rExtent, const std::string& _ID)
     {
         SPlane Plane = { _rTransform, _rExtent };
 
@@ -1872,7 +1872,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::UpdatePlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const std::string& _ID)
+    void CSLAMReconstructor::UpdatePlane(const glm::mat4& _rTransform, const glm::vec2& _rExtent, const std::string& _ID)
     {
         SPlane Plane = { _rTransform, _rExtent };
 
@@ -1881,7 +1881,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::AddPlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID)
+    void CSLAMReconstructor::AddPlaneWithMesh(const glm::mat4& _rTransform, const glm::vec2& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID)
     {
         glm::vec3 Normal = glm::normalize(glm::mat3(_rTransform) * glm::vec3(0.0f, -1.0f, 0.0f));
 
@@ -1894,7 +1894,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
     
-    void CSLAMReconstructor::UpdatePlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID)
+    void CSLAMReconstructor::UpdatePlaneWithMesh(const glm::mat4& _rTransform, const glm::vec2& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID)
     {
         AddPlaneWithMesh(_rTransform, _rExtent, _rVertices, _rIndices, _ID);
 

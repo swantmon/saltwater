@@ -1039,11 +1039,13 @@ namespace MR
                 glm::mat4 PlaneTransform = *reinterpret_cast<glm::mat4*>(Decompressed.data() + Offset);
 
                 Offset += sizeof(PlaneTransform);
-                glm::vec4 PlaneExtent = *reinterpret_cast<glm::vec4*>(Decompressed.data() + Offset);
+                glm::vec4 RawPlaneExtent = *reinterpret_cast<glm::vec4*>(Decompressed.data() + Offset);
 
-                Offset += sizeof(PlaneExtent);
+                Offset += sizeof(RawPlaneExtent);
 
                 PlaneTransform = glm::eulerAngleX(glm::half_pi<float>()) * PlaneTransform;
+
+                auto PlaneExtent = glm::vec2(RawPlaneExtent.x, RawPlaneExtent.z);
 
                 if (Offset < Decompressed.size()) // Is there additional data (a mesh)?
                 {

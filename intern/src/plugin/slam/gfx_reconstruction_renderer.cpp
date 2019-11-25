@@ -1764,7 +1764,9 @@ namespace
 
                 ContextManager::SetTexture(0, rPlane.second.m_TexturePtr);
 
-                BufferData.m_WorldMatrix = rPlane.second.m_Transform * glm::scale(glm::vec3(rPlane.second.m_Extent));
+                auto Scale = glm::vec3(rPlane.second.m_Extent.x, 1.0f, rPlane.second.m_Extent.y);
+
+                BufferData.m_WorldMatrix = rPlane.second.m_Transform * glm::scale(Scale);
                 //BufferData.m_WorldMatrix = glm::scale(glm::vec3(1.0f));
                 BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 0.3f);
 

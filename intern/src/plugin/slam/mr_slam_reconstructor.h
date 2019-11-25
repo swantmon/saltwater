@@ -70,7 +70,7 @@ namespace MR
         struct SPlane
         {
             glm::mat4 m_Transform;
-            glm::vec4 m_Extent;
+            glm::vec2 m_Extent;
 
             glm::vec3 m_Normal;
 
@@ -167,11 +167,11 @@ namespace MR
 
         void ResetReconstruction(const SReconstructionSettings* pReconstructionSettings = nullptr);
 
-        void AddPlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const std::string& _ID);
-        void UpdatePlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const std::string& _ID);
+        void AddPlane(const glm::mat4& _rTransform, const glm::vec2& _rExtent, const std::string& _ID);
+        void UpdatePlane(const glm::mat4& _rTransform, const glm::vec2& _rExtent, const std::string& _ID);
 
-        void AddPlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID);
-        void UpdatePlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID);
+        void AddPlaneWithMesh(const glm::mat4& _rTransform, const glm::vec2& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID);
+        void UpdatePlaneWithMesh(const glm::mat4& _rTransform, const glm::vec2& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID);
 
         void RemovePlane(const std::string& _ID);
 
