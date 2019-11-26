@@ -26,7 +26,7 @@ layout(location = 0) out vec2 out_UV;
 
 void main()
 {
-    vec4 WSPosition = g_WorldMatrix * vec4(in_VertexPosition.x, in_VertexPosition.y, 0.0f, 1.0f);
+    vec4 WSPosition = g_WorldMatrix * vec4(0.5f * in_VertexPosition.x, 0.0f, 0.5f * in_VertexPosition.y, 1.0f);
     out_UV = in_TexCoord;
     gl_Position = g_WorldToScreen * WSPosition;
 }

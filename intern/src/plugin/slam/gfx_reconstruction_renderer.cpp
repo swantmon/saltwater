@@ -587,8 +587,8 @@ namespace
         m_PlaneMeshVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_plane_mesh.glsl", "main", DefineString.c_str());
         m_PlaneMeshFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_plane_mesh.glsl", "main", DefineString.c_str());
 
-        m_ExtentMeshVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_plane_mesh.glsl", "main", DefineString.c_str());
-        m_ExtentMeshFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_plane_mesh.glsl", "main", DefineString.c_str());
+        m_ExtentMeshVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_extent.glsl", "main", DefineString.c_str());
+        m_ExtentMeshFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_extent.glsl", "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -1709,10 +1709,12 @@ namespace
 
         Performance::BeginEvent("Plane rendering");
         
-        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
+        //ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
 
         SDrawCallConstantBuffer BufferData;
         
@@ -1724,10 +1726,10 @@ namespace
 
             bool RenderExtent = m_PlaneRenderMode == EPlaneRenderingMode::EXTENT_ONLY || m_PlaneRenderMode == EPlaneRenderingMode::ALL || (m_PlaneRenderMode == EPlaneRenderingMode::MESH_WITH_EXTENT && RenderMesh);
 
+            ContextManager::SetTexture(0, rPlane.second.m_TexturePtr);
+
             if (RenderMesh)
             {
-                ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-
                 ContextManager::SetShaderVS(m_PlaneMeshVSPtr);
                 ContextManager::SetShaderPS(m_PlaneMeshFSPtr);
 
@@ -1735,13 +1737,11 @@ namespace
                 ContextManager::SetVertexBuffer(rPlane.second.m_MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
                 ContextManager::SetIndexBuffer(rPlane.second.m_MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
 
-                ContextManager::SetTexture(0, rPlane.second.m_TexturePtr);
-
                 ContextManager::SetInputLayout(m_PlaneMeshLayoutPtr);
                 ContextManager::SetTopology(STopology::TriangleList);
 
-                BufferData.m_WorldMatrix = rPlane.second.m_Transform;
-                BufferData.m_Color = glm::vec4(1.0f, 0.0f, 0.0f, 0.3f);
+                BufferData.m_WorldMatrix = glm::scale(glm::vec3(1.0f));
+                BufferData.m_Color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
@@ -1750,8 +1750,6 @@ namespace
 
             if (RenderExtent)
             {
-                ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-
                 ContextManager::SetShaderVS(m_ExtentMeshVSPtr);
                 ContextManager::SetShaderPS(m_ExtentMeshFSPtr);
 
@@ -1762,13 +1760,12 @@ namespace
                 ContextManager::SetInputLayout(m_InpaintedPlaneLayoutPtr);
                 ContextManager::SetTopology(STopology::TriangleStrip);
 
-                ContextManager::SetTexture(0, rPlane.second.m_TexturePtr);
-
                 auto Scale = glm::vec3(rPlane.second.m_Extent.x, 1.0f, rPlane.second.m_Extent.y);
 
-                BufferData.m_WorldMatrix = rPlane.second.m_Transform * glm::scale(Scale);
+                BufferData.m_WorldMatrix =  glm::scale(Scale);
+                //BufferData.m_WorldMatrix = rPlane.second.m_Transform;
                 //BufferData.m_WorldMatrix = glm::scale(glm::vec3(1.0f));
-                BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 0.3f);
+                BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
 
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
