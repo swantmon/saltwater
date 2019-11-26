@@ -1092,10 +1092,10 @@ namespace MR
                     switch (PlaneAction)
                     {
                     case ADDPLANE:
-                        m_Reconstructor.AddPlaneWithMesh(PlaneTransform, PlaneExtent, Vertices, Indices, PlaneID);
+                        m_Reconstructor.AddPlaneWithMesh(PlaneTransform, Vertices, Indices, PlaneID);
                         break;
                     case UPDATEPLANE:
-                        m_Reconstructor.UpdatePlaneWithMesh(PlaneTransform, PlaneExtent, Vertices, Indices, PlaneID);
+                        m_Reconstructor.UpdatePlaneWithMesh(PlaneTransform, Vertices, Indices, PlaneID);
                         break;
                     case REMOVEPLANE:
                         m_Reconstructor.RemovePlane(PlaneID);

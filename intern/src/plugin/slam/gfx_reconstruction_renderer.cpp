@@ -1718,15 +1718,15 @@ namespace
 
         SDrawCallConstantBuffer BufferData;
         
-        for (const auto& rPlane : rPlanes)
+        for (const auto&[rKey, rPlane] : rPlanes)
         {
-            bool HasMesh = rPlane.second.m_MeshPtr != nullptr;
+            bool HasMesh = rPlane.m_MeshPtr != nullptr;
 
             bool RenderMesh = (m_PlaneRenderMode == EPlaneRenderingMode::ALL || m_PlaneRenderMode == EPlaneRenderingMode::MESH_ONLY || m_PlaneRenderMode == EPlaneRenderingMode::MESH_WITH_EXTENT) && HasMesh;
 
             bool RenderExtent = m_PlaneRenderMode == EPlaneRenderingMode::EXTENT_ONLY || m_PlaneRenderMode == EPlaneRenderingMode::ALL || (m_PlaneRenderMode == EPlaneRenderingMode::MESH_WITH_EXTENT && RenderMesh);
 
-            ContextManager::SetTexture(0, rPlane.second.m_TexturePtr);
+            ContextManager::SetTexture(0, rPlane.m_TexturePtr);
 
             if (RenderMesh)
             {
@@ -1734,18 +1734,18 @@ namespace
                 ContextManager::SetShaderPS(m_PlaneMeshFSPtr);
 
                 const unsigned int Offset = 0;
-                ContextManager::SetVertexBuffer(rPlane.second.m_MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-                ContextManager::SetIndexBuffer(rPlane.second.m_MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+                ContextManager::SetVertexBuffer(rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+                ContextManager::SetIndexBuffer(rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
 
                 ContextManager::SetInputLayout(m_PlaneMeshLayoutPtr);
                 ContextManager::SetTopology(STopology::TriangleList);
 
-                BufferData.m_WorldMatrix = glm::scale(glm::vec3(1.0f));
+                BufferData.m_WorldMatrix = rPlane.m_Transform;
                 BufferData.m_Color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
-                ContextManager::DrawIndexed(rPlane.second.m_MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+                ContextManager::DrawIndexed(rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
             }
 
             if (RenderExtent)
@@ -1760,12 +1760,10 @@ namespace
                 ContextManager::SetInputLayout(m_InpaintedPlaneLayoutPtr);
                 ContextManager::SetTopology(STopology::TriangleStrip);
 
-                auto Scale = glm::vec3(rPlane.second.m_Extent.x, 1.0f, rPlane.second.m_Extent.y);
+                auto Scale = glm::vec3(rPlane.m_Extent.x, 1.0f, rPlane.m_Extent.y);
 
-                BufferData.m_WorldMatrix =  glm::scale(Scale);
-                //BufferData.m_WorldMatrix = rPlane.second.m_Transform;
-                //BufferData.m_WorldMatrix = glm::scale(glm::vec3(1.0f));
-                BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+                BufferData.m_WorldMatrix = rPlane.m_Transform;
+                BufferData.m_Color = glm::vec4(rPlane.m_Min, rPlane.m_Extent);
 
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 

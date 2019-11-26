@@ -71,6 +71,7 @@ namespace MR
         {
             glm::mat4 m_Transform;
             glm::vec2 m_Extent;
+            glm::vec2 m_Min;
 
             glm::vec3 m_Normal;
 
@@ -170,8 +171,8 @@ namespace MR
         void AddPlane(const glm::mat4& _rTransform, const glm::vec2& _rExtent, const std::string& _ID);
         void UpdatePlane(const glm::mat4& _rTransform, const glm::vec2& _rExtent, const std::string& _ID);
 
-        void AddPlaneWithMesh(const glm::mat4& _rTransform, const glm::vec2& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID);
-        void UpdatePlaneWithMesh(const glm::mat4& _rTransform, const glm::vec2& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID);
+        void AddPlaneWithMesh(const glm::mat4& _rTransform, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID);
+        void UpdatePlaneWithMesh(const glm::mat4& _rTransform, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID);
 
         void RemovePlane(const std::string& _ID);
 
