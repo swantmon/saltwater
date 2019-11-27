@@ -135,9 +135,6 @@ namespace MR
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
 
-        ContextManager::SetShaderVS(m_PlaneColorizationVSPtr);
-        ContextManager::SetShaderPS(m_PlaneColorizationFSPtr);
-
         ContextManager::SetImageTexture(0, _rPlane.m_TexturePtr);
 
         ContextManager::SetConstantBuffer(0, m_ConstantBufferPtr);
@@ -154,6 +151,9 @@ namespace MR
 
         if (_WholeExtent)
         {
+            ContextManager::SetShaderVS(m_ExtentColorizationVSPtr);
+            ContextManager::SetShaderPS(m_ExtentColorizationFSPtr);
+
             const unsigned int Offset = 0;
             ContextManager::SetVertexBuffer(m_ExtentMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
             ContextManager::SetIndexBuffer(m_ExtentMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
@@ -164,6 +164,9 @@ namespace MR
         }
         else
         {
+            ContextManager::SetShaderVS(m_PlaneColorizationVSPtr);
+            ContextManager::SetShaderPS(m_PlaneColorizationFSPtr);
+
             const unsigned int Offset = 0;
             ContextManager::SetVertexBuffer(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
             ContextManager::SetIndexBuffer(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
