@@ -7,7 +7,8 @@
 layout(std140, binding = 0) uniform PerDrawCallData
 {
     mat4 g_WorldMatrix;
-	vec4 g_Color;
+	vec2 g_Offset;
+    vec2 g_Size;
 	vec3 g_Normal;
 };
 

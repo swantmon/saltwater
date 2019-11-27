@@ -109,14 +109,7 @@ namespace MR
                 rPlane.m_TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
             }
 
-            if (rPlane.m_MeshPtr != nullptr && !InpaintExtent)
-            {
-                ColorizePlane(rPlane, false);
-            }
-            else
-            {
-                ColorizePlane(rPlane, true);
-            }
+            ColorizePlane(rPlane, rPlane.m_MeshPtr == nullptr || InpaintExtent);
         }
 
         Performance::EndEvent();
@@ -144,26 +137,41 @@ namespace MR
 
         ContextManager::SetShaderVS(m_PlaneColorizationVSPtr);
         ContextManager::SetShaderPS(m_PlaneColorizationFSPtr);
-        
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
 
         ContextManager::SetImageTexture(0, _rPlane.m_TexturePtr);
 
-        ContextManager::SetInputLayout(m_PlaneMeshLayoutPtr);
-        ContextManager::SetTopology(STopology::TriangleList);
+        ContextManager::SetConstantBuffer(0, m_ConstantBufferPtr);
 
         SConstantBuffer BufferData;
 
         BufferData.m_WorldMatrix = _rPlane.m_Transform;
-        BufferData.m_Color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+        BufferData.m_Color = _WholeExtent ? glm::vec4(_rPlane.m_Min, _rPlane.m_Extent) : glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
         BufferData.m_Normal = _rPlane.m_Normal;
 
         BufferManager::UploadBufferData(m_ConstantBufferPtr, &BufferData);
-        ContextManager::SetConstantBuffer(0, m_ConstantBufferPtr);
 
-        ContextManager::DrawIndexed(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::SetInputLayout(m_PlaneMeshLayoutPtr);
+
+        if (_WholeExtent)
+        {
+            const unsigned int Offset = 0;
+            ContextManager::SetVertexBuffer(m_ExtentMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+            ContextManager::SetIndexBuffer(m_ExtentMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+            ContextManager::SetTopology(STopology::TriangleStrip);
+
+            ContextManager::Draw(m_ExtentMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
+        }
+        else
+        {
+            const unsigned int Offset = 0;
+            ContextManager::SetVertexBuffer(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+            ContextManager::SetIndexBuffer(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+            ContextManager::SetTopology(STopology::TriangleList);
+
+            ContextManager::DrawIndexed(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        }
         
         ContextManager::ResetResourceBuffer(0);
         ContextManager::ResetResourceBuffer(1);
@@ -255,6 +263,27 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CPlaneColorizer::SetupMeshes()
+    {
+        struct SQuadVertex
+        {
+            glm::vec3 m_Pos;
+            glm::vec2 m_Tex;
+        };
+
+        SQuadVertex Quad[4] =
+        {
+            { glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec2(0.0f, 0.0f) },
+            { glm::vec3( 1.0f, 0.0f, -1.0f), glm::vec2(1.0f, 0.0f) },
+            { glm::vec3(-1.0f, 0.0f,  1.0f), glm::vec2(0.0f, 1.0f) },
+            { glm::vec3( 1.0f, 0.0f,  1.0f), glm::vec2(1.0f, 1.0f) },
+        };
+
+        m_ExtentMeshPtr = Gfx::MeshManager::CreateMesh(Quad, sizeof(Quad) / sizeof(Quad[0]), sizeof(Quad[0]), nullptr, 0);
+    }
+
+    // -----------------------------------------------------------------------------
+
     CPlaneColorizer::CPlaneColorizer(MR::CSLAMReconstructor* _pReconstructor)
         : m_pReconstructor(_pReconstructor)
     {
@@ -283,6 +312,7 @@ namespace MR
         SetupShaders();
         SetupBuffers();
         SetupStates();
+        SetupMeshes();
     }
 
     // -----------------------------------------------------------------------------

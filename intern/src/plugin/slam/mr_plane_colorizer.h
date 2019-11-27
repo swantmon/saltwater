@@ -49,6 +49,7 @@ namespace MR
         void SetupShaders();
         void SetupBuffers();
         void SetupStates();
+        void SetupMeshes();
 
     private:
 
@@ -68,6 +69,8 @@ namespace MR
 
         Gfx::CBufferPtr m_ConstantBufferPtr;
         
+        Gfx::CMeshPtr m_ExtentMeshPtr;
+
         Gfx::CInputLayoutPtr m_PlaneMeshLayoutPtr;
 
         Gfx::CViewPortSetPtr m_ViewPortSetPtr;
