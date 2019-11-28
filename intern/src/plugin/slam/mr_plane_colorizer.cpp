@@ -157,7 +157,8 @@ namespace MR
 
         BufferManager::UploadBufferData(m_ConstantBufferPtr, &BufferData);
 
-        TextureManager::ClearTexture(_rPlane.m_TexturePtr);
+        const auto ClearData = glm::u8vec4(255);
+        TextureManager::ClearTexture(_rPlane.m_TexturePtr, &ClearData);
 
         if (_WholeExtent)
         {
