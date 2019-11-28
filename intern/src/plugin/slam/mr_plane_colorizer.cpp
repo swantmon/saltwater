@@ -80,7 +80,7 @@ namespace MR
 
     void CPlaneColorizer::ColorizeAllPlanes()
     {
-        const bool InpaintExtent = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpaint_extent", false);
+        const bool InpaintExtent = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:plane_mode:fill_extent", true);
 
         Performance::BeginEvent("Plane colorization");
 
@@ -186,20 +186,23 @@ namespace MR
             ContextManager::DrawIndexed(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         }
 
-        const auto Width = _rPlane.m_TexturePtr->GetNumberOfPixelsU();
-        const auto Height = _rPlane.m_TexturePtr->GetNumberOfPixelsV();
-        const auto PixelCount = Width * Height;
+        if (const bool InpaintExtent = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:plane_mode:inpaint", true))
+        {
+            const auto Width = _rPlane.m_TexturePtr->GetNumberOfPixelsU();
+            const auto Height = _rPlane.m_TexturePtr->GetNumberOfPixelsV();
+            const auto PixelCount = Width * Height;
 
-        std::vector<glm::u8vec4> RawData(PixelCount);
+            std::vector<glm::u8vec4> RawData(PixelCount);
 
-        Gfx::TextureManager::CopyTextureToCPU(_rPlane.m_TexturePtr, reinterpret_cast<char*>(RawData.data()));
+            Gfx::TextureManager::CopyTextureToCPU(_rPlane.m_TexturePtr, reinterpret_cast<char*>(RawData.data()));
 
-        std::vector<glm::u8vec4> InpaintedImage(PixelCount);
+            std::vector<glm::u8vec4> InpaintedImage(PixelCount);
 
-        InpaintWithPixMix(glm::ivec2(Width, Height), RawData, InpaintedImage);
+            InpaintWithPixMix(glm::ivec2(Width, Height), RawData, InpaintedImage);
 
-        auto TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(Width, Height));
-        Gfx::TextureManager::CopyToTexture2D(_rPlane.m_TexturePtr, TargetRect, Width, reinterpret_cast<char*>(InpaintedImage.data()), true);
+            auto TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(Width, Height));
+            Gfx::TextureManager::CopyToTexture2D(_rPlane.m_TexturePtr, TargetRect, Width, reinterpret_cast<char*>(InpaintedImage.data()), true);
+        }
     }
 
     // -----------------------------------------------------------------------------
