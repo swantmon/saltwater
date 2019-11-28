@@ -149,6 +149,8 @@ namespace MR
 
         ContextManager::SetInputLayout(m_PlaneMeshLayoutPtr);
 
+        TextureManager::ClearTexture(_rPlane.m_TexturePtr);
+
         if (_WholeExtent)
         {
             ContextManager::SetShaderVS(m_ExtentColorizationVSPtr);
@@ -276,10 +278,10 @@ namespace MR
 
         SQuadVertex Quad[4] =
         {
-            { glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec2(0.0f, 0.0f) },
-            { glm::vec3( 1.0f, 0.0f, -1.0f), glm::vec2(1.0f, 0.0f) },
-            { glm::vec3(-1.0f, 0.0f,  1.0f), glm::vec2(0.0f, 1.0f) },
-            { glm::vec3( 1.0f, 0.0f,  1.0f), glm::vec2(1.0f, 1.0f) },
+            { glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec2(1.0f, 1.0f) },
+            { glm::vec3( 1.0f, 0.0f, -1.0f), glm::vec2(0.0f, 1.0f) },
+            { glm::vec3(-1.0f, 0.0f,  1.0f), glm::vec2(1.0f, 0.0f) },
+            { glm::vec3( 1.0f, 0.0f,  1.0f), glm::vec2(0.0f, 0.0f) },
         };
 
         m_ExtentMeshPtr = Gfx::MeshManager::CreateMesh(Quad, sizeof(Quad) / sizeof(Quad[0]), sizeof(Quad[0]), nullptr, 0);
