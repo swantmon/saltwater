@@ -84,6 +84,26 @@ namespace MR
 
         Performance::BeginEvent("Plane colorization");
 
+        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
+
+        ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
+        ContextManager::SetResourceBuffer(2, rVolume.m_Level1PoolPtr);
+        ContextManager::SetResourceBuffer(3, rVolume.m_TSDFPoolPtr);
+        ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
+        ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
+
+        ContextManager::SetTargetSet(m_TargetSetPtr);
+        ContextManager::SetViewPortSet(m_ViewPortSetPtr);
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
+
+        ContextManager::SetConstantBuffer(0, m_ConstantBufferPtr);
+
+        ContextManager::SetInputLayout(m_PlaneMeshLayoutPtr);
+
         auto& rPlaneMap = m_pReconstructor->GetPlanes();
 
         for (auto& Iter : rPlaneMap)
@@ -112,6 +132,14 @@ namespace MR
             ColorizePlane(rPlane, rPlane.m_MeshPtr == nullptr || InpaintExtent);
         }
 
+        ContextManager::ResetResourceBuffer(0);
+        ContextManager::ResetResourceBuffer(1);
+        ContextManager::ResetResourceBuffer(2);
+        ContextManager::ResetResourceBuffer(3);
+        ContextManager::ResetResourceBuffer(6);
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(2);
+
         Performance::EndEvent();
     }
 
@@ -119,25 +147,7 @@ namespace MR
 
     void CPlaneColorizer::ColorizePlane(CSLAMReconstructor::SPlane& _rPlane, bool _WholeExtent)
     {
-        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
-
-        ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
-        ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
-        ContextManager::SetResourceBuffer(2, rVolume.m_Level1PoolPtr);
-        ContextManager::SetResourceBuffer(3, rVolume.m_TSDFPoolPtr);
-        ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
-        ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
-
-        ContextManager::SetTargetSet(m_TargetSetPtr);
-        ContextManager::SetViewPortSet(m_ViewPortSetPtr);
-
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
-        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
-        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
-
         ContextManager::SetImageTexture(0, _rPlane.m_TexturePtr);
-
-        ContextManager::SetConstantBuffer(0, m_ConstantBufferPtr);
 
         SConstantBuffer BufferData;
 
@@ -146,8 +156,6 @@ namespace MR
         BufferData.m_Normal = _rPlane.m_Normal;
 
         BufferManager::UploadBufferData(m_ConstantBufferPtr, &BufferData);
-
-        ContextManager::SetInputLayout(m_PlaneMeshLayoutPtr);
 
         TextureManager::ClearTexture(_rPlane.m_TexturePtr);
 
@@ -177,14 +185,21 @@ namespace MR
 
             ContextManager::DrawIndexed(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         }
-        
-        ContextManager::ResetResourceBuffer(0);
-        ContextManager::ResetResourceBuffer(1);
-        ContextManager::ResetResourceBuffer(2);
-        ContextManager::ResetResourceBuffer(3);
-        ContextManager::ResetResourceBuffer(6);
-        ContextManager::ResetConstantBuffer(0);
-        ContextManager::ResetConstantBuffer(2);
+
+        const auto Width = _rPlane.m_TexturePtr->GetNumberOfPixelsU();
+        const auto Height = _rPlane.m_TexturePtr->GetNumberOfPixelsV();
+        const auto PixelCount = Width * Height;
+
+        std::vector<glm::u8vec4> RawData(PixelCount);
+
+        Gfx::TextureManager::CopyTextureToCPU(_rPlane.m_TexturePtr, reinterpret_cast<char*>(RawData.data()));
+
+        std::vector<glm::u8vec4> InpaintedImage(PixelCount);
+
+        InpaintWithPixMix(glm::ivec2(Width, Height), RawData, InpaintedImage);
+
+        auto TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(Width, Height));
+        Gfx::TextureManager::CopyToTexture2D(_rPlane.m_TexturePtr, TargetRect, Width, reinterpret_cast<char*>(InpaintedImage.data()), true);
     }
 
     // -----------------------------------------------------------------------------
@@ -318,6 +333,13 @@ namespace MR
         SetupBuffers();
         SetupStates();
         SetupMeshes();
+
+        if (!Core::PluginManager::LoadPlugin("PixMix"))
+        {
+            BASE_THROWM("PixMix plugin was not loaded");
+        }
+
+        InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix", "Inpaint"));
     }
 
     // -----------------------------------------------------------------------------

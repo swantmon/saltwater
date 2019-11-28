@@ -39,6 +39,11 @@ void main()
     vec3 Vertex = GetPosition(CameraPosition - RayDirection * CAMERA_OFFSET, RayDirection);
     vec3 Color = GetColor(Vertex);
 
+    if (Color.x + Color.y + Color.z == 0.0f)
+    {
+        Color = vec3(1.0f);
+    }
+
     imageStore(cs_Texture, ivec2(gl_FragCoord.xy), vec4(Color, 1.0f));
 }
 

@@ -8,6 +8,8 @@
 
 #include "engine/engine.h"
 
+#include "engine/core/core_plugin_manager.h"
+
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_main.h"
@@ -18,6 +20,7 @@
 #include "engine/graphic/gfx_selection.h"
 #include "engine/graphic/gfx_selection_renderer.h"
 #include "engine/graphic/gfx_view_manager.h"
+
 
 #include "plugin/slam/mr_slam_reconstructor.h"
 
@@ -76,5 +79,8 @@ namespace MR
         Gfx::CViewPortSetPtr m_ViewPortSetPtr;
 
         Gfx::CTargetSetPtr m_TargetSetPtr;
+
+        using InpaintWithPixMixFunc = void(*)(const glm::ivec2&, const std::vector<glm::u8vec4>&, std::vector<glm::u8vec4>&);
+        InpaintWithPixMixFunc InpaintWithPixMix;
     };
 } // namespace Scpt
