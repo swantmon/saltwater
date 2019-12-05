@@ -80,46 +80,10 @@ namespace MR
 
     void CPlaneColorizer::ColorizeAllPlanes()
     {
+        const bool InpaintExtent = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:plane_mode:fill_extent", true);
+
         Performance::BeginEvent("Plane colorization");
 
-        auto& rPlaneMap = m_pReconstructor->GetPlanes();
-
-        for (auto& Iter : rPlaneMap)
-        {
-            auto& rPlane = Iter.second;
-
-            if (rPlane.m_MeshPtr != nullptr)
-            {
-                if (rPlane.m_TexturePtr == m_DummyTexturePtr)
-                {
-                    STextureDescriptor TextureDescriptor = {};
-
-                    TextureDescriptor.m_NumberOfPixelsU = m_PlaneTextureSize;
-                    TextureDescriptor.m_NumberOfPixelsV = m_PlaneTextureSize;
-                    TextureDescriptor.m_NumberOfPixelsW = 1;
-                    TextureDescriptor.m_NumberOfMipMaps = 1;
-                    TextureDescriptor.m_NumberOfTextures = 1;
-                    TextureDescriptor.m_Binding = CTexture::ShaderResource;
-                    TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
-                    TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
-                    TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
-                    TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
-                    TextureDescriptor.m_pPixels = nullptr;
-
-                    rPlane.m_TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-                }
-
-                ColorizePlane(rPlane);
-            }
-        }
-
-        Performance::EndEvent();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CPlaneColorizer::ColorizePlane(CSLAMReconstructor::SPlane& _rPlane)
-    {
         MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
 
         ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
@@ -136,29 +100,38 @@ namespace MR
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
 
-        ContextManager::SetShaderVS(m_ColorizationVSPtr);
-        ContextManager::SetShaderPS(m_ColorizationFSPtr);
-        
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
-
-        ContextManager::SetImageTexture(0, _rPlane.m_TexturePtr);
-
-        ContextManager::SetInputLayout(m_PlaneMeshLayoutPtr);
-        ContextManager::SetTopology(STopology::TriangleList);
-
-        SConstantBuffer BufferData;
-
-        BufferData.m_WorldMatrix = _rPlane.m_Transform;
-        BufferData.m_Color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-        BufferData.m_Normal = _rPlane.m_Normal;
-
-        BufferManager::UploadBufferData(m_ConstantBufferPtr, &BufferData);
         ContextManager::SetConstantBuffer(0, m_ConstantBufferPtr);
 
-        ContextManager::DrawIndexed(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
-        
+        ContextManager::SetInputLayout(m_PlaneMeshLayoutPtr);
+
+        auto& rPlaneMap = m_pReconstructor->GetPlanes();
+
+        for (auto& Iter : rPlaneMap)
+        {
+            auto& rPlane = Iter.second;
+
+            if (rPlane.m_TexturePtr == m_DummyTexturePtr)
+            {
+                STextureDescriptor TextureDescriptor = {};
+
+                TextureDescriptor.m_NumberOfPixelsU = m_PlaneTextureSize;
+                TextureDescriptor.m_NumberOfPixelsV = m_PlaneTextureSize;
+                TextureDescriptor.m_NumberOfPixelsW = 1;
+                TextureDescriptor.m_NumberOfMipMaps = 1;
+                TextureDescriptor.m_NumberOfTextures = 1;
+                TextureDescriptor.m_Binding = CTexture::ShaderResource;
+                TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
+                TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
+                TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
+                TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
+                TextureDescriptor.m_pPixels = nullptr;
+
+                rPlane.m_TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+            }
+
+            ColorizePlane(rPlane, rPlane.m_MeshPtr == nullptr || InpaintExtent);
+        }
+
         ContextManager::ResetResourceBuffer(0);
         ContextManager::ResetResourceBuffer(1);
         ContextManager::ResetResourceBuffer(2);
@@ -166,6 +139,71 @@ namespace MR
         ContextManager::ResetResourceBuffer(6);
         ContextManager::ResetConstantBuffer(0);
         ContextManager::ResetConstantBuffer(2);
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPlaneColorizer::ColorizePlane(CSLAMReconstructor::SPlane& _rPlane, bool _WholeExtent)
+    {
+        ContextManager::SetImageTexture(0, _rPlane.m_TexturePtr);
+
+        SConstantBuffer BufferData;
+
+        BufferData.m_WorldMatrix = _rPlane.m_Transform;
+        BufferData.m_Color = _WholeExtent ? glm::vec4(_rPlane.m_Min, _rPlane.m_Extent) : glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+        BufferData.m_Normal = _rPlane.m_Normal;
+
+        BufferManager::UploadBufferData(m_ConstantBufferPtr, &BufferData);
+
+        const auto ClearData = glm::u8vec4(255);
+        TextureManager::ClearTexture(_rPlane.m_TexturePtr, &ClearData);
+
+        if (_WholeExtent)
+        {
+            ContextManager::SetShaderVS(m_ExtentColorizationVSPtr);
+            ContextManager::SetShaderPS(m_ExtentColorizationFSPtr);
+
+            const unsigned int Offset = 0;
+            ContextManager::SetVertexBuffer(m_ExtentMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+            ContextManager::SetIndexBuffer(m_ExtentMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+            ContextManager::SetTopology(STopology::TriangleStrip);
+
+            ContextManager::Draw(m_ExtentMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
+        }
+        else
+        {
+            ContextManager::SetShaderVS(m_PlaneColorizationVSPtr);
+            ContextManager::SetShaderPS(m_PlaneColorizationFSPtr);
+
+            const unsigned int Offset = 0;
+            ContextManager::SetVertexBuffer(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+            ContextManager::SetIndexBuffer(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+            ContextManager::SetTopology(STopology::TriangleList);
+
+            ContextManager::DrawIndexed(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        }
+
+        if (const bool InpaintExtent = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:plane_mode:inpaint", true))
+        {
+            const auto Width = _rPlane.m_TexturePtr->GetNumberOfPixelsU();
+            const auto Height = _rPlane.m_TexturePtr->GetNumberOfPixelsV();
+            const auto PixelCount = Width * Height;
+
+            std::vector<glm::u8vec4> RawData(PixelCount);
+
+            Gfx::TextureManager::CopyTextureToCPU(_rPlane.m_TexturePtr, reinterpret_cast<char*>(RawData.data()));
+
+            std::vector<glm::u8vec4> InpaintedImage(PixelCount);
+
+            InpaintWithPixMix(glm::ivec2(Width, Height), RawData, InpaintedImage);
+
+            auto TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(Width, Height));
+            Gfx::TextureManager::CopyToTexture2D(_rPlane.m_TexturePtr, TargetRect, Width, reinterpret_cast<char*>(InpaintedImage.data()), true);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -195,8 +233,11 @@ namespace MR
 
         std::string DefineString = DefineStream.str();
 
-        m_ColorizationVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/colorization/vs_colorize_plane.glsl", "main", DefineString.c_str());
-        m_ColorizationFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/colorization/fs_colorize_plane.glsl", "main", DefineString.c_str());
+        m_PlaneColorizationVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/colorization/vs_colorize_mesh.glsl", "main", DefineString.c_str());
+        m_PlaneColorizationFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/colorization/fs_colorize_mesh.glsl", "main", DefineString.c_str());
+
+        m_ExtentColorizationVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/colorization/vs_colorize_extent.glsl", "main", DefineString.c_str());
+        m_ExtentColorizationFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/colorization/fs_colorize_extent.glsl", "main", DefineString.c_str());
 
         SInputElementDescriptor PlaneMeshLayout[] =
         {
@@ -204,7 +245,7 @@ namespace MR
             { "TEXCOORD", 1, CInputLayout::Float2Format, 0, 12, 20, CInputLayout::PerVertex, 0 },
         };
 
-        m_PlaneMeshLayoutPtr = ShaderManager::CreateInputLayout(PlaneMeshLayout, sizeof(PlaneMeshLayout) / sizeof(PlaneMeshLayout[0]), m_ColorizationVSPtr);
+        m_PlaneMeshLayoutPtr = ShaderManager::CreateInputLayout(PlaneMeshLayout, sizeof(PlaneMeshLayout) / sizeof(PlaneMeshLayout[0]), m_PlaneColorizationVSPtr);
     }
 
     // -----------------------------------------------------------------------------
@@ -246,6 +287,27 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CPlaneColorizer::SetupMeshes()
+    {
+        struct SQuadVertex
+        {
+            glm::vec3 m_Pos;
+            glm::vec2 m_Tex;
+        };
+
+        SQuadVertex Quad[4] =
+        {
+            { glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec2(1.0f, 1.0f) },
+            { glm::vec3( 1.0f, 0.0f, -1.0f), glm::vec2(0.0f, 1.0f) },
+            { glm::vec3(-1.0f, 0.0f,  1.0f), glm::vec2(1.0f, 0.0f) },
+            { glm::vec3( 1.0f, 0.0f,  1.0f), glm::vec2(0.0f, 0.0f) },
+        };
+
+        m_ExtentMeshPtr = Gfx::MeshManager::CreateMesh(Quad, sizeof(Quad) / sizeof(Quad[0]), sizeof(Quad[0]), nullptr, 0);
+    }
+
+    // -----------------------------------------------------------------------------
+
     CPlaneColorizer::CPlaneColorizer(MR::CSLAMReconstructor* _pReconstructor)
         : m_pReconstructor(_pReconstructor)
     {
@@ -274,6 +336,14 @@ namespace MR
         SetupShaders();
         SetupBuffers();
         SetupStates();
+        SetupMeshes();
+
+        if (!Core::PluginManager::LoadPlugin("PixMix"))
+        {
+            BASE_THROWM("PixMix plugin was not loaded");
+        }
+
+        InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix", "Inpaint"));
     }
 
     // -----------------------------------------------------------------------------
@@ -281,8 +351,8 @@ namespace MR
     CPlaneColorizer::~CPlaneColorizer()
     {
         m_DummyTexturePtr = nullptr;
-        m_ColorizationVSPtr = nullptr;
-        m_ColorizationFSPtr = nullptr;
+        m_PlaneColorizationVSPtr = nullptr;
+        m_PlaneColorizationFSPtr = nullptr;
         m_ConstantBufferPtr = nullptr;
         m_PlaneMeshLayoutPtr = nullptr;
         m_ViewPortSetPtr = nullptr;

@@ -1863,7 +1863,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::AddPlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const std::string& _ID)
+    void CSLAMReconstructor::AddPlane(const glm::mat4& _rTransform, const glm::vec2& _rExtent, const std::string& _ID)
     {
         SPlane Plane = { _rTransform, _rExtent };
 
@@ -1872,7 +1872,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::UpdatePlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const std::string& _ID)
+    void CSLAMReconstructor::UpdatePlane(const glm::mat4& _rTransform, const glm::vec2& _rExtent, const std::string& _ID)
     {
         SPlane Plane = { _rTransform, _rExtent };
 
@@ -1881,22 +1881,35 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::AddPlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID)
+    void CSLAMReconstructor::AddPlaneWithMesh(const glm::mat4& _rTransform, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID)
     {
         glm::vec3 Normal = glm::normalize(glm::mat3(_rTransform) * glm::vec3(0.0f, -1.0f, 0.0f));
 
         auto MeshPtr =  MeshManager::CreateMesh(_rVertices.data(), static_cast<int>(_rVertices.size()), sizeof(_rVertices[0]), _rIndices.data(), static_cast<int>(_rIndices.size()));
 
-        SPlane Plane = { _rTransform, _rExtent, Normal, MeshPtr, nullptr, _rVertices, _rIndices };
+        glm::vec2 Min(std::numeric_limits<float>::infinity());
+        glm::vec2 Max(-std::numeric_limits<float>::infinity());
+
+        for (auto& rVertex : _rVertices)
+        {
+            Min.x = std::min(Min.x, rVertex.m_Position.x);
+            Min.y = std::min(Min.y, rVertex.m_Position.z);
+            Max.x = std::max(Max.x, rVertex.m_Position.x);
+            Max.y = std::max(Max.y, rVertex.m_Position.z);
+        }
+
+        auto Extent = Max - Min;
+
+        SPlane Plane = { _rTransform, Extent, Min, Normal, MeshPtr, nullptr, _rVertices, _rIndices };
 
         m_Planes[_ID] = Plane;
     }
     
     // -----------------------------------------------------------------------------
     
-    void CSLAMReconstructor::UpdatePlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID)
+    void CSLAMReconstructor::UpdatePlaneWithMesh(const glm::mat4& _rTransform, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID)
     {
-        AddPlaneWithMesh(_rTransform, _rExtent, _rVertices, _rIndices, _ID);
+        AddPlaneWithMesh(_rTransform, _rVertices, _rIndices, _ID);
 
         //SPlane Plane = { _Transform, _Extent };
 

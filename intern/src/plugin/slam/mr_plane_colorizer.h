@@ -8,6 +8,8 @@
 
 #include "engine/engine.h"
 
+#include "engine/core/core_plugin_manager.h"
+
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_main.h"
@@ -18,6 +20,7 @@
 #include "engine/graphic/gfx_selection.h"
 #include "engine/graphic/gfx_selection_renderer.h"
 #include "engine/graphic/gfx_view_manager.h"
+
 
 #include "plugin/slam/mr_slam_reconstructor.h"
 
@@ -37,7 +40,7 @@ namespace MR
 
     private:
 
-        void ColorizePlane(CSLAMReconstructor::SPlane& _rPlane);
+        void ColorizePlane(CSLAMReconstructor::SPlane& _rPlane, bool _WholeExtent);
 
         enum EPLANETYPE
         {
@@ -49,6 +52,7 @@ namespace MR
         void SetupShaders();
         void SetupBuffers();
         void SetupStates();
+        void SetupMeshes();
 
     private:
 
@@ -60,15 +64,23 @@ namespace MR
 
         Gfx::CTexturePtr m_DummyTexturePtr;
 
-        Gfx::CShaderPtr m_ColorizationVSPtr;
-        Gfx::CShaderPtr m_ColorizationFSPtr;
+        Gfx::CShaderPtr m_PlaneColorizationVSPtr;
+        Gfx::CShaderPtr m_PlaneColorizationFSPtr;
+
+        Gfx::CShaderPtr m_ExtentColorizationVSPtr;
+        Gfx::CShaderPtr m_ExtentColorizationFSPtr;
 
         Gfx::CBufferPtr m_ConstantBufferPtr;
         
+        Gfx::CMeshPtr m_ExtentMeshPtr;
+
         Gfx::CInputLayoutPtr m_PlaneMeshLayoutPtr;
 
         Gfx::CViewPortSetPtr m_ViewPortSetPtr;
 
         Gfx::CTargetSetPtr m_TargetSetPtr;
+
+        using InpaintWithPixMixFunc = void(*)(const glm::ivec2&, const std::vector<glm::u8vec4>&, std::vector<glm::u8vec4>&);
+        InpaintWithPixMixFunc InpaintWithPixMix;
     };
 } // namespace Scpt
