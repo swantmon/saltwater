@@ -85,7 +85,7 @@ namespace
     private:
 
         CPlugins m_Plugins;
-        std::string m_LibraryPath;
+        std::string m_LibraryPath = ".";
 
     private:
 
@@ -154,33 +154,40 @@ namespace
         // Find all files in the current path
 
 #ifdef PLATFORM_WINDOWS
-        for (const auto & rEntry : std::filesystem::directory_iterator(m_LibraryPath))
+        try
         {
-            // Find the ones that have a name like Saltwater plugins
-
-            const auto PluginFileName = rEntry.path().string();
-            if (std::regex_match(PluginFileName, m_PluginRegex))
+            for (const auto& rEntry : std::filesystem::directory_iterator(m_LibraryPath))
             {
-                // Found one! Now load it and get the plugin plugin's name
-                // If we can't get the name it's not a valid SW plugin and we release it
+                // Find the ones that have a name like Saltwater plugins
 
-                auto pLib = InternLoadLibrary(PluginFileName);
-                if (pLib != nullptr)
+                const auto PluginFileName = rEntry.path().filename().string();
+                if (std::regex_match(PluginFileName, m_PluginRegex))
                 {
-                    auto pInfo = static_cast<SPluginInfo*>(InternGetProc(pLib, "InfoExport"));
+                    // Found one! Now load it and get the plugin plugin's name
+                    // If we can't get the name it's not a valid SW plugin and we release it
 
-                    if (pInfo != nullptr)
+                    auto pLib = InternLoadLibrary(PluginFileName);
+                    if (pLib != nullptr)
                     {
-                        auto Message = "Found plugin \'"s + pInfo->m_pPluginName + R"(' in file ')" + PluginFileName + "\'"s;
-                        ENGINE_CONSOLE_INFO(Message.c_str());
-                        m_Plugins[pInfo->m_pPluginName] = { pLib, pInfo, false };
-                    }
-                    else
-                    {
-                        InternFreeLibrary(pLib);
+                        auto pInfo = static_cast<SPluginInfo*>(InternGetProc(pLib, "InfoExport"));
+
+                        if (pInfo != nullptr)
+                        {
+                            auto Message = "Found plugin \'"s + pInfo->m_pPluginName + R"(' in file ')" + PluginFileName + "\'"s;
+                            ENGINE_CONSOLE_INFO(Message.c_str());
+                            m_Plugins[pInfo->m_pPluginName] = { pLib, pInfo, false };
+                        }
+                        else
+                        {
+                            InternFreeLibrary(pLib);
+                        }
                     }
                 }
             }
+        }
+        catch (std::filesystem::filesystem_error& e)
+        {
+            std::cout << e.what();
         }
 #elif PLATFORM_ANDROID // TODO: Check if Android supports std::filesystem and delete this branch
         DIR *d;
