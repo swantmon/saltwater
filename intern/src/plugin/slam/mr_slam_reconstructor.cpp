@@ -1771,7 +1771,7 @@ namespace MR
         assert(Size > 0);
         assert(BufferPtr.IsValid());
 
-        BufferManager::UploadBufferData(BufferPtr, m_ClearVector.data());
+        BufferManager::UploadBufferData(BufferPtr, m_ClearVector.data(), 0, Size);
     }
 
     // -----------------------------------------------------------------------------
