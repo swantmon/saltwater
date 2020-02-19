@@ -91,14 +91,12 @@ namespace Scpt
                 {
                     std::memcpy(Decompressed.data(), _rMessage.m_Payload.data(), Decompressed.size());
                 }
-
-                int32_t MessageType = *reinterpret_cast<int32_t*>(Decompressed.data());
-
-                glm::ivec2 Size = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t));
+                
+                glm::ivec2 Size = *reinterpret_cast<glm::ivec2*>(Decompressed.data());
 
                 std::vector<glm::u8vec4> RawData(Size.x * Size.y);
 
-                std::memcpy(RawData.data(), Decompressed.data() + sizeof(int32_t) + sizeof(glm::ivec2), sizeof(RawData[0]) * RawData.size());
+                std::memcpy(RawData.data(), Decompressed.data() + sizeof(glm::ivec2), sizeof(RawData[0]) * RawData.size());
 
                 std::vector<glm::u8vec4> InpaintedImage(Size.x * Size.y);
 
