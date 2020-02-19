@@ -98,11 +98,28 @@ namespace Scpt
 
                 std::memcpy(RawData.data(), Decompressed.data() + sizeof(glm::ivec2), sizeof(RawData[0]) * RawData.size());
 
+                for (auto& Pixel : RawData)
+                {
+                    if (Pixel.r == 0 && Pixel.g == 0 && Pixel.b == 0)
+                    {
+                        Pixel = glm::u8vec4(255);
+                    }
+                }
+
                 std::vector<glm::u8vec4> InpaintedImage(Size.x * Size.y);
 
                 InpaintWithPixMix(Size, RawData, InpaintedImage);
 
-                // TODO: send image back
+                std::vector<char> Payload(InpaintedImage.size() * sizeof(InpaintedImage[0]));
+
+                Net::CMessage Message;
+                Message.m_Category = 0;
+                Message.m_CompressedSize = static_cast<int>(Payload.size());
+                Message.m_DecompressedSize = static_cast<int>(Payload.size());
+                Message.m_MessageType = 0;
+                Message.m_Payload = Payload;
+
+                Net::CNetworkManager::GetInstance().SendMessage(m_Socket, Message);
             }
         }
         
