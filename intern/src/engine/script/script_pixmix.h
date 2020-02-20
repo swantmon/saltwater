@@ -111,6 +111,7 @@ namespace Scpt
                 InpaintWithPixMix(Size, RawData, InpaintedImage);
 
                 std::vector<char> Payload(InpaintedImage.size() * sizeof(InpaintedImage[0]));
+                std::memcpy(Payload.data(), InpaintedImage.data(), Payload.size());
 
                 Net::CMessage Message;
                 Message.m_Category = 0;
