@@ -136,6 +136,7 @@
     <ClCompile Include="..\..\..\src\engine\script\script_camera_control_script.cpp" />
     <ClCompile Include="..\..\..\src\engine\script\script_easyar_target_script.cpp" />
     <ClCompile Include="..\..\..\src\engine\script\script_light_estimation.cpp" />
+    <ClCompile Include="..\..\..\src\engine\script\script_pixmix.cpp" />
     <ClCompile Include="..\..\..\src\engine\script\script_script_manager.cpp" />
     <ClCompile Include="..\..\..\src\engine\script\script_slam.cpp" />
   </ItemGroup>
@@ -277,6 +278,7 @@
     <ClInclude Include="..\..\..\src\engine\script\script_camera_control_script.h" />
     <ClInclude Include="..\..\..\src\engine\script\script_easyar_target_script.h" />
     <ClInclude Include="..\..\..\src\engine\script\script_light_estimation.h" />
+    <ClInclude Include="..\..\..\src\engine\script\script_pixmix.h" />
     <ClInclude Include="..\..\..\src\engine\script\script_script.h" />
     <ClInclude Include="..\..\..\src\engine\script\script_script_manager.h" />
     <ClInclude Include="..\..\..\src\engine\script\script_slam.h" />

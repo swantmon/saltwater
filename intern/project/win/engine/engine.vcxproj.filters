@@ -512,6 +512,9 @@
     <ClCompile Include="..\..\..\src\engine\script\script_slam.cpp">
       <Filter>script\scripts</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\script\script_pixmix.cpp">
+      <Filter>script\scripts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\engine\core\core_asset_generator.h">
@@ -927,6 +930,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_highlight_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\script\script_pixmix.h">
+      <Filter>script\scripts</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

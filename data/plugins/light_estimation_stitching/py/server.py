@@ -87,6 +87,9 @@ def OnNewClient(_Socket, _Address, _ID):
 
             integers = struct.unpack('I' * 3, header)
             bytesLeft = integers[1]
+            
+            textureSize = header = _Socket.recv(8)
+            
             panorama = np.array([])
 
             print(_Address, "Receiving ", bytesLeft, " byte of data")

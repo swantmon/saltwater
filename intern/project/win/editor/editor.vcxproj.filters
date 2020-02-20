@@ -177,6 +177,9 @@
     <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImTextureSlot.cpp">
       <Filter>gui\native\extensions</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_script_slam_pixmix.cpp">
+      <Filter>gui\objects\components\scripts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor\edit_edit_state.h">
@@ -324,6 +327,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImTextureSlot.h">
       <Filter>gui\native\extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_script_slam_pixmix.h">
+      <Filter>gui\objects\components\scripts</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -38,6 +38,7 @@
 #include "engine/script/script_light_estimation.h"
 #include "engine/script/script_script_manager.h"
 #include "engine/script/script_slam.h"
+#include "engine/script/script_pixmix.h"
 
 #include <assert.h>
 #include <fstream>
@@ -61,6 +62,7 @@ namespace Edit
     void CreateEasyARScene();
     void CreateCornellBoxScene();
     void CreateSLAMScene();
+    void CreatePixMixScene();
 } // namespace Edit
 
 namespace Edit
@@ -153,6 +155,10 @@ namespace Edit
             else if (Scene == "slam")
             {
                 CreateSLAMScene();
+            }
+            else if (Scene == "pixmix")
+            {
+                CreatePixMixScene();
             }
 
             CEditState::GetInstance().SetDirty(true);
@@ -671,6 +677,42 @@ namespace Edit
             // -----------------------------------------------------------------------------
 
             auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CSLAMScript>();
+
+            rEntity.AttachComponent(ScriptComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CreatePixMixScene()
+    {
+        // -----------------------------------------------------------------------------
+        // Allocate a map
+        // -----------------------------------------------------------------------------
+        Dt::Map::AllocateMap(1, 1);
+
+        // -----------------------------------------------------------------------------
+        // Setup entities
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
+
+            rEntity.SetName("PIXMIX");
+
+            // -----------------------------------------------------------------------------
+
+            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CPixMixScript>();
 
             rEntity.AttachComponent(ScriptComponent);
 
