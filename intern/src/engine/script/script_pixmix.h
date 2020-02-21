@@ -42,6 +42,8 @@ namespace Scpt
             int Port = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:network_port", 12346);
             m_Socket = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
             m_NetHandle = Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_Socket, SLAMDelegate);
+
+            m_Threshold = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:color_threshold", 50);
         }
 
         // -----------------------------------------------------------------------------
@@ -100,7 +102,7 @@ namespace Scpt
 
                 for (auto& Pixel : RawData)
                 {
-                    if (Pixel.r == 0 && Pixel.g == 0 && Pixel.b == 0)
+                    if (Pixel.r <= m_Threshold && Pixel.g <= m_Threshold && Pixel.b <= m_Threshold)
                     {
                         Pixel = glm::u8vec4(255);
                     }
@@ -138,5 +140,7 @@ namespace Scpt
 
         Net::SocketHandle m_Socket;
         Net::CNetworkManager::CMessageDelegate::HandleType m_NetHandle;
+
+        int m_Threshold;
     };
 } // namespace Scpt
