@@ -43,7 +43,7 @@ namespace Scpt
             m_Socket = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
             m_NetHandle = Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_Socket, SLAMDelegate);
 
-            m_Threshold = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:color_threshold", 50);
+            m_Threshold = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:color_threshold", 0);
         }
 
         // -----------------------------------------------------------------------------
