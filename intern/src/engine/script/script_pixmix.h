@@ -102,7 +102,7 @@ namespace Scpt
 
                 for (auto& Pixel : RawData)
                 {
-                    if (Pixel.r <= m_Threshold && Pixel.g <= m_Threshold && Pixel.b <= m_Threshold)
+                    if (Pixel.r + Pixel.g + Pixel.b / 3.0f < m_Threshold)
                     {
                         Pixel = glm::u8vec4(255);
                     }
