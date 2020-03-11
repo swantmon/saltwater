@@ -221,7 +221,7 @@ namespace PM
         {
             glm::u8vec4 Pixel = _SourceImage[i];
             Image[i] = glm::u8vec3(Pixel.r, Pixel.g, Pixel.b);
-            Mask[i] = 255 - Pixel.a;
+            Mask[i] = _MaskInAlpha ? 255 - Pixel.a : (Mask[i] = Pixel.r == 255 && Pixel.g == 255 && Pixel.b == 255 ? 0x00 : 0xFF);
         }
 
         Ocean::CV::Synthesis::SynthesisOneFramePixel PixMix;
