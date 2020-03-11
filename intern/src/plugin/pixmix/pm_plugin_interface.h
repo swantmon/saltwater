@@ -19,5 +19,10 @@ namespace PM
 
         void EventHook();
         void Inpaint(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage);
+        void InpaintWithMask(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage);
+
+    private:
+
+        void InpaintInternal(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage, bool _MaskInAlpha);
     };
 } // namespace PM
