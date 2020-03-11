@@ -116,20 +116,38 @@ namespace PM
 
     // -----------------------------------------------------------------------------
 
-#ifndef OCEAN_PIXMIX
     void CPluginInterface::Inpaint(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage)
     {
+        InpaintInternal(_Resolution, _SourceImage, _DestinationImage, false);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::InpaintWithMask(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage)
+    {
+        InpaintInternal(_Resolution, _SourceImage, _DestinationImage, true);
+    }
+
+    // -----------------------------------------------------------------------------
+
+#ifndef OCEAN_PIXMIX
+    void CPluginInterface::InpaintInternal(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage, bool _MaskInAlpha)
+    {
+        BASE_UNUSED(_MaskInAlpha);
+
         assert(_Resolution.x > 0 && _Resolution.y > 0);
         assert(_SourceImage.size() == _DestinationImage.size());
 
-        cv::Mat_<cv::Vec4b> Source4(_Resolution.x, _Resolution.y);
-        cv::Mat_<cv::Vec4b> Dest4(_Resolution.x, _Resolution.y);
+        auto Resolution = glm::ivec2(_Resolution.y, _Resolution.x);
+
+        cv::Mat_<cv::Vec4b> Source4(Resolution.x, Resolution.y);
+        cv::Mat_<cv::Vec4b> Dest4(Resolution.x, Resolution.y);
 
         std::memcpy(Source4.data, _SourceImage.data(), _SourceImage.size() * sizeof(_SourceImage[0]));
         std::memcpy(Dest4.data, _DestinationImage.data(), _DestinationImage.size() * sizeof(_DestinationImage[0]));
 
-        cv::Mat_<cv::Vec3b> Source3(_Resolution.x, _Resolution.y);
-        cv::Mat_<cv::Vec3b> Dest3(_Resolution.x, _Resolution.y);
+        cv::Mat_<cv::Vec3b> Source3(Resolution.x, Resolution.y);
+        cv::Mat_<cv::Vec3b> Dest3(Resolution.x, Resolution.y);
 
         cv::cvtColor(Source4, Source3, cv::COLOR_BGRA2RGB);
 
@@ -189,7 +207,9 @@ namespace PM
 
 #else
 
-    void CPluginInterface::Inpaint(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage)
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::InpaintInternal(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage, bool _MaskInAlpha)
     {
         assert(_Resolution.x > 0 && _Resolution.y > 0);
         assert(_SourceImage.size() == _DestinationImage.size());
@@ -201,7 +221,7 @@ namespace PM
         {
             glm::u8vec4 Pixel = _SourceImage[i];
             Image[i] = glm::u8vec3(Pixel.r, Pixel.g, Pixel.b);
-            Mask[i] = Pixel.r == 255 && Pixel.g == 255 && Pixel.b == 255 ? 0x00 : 0xFF;
+            Mask[i] = 255 - Pixel.a;
         }
 
         Ocean::CV::Synthesis::SynthesisOneFramePixel PixMix;
@@ -232,7 +252,12 @@ namespace PM
 #endif
 } // namespace PM
 
-extern "C" CORE_PLUGIN_API_EXPORT void Inpaint(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage)
+extern "C" CORE_PLUGIN_API_EXPORT void Inpaint(const glm::ivec2 & _Resolution, const std::vector<glm::u8vec4> & _SourceImage, std::vector<glm::u8vec4> & _DestinationImage)
 {
     static_cast<PM::CPluginInterface&>(GetInstance()).Inpaint(_Resolution, _SourceImage, _DestinationImage);
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void InpaintWithMask(const glm::ivec2 & _Resolution, const std::vector<glm::u8vec4> & _SourceImage, std::vector<glm::u8vec4> & _DestinationImage)
+{
+    static_cast<PM::CPluginInterface&>(GetInstance()).InpaintWithMask(_Resolution, _SourceImage, _DestinationImage);
 }
