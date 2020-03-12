@@ -126,12 +126,12 @@ namespace PM
         try
         {
             InpaintWithOcean(_Resolution, _SourceImage, _DestinationImage, false);
-            std::cout << "Ocean" << '\n';
+            ENGINE_CONSOLE_DEBUG("Inpainted with Ocean Version");
         }
         catch (...)
         {
             InpaintWithOpen(_Resolution, _SourceImage, _DestinationImage, false);
-            std::cout << "Open" << '\n';
+            ENGINE_CONSOLE_DEBUG("Inpainted with Open Version");
         }
 #endif
     }
