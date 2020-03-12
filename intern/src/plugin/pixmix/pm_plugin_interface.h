@@ -23,6 +23,11 @@ namespace PM
 
     private:
 
-        void InpaintInternal(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage, bool _MaskInAlpha);
+#if defined OCEAN_PIXMIX_ONLY || defined PIXMIX_FALLBACK
+        void InpaintWithOcean(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage, bool _MaskInAlpha);
+#endif
+#if defined OPEN_PIXMIX_ONLY || defined PIXMIX_FALLBACK
+        void InpaintWithOpen(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage, bool _MaskInAlpha);
+#endif
     };
 } // namespace PM
