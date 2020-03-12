@@ -7,71 +7,71 @@
 #include "engine/engine_config.h"
 #include "plugin/pixmix/pm_plugin_interface.h"
 
-#ifndef OCEAN_PIXMIX
-
-#ifdef ENGINE_DEBUG_MODE
-
-#pragma comment(lib, "opencv_world410d.lib")
-
-#else
-
-#pragma comment(lib, "opencv_world410.lib")
-
-#endif
-
-#include "plugin/pixmix/PixMix/PixMix.h"
-#include "opencv2/opencv.hpp"
-
-#else
-
-#ifdef ENGINE_DEBUG_MODE
-
-#pragma comment(lib, "OceanBaseD.lib")
-#pragma comment(lib, "OceanCVD.lib")
-#pragma comment(lib, "OceanCVDetectorD.lib")
-#pragma comment(lib, "OceanCVSegmentationD.lib")
-#pragma comment(lib, "OceanCVSynthesisD.lib")
-#pragma comment(lib, "OceanGeometryD.lib")
-#pragma comment(lib, "OceanIOD.lib")
-#pragma comment(lib, "OceanMathD.lib")
-#pragma comment(lib, "OceanMediaD.lib")
-#pragma comment(lib, "OceanNetworkD.lib")
-#pragma comment(lib, "OceanPlatformWinD.lib")
-
-#else
-
-#pragma comment(lib, "OceanBase.lib")
-#pragma comment(lib, "OceanCV.lib")
-#pragma comment(lib, "OceanCVDetector.lib")
-#pragma comment(lib, "OceanCVSegmentation.lib")
-#pragma comment(lib, "OceanCVSynthesis.lib")
-#pragma comment(lib, "OceanGeometry.lib")
-#pragma comment(lib, "OceanIO.lib")
-#pragma comment(lib, "OceanMath.lib")
-#pragma comment(lib, "OceanMedia.lib")
-#pragma comment(lib, "OceanNetwork.lib")
-#pragma comment(lib, "OceanPlatformWin.lib")
-
-#endif
-
-#pragma warning(push)
-#pragma warning(disable : 4100 4245 5033)
-
-#define _WINDOWS
-#undef _DLL
-#include "ocean/cv/synthesis/SynthesisOneFramePixel.h"
-
-#pragma warning(pop)
-
-#endif
-
 #include <vector>
 
-#ifndef OCEAN_PIXMIX
+#ifdef OCEAN_PIXMIX_ONLY
+CORE_PLUGIN_INFO(PM::CPluginInterface, "PixMix", "1.0", "This plugin enables inpainting with PixMix (Ocean version).")
+#elif defined OPEN_PIXMIX_ONLY
 CORE_PLUGIN_INFO(PM::CPluginInterface, "PixMix", "1.0", "This plugin enables inpainting with PixMix (Open version).")
-#else
-CORE_PLUGIN_INFO(PM::CPluginInterface, "PixMix", "1.0", "This plugin enables inpainting with PixMix (Original version).")
+#elif defined PIXMIX_FALLBACK
+CORE_PLUGIN_INFO(PM::CPluginInterface, "PixMix", "1.0", "This plugin enables inpainting with PixMix (Fallback version).")
 #endif
+
+#if defined OCEAN_PIXMIX_ONLY || defined PIXMIX_FALLBACK
+
+    #ifdef ENGINE_DEBUG_MODE
+
+        #pragma comment(lib, "OceanBaseD.lib")
+        #pragma comment(lib, "OceanCVD.lib")
+        #pragma comment(lib, "OceanCVDetectorD.lib")
+        #pragma comment(lib, "OceanCVSegmentationD.lib")
+        #pragma comment(lib, "OceanCVSynthesisD.lib")
+        #pragma comment(lib, "OceanGeometryD.lib")
+        #pragma comment(lib, "OceanIOD.lib")
+        #pragma comment(lib, "OceanMathD.lib")
+        #pragma comment(lib, "OceanMediaD.lib")
+        #pragma comment(lib, "OceanNetworkD.lib")
+        #pragma comment(lib, "OceanPlatformWinD.lib")
+
+    #else
+
+        #pragma comment(lib, "OceanBase.lib")
+        #pragma comment(lib, "OceanCV.lib")
+        #pragma comment(lib, "OceanCVDetector.lib")
+        #pragma comment(lib, "OceanCVSegmentation.lib")
+        #pragma comment(lib, "OceanCVSynthesis.lib")
+        #pragma comment(lib, "OceanGeometry.lib")
+        #pragma comment(lib, "OceanIO.lib")
+        #pragma comment(lib, "OceanMath.lib")
+        #pragma comment(lib, "OceanMedia.lib")
+        #pragma comment(lib, "OceanNetwork.lib")
+        #pragma comment(lib, "OceanPlatformWin.lib")
+
+    #endif
+
+    #pragma warning(push)
+    #pragma warning(disable : 4100 4245 5033)
+
+    #define _WINDOWS
+    #undef _DLL
+    #include "ocean/cv/synthesis/SynthesisOneFramePixel.h"
+
+    #pragma warning(pop)
+
+#endif
+
+#if defined OPEN_PIXMIX_ONLY || defined PIXMIX_FALLBACK
+    #include "plugin/pixmix/PixMix/PixMix.h"
+    #include "opencv2/opencv.hpp"
+
+    #ifdef ENGINE_DEBUG_MODE
+    #pragma comment(lib, "opencv_world410d.lib")
+    #else
+    #pragma comment(lib, "opencv_world410.lib")
+    #endif
+
+#endif
+
 
 namespace PM
 {
@@ -118,20 +118,49 @@ namespace PM
 
     void CPluginInterface::Inpaint(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage)
     {
-        InpaintInternal(_Resolution, _SourceImage, _DestinationImage, false);
+#ifdef OCEAN_PIXMIX_ONLY
+        InpaintWithOcean(_Resolution, _SourceImage, _DestinationImage, false);
+#elif defined OPEN_PIXMIX_ONLY
+        InpaintWithOpen(_Resolution, _SourceImage, _DestinationImage, false);
+#elif defined PIXMIX_FALLBACK
+        try
+        {
+            InpaintWithOcean(_Resolution, _SourceImage, _DestinationImage, false);
+            std::cout << "Ocean" << '\n';
+        }
+        catch (...)
+        {
+            InpaintWithOpen(_Resolution, _SourceImage, _DestinationImage, false);
+            std::cout << "Open" << '\n';
+        }
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::InpaintWithMask(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage)
     {
-        InpaintInternal(_Resolution, _SourceImage, _DestinationImage, true);
+#ifdef OCEAN_PIXMIX_ONLY
+        InpaintWithOcean(_Resolution, _SourceImage, _DestinationImage, true);
+#elif defined OPEN_PIXMIX_ONLY
+        InpaintWithOpen(_Resolution, _SourceImage, _DestinationImage, true);
+#elif defined PIXMIX_FALLBACK
+        try
+        {
+            InpaintWithOcean(_Resolution, _SourceImage, _DestinationImage, true);
+        }
+        catch (...)
+        {
+            InpaintWithOpen(_Resolution, _SourceImage, _DestinationImage, true);
+        }
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
-#ifndef OCEAN_PIXMIX
-    void CPluginInterface::InpaintInternal(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage, bool _MaskInAlpha)
+#if defined OPEN_PIXMIX_ONLY || defined PIXMIX_FALLBACK
+
+    void CPluginInterface::InpaintWithOpen(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage, bool _MaskInAlpha)
     {
         BASE_UNUSED(_MaskInAlpha);
 
@@ -205,11 +234,13 @@ namespace PM
         std::memcpy(_DestinationImage.data(), Dest4.data, _DestinationImage.size() * sizeof(_DestinationImage[0]));
     }
 
-#else
+#endif
 
     // -----------------------------------------------------------------------------
 
-    void CPluginInterface::InpaintInternal(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage, bool _MaskInAlpha)
+#if defined OCEAN_PIXMIX_ONLY || defined PIXMIX_FALLBACK
+
+    void CPluginInterface::InpaintWithOcean(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage, bool _MaskInAlpha)
     {
         assert(_Resolution.x > 0 && _Resolution.y > 0);
         assert(_SourceImage.size() == _DestinationImage.size());
