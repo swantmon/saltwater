@@ -65,7 +65,7 @@ namespace GUI
 
         if (m_pEntity)
         {
-            auto Hash = rFactory.CalculateHash(m_pEntity);
+            auto TypeInfo = Base::CTypeInfo::Get(m_pEntity);
 
             if (rFactory.Has<Dt::CEntity>())
             {
@@ -87,7 +87,7 @@ namespace GUI
 
             auto pTransformationFacet = m_pEntity->GetTransformationFacet();
 
-            Hash = rFactory.CalculateHash(pTransformationFacet);
+            TypeInfo = Base::CTypeInfo::Get(pTransformationFacet);
 
             if (pTransformationFacet && rFactory.Has<Dt::CTransformationFacet>())
             {
@@ -111,18 +111,18 @@ namespace GUI
             {
                 for (auto pComponent : pComponentFacet->GetComponents())
                 {
-                    Hash = pComponent->GetTypeID();
+                    TypeInfo = pComponent->GetTypeInfo();
 
-                    if (pComponent->GetTypeID() == Base::CTypeInfo::GetTypeID<Dt::CScriptComponent>())
+                    if (pComponent->GetTypeInfo() == Base::CTypeInfo::Get<Dt::CScriptComponent>())
                     {
                         auto pScriptComponent = static_cast<Dt::CScriptComponent*>(pComponent);
 
-                        Hash = pScriptComponent->GetScriptTypeID();
+						TypeInfo = pScriptComponent->GetScriptTypeInfo();
                     }
 
-                    if (rFactory.Has(Hash))
+                    if (rFactory.Has(TypeInfo))
                     {
-                        auto Panel = rFactory.Get(Hash, pComponent);
+                        auto Panel = rFactory.Get(TypeInfo, pComponent);
 
                         ImGui::PushID(IndexID);
                         

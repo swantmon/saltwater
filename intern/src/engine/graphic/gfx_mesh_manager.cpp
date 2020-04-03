@@ -1220,7 +1220,7 @@ namespace
 
     void CGfxMeshManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CMeshComponent>()) return;
+        if (_pComponent->GetTypeInfo() != Base::CTypeInfo::Get<Dt::CMeshComponent>()) return;
 
         auto* pMeshComponent = static_cast<Dt::CMeshComponent*>(_pComponent);
 

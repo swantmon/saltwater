@@ -537,7 +537,7 @@ namespace
 
     void CGfxViewManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CCameraComponent>()) return;
+        if (_pComponent->GetTypeInfo() != Base::CTypeInfo::Get<Dt::CCameraComponent>()) return;
 
         Dt::CCameraComponent* pCameraComponent = static_cast<Dt::CCameraComponent*>(_pComponent);
 

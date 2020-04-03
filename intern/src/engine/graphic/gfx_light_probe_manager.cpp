@@ -460,7 +460,7 @@ namespace
 
     void CGfxLightProbeManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CLightProbeComponent>()) return;
+        if (_pComponent->GetTypeInfo() != Base::CTypeInfo::Get<Dt::CLightProbeComponent>()) return;
 
         auto* pLightProbeComponent = static_cast<Dt::CLightProbeComponent*>(_pComponent);
 

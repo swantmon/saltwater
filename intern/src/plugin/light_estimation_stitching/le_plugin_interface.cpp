@@ -5,7 +5,10 @@
 #include "plugin/light_estimation_stitching/le_precompiled.h"
 
 #include "engine/core/core_console.h"
+#include "engine/core/core_program_parameters.h"
 #include "engine/core/core_time.h"
+
+#include "engine/data/data_script_component.h"
 
 #include "engine/engine.h"
 
@@ -20,6 +23,8 @@
 #include "engine/graphic/gfx_target_set_manager.h"
 #include "engine/graphic/gfx_texture_manager.h"
 #include "engine/graphic/gfx_view_manager.h"
+
+#include "engine/script/script_light_estimation.h"
 
 #include "plugin/light_estimation_stitching/le_plugin_interface.h"
 
@@ -46,6 +51,11 @@ namespace LE
     void CPluginInterface::OnStart()
     {
         // -----------------------------------------------------------------------------
+        // Delegates
+        // -----------------------------------------------------------------------------
+        m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CPluginInterface::OnDirtyComponent, this, std::placeholders::_1));
+
+        // -----------------------------------------------------------------------------
         // Hooks
         // -----------------------------------------------------------------------------
         m_GfxOnUpdateDelegate = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnUpdate, std::bind(&CPluginInterface::Gfx_OnUpdate, this));
@@ -56,6 +66,24 @@ namespace LE
         m_VSPtr = Gfx::ShaderManager::CompileVS("../../plugins/light_estimation_stitching/vs.glsl", "main");
         m_GSPtr = Gfx::ShaderManager::CompileGS("../../plugins/light_estimation_stitching/gs.glsl", "main");
         m_PSPtr = Gfx::ShaderManager::CompilePS("../../plugins/light_estimation_stitching/fs.glsl", "main");
+
+		std::string Define = "";
+		Define += "#define TILE_SIZE 1\n";
+		Define += "#define CUBE_TYPE rgba8\n";
+		Define += "#define OUTPUT_TYPE rgba8\n";
+		Define += "#define CUBE_SIZE " + std::to_string(s_CubemapSize) + "\n";
+		Define += "#define PANORAMA_SIZE_W " + std::to_string(s_PanoramaWidth) + "\n";
+		Define += "#define PANORAMA_SIZE_H " + std::to_string(s_PanoramaHeight) + "\n";
+
+		m_C2PShaderPtr = Gfx::ShaderManager::CompileCS("helper/cs_cube2pano.glsl", "main", Define.c_str());
+
+		m_P2CShaderPtr = Gfx::ShaderManager::CompileCS("helper/cs_pano2cube.glsl", "main", Define.c_str());
+
+		Define = "";
+		Define += "#define TILE_SIZE 1\n";
+		Define += "#define PANORAMA_TYPE rgba8\n";
+
+		m_FusePanoramaShaderPtr = Gfx::ShaderManager::CompileCS("helper/cs_fusepano.glsl", "main", Define.c_str());
 
         // -----------------------------------------------------------------------------
         // Input layout
@@ -137,14 +165,93 @@ namespace LE
         m_VertexBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
+        // Texture
+        // -----------------------------------------------------------------------------
+		m_InputTexturePtr = nullptr;
 
-        m_InputTexturePtr  = nullptr;
-        m_OutputCubemapPtr = nullptr;
+		Gfx::STextureDescriptor TextureDescriptor;
+
+        TextureDescriptor.m_NumberOfPixelsU  = s_PanoramaWidth;
+        TextureDescriptor.m_NumberOfPixelsV  = s_PanoramaHeight;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
+        TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
+        TextureDescriptor.m_Usage            = Gfx::CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+        TextureDescriptor.m_pFileName        = nullptr;
+        TextureDescriptor.m_pPixels          = nullptr;
+        
+        m_PanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+        m_EstimationPanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+        m_NNPanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+        Gfx::TextureManager::SetTextureLabel(m_PanoramaTexturePtr, "Stitching Panorama");
+        Gfx::TextureManager::SetTextureLabel(m_NNPanoramaTexturePtr, "NN Panorama NN");
+        Gfx::TextureManager::SetTextureLabel(m_EstimationPanoramaTexturePtr, "Stitching NN Panorama");
+
+        // -----------------------------------------------------------------------------
+
+        TextureDescriptor.m_NumberOfPixelsU  = s_CubemapSize;
+        TextureDescriptor.m_NumberOfPixelsV  = s_CubemapSize;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
+        TextureDescriptor.m_NumberOfTextures = 6;
+        TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource | Gfx::CTexture::RenderTarget;
+        TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
+        TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
+        TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+        TextureDescriptor.m_pFileName        = nullptr;
+        TextureDescriptor.m_pPixels          = nullptr;
+        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
+
+        m_StitchingCubemapPtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
+        m_EstimationCubemapPtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
+
+        Gfx::TextureManager::SetTextureLabel(m_StitchingCubemapPtr, "Sky cube map from image");
+        Gfx::TextureManager::SetTextureLabel(m_EstimationCubemapPtr, "Sky cube map from image with NN");
+
+		// -----------------------------------------------------------------------------
+		// Target set
+		// -----------------------------------------------------------------------------
+		Gfx::CTexturePtr FirstMipmapCubeTexture = Gfx::TextureManager::GetMipmapFromTexture2D(m_StitchingCubemapPtr, 0);
+
+		m_TargetSetPtr = Gfx::TargetSetManager::CreateTargetSet(FirstMipmapCubeTexture);
+
+		// -----------------------------------------------------------------------------
+		// Viewport
+		// -----------------------------------------------------------------------------
+		Gfx::SViewPortDescriptor ViewPortDesc;
+
+		ViewPortDesc.m_TopLeftX = 0.0f;
+		ViewPortDesc.m_TopLeftY = 0.0f;
+		ViewPortDesc.m_MinDepth = 0.0f;
+		ViewPortDesc.m_MaxDepth = 1.0f;
+
+		ViewPortDesc.m_Width = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsU());
+		ViewPortDesc.m_Height = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsV());
+
+		Gfx::CViewPortPtr MipMapViewPort = Gfx::ViewManager::CreateViewPort(ViewPortDesc);
+
+		m_ViewPortSetPtr = Gfx::ViewManager::CreateViewPortSet(MipMapViewPort);
 
         // -----------------------------------------------------------------------------
         // Settings
         // -----------------------------------------------------------------------------
         m_IsActive = true;
+
+		// -----------------------------------------------------------------------------
+		// Network
+		// -----------------------------------------------------------------------------
+		std::string IP = Core::CProgramParameters::GetInstance().Get("mr:stitching:server_ip", "127.0.0.1");
+		int Port = Core::CProgramParameters::GetInstance().Get("mr:stitching:network_port", 12345);
+        m_UseNeuralNetwork = false;
+
+		m_SocketHandle = Net::CNetworkManager::GetInstance().CreateClientSocket(IP, Port);
+		m_NetworkDelegate = Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_SocketHandle, std::bind(&CPluginInterface::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2));
     }
 
     // -----------------------------------------------------------------------------
@@ -157,16 +264,29 @@ namespace LE
         m_CubemapBufferPtr = nullptr;
         m_VertexBufferPtr = nullptr;
         m_InputTexturePtr = nullptr;
-        m_OutputCubemapPtr = nullptr;
+        m_StitchingCubemapPtr = nullptr;
         m_TargetSetPtr = nullptr;
         m_ViewPortSetPtr = nullptr;
+
+        m_PanoramaTexturePtr = nullptr;
+        m_NNPanoramaTexturePtr = nullptr;
+        m_EstimationPanoramaTexturePtr = nullptr;
+        m_StitchingCubemapPtr = nullptr;
+        m_EstimationCubemapPtr = nullptr;
+
+        m_OnDirtyComponentDelegate = nullptr;
     }
 
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::Update()
     {
+		if (m_UseNeuralNetwork)
+		{
+			FillEnvironmentWithNN();
 
+            m_UseNeuralNetwork = false;
+		}
     }
 
     // -----------------------------------------------------------------------------
@@ -192,45 +312,9 @@ namespace LE
 
     // -----------------------------------------------------------------------------
 
-    void CPluginInterface::SetOutputCubemap(Gfx::CTexturePtr _OutputCubemapPtr)
-    {
-        if (_OutputCubemapPtr == nullptr)
-        {
-            return;
-        }
-
-        m_OutputCubemapPtr = _OutputCubemapPtr;
-
-        // -----------------------------------------------------------------------------
-        // Target Set
-        // -----------------------------------------------------------------------------
-        Gfx::CTexturePtr FirstMipmapCubeTexture = Gfx::TextureManager::GetMipmapFromTexture2D(_OutputCubemapPtr, 0);
-
-        m_TargetSetPtr = Gfx::TargetSetManager::CreateTargetSet(FirstMipmapCubeTexture);
-
-        // -----------------------------------------------------------------------------
-        // Viewport
-        // -----------------------------------------------------------------------------
-        Gfx::SViewPortDescriptor ViewPortDesc;
-
-        ViewPortDesc.m_TopLeftX = 0.0f;
-        ViewPortDesc.m_TopLeftY = 0.0f;
-        ViewPortDesc.m_MinDepth = 0.0f;
-        ViewPortDesc.m_MaxDepth = 1.0f;
-
-        ViewPortDesc.m_Width  = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsU());
-        ViewPortDesc.m_Height = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsV());
-
-        Gfx::CViewPortPtr MipMapViewPort = Gfx::ViewManager::CreateViewPort(ViewPortDesc);
-
-        m_ViewPortSetPtr = Gfx::ViewManager::CreateViewPortSet(MipMapViewPort);
-    }
-
-    // -----------------------------------------------------------------------------
-
     Gfx::CTexturePtr CPluginInterface::GetOutputCubemap()
     {
-        return m_OutputCubemapPtr;
+        return m_EstimationCubemapPtr;
     }
 
     // -----------------------------------------------------------------------------
@@ -240,11 +324,60 @@ namespace LE
         m_IsActive = _Flag;
     }
 
+	// -----------------------------------------------------------------------------
+
+	void CPluginInterface::FillEnvironmentWithNN()
+	{
+		if (!Net::CNetworkManager::GetInstance().IsConnected(m_SocketHandle)) return;
+
+		// -----------------------------------------------------------------------------
+		// Send message
+		// -----------------------------------------------------------------------------
+		Net::CMessage Message;
+
+		Message.m_Payload = std::vector<char>(s_PanoramaWidth * s_PanoramaHeight * 4);
+		Message.m_CompressedSize = Message.m_DecompressedSize = static_cast<int>(Message.m_Payload.size());
+		Message.m_MessageType = 0;
+
+		Gfx::TextureManager::CopyTextureToCPU(m_PanoramaTexturePtr, Message.m_Payload.data());
+
+		Net::CNetworkManager::GetInstance().SendMessage(m_SocketHandle, Message);
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void CPluginInterface::OnNewMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
+	{
+		BASE_UNUSED(_SocketHandle);
+
+		if (_rMessage.m_DecompressedSize != s_PanoramaWidth * s_PanoramaHeight * 4) return;
+
+		// -----------------------------------------------------------------------------
+		// Read new texture from network
+		// -----------------------------------------------------------------------------
+		Gfx::STextureDescriptor TextureDescriptor;
+
+		TextureDescriptor.m_NumberOfPixelsU  = s_PanoramaWidth;
+		TextureDescriptor.m_NumberOfPixelsV  = s_PanoramaHeight;
+		TextureDescriptor.m_NumberOfPixelsW  = 1;
+		TextureDescriptor.m_NumberOfMipMaps  = 1;
+		TextureDescriptor.m_NumberOfTextures = 1;
+		TextureDescriptor.m_Binding			 = Gfx::CTexture::ShaderResource;
+		TextureDescriptor.m_Access			 = Gfx::CTexture::CPUWrite;
+		TextureDescriptor.m_Format			 = Gfx::CTexture::R8G8B8A8_UBYTE;
+		TextureDescriptor.m_Usage			 = Gfx::CTexture::GPUReadWrite;
+		TextureDescriptor.m_Semantic		 = Gfx::CTexture::Diffuse;
+		TextureDescriptor.m_pFileName		 = nullptr;
+		TextureDescriptor.m_pPixels			 = const_cast<char*>(&_rMessage.m_Payload[0]);
+
+		m_NNPanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+	}
+
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::Gfx_OnUpdate()
     {
-        if (m_IsActive == false || m_InputTexturePtr == nullptr || m_OutputCubemapPtr == nullptr)
+        if (m_IsActive == false || m_InputTexturePtr == nullptr || m_StitchingCubemapPtr == nullptr)
         {
             return;
         }
@@ -359,20 +492,90 @@ namespace LE
         // -----------------------------------------------------------------------------
         // Update mip maps
         // -----------------------------------------------------------------------------
-        Gfx::TextureManager::UpdateMipmap(m_OutputCubemapPtr);
+        Gfx::TextureManager::UpdateMipmap(m_StitchingCubemapPtr);
 
-        Gfx::Performance::EndEvent();       
+        Gfx::Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // Create panorama
+        // -----------------------------------------------------------------------------
+        Gfx::ContextManager::SetShaderCS(m_C2PShaderPtr);
+
+        Gfx::ContextManager::SetImageTexture(0, m_StitchingCubemapPtr);
+
+        Gfx::ContextManager::SetImageTexture(1, m_PanoramaTexturePtr);
+
+        Gfx::ContextManager::Dispatch(s_PanoramaWidth, s_PanoramaHeight, 1);
+
+        Gfx::ContextManager::ResetImageTexture(0);
+
+        Gfx::ContextManager::ResetImageTexture(1);
+
+        Gfx::ContextManager::ResetShaderCS();
+
+        // -----------------------------------------------------------------------------
+        // Create combination of new texture and existing data
+        // -----------------------------------------------------------------------------
+        Gfx::ContextManager::SetShaderCS(m_FusePanoramaShaderPtr);
+
+        Gfx::ContextManager::SetImageTexture(0, m_NNPanoramaTexturePtr);
+
+        Gfx::ContextManager::SetImageTexture(1, m_PanoramaTexturePtr);
+
+        Gfx::ContextManager::SetImageTexture(2, m_EstimationPanoramaTexturePtr);
+
+        Gfx::ContextManager::Dispatch(s_PanoramaWidth, s_PanoramaHeight, 1);
+
+        Gfx::ContextManager::ResetImageTexture(0);
+
+        Gfx::ContextManager::ResetImageTexture(1);
+
+        Gfx::ContextManager::ResetImageTexture(2);
+
+        Gfx::ContextManager::ResetShaderCS();
+
+        // -----------------------------------------------------------------------------
+        // Convert pano to cubemap
+        // -----------------------------------------------------------------------------
+        Gfx::ContextManager::SetShaderCS(m_P2CShaderPtr);
+
+        Gfx::ContextManager::SetImageTexture(0, m_EstimationPanoramaTexturePtr);
+
+        Gfx::ContextManager::SetImageTexture(1, m_EstimationCubemapPtr);
+
+        Gfx::ContextManager::Dispatch(s_CubemapSize, s_CubemapSize, 6);
+
+        Gfx::ContextManager::ResetImageTexture(0);
+
+        Gfx::ContextManager::ResetImageTexture(1);
+
+        Gfx::ContextManager::ResetShaderCS();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::OnDirtyComponent(Dt::IComponent* _pComponent)
+    {
+        if (!Base::CTypeInfo::IsEqualName(_pComponent->GetTypeInfo(), Base::CTypeInfo::Get<Dt::CScriptComponent>())) return;
+
+        auto* pScriptComponent = static_cast<Dt::CScriptComponent*>(_pComponent);
+
+        if (!pScriptComponent->IsActiveAndUsable()) return;
+
+        if (Base::CTypeInfo::IsEqualName(pScriptComponent->GetScriptTypeInfo(), Base::CTypeInfo::Get<Scpt::CLightEstimationScript>()))
+        {
+            auto pLightEstimationComponent = (Scpt::CLightEstimationScript*)(pScriptComponent);
+
+            m_UseNeuralNetwork = pLightEstimationComponent->m_UseEstimationWithNeuralNetwork;
+
+            pLightEstimationComponent->m_UseEstimationWithNeuralNetwork = false;
+        }
     }
 } // namespace LE
 
 extern "C" CORE_PLUGIN_API_EXPORT void SetInputTexture(Gfx::CTexturePtr _InputTexturePtr)
 {
     static_cast<LE::CPluginInterface&>(GetInstance()).SetInputTexture(_InputTexturePtr);
-}
-
-extern "C" CORE_PLUGIN_API_EXPORT void SetOutputCubemap(Gfx::CTexturePtr _OutputCubemapPtr)
-{
-    static_cast<LE::CPluginInterface&>(GetInstance()).SetOutputCubemap(_OutputCubemapPtr);
 }
 
 extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetOutputCubemap()

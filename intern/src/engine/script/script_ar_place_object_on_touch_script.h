@@ -12,6 +12,7 @@
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/script/script_script.h"
+#include "script_ar_settings_script.h"
 
 namespace Scpt
 {
@@ -23,13 +24,11 @@ namespace Scpt
         using ArCoreReleaseMarkerFunc = const void (*)(const void* _pMarker);
         using ArCoreGetMarkerTrackingStateFunc = int (*)(const void* _pMarker);
         using ArCoreGetMarkerModelMatrixFunc = glm::mat4 (*)(const void* _pMarker);
-        using ArCoreSetSettingsFunc = bool (*)(bool _ShowPlanes, bool _ShowPoints);
 
         ArCoreAcquireNewMarkerFunc AcquireNewMarker;
         ArCoreReleaseMarkerFunc ReleaseMarker;
         ArCoreGetMarkerTrackingStateFunc GetMarkerTrackingState;
         ArCoreGetMarkerModelMatrixFunc GetMarkerModelMatrix;
-        ArCoreSetSettingsFunc SetSettings;
 
     public:
 
@@ -58,8 +57,6 @@ namespace Scpt
 
                 GetMarkerTrackingState = (ArCoreGetMarkerTrackingStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerTrackingState"));
                 GetMarkerModelMatrix = (ArCoreGetMarkerModelMatrixFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerModelMatrix"));
-
-                SetSettings = (ArCoreSetSettingsFunc)(Core::PluginManager::GetPluginFunction("ArCore", "SetSettings"));
             }
         }
 
@@ -113,7 +110,27 @@ namespace Scpt
                 {
                     m_pMarker = pNewMarker;
 
-                    SetSettings(false, false);
+                    auto ScriptComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CScriptComponent>();
+
+                    for (auto ScriptComponent : ScriptComponents)
+                    {
+                        auto pScriptComponent = static_cast<Dt::CScriptComponent*>(ScriptComponent);
+
+                        if (pScriptComponent->GetScriptTypeInfo() == Base::CTypeInfo::Get<Scpt::CARSettingsScript>())
+                        {
+                            auto pARSettingsScript = static_cast<Scpt::CARSettingsScript*>(pScriptComponent);
+
+                            if (pARSettingsScript->m_HidePlanesAndPointsOnFirstMarker)
+                            {
+                                pARSettingsScript->m_RenderPlanes = false;
+                                pARSettingsScript->m_RenderPoints = false;
+
+                                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pARSettingsScript, Dt::IComponent::DirtyInfo);
+                            }
+
+                            break;
+                        }
+                    }
                 }
             }
         }

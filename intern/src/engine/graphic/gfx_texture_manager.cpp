@@ -510,17 +510,14 @@ namespace
         // -----------------------------------------------------------------------------
         // Get information
         // -----------------------------------------------------------------------------
-        glm::uvec2 Size = _rTargetRect.Size();
-
         assert(_pBytes != nullptr);
         assert(_TextureArrayPtr.IsValid());
-        assert(_TextureArrayPtr->GetNumberOfPixelsU() == Size[0] && _TextureArrayPtr->GetNumberOfPixelsV() == Size[1]);
         
-        auto Offset     = glm::uvec2(0);
-        glm::uvec2 UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
+        auto Offset           = _rTargetRect[0];
+        auto UpdateSize = _rTargetRect[1] - _rTargetRect[0];
         
-        assert(Size[0] >= UpdateSize[0] + Offset[0]);
-        assert(Size[1] >= UpdateSize[1] + Offset[1]);
+        assert(_TextureArrayPtr->GetNumberOfPixelsU() >= UpdateSize[0] + Offset[0]);
+        assert(_TextureArrayPtr->GetNumberOfPixelsV() >= UpdateSize[1] + Offset[1]);
         
         auto pInternTextureArray = static_cast<CInternTexture*>(_TextureArrayPtr.GetPtr());
         
@@ -532,9 +529,15 @@ namespace
         // -----------------------------------------------------------------------------
         if (pInternTextureArray->m_Info.m_IsCubeTexture)
         {
+            GLint OldTexture;
+
+			glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &OldTexture);
+
             glBindTexture(GL_TEXTURE_CUBE_MAP, _TextureArrayPtr->GetNativeHandle());
 
             glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, _pBytes);
+
+            glBindTexture(GL_TEXTURE_CUBE_MAP, OldTexture);
         }
         else
         {
@@ -559,7 +562,7 @@ namespace
         assert(_TextureArrayPtr->GetNumberOfPixelsU() == _TexturePtr->GetNumberOfPixelsU() && _TextureArrayPtr->GetNumberOfPixelsV() == _TexturePtr->GetNumberOfPixelsV());
         
         auto Offset     = glm::uvec2(0);
-        glm::uvec2 UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
+        auto UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
         
         assert(_TexturePtr->GetNumberOfPixelsU() >= UpdateSize[0] + Offset[0]);
         assert(_TexturePtr->GetNumberOfPixelsV() >= UpdateSize[1] + Offset[1]);
@@ -1072,12 +1075,17 @@ namespace
                 }
                 else
                 {
-                    NativeILFormat = CheckILFormat;
-                    NativeILType   = CheckILType;
+					auto Channels = ilGetInteger(IL_IMAGE_CHANNELS);
+					auto BPP = ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
+					auto BPC = BPP / Channels * 8;
 
-                    GLInternalFormat = ilGetInteger(IL_IMAGE_CHANNELS) == 4 ? GL_RGBA8 : GL_RGB8;
-                    GLFormat         = NativeILFormat;
-                    GLType           = NativeILType;
+					GLInternalFormat = GL_RGBA8; // (BPC == 8) 
+
+					if (BPC == 16)      GLInternalFormat = GL_RGBA16F;
+					else if (BPC == 32) GLInternalFormat = GL_RGBA32F;
+
+                    GLFormat         = CheckILFormat;
+                    GLType           = CheckILType;
                 }
 
                 pTextureData = ilGetData();
@@ -2304,10 +2312,10 @@ namespace
             GL_UNSIGNED_SHORT,
             GL_UNSIGNED_SHORT,
             GL_UNSIGNED_SHORT,
-            GL_FLOAT,
-            GL_FLOAT,
-            GL_FLOAT,
-            GL_FLOAT,
+            GL_HALF_FLOAT,
+            GL_HALF_FLOAT,
+            GL_HALF_FLOAT,
+            GL_HALF_FLOAT,
             
             GL_INT,
             GL_INT,

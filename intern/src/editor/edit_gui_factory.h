@@ -64,18 +64,12 @@ namespace Edit
         template<class T>
         IGUIFactory* Get(void* _pObject);
 
-        inline IGUIFactory* Get(size_t _Hash, void* _pObject);
+        inline IGUIFactory* Get(Base::CTypeInfo::BInfo _TypeInfo, void* _pObject);
 
         template<class T>
         bool Has();
 
-        inline bool Has(size_t _Hash);
-
-        template<class T>
-        size_t CalculateHash();
-
-        template<class T>
-        size_t CalculateHash(T _Object);
+        inline bool Has(Base::CTypeInfo::BInfo _TypeInfo);
 
     private:
 
@@ -87,8 +81,8 @@ namespace Edit
 
     private:
 
-        using CFactoryMap = std::map<size_t, SFactoryElement>;
-        using CFactoryMapPair = std::pair<size_t, SFactoryElement>;
+        using CFactoryMap = std::map<Base::CTypeInfo::BInfo, SFactoryElement>;
+        using CFactoryMapPair = std::pair<Base::CTypeInfo::BInfo, SFactoryElement>;
         
     private:
         
@@ -137,7 +131,7 @@ namespace Edit
 
             NewElement.m_pFactory = _pClassObject;
 
-            m_Factory.insert(CFactoryMapPair(CalculateHash<T>(), NewElement));
+            m_Factory.insert(CFactoryMapPair(Base::CTypeInfo::Get<T>(), NewElement));
         }
     }
 
@@ -148,7 +142,7 @@ namespace Edit
     {
         if (Has<T>())
         {
-            SFactoryElement& rElement = m_Factory.find(CalculateHash<T>())->second;
+            SFactoryElement& rElement = m_Factory.find(Base::CTypeInfo::Get<T>())->second;
 
             if (rElement.m_Instances.find((size_t)_pBaseClass) == rElement.m_Instances.end())
             {
@@ -167,11 +161,11 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    inline IGUIFactory* CGUIFactory::Get(size_t _Hash, void* _pBaseClass)
+    inline IGUIFactory* CGUIFactory::Get(Base::CTypeInfo::BInfo _TypeInfo, void* _pBaseClass)
     {
-        if (Has(_Hash))
+        if (Has(_TypeInfo))
         {
-            SFactoryElement& rElement = m_Factory.find(_Hash)->second;
+            SFactoryElement& rElement = m_Factory.find(_TypeInfo)->second;
 
             if (rElement.m_Instances.find((size_t)_pBaseClass) == rElement.m_Instances.end())
             {
@@ -193,31 +187,13 @@ namespace Edit
     template<class T>
     bool CGUIFactory::Has()
     {
-        return m_Factory.find(CalculateHash<T>()) != m_Factory.end();
+        return m_Factory.find(Base::CTypeInfo::Get<T>()) != m_Factory.end();
     }
 
     // -----------------------------------------------------------------------------
 
-    inline bool CGUIFactory::Has(size_t _Hash)
+    inline bool CGUIFactory::Has(Base::CTypeInfo::BInfo _TypeInfo)
     {
-        return m_Factory.find(_Hash) != m_Factory.end();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    size_t CGUIFactory::CalculateHash()
-    {
-        return Base::CTypeInfo::GetTypeID<T>();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    size_t CGUIFactory::CalculateHash(T _Class)
-    {
-        BASE_UNUSED(_Class);
-
-        return Base::CTypeInfo::GetTypeID<T>();
+        return m_Factory.find(_TypeInfo) != m_Factory.end();
     }
 } // namespace Edit

@@ -59,8 +59,12 @@ namespace Dt
         // -----------------------------------------------------------------------------
         m_ComponentByID.erase(_ID);
 
-        auto& rComponentTypeVector = m_ComponentsByType[Component->GetTypeID()];
-
+#ifdef COMPONENT_MANAGER_MAPTYPE_BY_NAME
+		auto& rComponentTypeVector = m_ComponentsByType[Component->GetTypeInfo().name()];
+#else
+		auto& rComponentTypeVector = m_ComponentsByType[Component->GetTypeInfo()];
+#endif // COMPONENT_MANAGER_MAPTYPE_BY_NAME
+        
         auto ComponentTypeVectorIter = std::find(rComponentTypeVector.begin(), rComponentTypeVector.end(), Component);
 
         if (ComponentTypeVectorIter == rComponentTypeVector.end()) return;
@@ -130,7 +134,11 @@ namespace Dt
             // -----------------------------------------------------------------------------
             m_ComponentByID[pNewComponent->m_ID] = pNewComponent;
 
-            m_ComponentsByType[pNewComponent->GetTypeID()].emplace_back(pNewComponent);
+#ifdef COMPONENT_MANAGER_MAPTYPE_BY_NAME
+			m_ComponentsByType[pNewComponent->GetTypeInfo().name()].emplace_back(pNewComponent);
+#else
+			m_ComponentsByType[pNewComponent->GetTypeInfo()].emplace_back(pNewComponent);
+#endif // COMPONENT_MANAGER_MAPTYPE_BY_NAME
         }
     }
 
@@ -142,21 +150,21 @@ namespace Dt
 
         for (auto& Component : m_Components)
         {
-            Base::ID ID = Component->GetTypeID();
+            auto TypeInfo = Component->GetTypeInfo();
 
-            if (ID == CScriptComponent::STATIC_TYPE_ID)
+            if (TypeInfo == Base::CTypeInfo::Get<CScriptComponent>())
             {
                 auto ScriptComponent = static_cast<CScriptComponent*>(&*Component);
 
-                ID = ScriptComponent->GetScriptTypeID();
+                TypeInfo = ScriptComponent->GetScriptTypeInfo();
             }
 
-            if (m_FactoryHash.find(ID) == std::end(m_FactoryHash))
+            if (m_FactoryHash.find(TypeInfo) == std::end(m_FactoryHash))
             {
-                BASE_THROWV("Failed writing component '%s' because hash is missing in factory.", Base::CTypeInfo::GetTypeName(Component));
+                BASE_THROWV("Failed writing component '%s' because hash is missing in factory.", Base::CTypeInfo::Get(Component).name());
             }
 
-            Base::BHash Hash = m_FactoryHash.find(ID)->second;
+            Base::BHash Hash = m_FactoryHash.find(TypeInfo)->second;
 
             _rCodec << Hash;
 

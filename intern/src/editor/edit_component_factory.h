@@ -65,7 +65,7 @@ namespace Edit
 
     private:
 
-        std::set<size_t> m_Hashes;
+        std::set<Base::CTypeInfo::BInfo> m_TypeInfos;
 
     private:
 
@@ -91,7 +91,7 @@ namespace Edit
     inline CComponentFactory::~CComponentFactory()
     {
         m_Factory.clear();
-        m_Hashes.clear();
+        m_TypeInfos.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -99,9 +99,9 @@ namespace Edit
     template<class T>
     void CComponentFactory::Register(IGUIComponentFactory* _pClassObject)
     {
-        auto Hash = Base::CTypeInfo::GetTypeID<T>();
+        auto TypeInfo = Base::CTypeInfo::Get<T>();
 
-        if (m_Hashes.find(Hash) == m_Hashes.end()) m_Factory.push_back(_pClassObject);
+        if (m_TypeInfos.find(TypeInfo) == m_TypeInfos.end()) m_Factory.push_back(_pClassObject);
     }
 
     // -----------------------------------------------------------------------------

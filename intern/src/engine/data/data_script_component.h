@@ -14,7 +14,7 @@ namespace Dt
     {
     public:
 
-        virtual const Base::ID GetScriptTypeID() const = 0;
+        virtual const Base::CTypeInfo::BInfo GetScriptTypeInfo() const = 0;
 
     public:
 

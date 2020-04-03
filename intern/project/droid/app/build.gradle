@@ -10,11 +10,11 @@ def external_libs = "${buildDir}/external_libs"
 configurations { natives }
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         applicationId "de.tuilmenau.saltwater"
         minSdkVersion 28
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         externalNativeBuild {
@@ -47,7 +47,8 @@ android {
 
 dependencies {
     // ARCore library
-    implementation 'com.google.ar:core:1.10.0'
+    implementation 'com.google.ar:core:1.11.0'
+    natives 'com.google.ar:core:1.11.0'
 
     // Android core
     implementation 'com.google.android.material:material:1.0.0'

@@ -506,7 +506,7 @@ public:
     template<class T>
     void Register(IFactoryBase* _pBase)
     {
-        auto ID = Base::CTypeInfo::GetTypeID<T>();
+        auto ID = Base::CTypeInfo::Get<T>().hash_code();
 
         if (m_Factory.find(ID) == m_Factory.end()) m_Factory.insert(CFactoryMapPair(ID, _pBase));
     }
@@ -605,12 +605,12 @@ BASE_TEST(SerializeInterfaceWithText)
     // -----------------------------------------------------------------------------
     Base::CTextWriter Writer(Stream, 1);
 
-    auto ID = Base::CTypeInfo::GetTypeID<CDerivedA>();
-    Writer << ID;
+    auto ID = Base::CTypeInfo::Get<CDerivedA>();
+    Writer << ID.hash_code();
     Writer << CompexClassA;
 
-    ID = Base::CTypeInfo::GetTypeID<CDerivedB>();
-    Writer << ID;
+    ID = Base::CTypeInfo::Get<CDerivedB>();
+    Writer << ID.hash_code();
     Writer << CompexClassB;
 
     // -----------------------------------------------------------------------------

@@ -324,7 +324,7 @@ namespace
 
         for (auto pComponent : AreaLightComponents)
         {
-            if (pComponent->GetTypeID() == Base::CTypeInfo::GetTypeID<Dt::CPointLightComponent>())
+            if (pComponent->GetTypeInfo() == Base::CTypeInfo::Get<Dt::CPointLightComponent>())
             {
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CPointLightComponent::DirtyInfo);
             }
@@ -335,7 +335,7 @@ namespace
 
     void CGfxPointLightManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CPointLightComponent>()) return;
+        if (_pComponent->GetTypeInfo() != Base::CTypeInfo::Get<Dt::CPointLightComponent>()) return;
 
         Dt::CPointLightComponent* pPointLightComponent = static_cast<Dt::CPointLightComponent*>(_pComponent);
 
