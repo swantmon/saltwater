@@ -74,6 +74,7 @@ namespace LE
 		Define += "#define CUBE_SIZE " + std::to_string(s_CubemapSize) + "\n";
 		Define += "#define PANORAMA_SIZE_W " + std::to_string(s_PanoramaWidth) + "\n";
 		Define += "#define PANORAMA_SIZE_H " + std::to_string(s_PanoramaHeight) + "\n";
+        Define += "#define FLIP_PANORAMA 1\n";
 
 		m_C2PShaderPtr = Gfx::ShaderManager::CompileCS("helper/cs_cube2pano.glsl", "main", Define.c_str());
 
