@@ -157,7 +157,7 @@ namespace Scpt
         {
             if (_rEvent.GetAction() == Base::CInputEvent::TouchReleased)
             {
-                ENGINE_CONSOLE_INFO("Touched (NE = switch estimation; SE = save cube map; NW = turn on/off estimation");
+                ENGINE_CONSOLE_INFO("Touched (NE = switch estimation; SE = save cube map; NW = Estimate environment w/ NN");
 
                 auto x = static_cast<float>(_rEvent.GetGlobalCursorPosition()[0]);
                 auto y = static_cast<float>(_rEvent.GetGlobalCursorPosition()[1]);
@@ -182,14 +182,7 @@ namespace Scpt
                 {
                     m_UseEstimationWithNeuralNetwork = !m_UseEstimationWithNeuralNetwork;
 
-                    if (m_UseEstimationWithNeuralNetwork)
-                    {
-                        ENGINE_CONSOLE_INFO("NN estimation turned on");
-                    }
-                    else
-                    {
-                        ENGINE_CONSOLE_INFO("NN estimation turned off");
-                    }
+                    ENGINE_CONSOLE_INFO("Estimate environment with NN");
 
                     Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*this, CLightEstimationScript::DirtyInfo);
                 }

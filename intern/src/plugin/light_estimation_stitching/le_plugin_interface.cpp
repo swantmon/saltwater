@@ -281,15 +281,11 @@ namespace LE
 
     void CPluginInterface::Update()
     {
-		static float CurrentTime = 0.0f;
-
-		CurrentTime += Core::Time::GetDeltaTimeLastFrame();
-
-		if (CurrentTime > 4.0f)
+		if (m_UseNeuralNetwork)
 		{
 			FillEnvironmentWithNN();
 
-			CurrentTime = 0.0f;
+            m_UseNeuralNetwork = false;
 		}
     }
 
@@ -571,6 +567,8 @@ namespace LE
             auto pLightEstimationComponent = (Scpt::CLightEstimationScript*)(pScriptComponent);
 
             m_UseNeuralNetwork = pLightEstimationComponent->m_UseEstimationWithNeuralNetwork;
+
+            pLightEstimationComponent->m_UseEstimationWithNeuralNetwork = false;
         }
     }
 } // namespace LE
