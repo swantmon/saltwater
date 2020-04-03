@@ -1,15 +1,1 @@
-extern/arcore filter=lfs diff=lfs merge=lfs -text
-extern/glm filter=lfs diff=lfs merge=lfs -text
-extern/kinect filter=lfs diff=lfs merge=lfs -text
-extern/lua filter=lfs diff=lfs merge=lfs -text
-extern/opencv filter=lfs diff=lfs merge=lfs -text
-extern/zlib filter=lfs diff=lfs merge=lfs -text
-extern/asio filter=lfs diff=lfs merge=lfs -text
-extern/easyar filter=lfs diff=lfs merge=lfs -text
-extern/devil filter=lfs diff=lfs merge=lfs -text
-extern/glew filter=lfs diff=lfs merge=lfs -text
-extern/imgui filter=lfs diff=lfs merge=lfs -text
-extern/sdl2 filter=lfs diff=lfs merge=lfs -text
-extern/assimp filter=lfs diff=lfs merge=lfs -text
-extern/json filter=lfs diff=lfs merge=lfs -text
-extern/tinyxml2 filter=lfs diff=lfs merge=lfs -text
+extern/** filter=lfs diff=lfs merge=lfs -text
