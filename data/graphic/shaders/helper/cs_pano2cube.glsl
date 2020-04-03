@@ -7,6 +7,7 @@
 // #define CUBE_SIZE 512
 // #define PANORAMA_SIZE_W 128
 // #define PANORAMA_SIZE_H 64
+// #define FLIP_PANORAMA 0
 #define PI 3.14159265359f
 
 // -----------------------------------------------------------------------------
@@ -23,6 +24,10 @@ vec4 GetTextureSpherical(in vec3 _Normal)
     float Theta = atan(-1.0f * _Normal.x, _Normal.z) + PI;
 
     vec2 UV = vec2(Theta / (2.0f * PI), 1.0f - Phi / PI);
+
+#if FLIP_PANORAMA == 1
+    UV.y = 1.0f - UV.y;
+#endif
 
     UV.x *= float(PANORAMA_SIZE_W);
     UV.y *= float(PANORAMA_SIZE_H);

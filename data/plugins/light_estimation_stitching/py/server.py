@@ -29,12 +29,12 @@ import torch
 # Config
 # -----------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument('--output', type=str, default='D:/NN/plugin_stitching/output/', help='output folder of the results')
+parser.add_argument('--output', type=str, default='W:/project_data/saltwater/data/plugin_stitching/savepoint_20181222_ENV/output/', help='output folder of the results')
 parser.add_argument('--img_size_w', type=int, default=256, help='width of image dimension')
 parser.add_argument('--img_size_h', type=int, default=128, help='height of each image dimension')
-parser.add_argument('--path_to_generator', type=str, default='D:/NN/plugin_stitching/savepoint/model_best_generator.pth.tar', help='path to saved generator')
+parser.add_argument('--path_to_generator', type=str, default='W:/project_data/saltwater/data/plugin_stitching/savepoint_20181222_ENV/savepoint/model_best_generator.pth.tar', help='path to saved generator')
 parser.add_argument('--port', type=int, default=12345, help='Port address to an endpoint')
-parser.add_argument('--temp', type=str, default='D:/NN/plugin_stitching/.tmp/', help='temporary folder')
+parser.add_argument('--temp', type=str, default='W:/project_data/saltwater/data/plugin_stitching/savepoint_20181222_ENV/.tmp/', help='temporary folder')
 opt = parser.parse_args()
 
 # -----------------------------------------------------------------------------
@@ -87,8 +87,6 @@ def OnNewClient(_Socket, _Address, _ID):
 
             integers = struct.unpack('I' * 3, header)
             bytesLeft = integers[1]
-            
-            textureSize = _Socket.recv(8)
             
             panorama = np.array([])
 
