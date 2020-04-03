@@ -180,7 +180,7 @@ namespace Scpt
 
                 if (x > Gfx::Main::GetActiveNativeWindowSize()[0] - 200.0f && y < 200.0f)
                 {
-                    m_UseEstimationWithNeuralNetwork = !m_UseEstimationWithNeuralNetwork;
+                    m_UseEstimationWithNeuralNetwork = true;
 
                     ENGINE_CONSOLE_INFO("Estimate environment with NN");
 
