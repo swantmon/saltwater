@@ -6,6 +6,8 @@
 #include "base/base_include_glm.h"
 #include "base/base_uncopyable.h"
 
+#include "engine/data/data_component_manager.h"
+
 #include "engine/graphic/gfx_buffer.h"
 #include "engine/graphic/gfx_input_layout.h"
 #include "engine/graphic/gfx_mesh.h"
@@ -69,8 +71,11 @@ namespace LE
         Gfx::CBufferPtr m_VertexBufferPtr;
 
         Gfx::CTexturePtr m_InputTexturePtr;
-        Gfx::CTexturePtr m_OutputCubemapPtr;
+        Gfx::CTexturePtr m_StitchingCubemapPtr;
+        Gfx::CTexturePtr m_EstimationCubemapPtr;
 		Gfx::CTexturePtr m_PanoramaTexturePtr;
+        Gfx::CTexturePtr m_EstimationPanoramaTexturePtr;
+		Gfx::CTexturePtr m_NNPanoramaTexturePtr;
 
         Gfx::CTargetSetPtr m_TargetSetPtr;
 
@@ -81,12 +86,18 @@ namespace LE
 		Engine::CEventDelegates::HandleType m_GfxOnUpdateDelegate;
 
 		Net::CNetworkManager::CMessageDelegate::HandleType m_NetworkDelegate;
-		Net::SocketHandle m_SocketHandle;
+        Net::SocketHandle m_SocketHandle;
+
+        Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
+
+        bool m_UseNeuralNetwork;
 
     private:
 
 		void OnNewMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle);
 
         void Gfx_OnUpdate();
+
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
     };
 } // namespace LE

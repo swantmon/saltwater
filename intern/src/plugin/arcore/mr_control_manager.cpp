@@ -19,6 +19,7 @@
 #include "engine/data/data_entity.h"
 #include "engine/data/data_entity_manager.h"
 #include "engine/data/data_map.h"
+#include "engine/data/data_script_component.h"
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/graphic/gfx_buffer_manager.h"
@@ -38,7 +39,7 @@
 
 #include <array>
 #include <vector>
-#include <engine/data/data_script_component.h>
+
 #include <engine/script/script_ar_camera_control_script.h>
 
 #include "arcore_c_api.h"

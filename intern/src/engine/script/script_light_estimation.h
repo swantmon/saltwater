@@ -47,6 +47,8 @@ namespace Scpt
         Dt::CSkyComponent* m_pSkyComponent = nullptr;
         Dt::CSunComponent* m_pSunComponent = nullptr;
 
+        bool m_UseEstimationWithNeuralNetwork = false;
+
     private:
 
         using LESetInputTextureFunc = void(*)(Gfx::CTexturePtr);
@@ -155,7 +157,7 @@ namespace Scpt
         {
             if (_rEvent.GetAction() == Base::CInputEvent::TouchReleased)
             {
-                ENGINE_CONSOLE_INFO("Touched (NE = switch estimation; SE = save cube map; NW = send panorama; SW = reset");
+                ENGINE_CONSOLE_INFO("Touched (NE = switch estimation; SE = save cube map; NW = turn on/off estimation");
 
                 auto x = static_cast<float>(_rEvent.GetGlobalCursorPosition()[0]);
                 auto y = static_cast<float>(_rEvent.GetGlobalCursorPosition()[1]);
@@ -174,6 +176,22 @@ namespace Scpt
                     ENGINE_CONSOLE_INFO("Save cubemap");
 
                     SaveCubemap();
+                }
+
+                if (x > Gfx::Main::GetActiveNativeWindowSize()[0] - 200.0f && y < 200.0f)
+                {
+                    m_UseEstimationWithNeuralNetwork = !m_UseEstimationWithNeuralNetwork;
+
+                    if (m_UseEstimationWithNeuralNetwork)
+                    {
+                        ENGINE_CONSOLE_INFO("NN estimation turned on");
+                    }
+                    else
+                    {
+                        ENGINE_CONSOLE_INFO("NN estimation turned off");
+                    }
+
+                    Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*this, CLightEstimationScript::DirtyInfo);
                 }
             }
 
