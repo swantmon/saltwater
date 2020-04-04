@@ -87,6 +87,9 @@ def OnNewClient(_Socket, _Address, _ID):
 
             integers = struct.unpack('I' * 3, header)
             bytesLeft = integers[1]
+
+            textureSize = _Socket.recv(8)
+            bytesLeft -= len(textureSize)
             
             panorama = np.array([])
 
