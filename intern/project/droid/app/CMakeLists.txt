@@ -37,6 +37,8 @@ add_library( base STATIC ${TargetSources} )
 target_include_directories( base PRIVATE ${ExternDir}/glm/include )
 target_include_directories( base PRIVATE ${ExternDir}/json/include )
 
+target_link_libraries( base z )
+
 # ---------------------------------------
 # Engine
 # ---------------------------------------

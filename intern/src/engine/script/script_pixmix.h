@@ -85,7 +85,7 @@ namespace Scpt
                     }
                     catch (...)
                     {
-                        ENGINE_CONSOLE_ERRORV("Failed to decompress! Ignoring network message!");
+                        ENGINE_CONSOLE_ERROR("Failed to decompress! Ignoring network message!");
                         return;
                     }
                 }
