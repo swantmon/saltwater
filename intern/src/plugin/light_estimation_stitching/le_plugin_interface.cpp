@@ -332,15 +332,30 @@ namespace LE
 		if (!Net::CNetworkManager::GetInstance().IsConnected(m_SocketHandle)) return;
 
 		// -----------------------------------------------------------------------------
-		// Send message
+		// Pack message
 		// -----------------------------------------------------------------------------
+        int MessageLength = sizeof(size_t) + s_PanoramaWidth * s_PanoramaHeight * 4;
+
+        std::vector<char> Payload(MessageLength);
+
+        int Offset = 0;
+
+        size_t TextureSize = s_PanoramaWidth * s_PanoramaHeight * 4;
+        std::memcpy(Payload.data() + Offset, &TextureSize, sizeof(TextureSize));
+        Offset += sizeof(TextureSize);
+
+        Gfx::TextureManager::CopyTextureToCPU(m_PanoramaTexturePtr, Payload.data() + Offset);
+
+        // -----------------------------------------------------------------------------
+        // Send message
+        // -----------------------------------------------------------------------------
 		Net::CMessage Message;
 
-		Message.m_Payload = std::vector<char>(s_PanoramaWidth * s_PanoramaHeight * 4);
-		Message.m_CompressedSize = Message.m_DecompressedSize = static_cast<int>(Message.m_Payload.size());
+        Message.m_Category = 0;
+		Message.m_CompressedSize = MessageLength;
+		Message.m_DecompressedSize = MessageLength;
 		Message.m_MessageType = 0;
-
-		Gfx::TextureManager::CopyTextureToCPU(m_PanoramaTexturePtr, Message.m_Payload.data());
+        Message.m_Payload = std::move(Payload);
 
 		Net::CNetworkManager::GetInstance().SendMessage(m_SocketHandle, Message);
 	}
