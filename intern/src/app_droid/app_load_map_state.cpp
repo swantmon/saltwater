@@ -26,6 +26,8 @@
 #include "engine/data/data_sun_component.h"
 #include "engine/data/data_transformation_facet.h"
 
+#include "engine/graphic/gfx_material_manager.h"
+
 #include "engine/script/script_ar_camera_control_script.h"
 #include "engine/script/script_ar_place_object_on_touch_script.h"
 #include "engine/script/script_ar_settings_script.h"
@@ -349,7 +351,7 @@ namespace App
 
             if (DefaultSceneMaterialType == 1)
             {
-                pMaterialComponent->SetFileName(DefaultSceneMaterial);
+                Gfx::MaterialManager::CreateMaterialFromXML(DefaultSceneMaterial, pMaterialComponent);
             }
             else
             {
