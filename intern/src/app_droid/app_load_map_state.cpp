@@ -32,9 +32,6 @@
 #include "engine/script/script_light_estimation.h"
 #include "engine/script/script_script_manager.h"
 
-#define USE_SCENE 1
-#define USE_HEAD_MODEL 0
-
 namespace App
 {
     void CreateDefaultScene();
@@ -68,10 +65,10 @@ namespace App
 
     void CLoadMapState::InternOnEnter()
     {
-#if USE_SCENE
         // -----------------------------------------------------------------------------
         // Get filename
         // -----------------------------------------------------------------------------
+        bool UseScene = Core::CProgramParameters::GetInstance().Get("application:use_scene", true);
         std::string Filename = Core::CProgramParameters::GetInstance().Get("application:last_scene", "Default Scene.sws");
 
         // -----------------------------------------------------------------------------
@@ -81,7 +78,7 @@ namespace App
 
         iStream.open(Core::AssetManager::GetPathToAssets() + "/" + Filename);
 
-        if (iStream.is_open())
+        if (UseScene && iStream.is_open())
         {
             Base::CTextReader Reader(iStream, 1);
 
@@ -97,9 +94,6 @@ namespace App
         {
             CreateDefaultScene();
         }
-#else
-        CreateDefaultScene();
-#endif
     }
 
     // -----------------------------------------------------------------------------
@@ -300,6 +294,20 @@ namespace App
 
         // -----------------------------------------------------------------------------
 
+        glm::vec3 DefaultSceneObjectPosition = Core::CProgramParameters::GetInstance().Get("application:default_scene:object:position", glm::vec3(0.0f, 0.0f, 1.0f));
+        glm::vec3 DefaultSceneObjectScale = Core::CProgramParameters::GetInstance().Get("application:default_scene:object:scale", glm::vec3(1.0f));
+        glm::vec3 DefaultSceneObjectRotation = Core::CProgramParameters::GetInstance().Get("application:default_scene:object:rotation", glm::vec3(glm::radians(-90.0f), 0.0f, 0.0f));
+
+        int DefaultSceneModelType = Core::CProgramParameters::GetInstance().Get("application:default_scene:model:type", 0);
+        std::string DefaultSceneModel = Core::CProgramParameters::GetInstance().Get("application:default_scene:model:file", "/models/head.dae");
+
+        int DefaultSceneMaterialType = Core::CProgramParameters::GetInstance().Get("application:default_scene:material:type", 0);
+        std::string DefaultSceneMaterial = Core::CProgramParameters::GetInstance().Get("application:default_scene:material:file", "/materials/naturals/metals/Gold_Worn_00.mat");
+        glm::vec4 DefaultSceneMaterialColor = Core::CProgramParameters::GetInstance().Get("application:default_scene:material:color", glm::vec4(1.0f));
+        float DefaultSceneMaterialMetalness = Core::CProgramParameters::GetInstance().Get("application:default_scene:material:metalness", 1.0f);
+        float DefaultSceneMaterialRoughness = Core::CProgramParameters::GetInstance().Get("application:default_scene:material:roughness", 0.25f);
+        float DefaultSceneMaterialReflectance = Core::CProgramParameters::GetInstance().Get("application:default_scene:material:reflectance", 1.0f);
+
         Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rRootEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
         {
@@ -314,25 +322,22 @@ namespace App
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-#if USE_HEAD_MODEL == 1
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
-            pTransformationFacet->SetScale(glm::vec3(2.0f));
-            pTransformationFacet->SetRotation(glm::vec3(glm::radians(-90.0f), 0.0f, 0.0f));
-#else
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
-            pTransformationFacet->SetScale(glm::vec3(0.40f));
-            pTransformationFacet->SetRotation(glm::vec3(0.0f));
-#endif
+            pTransformationFacet->SetPosition(DefaultSceneObjectPosition);
+            pTransformationFacet->SetScale(DefaultSceneObjectScale);
+            pTransformationFacet->SetRotation(DefaultSceneObjectRotation);
 
             // -----------------------------------------------------------------------------
 
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
-#if USE_HEAD_MODEL == 1
-            pMeshComponent->SetFilename("/models/head.dae");
-#else
-            pMeshComponent->SetMeshType(Dt::CMeshComponent::Sphere);
-#endif
+            if (DefaultSceneModelType == 1)
+            {
+                pMeshComponent->SetFilename(DefaultSceneModel);
+            }
+            else
+            {
+                pMeshComponent->SetMeshType(Dt::CMeshComponent::Sphere);
+            }
 
             rEntity.AttachComponent(pMeshComponent);
 
@@ -342,9 +347,18 @@ namespace App
 
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
-            pMaterialComponent->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-            pMaterialComponent->SetMetalness(1.0f);
-            pMaterialComponent->SetRoughness(0.25f);
+            if (DefaultSceneMaterialType == 1)
+            {
+                pMaterialComponent->SetFileName(DefaultSceneMaterial);
+            }
+            else
+            {
+                pMaterialComponent->SetColor(DefaultSceneMaterialColor);
+                pMaterialComponent->SetMetalness(DefaultSceneMaterialMetalness);
+                pMaterialComponent->SetRoughness(DefaultSceneMaterialRoughness);
+                pMaterialComponent->SetReflectance(DefaultSceneMaterialReflectance);
+            }
+
 
             rEntity.AttachComponent(pMaterialComponent);
 
