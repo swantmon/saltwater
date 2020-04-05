@@ -119,7 +119,7 @@ def OnNewClient(_Socket, _Address, _ID):
 
         for y in range(opt.img_size_h):
             for x in range(opt.img_size_w):
-                if panorama[y][x][3] != 0.0:
+                if panorama[y][x][3] > 0.06:
                     masked_sample_pixels[x, y] = (int(panorama[y][x][0] * 255), int(panorama[y][x][1] * 255), int(panorama[y][x][2] * 255))
 
         transform = transforms.Compose(transforms_)
