@@ -97,6 +97,8 @@ namespace Scpt
                 auto x = (float)_rEvent.GetGlobalCursorPosition()[0];
                 auto y = (float)_rEvent.GetGlobalCursorPosition()[1];
 
+                if (x < 200.0f || y < 200.0f) return;
+
                 const void* pNewMarker = AcquireNewMarker(x, y);
 
                 if (pNewMarker != nullptr && m_pMarker != nullptr)
