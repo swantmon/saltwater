@@ -335,6 +335,9 @@ namespace App
             if (DefaultSceneModelType == 1)
             {
                 pMeshComponent->SetFilename(DefaultSceneModel);
+                pMeshComponent->SetGeneratorFlag(1);
+                pMeshComponent->SetMeshType(Dt::CMeshComponent::Asset);
+                pMeshComponent->SetMeshIndex(0);
             }
             else
             {
