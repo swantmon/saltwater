@@ -34,13 +34,13 @@
 #include "engine/gui/gui_event_handler.h"
 
 #include "engine/script/script_ar_settings_script.h"
+#include <engine/script/script_ar_camera_control_script.h>
 
 #include "plugin/arcore/mr_control_manager.h"
 
 #include <array>
+#include <unistd.h>
 #include <vector>
-
-#include <engine/script/script_ar_camera_control_script.h>
 
 #include "arcore_c_api.h"
 
@@ -319,6 +319,12 @@ namespace
         // Initialize ARCore if needed
         // -----------------------------------------------------------------------------
         OnResume();
+
+        // -----------------------------------------------------------------------------
+        // Sleep thread for one second to finally initialize ARCore on device
+        // Note: Otherwise ARCore and OpenGl crashes from time to time
+        // -----------------------------------------------------------------------------
+        sleep(1.0);
     }
 
     // -----------------------------------------------------------------------------
