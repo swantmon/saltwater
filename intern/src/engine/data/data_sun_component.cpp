@@ -8,13 +8,14 @@ namespace Dt
     REGISTER_COMPONENT_SER(CSunComponent);
 
     CSunComponent::CSunComponent()
-        : m_RefreshMode   (Static)
-        , m_Direction     (0.0f, 0.0f, -1.0f)
-        , m_Color         ()
-        , m_Lightness     ()
-        , m_Temperature   (0.0f)
-        , m_Intensity     (0.0f)
-        , m_HasTemperature(false)
+        : m_RefreshMode             (Static)
+        , m_Direction               (0.0f, 0.0f, -1.0f)
+        , m_Color                   ()
+        , m_Lightness               ()
+        , m_Temperature             (0.0f)
+        , m_Intensity               (0.0f)
+        , m_CustomDistanceFromOrigin(-1.0f)
+        , m_HasTemperature          (false)
     {
 
     }
@@ -80,6 +81,27 @@ namespace Dt
     const glm::vec3& CSunComponent::GetDirection() const
     {
         return m_Direction;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSunComponent::SetCustomDistanceToOrigin(float _Distance)
+    {
+        m_CustomDistanceFromOrigin = _Distance;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CSunComponent::GetCustomDistanceToOrigin() const
+    {
+        return m_CustomDistanceFromOrigin;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSunComponent::ResetCustomDistance()
+    {
+        m_CustomDistanceFromOrigin = -1.0f;
     }
 
     // -----------------------------------------------------------------------------

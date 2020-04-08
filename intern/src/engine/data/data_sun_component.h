@@ -35,6 +35,10 @@ namespace Dt
         glm::vec3& GetDirection();
         const glm::vec3& GetDirection() const;
 
+        void SetCustomDistanceToOrigin(float _Distance);
+        float GetCustomDistanceToOrigin() const;
+        void ResetCustomDistance();
+
         void SetTemperature(float _Temperature);
         float GetTemperature() const;
 
@@ -72,6 +76,7 @@ namespace Dt
             Base::Serialize(_rCodec, m_Color);
             Base::Serialize(_rCodec, m_Lightness);
 
+            _rCodec >> m_CustomDistanceFromOrigin;
             _rCodec >> m_Temperature;
             _rCodec >> m_Intensity;
             _rCodec >> m_HasTemperature;
@@ -89,6 +94,7 @@ namespace Dt
             Base::Serialize(_rCodec, m_Color);
             Base::Serialize(_rCodec, m_Lightness);
 
+            _rCodec << m_CustomDistanceFromOrigin;
             _rCodec << m_Temperature;
             _rCodec << m_Intensity;
             _rCodec << m_HasTemperature;
@@ -107,6 +113,7 @@ namespace Dt
         glm::vec3    m_Lightness;
         float        m_Temperature;
         float        m_Intensity;
+        float        m_CustomDistanceFromOrigin;
         bool         m_HasTemperature;
 
     private:
