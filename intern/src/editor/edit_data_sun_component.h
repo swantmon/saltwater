@@ -29,6 +29,8 @@ namespace Dt
 
             HasChanged |= ImGui::DragFloat("Intensity", &m_Intensity);
 
+            HasChanged |= ImGui::DragFloat("Distance From Origin", &m_CustomDistanceFromOrigin);
+
             HasChanged |= ImGui::DragFloat3("Direction", &m_Direction.x, 0.001f);
 
             if (HasChanged) UpdateLightness();

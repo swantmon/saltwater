@@ -191,6 +191,8 @@ namespace App
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             {
+                float CustomDistanceOfSun = Core::CProgramParameters::GetInstance().Get("application:default_scene:sun:distance", 5.0f);
+
                 auto SunComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSunComponent>();
 
                 SunComponent->EnableTemperature(false);
@@ -200,6 +202,7 @@ namespace App
                 SunComponent->SetIntensity(90600.0f);
                 SunComponent->SetTemperature(0);
                 SunComponent->SetRefreshMode(Dt::CSunComponent::Dynamic);
+                SunComponent->SetCustomDistanceToOrigin(CustomDistanceOfSun);
 
                 SunComponent->UpdateLightness();
 

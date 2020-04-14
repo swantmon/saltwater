@@ -223,7 +223,10 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Calculate near and far plane
                 // -----------------------------------------------------------------------------
-                float Radius = static_cast<float>(glm::max(Dt::Map::GetNumberOfMetersX(), Dt::Map::GetNumberOfMetersY()));
+                float Radius = pDtComponent->GetCustomDistanceToOrigin();
+
+                if (Radius <= 0.0f) Radius = static_cast<float>(glm::max(Dt::Map::GetNumberOfMetersX(), Dt::Map::GetNumberOfMetersY()));
+
                 float Near   = 1.0f;
                 float Far    = Radius * 3.14f;
 
