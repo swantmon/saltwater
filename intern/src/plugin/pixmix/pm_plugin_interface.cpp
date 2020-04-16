@@ -187,9 +187,9 @@ namespace PM
         {
             for (int c = 0; c < Source3.cols; ++c)
             {
-                cv::Vec3b color = Source3(r, c);
+                cv::Vec4b color = Source4(r, c);
 
-                if (color[0] == 255 && color[1] == 255 && color[2] == 255)
+                if (_MaskInAlpha ? (color[3] == 0) : (color[0] == 255 && color[1] == 255 && color[2] == 255))
                 {
                     Mask(r, c) = 0;
                     if (r + 2 < Source3.rows)
