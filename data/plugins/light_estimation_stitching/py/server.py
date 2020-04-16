@@ -151,7 +151,8 @@ def OnNewClient(_Socket, _Address, _ID):
 
         pixels = resultData.tobytes()
 
-        _Socket.sendall(struct.pack('iii', 0, opt.img_size_w * opt.img_size_h * 4, opt.img_size_w * opt.img_size_h * 4))
+        _Socket.sendall(struct.pack('iii', 0, opt.img_size_w * opt.img_size_h * 4 + 2 * 4, opt.img_size_w * opt.img_size_h * 4 + 2 * 4))
+        _Socket.sendall(struct.pack('ii', opt.img_size_w, opt.img_size_h))
         _Socket.sendall(pixels)
 
         # -----------------------------------------------------------------------------
