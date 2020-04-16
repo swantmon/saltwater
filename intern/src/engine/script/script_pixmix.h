@@ -31,7 +31,7 @@ namespace Scpt
                 BASE_THROWM("PixMix plugin was not loaded");
             }
 
-            InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix", "Inpaint"));
+            InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix", "InpaintWithMask"));
 
             // -----------------------------------------------------------------------------
             // Create server
