@@ -366,15 +366,38 @@ namespace LE
 	{
 		BASE_UNUSED(_SocketHandle);
 
-		if (_rMessage.m_DecompressedSize != s_PanoramaWidth * s_PanoramaHeight * 4) return;
+		if (_rMessage.m_DecompressedSize != s_PanoramaWidth * s_PanoramaHeight * 4 + 2 * sizeof(int)) return;
+
+        // -----------------------------------------------------------------------------
+        // Read data from network
+        // -----------------------------------------------------------------------------
+        int ImageWidth;
+        int ImageHeight;
+        const char* pTexturePayload = nullptr;
+        int Offset = 0;
+
+        std::memcpy(&ImageWidth, &_rMessage.m_Payload[0] + Offset, sizeof(int));
+        Offset += sizeof(int);
+
+        std::memcpy(&ImageHeight, &_rMessage.m_Payload[0] + Offset, sizeof(int));
+        Offset += sizeof(int);
+
+        pTexturePayload = &_rMessage.m_Payload[0] + Offset;
+
+        if (ImageWidth != s_PanoramaWidth || ImageHeight != s_PanoramaHeight)
+        {
+            ENGINE_CONSOLE_ERROR("Mismatching input and output size of panoramas from neural network!");
+
+            return;
+        }
 
 		// -----------------------------------------------------------------------------
-		// Read new texture from network
+		// Put data to GPU
 		// -----------------------------------------------------------------------------
 		Gfx::STextureDescriptor TextureDescriptor;
 
-		TextureDescriptor.m_NumberOfPixelsU  = s_PanoramaWidth;
-		TextureDescriptor.m_NumberOfPixelsV  = s_PanoramaHeight;
+		TextureDescriptor.m_NumberOfPixelsU  = ImageWidth;
+		TextureDescriptor.m_NumberOfPixelsV  = ImageHeight;
 		TextureDescriptor.m_NumberOfPixelsW  = 1;
 		TextureDescriptor.m_NumberOfMipMaps  = 1;
 		TextureDescriptor.m_NumberOfTextures = 1;
@@ -384,7 +407,7 @@ namespace LE
 		TextureDescriptor.m_Usage			 = Gfx::CTexture::GPUReadWrite;
 		TextureDescriptor.m_Semantic		 = Gfx::CTexture::Diffuse;
 		TextureDescriptor.m_pFileName		 = nullptr;
-		TextureDescriptor.m_pPixels			 = const_cast<char*>(&_rMessage.m_Payload[0]);
+		TextureDescriptor.m_pPixels			 = const_cast<char*>(pTexturePayload);
 
 		m_NNPanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 	}

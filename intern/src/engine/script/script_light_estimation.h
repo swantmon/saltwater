@@ -202,6 +202,11 @@ namespace Scpt
                 case Base::CInputEvent::Key1:
                     SaveCubemap();
                     break;
+                case Base::CInputEvent::Key2:
+                    m_UseEstimationWithNeuralNetwork = true;
+
+                    Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*this, CLightEstimationScript::DirtyInfo);
+                    break;
                 };
             }
         }
