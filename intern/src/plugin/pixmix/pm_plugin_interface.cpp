@@ -248,11 +248,23 @@ namespace PM
         std::vector<glm::u8vec3> Image(_Resolution.x * _Resolution.y);
         std::vector<unsigned char> Mask(_Resolution.x * _Resolution.y);
 
-        for (int i = 0; i < _Resolution.x * _Resolution.y; ++i)
+        if (_MaskInAlpha)
         {
-            glm::u8vec4 Pixel = _SourceImage[i];
-            Image[i] = glm::u8vec3(Pixel.r, Pixel.g, Pixel.b);
-            Mask[i] = _MaskInAlpha ? 255 - Pixel.a : (Mask[i] = Pixel.r == 255 && Pixel.g == 255 && Pixel.b == 255 ? 0x00 : 0xFF);
+            for (int i = 0; i < _Resolution.x * _Resolution.y; ++i)
+            {
+                glm::u8vec4 Pixel = _SourceImage[i];
+                Image[i] = glm::u8vec3(Pixel.r, Pixel.g, Pixel.b);
+                Mask[i] = Pixel.a < 255 ? 0x00 : 0xFF;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < _Resolution.x * _Resolution.y; ++i)
+            {
+                glm::u8vec4 Pixel = _SourceImage[i];
+                Image[i] = glm::u8vec3(Pixel.r, Pixel.g, Pixel.b);
+                Mask[i] = (Pixel.r == 255 && Pixel.g == 255 && Pixel.b == 255) ? 0x00 : 0xFF;
+            }
         }
 
         Ocean::CV::Synthesis::SynthesisOneFramePixel PixMix;
