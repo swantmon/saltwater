@@ -44,6 +44,8 @@ namespace Scpt
             m_NetHandle = Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_Socket, SLAMDelegate);
 
             m_Threshold = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:color_threshold", 0);
+
+            m_AlphaThreshold = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:alpha_threshold", 0);
         }
 
         // -----------------------------------------------------------------------------
@@ -100,13 +102,16 @@ namespace Scpt
 
                 std::memcpy(RawData.data(), Decompressed.data() + sizeof(glm::ivec2), sizeof(RawData[0]) * RawData.size());
 
-                /*for (auto& Pixel : RawData)
+                if (m_AlphaThreshold > 0)
                 {
-                    if (Pixel.r + Pixel.g + Pixel.b / 3.0f < m_Threshold)
+                    for (auto& Pixel : RawData)
                     {
-                        Pixel = glm::u8vec4(255);
+                        if (Pixel.a > m_AlphaThreshold)
+                        {
+                            Pixel.a = 255;
+                        }
                     }
-                }*/
+                }
 
                 std::vector<glm::u8vec4> InpaintedImage(Size.x * Size.y);
 
@@ -144,5 +149,6 @@ namespace Scpt
         Net::CNetworkManager::CMessageDelegate::HandleType m_NetHandle;
 
         int m_Threshold;
+        int m_AlphaThreshold;
     };
 } // namespace Scpt
