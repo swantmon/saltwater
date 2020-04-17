@@ -31,7 +31,7 @@ namespace Scpt
                 BASE_THROWM("PixMix plugin was not loaded");
             }
 
-            InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix", "Inpaint"));
+            InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix", "InpaintWithMask"));
 
             // -----------------------------------------------------------------------------
             // Create server
@@ -100,13 +100,13 @@ namespace Scpt
 
                 std::memcpy(RawData.data(), Decompressed.data() + sizeof(glm::ivec2), sizeof(RawData[0]) * RawData.size());
 
-                for (auto& Pixel : RawData)
+                /*for (auto& Pixel : RawData)
                 {
                     if (Pixel.r + Pixel.g + Pixel.b / 3.0f < m_Threshold)
                     {
                         Pixel = glm::u8vec4(255);
                     }
-                }
+                }*/
 
                 std::vector<glm::u8vec4> InpaintedImage(Size.x * Size.y);
 
