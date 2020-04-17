@@ -148,10 +148,12 @@ namespace PM
         try
         {
             InpaintWithOcean(_Resolution, _SourceImage, _DestinationImage, true);
+            ENGINE_CONSOLE_DEBUG("Inpainted with Ocean Version");
         }
         catch (...)
         {
             InpaintWithOpen(_Resolution, _SourceImage, _DestinationImage, true);
+            ENGINE_CONSOLE_DEBUG("Inpainted with Open Version");
         }
 #endif
     }
