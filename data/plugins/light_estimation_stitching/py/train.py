@@ -41,8 +41,8 @@ parser.add_argument('--mask_ground_and_sky', type=float, default=0.3, help='Perc
 parser.add_argument('--number_of_masks', type=int, default=4, help='number of random mask')
 parser.add_argument('--mask_size', type=int, default=64, help='size of random mask')
 parser.add_argument('--sample_interval', type=int, default=5000, help='interval between image sampling')
-parser.add_argument('--output', type=str, default='D:/NN/plugin_stitching/output/SUN360_FLAT_256x128/', help='output folder of the results')
-parser.add_argument('--path_to_savepoint', type=str, default='D:/NN/plugin_stitching/savepoint/', help='path to load and store savepoint')
+parser.add_argument('--output', type=str, default='D:/NN/plugin_stitching/v4_more_layer_m2/output/', help='output folder of the results')
+parser.add_argument('--path_to_savepoint', type=str, default='D:/NN/plugin_stitching/v4_more_layer_m2/savepoint/', help='path to load and store savepoint')
 opt = parser.parse_args()
 
 # -----------------------------------------------------------------------------
@@ -118,16 +118,6 @@ class ImageDataset(Dataset):
 
     # -----------------------------------------------------------------------------
 
-    def apply_center_mask(self, img):
-        # Get upper-left pixel coordinate
-        i = (opt.img_size - opt.mask_size) // 2
-        masked_img = img.clone()
-        masked_img[:, i:i+opt.mask_size, i:i+opt.mask_size] = 1
-
-        return masked_img, masked_img
-
-    # -----------------------------------------------------------------------------
-
     def apply_panorama_mask(self, img):
         masked_part = torch.zeros(img.shape)
         masked_img = img.clone()
@@ -135,7 +125,7 @@ class ImageDataset(Dataset):
         noise = self.generateMaskTensor()
 
         masked_img = torch.ones(img.shape) * (1.0 - noise) + masked_img * noise
-        masked_part = torch.ones(img.shape) * (1.0 - noise) + masked_part * noise
+        masked_part = torch.ones(img.shape) * noise
 
         return masked_img, masked_part
 
@@ -252,12 +242,14 @@ def save_sample(batches_done, _Path):
     # -----------------------------------------------------------------------------
     # Mixture
     # -----------------------------------------------------------------------------
-    filled_example = gen_mask * masked_part + masked_samples * (1 - masked_part)
+    filled_example = gen_mask * masked_part + samples * (1 - masked_part)
+
+    masked_part = (masked_part - 0.5) * 2.0
 
     # -----------------------------------------------------------------------------
     # Save sample
     # -----------------------------------------------------------------------------
-    sample = torch.cat((masked_samples.data, gen_mask.data, filled_example.data, samples.data), -2)
+    sample = torch.cat((samples.data, masked_part.data, masked_samples.data, gen_mask.data, filled_example.data, samples.data), -2)
     save_image(sample, _Path, nrow=6, normalize=True)
 
 # -----------------------------------------------------------------------------
