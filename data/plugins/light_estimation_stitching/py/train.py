@@ -242,12 +242,12 @@ def save_sample(batches_done, _Path):
     # -----------------------------------------------------------------------------
     # Mixture
     # -----------------------------------------------------------------------------
-    filled_example = gen_mask * masked_part + samples * (1 - masked_part)
+    filled_example = gen_mask * (1 - masked_part) + samples * masked_part
 
     # -----------------------------------------------------------------------------
     # Transfer mask to image space for saving (-1.0 .. +1.0)
     # -----------------------------------------------------------------------------
-    masked_part = (masked_part - 0.5) * 2.0
+    masked_part = (1.0 - masked_part - 0.5) * 2.0
 
     # -----------------------------------------------------------------------------
     # Save sample
