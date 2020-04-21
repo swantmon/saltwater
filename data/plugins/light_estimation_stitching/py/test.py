@@ -85,7 +85,11 @@ def EstimateEnvironment(_Panorama):
 
     masked_samples = Variable(masked_samples.type(Tensor))
 
+    save_image(masked_samples.data, '{}/tmp_output_generator_xxx.png'.format(opt.data), nrow=1, normalize=True)  
+
     gen_mask = generator(masked_samples)
+
+    save_image(gen_mask.data, '{}/tmp_output_generator.png'.format(opt.data), nrow=1, normalize=True)  
 
     gen_mask = gen_mask[0]
 
