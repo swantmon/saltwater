@@ -31,12 +31,13 @@ import torch
 parser = argparse.ArgumentParser()
 parser.add_argument('--data', type=str, default='/Users/tschwandt/Documents/Archive/data/', help='output folder of the results')
 parser.add_argument('--path_to_generator', type=str, default='/Users/tschwandt/Documents/Archive/model_best_generator.pth.tar', help='path to saved generator')
+parser.add_argument('--use_cuda', type=bool, default=True, help='use CUDA if available')
 opt = parser.parse_args()
 
 # -----------------------------------------------------------------------------
 # Check if cuda is available
 # -----------------------------------------------------------------------------
-cuda = True if torch.cuda.is_available() else False
+cuda = True if opt.use_cuda & torch.cuda.is_available() else False
 
 # -----------------------------------------------------------------------------
 # GAN & Settings
@@ -105,7 +106,7 @@ if __name__ == '__main__':
         # -----------------------------------------------------------------------------
         Checkpoint = LoadCheckpoint(opt.path_to_generator)
 
-        generator.load_state_dict(Checkpoint['state_dict'])
+        generator.load_state_dict(Checkpoint['state_dict'], cuda)
 
         generator.eval()
 

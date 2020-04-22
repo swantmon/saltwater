@@ -183,7 +183,7 @@ if __name__ == '__main__':
         # -----------------------------------------------------------------------------
         Checkpoint = LoadCheckpoint(opt.path_to_generator)
 
-        generator.load_state_dict(Checkpoint['state_dict'])
+        generator.load_state_dict(Checkpoint['state_dict'], cuda)
 
         generator.eval()
 
