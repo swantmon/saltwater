@@ -34,7 +34,6 @@ parser.add_argument('--img_size_w', type=int, default=256, help='width of image 
 parser.add_argument('--img_size_h', type=int, default=128, help='height of each image dimension')
 parser.add_argument('--path_to_generator', type=str, default='W:/project_data/saltwater/data/plugin_stitching/savepoint_20181222_ENV/savepoint/model_best_generator.pth.tar', help='path to saved generator')
 parser.add_argument('--port', type=int, default=12345, help='Port address to an endpoint')
-parser.add_argument('--temp', type=str, default='W:/project_data/saltwater/data/plugin_stitching/savepoint_20181222_ENV/.tmp/', help='temporary folder')
 opt = parser.parse_args()
 
 # -----------------------------------------------------------------------------
@@ -50,9 +49,29 @@ cuda = True if torch.cuda.is_available() else False
 # -----------------------------------------------------------------------------
 # GAN & Settings
 # -----------------------------------------------------------------------------
+class Denormalize(object):
+    def __init__(self, mean, std):
+        self.mean = mean
+        self.std = std
+
+    def __call__(self, tensor):
+        """
+        Args:
+            tensor (Tensor): Tensor image of size (C, H, W) to be normalized.
+        Returns:
+            Tensor: Normalized image.
+        """
+        for t, m, s in zip(tensor, self.mean, self.std):
+            t.mul_(s).add_(m)
+            # The normalize code -> t.sub_(m).div_(s)
+        return tensor
+
 transforms_ = [ transforms.Resize((opt.img_size_h, opt.img_size_w), Image.BICUBIC),
                 transforms.ToTensor(),
                 transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5)) ]
+transforms__ = [ Denormalize((0.5,0.5,0.5), (0.5,0.5,0.5)),
+                 transforms.ToPILImage(mode='RGB'),
+                 transforms.Resize((opt.img_size_h, opt.img_size_w), Image.BICUBIC) ]
 
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
@@ -64,6 +83,9 @@ if cuda:
 # -----------------------------------------------------------------------------
 # Functionality
 # -----------------------------------------------------------------------------
+transform1 = transforms.Compose(transforms_)
+transform2 = transforms.Compose(transforms__)
+
 def OnNewClient(_Socket, _Address, _ID):
     print ("Accepted connection from client", _Address)
 
@@ -122,9 +144,8 @@ def OnNewClient(_Socket, _Address, _ID):
                 if panorama[y][x][3] > 0.06:
                     masked_sample_pixels[x, y] = (int(panorama[y][x][0] * 255), int(panorama[y][x][1] * 255), int(panorama[y][x][2] * 255))
 
-        transform = transforms.Compose(transforms_)
 
-        masked_sample = transform(masked_sample)
+        masked_sample = transform1(masked_sample)
 
         masked_samples = torch.zeros([1, 3, opt.img_size_h, opt.img_size_w])
 
@@ -132,18 +153,18 @@ def OnNewClient(_Socket, _Address, _ID):
 
         masked_samples = Variable(masked_samples.type(Tensor))
 
-        gen_mask = generator(masked_samples)
+        gen_masks = generator(masked_samples)
 
         # -----------------------------------------------------------------------------
         # Send generated image back
-        # Now: Save image to see quality
-        # TODO: Do not save image! Use data directly.
         # -----------------------------------------------------------------------------
-        os.makedirs('{}{}/{}'.format(opt.temp, _Address[0], _ID), exist_ok=True)
+        gen_mask = gen_masks[0]
 
-        save_image(gen_mask.data, '{}{}/{}/tmp_output_generator.png'.format(opt.temp, _Address[0], _ID), nrow=1, normalize=True)  
+        if cuda: gen_mask = gen_mask.cpu()       
 
-        im = Image.open('{}{}/{}/tmp_output_generator.png'.format(opt.temp, _Address[0], _ID)).convert('RGBA')
+        im = transform2(gen_mask)
+
+        im = im.convert('RGBA')
 
         resultData =  np.asarray(list(im.getdata()))
 
@@ -158,7 +179,7 @@ def OnNewClient(_Socket, _Address, _ID):
         # -----------------------------------------------------------------------------
         # Save output and input to file system
         # -----------------------------------------------------------------------------
-        sample = torch.cat((masked_samples.data, gen_mask.data), -2)
+        sample = torch.cat((masked_samples.data, gen_masks.data), -2)
 
         os.makedirs('{}{}/{}'.format(opt.output, _Address[0], _ID), exist_ok=True)
         save_image(sample, '{}{}/{}/result_panorama_{}.png'.format(opt.output, _Address[0], _ID, Interval), nrow=1, normalize=True)
@@ -166,9 +187,6 @@ def OnNewClient(_Socket, _Address, _ID):
         Interval = Interval + 1
 
     print ("Disconnected from client", _Address)
-
-    if os.path.isfile('{}{}/{}/tmp_output_generator.png'.format(opt.temp, _Address[0], _ID)) == True:
-        os.remove('{}{}/{}/tmp_output_generator.png'.format(opt.temp, _Address[0], _ID))
     
     _Socket.close()
 
