@@ -79,13 +79,13 @@ def generate_perlin_noise_2d(shape, res):
     n1 = n01*(1-t[:,:,0]) + t[:,:,0]*n11
     return np.sqrt(2)*((1-t[:,:,1])*n0 + t[:,:,1]*n1)
         
-def generate_fractal_noise_2d(shape, res, octaves=1, persistence=0.5):
+def generate_fractal_noise_2d(shape, res, octaves=1, persistence=0.5, frequence=2):
     noise = np.zeros(shape)
     frequency = 1
     amplitude = 1
     for _ in range(octaves):
         noise += amplitude * generate_perlin_noise_2d(shape, (frequency*res[0], frequency*res[1]))
-        frequency *= 2
+        frequency *= frequence
         amplitude *= persistence
     return noise
 
@@ -99,9 +99,13 @@ class ImageDataset(Dataset):
     # -----------------------------------------------------------------------------
 
     def generateMaskTensor(self):
-        noise = generate_perlin_noise_2d((128, 256), (2, 2))
-        noise = noise * 2.0 + 0.6
-        noise = 1.0 - np.clip(noise, 0, 1)
+        octaves = np.random.randint(1, 3)
+        noise = generate_fractal_noise_2d((128, 256), (1, 1), octaves=2, persistence=1.0, frequence=1)
+        
+        #noise = np.clip(noise, 0, 1)
+        noise[noise <  0.1] = 0.0
+        noise[noise >= 0.1] = 1.0
+
         return torch.Tensor(noise)
 
     # -----------------------------------------------------------------------------
