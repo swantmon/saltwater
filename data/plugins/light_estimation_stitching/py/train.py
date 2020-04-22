@@ -99,12 +99,12 @@ class ImageDataset(Dataset):
     # -----------------------------------------------------------------------------
 
     def generateMaskTensor(self):
-        octaves = np.random.randint(1, 3)
-        noise = generate_fractal_noise_2d((128, 256), (1, 1), octaves=2, persistence=1.0, frequence=1)
-        
-        #noise = np.clip(noise, 0, 1)
-        noise[noise <  0.1] = 0.0
-        noise[noise >= 0.1] = 1.0
+        noise = generate_fractal_noise_2d((128, 256), (2, 2), octaves=3, persistence=0.4, frequence=1)
+        noise += generate_fractal_noise_2d((128, 256), (2, 2), octaves=1, persistence=4.0, frequence=1)
+        noise *= 2.0
+        noise = np.clip(noise, 0, 1)
+        noise[noise <  0.5] = 0.0
+        noise[noise >= 0.5] = 1.0
 
         return torch.Tensor(noise)
 
@@ -251,7 +251,7 @@ def save_sample(batches_done, _Path):
     # -----------------------------------------------------------------------------
     # Transfer mask to image space for saving (-1.0 .. +1.0)
     # -----------------------------------------------------------------------------
-    masked_part = (1.0 - masked_part - 0.5) * 2.0
+    masked_part = (masked_part - 0.5) * 2.0
 
     # -----------------------------------------------------------------------------
     # Save sample
