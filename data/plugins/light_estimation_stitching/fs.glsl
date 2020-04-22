@@ -29,8 +29,11 @@ void main(void)
     float Radius = min(sqrt(dot(SSUV, SSUV)), 1.0f);
 
     vec4 FinalColor = texture(in_InputTexture, in_UV);
+
+    float Alpha = min((1.0f - Radius), 1.0f) * 1.4f;
+    Alpha = clamp(Alpha, 0.0f, 1.0f);
         
-    out_Output = vec4(FinalColor.xyz, min((1.0f - Radius) + g_FrameDeltaTime, 1.0f));
+    out_Output = vec4(FinalColor.xyz, Alpha);
 }
 
 #endif // __INCLUDE_FS_TEXTURE_ENV_CUBEMAP_GENERATION_GLSL__
