@@ -107,6 +107,8 @@ if __name__ == '__main__':
 
         generator.load_state_dict(Checkpoint['state_dict'])
 
+        generator.eval()
+
         print ("Loaded extisting checkpoint")
 
         ListOfImages = []
