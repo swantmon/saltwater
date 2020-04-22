@@ -93,7 +93,6 @@ def OnNewClient(_Socket, _Address, _ID):
     # Prepare for output
     # -----------------------------------------------------------------------------
     os.makedirs('{}{}'.format(opt.output, _Address[0]), exist_ok=True)
-    os.makedirs('./tmp/{}'.format(_Address[0]), exist_ok=True)
 
     # -----------------------------------------------------------------------------
     # Wait for data
@@ -134,7 +133,14 @@ def OnNewClient(_Socket, _Address, _ID):
         # Use generator to create estimation
         # -----------------------------------------------------------------------------
         panorama.shape = (opt.img_size_h, opt.img_size_w, 4)
+
+        OriginalImage = Image.fromarray(np.uint8(panorama), "RGBA")
+        OriginalMask  = OriginalImage.split()[-1]
+
         panorama /= 255
+
+        panorama[:,:,3][panorama[:,:,3] <  0.5] = 0.0
+        panorama[:,:,3][panorama[:,:,3] >= 0.5] = 1.0
 
         panorama[:,:,0] = panorama[:,:,0] * panorama[:,:,3] + 1.0 * (1.0 - panorama[:,:,3])
         panorama[:,:,1] = panorama[:,:,1] * panorama[:,:,3] + 1.0 * (1.0 - panorama[:,:,3])
@@ -181,11 +187,14 @@ def OnNewClient(_Socket, _Address, _ID):
         # -----------------------------------------------------------------------------
         # Save output and input to file system
         # -----------------------------------------------------------------------------
-        Result = Image.new('RGB', (256, 384))
+        Result = Image.new('RGBA', (256, 768))
 
-        Result.paste(InputImage, (0, 0))
-        Result.paste(InputMask, (0, 128))
-        Result.paste(OutputImage, (0, 256))
+        Result.paste(OriginalImage, (0, 0))
+        Result.paste(OriginalMask, (0, 128))
+        Result.paste(InputImage.convert('RGB'), (0, 256))
+        Result.paste(InputMask, (0, 384))
+        Result.paste(OutputImage, (0, 512))
+        Result.paste(Image.alpha_composite(OutputImage, OriginalImage), (0, 640))
 
         os.makedirs('{}{}/{}'.format(opt.output, _Address[0], _ID), exist_ok=True)
         Result.save('{}{}/{}/result_panorama_{}.png'.format(opt.output, _Address[0], _ID, Interval))
