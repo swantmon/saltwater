@@ -134,16 +134,18 @@ def OnNewClient(_Socket, _Address, _ID):
         # Use generator to create estimation
         # -----------------------------------------------------------------------------
         panorama.shape = (opt.img_size_h, opt.img_size_w, 4)
-        panorama = panorama / 255.0
+        panorama /= 255
+
+        panorama[:,:,0] = panorama[:,:,0] * panorama[:,:,3] + 1.0 * (1.0 - panorama[:,:,3])
+        panorama[:,:,1] = panorama[:,:,1] * panorama[:,:,3] + 1.0 * (1.0 - panorama[:,:,3])
+        panorama[:,:,2] = panorama[:,:,2] * panorama[:,:,3] + 1.0 * (1.0 - panorama[:,:,3])
+
+        panorama *= 255
         
-        masked_sample = Image.new("RGB", (opt.img_size_w, opt.img_size_h), "white")
-        masked_sample_pixels = masked_sample.load()
+        InputImage = Image.fromarray(np.uint8(panorama), "RGBA")
+        InputMask = InputImage.split()[-1]
 
-        for y in range(opt.img_size_h):
-            for x in range(opt.img_size_w):
-                if panorama[y][x][3] > 0.06:
-                    masked_sample_pixels[x, y] = (int(panorama[y][x][0] * 255), int(panorama[y][x][1] * 255), int(panorama[y][x][2] * 255))
-
+        masked_sample = InputImage.convert("RGB")
 
         masked_sample = transform1(masked_sample)
 
@@ -162,11 +164,11 @@ def OnNewClient(_Socket, _Address, _ID):
 
         if cuda: gen_mask = gen_mask.cpu()       
 
-        im = transform2(gen_mask)
+        OutputImage = transform2(gen_mask)
 
-        im = im.convert('RGBA')
+        OutputImage = OutputImage.convert('RGBA')
 
-        resultData =  np.asarray(list(im.getdata()))
+        resultData =  np.asarray(list(OutputImage.getdata()))
 
         resultData = resultData.astype(np.uint8)
 
@@ -179,10 +181,14 @@ def OnNewClient(_Socket, _Address, _ID):
         # -----------------------------------------------------------------------------
         # Save output and input to file system
         # -----------------------------------------------------------------------------
-        sample = torch.cat((masked_samples.data, gen_masks.data), -2)
+        Result = Image.new('RGB', (256, 384))
+
+        Result.paste(InputImage, (0, 0))
+        Result.paste(InputMask, (0, 128))
+        Result.paste(OutputImage, (0, 256))
 
         os.makedirs('{}{}/{}'.format(opt.output, _Address[0], _ID), exist_ok=True)
-        save_image(sample, '{}{}/{}/result_panorama_{}.png'.format(opt.output, _Address[0], _ID, Interval), nrow=1, normalize=True)
+        Result.save('{}{}/{}/result_panorama_{}.png'.format(opt.output, _Address[0], _ID, Interval))
 
         Interval = Interval + 1
 

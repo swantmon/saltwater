@@ -83,7 +83,7 @@ def SaveCheckpoint(_Epoch, _ModelDict, _BestPrecision, _OptimizerDict, _Filename
             'optimizer' : _OptimizerDict,
         }, _Filename)
 
-def LoadCheckpoint(_Filename='checkpoint.pth.tar', _UseCuda = False):
-    if _UseCuda: 
+def LoadCheckpoint(_Filename='checkpoint.pth.tar'):
+    if torch.cuda.is_available(): 
         return torch.load(_Filename)
     return torch.load(_Filename, map_location='cpu')
