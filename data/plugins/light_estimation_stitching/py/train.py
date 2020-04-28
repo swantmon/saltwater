@@ -5,6 +5,7 @@ import numpy as np
 import math
 import sys
 import random
+import time
 
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
@@ -99,6 +100,8 @@ class ImageDataset(Dataset):
     # -----------------------------------------------------------------------------
 
     def generateMaskTensor(self):
+        np.random.seed(int(time.time()) + np.random.randint(0, 1000))
+
         noise = generate_fractal_noise_2d((128, 256), (2, 2), octaves=3, persistence=0.4, frequence=1)
         noise += generate_fractal_noise_2d((128, 256), (2, 2), octaves=1, persistence=4.0, frequence=1)
         noise *= 2.0
