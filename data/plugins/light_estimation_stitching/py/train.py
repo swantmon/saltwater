@@ -270,7 +270,7 @@ if __name__ == '__main__':
     try:
 
         if os.path.isfile(opt.path_to_savepoint + '/model_best_generator.pth.tar'):
-            Checkpoint = LoadCheckpoint(opt.path_to_savepoint + '/model_best_discriminator.pth.tar')
+            Checkpoint = LoadCheckpoint(opt.path_to_savepoint + '/model_best_discriminator.pth.tar', cuda)
 
             discriminator.load_state_dict(Checkpoint['state_dict'])
             optimizer_D.load_state_dict(Checkpoint['optimizer'])
@@ -279,7 +279,7 @@ if __name__ == '__main__':
             
             # -----------------------------------------------------------------------------
 
-            Checkpoint = LoadCheckpoint(opt.path_to_savepoint + '/model_best_generator.pth.tar')
+            Checkpoint = LoadCheckpoint(opt.path_to_savepoint + '/model_best_generator.pth.tar', cuda)
 
             LastEpoch            = Checkpoint['epoch']
             GeneratorMinimalLoss = Checkpoint['best_prec1']
