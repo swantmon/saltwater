@@ -122,7 +122,7 @@ if __name__ == '__main__':
         for _ImageFilepath in ListOfImages:
             print(_ImageFilepath)
 
-            Img = Image.open(_ImageFilepath)
+            Img = Image.open(_ImageFilepath).convert('RGB')
 
             Pano = Img.crop((0, 0, 256, 128))
 

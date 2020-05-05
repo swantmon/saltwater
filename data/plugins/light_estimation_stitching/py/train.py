@@ -360,9 +360,9 @@ if __name__ == '__main__':
                 # -----------------------------------------------------------------------------
                 if g_loss < GeneratorMinimalLoss and epoch > 0:
                     GeneratorMinimalLoss = g_loss
-                    SaveCheckpoint(epoch, generator.state_dict(), g_loss, optimizer_G.state_dict(), opt.path_to_savepoint + '/model_best_generator.pth.tar')
-                    SaveCheckpoint(epoch, discriminator.state_dict(), d_loss, optimizer_D.state_dict(), opt.path_to_savepoint + '/model_best_discriminator.pth.tar')
-                    save_sample(batches_done, opt.path_to_savepoint + '/model_best_batch.png')
+                    SaveCheckpoint(epoch, generator.state_dict(), g_loss, optimizer_G.state_dict(), opt.path_to_savepoint + '/model_best_generator_epoch_%d.pth.tar' % epoch)
+                    SaveCheckpoint(epoch, discriminator.state_dict(), d_loss, optimizer_D.state_dict(), opt.path_to_savepoint + '/model_best_discriminator_epoch_%d.pth.tar' % epoch)
+                    save_sample(batches_done, opt.path_to_savepoint + '/model_best_epoch_%d.png' % epoch)
                 
                 # -----------------------------------------------------------------------------
                 # Round end
