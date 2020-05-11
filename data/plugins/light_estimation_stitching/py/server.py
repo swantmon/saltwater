@@ -11,6 +11,7 @@ import sys
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
 from PIL import Image
+from PIL import ImageOps
 
 from torch.utils.data import DataLoader, Dataset
 from torchvision import datasets
@@ -34,6 +35,7 @@ parser.add_argument('--img_size_w', type=int, default=256, help='width of image 
 parser.add_argument('--img_size_h', type=int, default=128, help='height of each image dimension')
 parser.add_argument('--path_to_generator', type=str, default='./savepoint/model_best_generator.pth.tar', help='path to saved generator')
 parser.add_argument('--port', type=int, default=12345, help='Port address to an endpoint')
+parser.add_argument('--flip', type=bool, default=False, help='flip input image')
 opt, unknown_opt = parser.parse_known_args()
 
 # -----------------------------------------------------------------------------
@@ -134,7 +136,10 @@ def OnNewClient(_Socket, _Address, _ID):
         # -----------------------------------------------------------------------------
         panorama.shape = (opt.img_size_h, opt.img_size_w, 4)
 
+        if opt.flip == True: panorama = np.flip(panorama, 0)
+
         OriginalImage = Image.fromarray(np.uint8(panorama), "RGBA")
+
         OriginalMask  = OriginalImage.split()[-1]
 
         panorama /= 255
@@ -149,6 +154,7 @@ def OnNewClient(_Socket, _Address, _ID):
         panorama *= 255
         
         InputImage = Image.fromarray(np.uint8(panorama), "RGBA")
+
         InputMask = InputImage.split()[-1]
 
         masked_sample = InputImage.convert("RGB")
@@ -174,6 +180,8 @@ def OnNewClient(_Socket, _Address, _ID):
 
         OutputImage = OutputImage.convert('RGBA')
 
+        if opt.flip == True: OutputImage = ImageOps.flip(OutputImage)
+
         resultData =  np.asarray(list(OutputImage.getdata()))
 
         resultData = resultData.astype(np.uint8)
@@ -183,6 +191,8 @@ def OnNewClient(_Socket, _Address, _ID):
         _Socket.sendall(struct.pack('iii', 0, opt.img_size_w * opt.img_size_h * 4 + 2 * 4, opt.img_size_w * opt.img_size_h * 4 + 2 * 4))
         _Socket.sendall(struct.pack('ii', opt.img_size_w, opt.img_size_h))
         _Socket.sendall(pixels)
+
+        if opt.flip == True: OutputImage = ImageOps.flip(OutputImage)
 
         # -----------------------------------------------------------------------------
         # Save output and input to file system
