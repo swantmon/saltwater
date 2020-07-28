@@ -57,7 +57,7 @@ android {
             path "CMakeLists.txt"
         }
     }
-    buildToolsVersion = '30.0.0 rc2'
+    buildToolsVersion = '30.0.1'
 }
 
 dependencies {
