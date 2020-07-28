@@ -28,12 +28,16 @@ class Generator(nn.Module):
             *downsample(64, 64),
             *downsample(64, 64),
             *downsample(64, 128),
+            nn.Conv2d(128, 128, 1),
             *downsample(128, 256),
             *downsample(256, 512),
-            nn.Conv2d(512, 4000, 1),
-            *upsample(4000, 512),
+            nn.Conv2d(512, 1024, 1),
+            nn.Conv2d(1024, 4000, 1),
+            nn.Conv2d(4000, 1024, 1),
+            *upsample(1024, 512),
             *upsample(512, 256),
             *upsample(256, 128),
+            nn.Conv2d(128, 128, 1),
             *upsample(128, 64),
             *upsample(64, 64),
             *upsample(64, 64),
@@ -83,7 +87,7 @@ def SaveCheckpoint(_Epoch, _ModelDict, _BestPrecision, _OptimizerDict, _Filename
             'optimizer' : _OptimizerDict,
         }, _Filename)
 
-def LoadCheckpoint(_Filename='checkpoint.pth.tar'):
-    if torch.cuda.is_available(): 
+def LoadCheckpoint(_Filename='checkpoint.pth.tar', _UseCuda = False):
+    if _UseCuda: 
         return torch.load(_Filename)
     return torch.load(_Filename, map_location='cpu')

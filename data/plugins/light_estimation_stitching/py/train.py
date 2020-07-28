@@ -5,6 +5,7 @@ import numpy as np
 import math
 import sys
 import random
+import time
 
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
@@ -29,7 +30,7 @@ import torch
 parser = argparse.ArgumentParser()
 parser.add_argument('--n_epochs', type=int, default=2000, help='number of epochs of training')
 parser.add_argument('--batch_size', type=int, default=16, help='size of the batches')
-parser.add_argument('--path_to_dataset', type=str, default='D:/NN/dataset/SUN360_FLAT_256x128/', help='path to the dataset (no recursive search)')
+parser.add_argument('--path_to_dataset', type=str, default='./dataset/', help='path to the dataset (no recursive search)')
 parser.add_argument('--lr', type=float, default=0.0002, help='adam: learning rate')
 parser.add_argument('--b1', type=float, default=0.5, help='adam: decay of first order momentum of gradient')
 parser.add_argument('--b2', type=float, default=0.999, help='adam: decay of first order momentum of gradient')
@@ -41,9 +42,9 @@ parser.add_argument('--mask_ground_and_sky', type=float, default=0.3, help='Perc
 parser.add_argument('--number_of_masks', type=int, default=4, help='number of random mask')
 parser.add_argument('--mask_size', type=int, default=64, help='size of random mask')
 parser.add_argument('--sample_interval', type=int, default=5000, help='interval between image sampling')
-parser.add_argument('--output', type=str, default='D:/NN/plugin_stitching/output/SUN360_FLAT_256x128/', help='output folder of the results')
-parser.add_argument('--path_to_savepoint', type=str, default='D:/NN/plugin_stitching/savepoint/', help='path to load and store savepoint')
-opt = parser.parse_args()
+parser.add_argument('--output', type=str, default='./output/', help='output folder of the results')
+parser.add_argument('--path_to_savepoint', type=str, default='./savepoint/', help='path to load and store savepoint')
+opt, unknown_opt = parser.parse_known_args()
 
 # -----------------------------------------------------------------------------
 # Output
@@ -54,6 +55,41 @@ os.makedirs(opt.path_to_savepoint, exist_ok=True)
 # -----------------------------------------------------------------------------
 # Dataset
 # -----------------------------------------------------------------------------
+def generate_perlin_noise_2d(shape, res):
+    def f(t):
+        return 6*t**5 - 15*t**4 + 10*t**3
+    
+    delta = (res[0] / shape[0], res[1] / shape[1])
+    d = (shape[0] // res[0], shape[1] // res[1])
+    grid = np.mgrid[0:res[0]:delta[0],0:res[1]:delta[1]].transpose(1, 2, 0) % 1
+    # Gradients
+    angles = 2*np.pi*np.random.rand(res[0]+1, res[1]+1)
+    gradients = np.dstack((np.cos(angles), np.sin(angles)))
+    g00 = gradients[0:-1,0:-1].repeat(d[0], 0).repeat(d[1], 1)
+    g10 = gradients[1:  ,0:-1].repeat(d[0], 0).repeat(d[1], 1)
+    g01 = gradients[0:-1,1:  ].repeat(d[0], 0).repeat(d[1], 1)
+    g11 = gradients[1:  ,1:  ].repeat(d[0], 0).repeat(d[1], 1)
+    # Ramps
+    n00 = np.sum(np.dstack((grid[:,:,0]  , grid[:,:,1]  )) * g00, 2)
+    n10 = np.sum(np.dstack((grid[:,:,0]-1, grid[:,:,1]  )) * g10, 2)
+    n01 = np.sum(np.dstack((grid[:,:,0]  , grid[:,:,1]-1)) * g01, 2)
+    n11 = np.sum(np.dstack((grid[:,:,0]-1, grid[:,:,1]-1)) * g11, 2)
+    # Interpolation
+    t = f(grid)
+    n0 = n00*(1-t[:,:,0]) + t[:,:,0]*n10
+    n1 = n01*(1-t[:,:,0]) + t[:,:,0]*n11
+    return np.sqrt(2)*((1-t[:,:,1])*n0 + t[:,:,1]*n1)
+        
+def generate_fractal_noise_2d(shape, res, octaves=1, persistence=0.5, frequence=2):
+    noise = np.zeros(shape)
+    frequency = 1
+    amplitude = 1
+    for _ in range(octaves):
+        noise += amplitude * generate_perlin_noise_2d(shape, (frequency*res[0], frequency*res[1]))
+        frequency *= frequence
+        amplitude *= persistence
+    return noise
+
 class ImageDataset(Dataset):
     def __init__(self, root, transforms_=None, mode='train'):
         self.transform = transforms.Compose(transforms_)
@@ -63,43 +99,29 @@ class ImageDataset(Dataset):
 
     # -----------------------------------------------------------------------------
 
+    def generateMaskTensor(self):
+        np.random.seed(int(time.time()) + np.random.randint(0, 1000))
+
+        noise = generate_fractal_noise_2d((128, 256), (2, 2), octaves=3, persistence=0.4, frequence=1)
+        noise += generate_fractal_noise_2d((128, 256), (2, 2), octaves=1, persistence=4.0, frequence=1)
+        noise *= 2.0
+        noise = np.clip(noise, 0, 1)
+        noise[noise <  0.5] = 0.0
+        noise[noise >= 0.5] = 1.0
+
+        return torch.Tensor(noise)
+
+    # -----------------------------------------------------------------------------
+
     def apply_random_mask(self, img):
         masked_part = img.clone()
         masked_img = img.clone()
 
-        y1 = int(opt.img_size_h * 0.0)
-        y2 = int(opt.img_size_h * opt.mask_ground_and_sky)
-        x1 = int(0)
-        x2 = int(opt.img_size_w)
+        noise = self.generateMaskTensor()
 
-        masked_img[:, y1:y2, x1:x2] = 1
-
-        y1 = int(opt.img_size_h * (1.0 - opt.mask_ground_and_sky * 0.4))
-        y2 = int(opt.img_size_h * 1.0)
-        x1 = int(0)
-        x2 = int(opt.img_size_w)
-
-        masked_img[:, y1:y2, x1:x2] = 1
-        
-        for _ in range(random.randrange(1, opt.number_of_masks + 1)):
-            y1 = np.random.randint(0, opt.img_size_h - opt.mask_size)
-            x1 = np.random.randint(0, opt.img_size_w - int(opt.mask_size * 1.5))
-
-            y2, x2 = y1 + opt.mask_size, x1 + int(opt.mask_size * 1.5)
-
-            masked_img[:, y1:y2, x1:x2] = 1
+        masked_img = torch.ones(img.shape) * (1.0 - noise) + masked_img * noise
 
         return masked_img, masked_part
-
-    # -----------------------------------------------------------------------------
-
-    def apply_center_mask(self, img):
-        # Get upper-left pixel coordinate
-        i = (opt.img_size - opt.mask_size) // 2
-        masked_img = img.clone()
-        masked_img[:, i:i+opt.mask_size, i:i+opt.mask_size] = 1
-
-        return masked_img, masked_img
 
     # -----------------------------------------------------------------------------
 
@@ -107,30 +129,10 @@ class ImageDataset(Dataset):
         masked_part = torch.zeros(img.shape)
         masked_img = img.clone()
 
-        y1 = int(opt.img_size_h * 0.0)
-        y2 = int(opt.img_size_h * opt.mask_ground_and_sky)
-        x1 = int(0)
-        x2 = int(opt.img_size_w)
+        noise = self.generateMaskTensor()
 
-        masked_part[:, y1:y2, x1:x2] = 1
-        masked_img[:, y1:y2, x1:x2] = 1
-
-        y1 = int(opt.img_size_h * (1.0 - opt.mask_ground_and_sky * 0.4))
-        y2 = int(opt.img_size_h * 1.0)
-        x1 = int(0)
-        x2 = int(opt.img_size_w)
-
-        masked_part[:, y1:y2, x1:x2] = 1
-        masked_img[:, y1:y2, x1:x2] = 1
-        
-        for _ in range(random.randrange(1, opt.number_of_masks + 1)):
-            y1 = np.random.randint(0, opt.img_size_h - opt.mask_size)
-            x1 = np.random.randint(0, opt.img_size_w - int(opt.mask_size * 1.5))
-
-            y2, x2 = y1 + opt.mask_size, x1 + int(opt.mask_size * 1.5)
-
-            masked_part[:, y1:y2, x1:x2] = 1
-            masked_img[:, y1:y2, x1:x2] = 1
+        masked_img = torch.ones(img.shape) * (1.0 - noise) + masked_img * noise
+        masked_part = torch.ones(img.shape) * noise
 
         return masked_img, masked_part
 
@@ -247,12 +249,17 @@ def save_sample(batches_done, _Path):
     # -----------------------------------------------------------------------------
     # Mixture
     # -----------------------------------------------------------------------------
-    filled_example = gen_mask * masked_part + masked_samples * (1 - masked_part)
+    filled_example = gen_mask * (1 - masked_part) + samples * masked_part
+
+    # -----------------------------------------------------------------------------
+    # Transfer mask to image space for saving (-1.0 .. +1.0)
+    # -----------------------------------------------------------------------------
+    masked_part = (masked_part - 0.5) * 2.0
 
     # -----------------------------------------------------------------------------
     # Save sample
     # -----------------------------------------------------------------------------
-    sample = torch.cat((masked_samples.data, gen_mask.data, filled_example.data, samples.data), -2)
+    sample = torch.cat((samples.data, masked_part.data, masked_samples.data, gen_mask.data, filled_example.data, samples.data), -2)
     save_image(sample, _Path, nrow=6, normalize=True)
 
 # -----------------------------------------------------------------------------
@@ -263,20 +270,24 @@ if __name__ == '__main__':
     try:
 
         if os.path.isfile(opt.path_to_savepoint + '/model_best_generator.pth.tar'):
-            Checkpoint = LoadCheckpoint(opt.path_to_savepoint + '/model_best_discriminator.pth.tar')
+            Checkpoint = LoadCheckpoint(opt.path_to_savepoint + '/model_best_discriminator.pth.tar', cuda)
 
             discriminator.load_state_dict(Checkpoint['state_dict'])
             optimizer_D.load_state_dict(Checkpoint['optimizer'])
 
+            discriminator.train()
+            
             # -----------------------------------------------------------------------------
 
-            Checkpoint = LoadCheckpoint(opt.path_to_savepoint + '/model_best_generator.pth.tar')
+            Checkpoint = LoadCheckpoint(opt.path_to_savepoint + '/model_best_generator.pth.tar', cuda)
 
             LastEpoch            = Checkpoint['epoch']
             GeneratorMinimalLoss = Checkpoint['best_prec1']
 
             generator.load_state_dict(Checkpoint['state_dict'])
             optimizer_G.load_state_dict(Checkpoint['optimizer'])
+
+            generator.train()
 
             print ("Loaded extisting checkpoint to resume in epoch", LastEpoch)
         else:
@@ -349,9 +360,9 @@ if __name__ == '__main__':
                 # -----------------------------------------------------------------------------
                 if g_loss < GeneratorMinimalLoss and epoch > 0:
                     GeneratorMinimalLoss = g_loss
-                    SaveCheckpoint(epoch, generator.state_dict(), g_loss, optimizer_G.state_dict(), opt.path_to_savepoint + '/model_best_generator.pth.tar')
-                    SaveCheckpoint(epoch, discriminator.state_dict(), d_loss, optimizer_D.state_dict(), opt.path_to_savepoint + '/model_best_discriminator.pth.tar')
-                    save_sample(batches_done, opt.path_to_savepoint + '/model_best_batch.png')
+                    SaveCheckpoint(epoch, generator.state_dict(), g_loss, optimizer_G.state_dict(), opt.path_to_savepoint + '/model_best_generator_epoch_%d.pth.tar' % epoch)
+                    SaveCheckpoint(epoch, discriminator.state_dict(), d_loss, optimizer_D.state_dict(), opt.path_to_savepoint + '/model_best_discriminator_epoch_%d.pth.tar' % epoch)
+                    save_sample(batches_done, opt.path_to_savepoint + '/model_best_epoch_%d.png' % epoch)
                 
                 # -----------------------------------------------------------------------------
                 # Round end
