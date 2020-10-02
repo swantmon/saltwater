@@ -15,7 +15,7 @@ namespace HW
     {
         ENGINE_CONSOLE_INFOV("Hello world plugin started!");
 
-        Engine::RegisterEventHandler(Engine::Gfx_OnRenderGBuffer, ENGINE_BIND_EVENT_METHOD(&CPluginInterface::EventHook));
+        m_GfxOnRenderGBufferDelegate = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnRenderGBuffer, std::bind(&CPluginInterface::EventHook, this));
     }
 
     // -----------------------------------------------------------------------------

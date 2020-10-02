@@ -29,3 +29,12 @@
 #else
 #define ENGINE_API
 #endif
+
+// -----------------------------------------------------------------------------
+// Serialization
+// -----------------------------------------------------------------------------
+#include "base/base_serialize_text_reader.h"
+#include "base/base_serialize_text_writer.h"
+
+using CSceneWriter = Base::CTextWriter;
+using CSceneReader = Base::CTextReader;

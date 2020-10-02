@@ -1,9 +1,11 @@
 
 #pragma once
 
+#include "base/base_input_event.h"
+
 #include "editor/edit_state.h"
 
-#include "editor_port/edit_message.h"
+#include "engine/gui/gui_event_handler.h"
 
 namespace Gfx
 {
@@ -19,11 +21,44 @@ namespace Edit
         
         static CEditState& GetInstance();
 
+    public:
+
+        enum EOperation
+        {
+            Hand,
+            Translate,
+            Rotate,
+            Scale
+        };
+
+        enum EMode
+        {
+            Local,
+            World
+        };
+
+    public:
+
+        void SetOperation(EOperation _Operation);
+        EOperation GetOperation() const;
+
+        void SetMode(EMode _Mode);
+        EMode GetMode() const;
+
+        void SetDirty(bool _Flag = true);
+        bool IsDirty() const;
+
     private:
 
-        CState::EStateType m_Action;
+        EOperation m_CurrentOperation;
+
+        EMode m_CurrentMode;
+
+        bool m_DirtyFlag;
 
         Gfx::CSelectionTicket* m_pSelectionTicket;
+
+        Gui::EventHandler::CEventDelegate::HandleType m_OnEventDelegate;
 
     private:
         
@@ -32,18 +67,12 @@ namespace Edit
         
     private:
         
-        virtual CState::EStateType InternOnEnter();
-        virtual CState::EStateType InternOnLeave();
-        virtual CState::EStateType InternOnRun();
-        
+        void InternOnEnter() override;
+        void InternOnLeave() override;
+        CState::EStateType InternOnRun() override;
+
     private:
 
-        void OnExit(Edit::CMessage& _rMessage);
-        void OnPlay(Edit::CMessage& _rMessage);
-        void OnNewMap(Edit::CMessage& _rMessage);
-
-        void OnHighlightEntity(Edit::CMessage& _rMessage);
-
-        void OnMouseLeftReleased(Edit::CMessage& _rMessage);
+        void OnEvent(const Base::CInputEvent& _rInputEvent);
     };
 } // namespace Edit

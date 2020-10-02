@@ -6,6 +6,7 @@
 #include "base/base_input_event.h"
 
 #include "engine/data/data_component.h"
+#include "engine/data/data_component_manager.h"
 
 namespace Dt
 {
@@ -13,7 +14,7 @@ namespace Dt
     {
     public:
 
-        virtual const Base::ID GetScriptTypeID() const = 0;
+        virtual const Base::CTypeInfo::BInfo GetScriptTypeInfo() const = 0;
 
     public:
 

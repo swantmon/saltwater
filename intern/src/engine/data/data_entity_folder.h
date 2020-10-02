@@ -33,7 +33,7 @@ namespace Dt
 
 namespace Dt
 {
-	inline CEntityFolder::CEntityFolder()
+    inline CEntityFolder::CEntityFolder()
         : m_Category        (0)
         , m_pRegion         (0)
         , m_pEntities       (0)

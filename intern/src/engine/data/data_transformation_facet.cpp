@@ -104,4 +104,30 @@ namespace Dt
     {
         return m_WorldMatrix;
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CTransformationFacet::Read(CSceneReader& _rCodec)
+    {
+        Base::Serialize(_rCodec, m_WorldMatrix);
+
+        Base::Serialize(_rCodec, m_Position);
+
+        Base::Serialize(_rCodec, m_Rotation);
+
+        Base::Serialize(_rCodec, m_Scale);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CTransformationFacet::Write(CSceneWriter& _rCodec)
+    {
+        Base::Serialize(_rCodec, m_WorldMatrix);
+
+        Base::Serialize(_rCodec, m_Position);
+
+        Base::Serialize(_rCodec, m_Rotation);
+
+        Base::Serialize(_rCodec, m_Scale);
+    }
 } // namespace Dt

@@ -79,6 +79,8 @@ namespace
         CTargetSetPtr m_DeferredTargetSet;
         CTargetSetPtr m_LightAccumulationTargetSet;
         CTargetSetPtr m_HitProxyTargetSet;
+
+        Gfx::Main::CResizeDelegate::HandleType m_OnResizeDelegate;
         
     private:
         
@@ -98,10 +100,7 @@ namespace
         , m_LightAccumulationTargetSet()
         , m_HitProxyTargetSet         ()
     {
-        // -----------------------------------------------------------------------------
-        // Register for resizing events
-        // -----------------------------------------------------------------------------
-        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxTargetSetManager::OnResize));
+        m_OnResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxTargetSetManager::OnResize, this, std::placeholders::_1, std::placeholders::_2));
     }
     
     // -----------------------------------------------------------------------------
@@ -432,9 +431,14 @@ namespace
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
 
+        GLint OldFBO;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &OldFBO);
+
         glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
 
         glClearBufferfv(GL_DEPTH, 0, &_Depth);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, OldFBO);
     }
 
     // -----------------------------------------------------------------------------
@@ -443,12 +447,17 @@ namespace
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
 
+        GLint OldFBO;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &OldFBO);
+
         glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
 
         for (unsigned int Index = 0; Index <_TargetPtr->GetNumberOfRenderTargets(); ++ Index)
         {
             glClearBufferfv(GL_COLOR, Index, const_cast<GLfloat*>(&_rColor[0]));
         }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, OldFBO);
     }
     
     // -----------------------------------------------------------------------------
@@ -456,6 +465,9 @@ namespace
     void CGfxTargetSetManager::ClearTargetSet(CTargetSetPtr _TargetPtr, const glm::vec4& _rColor, float _Depth)
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
+
+        GLint OldFBO;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &OldFBO);
 
         glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
        
@@ -465,6 +477,8 @@ namespace
         }
 
         glClearBufferfv(GL_DEPTH, 0, &_Depth);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, OldFBO);
     }
 
     // -----------------------------------------------------------------------------

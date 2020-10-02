@@ -17,7 +17,7 @@ namespace MR
     {
     public:
 
-        typedef std::vector<Gfx::CTexturePtr> CTextureVector;
+        using CTextureVector = std::vector<Gfx::CTexturePtr>;
 
         glm::mat4 Track(
             const glm::mat4& _rPoseMatrix,
@@ -38,7 +38,7 @@ namespace MR
         CICPTracker(int _Width, int _Height, const MR::SReconstructionSettings& _Settings);
        ~CICPTracker();
 
-	private:
+    private:
 
         void CICPTracker::DetermineSummands(int PyramidLevel, const glm::mat4& rIncPoseMatrix,
             const CICPTracker::CTextureVector& _rReferenceVertexMap,

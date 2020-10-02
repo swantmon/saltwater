@@ -4,8 +4,47 @@
     <Filter Include="states">
       <UniqueIdentifier>{7807dec5-a560-497a-89fa-d6fa102e7bc5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gui">
+      <UniqueIdentifier>{9614303a-16dd-45bb-9d4e-e6f6a8eb1fff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\panels">
+      <UniqueIdentifier>{7f59819c-41d3-449b-b8c2-d20d553dab5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\factory">
+      <UniqueIdentifier>{08250363-5a86-4bc0-9537-a41aae3d5ca8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\objects">
+      <UniqueIdentifier>{d7c4b4c4-40a1-48ce-9d4c-8bcc4a07853d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\native">
+      <UniqueIdentifier>{904bb3ad-33d3-4144-8fde-4694febcbb0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\objects\components">
+      <UniqueIdentifier>{6a2db214-29a6-4b26-8ba4-7d1eeee7d8db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\objects\components\camera">
+      <UniqueIdentifier>{7bda0502-5935-459e-bd21-ae0d81fe1d01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\objects\components\fx">
+      <UniqueIdentifier>{536ab1e5-a436-4efa-98b7-b42be70fd138}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\objects\components\lights">
+      <UniqueIdentifier>{20cd0448-9716-477e-8f38-2dee4618d759}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\objects\components\model">
+      <UniqueIdentifier>{ec06401f-5c0c-4c7d-9ddb-7b2385561cbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\objects\components\scripts">
+      <UniqueIdentifier>{548c3b3f-4325-4419-b204-0c560681ba61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\objects\facets">
+      <UniqueIdentifier>{84953982-0877-4423-b436-17d1739b086a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\native\extensions">
+      <UniqueIdentifier>{1503ff86-efa6-4c04-9742-127169b967e8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="helper">
-      <UniqueIdentifier>{9b8d6b30-5dce-454a-b416-151c86fb5833}</UniqueIdentifier>
+      <UniqueIdentifier>{d0fbe43a-4627-4293-ad46-09d5dbf4af0b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -33,26 +72,113 @@
     <ClCompile Include="..\..\..\src\editor\edit_main.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_application.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_precompiled.cpp" />
-    <ClCompile Include="..\..\..\src\editor\edit_graphic_helper.cpp">
+    <ClCompile Include="..\..\..\src\editor\edit_gui.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_inspector_panel.cpp">
+      <Filter>gui\panels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_script_slam.cpp">
+      <Filter>gui\objects\components\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_scene_graph_panel.cpp">
+      <Filter>gui\panels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\imgui\imgui.cpp">
+      <Filter>gui\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\imgui\imgui_demo.cpp">
+      <Filter>gui\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\imgui\imgui_draw.cpp">
+      <Filter>gui\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\imgui\imgui_widgets.cpp">
+      <Filter>gui\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\imgui\imgui_impl_opengl.cpp">
+      <Filter>gui\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\imgui\imgui_impl_sdl.cpp">
+      <Filter>gui\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_infos_panel.cpp">
+      <Filter>gui\panels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_camera_component.cpp">
+      <Filter>gui\objects\components\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_bloom_component.cpp">
+      <Filter>gui\objects\components\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_area_light_component.cpp">
+      <Filter>gui\objects\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_light_probe_component.cpp">
+      <Filter>gui\objects\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_point_light_component.cpp">
+      <Filter>gui\objects\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_sky_component.cpp">
+      <Filter>gui\objects\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_sun_component.cpp">
+      <Filter>gui\objects\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_transformation_facet.cpp">
+      <Filter>gui\objects\facets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_mesh_component.cpp">
+      <Filter>gui\objects\components\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_material_component.cpp">
+      <Filter>gui\objects\components\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_dof_component.cpp">
+      <Filter>gui\objects\components\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_post_aa_component.cpp">
+      <Filter>gui\objects\components\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_ssao_component.cpp">
+      <Filter>gui\objects\components\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_ssr_component.cpp">
+      <Filter>gui\objects\components\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_volume_fog_component.cpp">
+      <Filter>gui\objects\components\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_data_entity.cpp">
+      <Filter>gui\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_console_panel.cpp">
+      <Filter>gui\panels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImGuizmo.cpp">
+      <Filter>gui\native\extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_toolbar_panel.cpp">
+      <Filter>gui\panels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImFiledialog.cpp">
+      <Filter>gui\native\extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_script_camera_control.cpp">
+      <Filter>gui\objects\components\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_assets_panel.cpp">
+      <Filter>gui\panels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_asset_helper.cpp">
       <Filter>helper</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor\edit_effect_helper.cpp">
-      <Filter>helper</Filter>
+    <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImTextureSlot.cpp">
+      <Filter>gui\native\extensions</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor\edit_actor_helper.cpp">
-      <Filter>helper</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor\edit_light_helper.cpp">
-      <Filter>helper</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor\edit_entity_helper.cpp">
-      <Filter>helper</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor\edit_plugin_helper.cpp">
-      <Filter>helper</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor\edit_material_helper.cpp">
-      <Filter>helper</Filter>
+    <ClCompile Include="..\..\..\src\editor\edit_script_slam_pixmix.cpp">
+      <Filter>gui\objects\components\scripts</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -82,26 +208,128 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor\edit_application.h" />
     <ClInclude Include="..\..\..\src\editor\edit_precompiled.h" />
-    <ClInclude Include="..\..\..\src\editor\edit_graphic_helper.h">
+    <ClInclude Include="..\..\..\src\editor\edit_gui.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_inspector_panel.h">
+      <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_gui_factory.h">
+      <Filter>gui\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_script_slam.h">
+      <Filter>gui\objects\components\scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_scene_graph_panel.h">
+      <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\imgui\imconfig.h">
+      <Filter>gui\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\imgui\imgui.h">
+      <Filter>gui\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\imgui\imgui_internal.h">
+      <Filter>gui\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\imgui\imstb_rectpack.h">
+      <Filter>gui\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\imgui\imstb_textedit.h">
+      <Filter>gui\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\imgui\imstb_truetype.h">
+      <Filter>gui\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\imgui\imgui_impl_opengl.h">
+      <Filter>gui\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\imgui\imgui_impl_sdl.h">
+      <Filter>gui\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_infos_panel.h">
+      <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_panel_interface.h">
+      <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_camera_component.h">
+      <Filter>gui\objects\components\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_bloom_component.h">
+      <Filter>gui\objects\components\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_area_light_component.h">
+      <Filter>gui\objects\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_light_probe_component.h">
+      <Filter>gui\objects\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_point_light_component.h">
+      <Filter>gui\objects\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_sky_component.h">
+      <Filter>gui\objects\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_sun_component.h">
+      <Filter>gui\objects\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_transformation_facet.h">
+      <Filter>gui\objects\facets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_mesh_component.h">
+      <Filter>gui\objects\components\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_material_component.h">
+      <Filter>gui\objects\components\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_dof_component.h">
+      <Filter>gui\objects\components\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_post_aa_component.h">
+      <Filter>gui\objects\components\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_ssao_component.h">
+      <Filter>gui\objects\components\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_ssr_component.h">
+      <Filter>gui\objects\components\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_volume_fog_component.h">
+      <Filter>gui\objects\components\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_component_factory.h">
+      <Filter>gui\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_data_entity.h">
+      <Filter>gui\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_console_panel.h">
+      <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImGuizmo.h">
+      <Filter>gui\native\extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_toolbar_panel.h">
+      <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImFiledialog.h">
+      <Filter>gui\native\extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_script_camera_control.h">
+      <Filter>gui\objects\components\scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_assets_panel.h">
+      <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_asset_helper.h">
       <Filter>helper</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\editor\edit_effect_helper.h">
-      <Filter>helper</Filter>
+    <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImTextureSlot.h">
+      <Filter>gui\native\extensions</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\editor\edit_actor_helper.h">
-      <Filter>helper</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor\edit_light_helper.h">
-      <Filter>helper</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor\edit_entity_helper.h">
-      <Filter>helper</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor\edit_plugin_helper.h">
-      <Filter>helper</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor\edit_material_helper.h">
-      <Filter>helper</Filter>
+    <ClInclude Include="..\..\..\src\editor\edit_script_slam_pixmix.h">
+      <Filter>gui\objects\components\scripts</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

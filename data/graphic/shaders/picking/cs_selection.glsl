@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_CS_PICKING_BLUR_GLSL__
-#define __INCLUDE_CS_PICKING_BLUR_GLSL__
+#ifndef __INCLUDE_CS_SELECTION_GLSL__
+#define __INCLUDE_CS_SELECTION_GLSL__
 
 #include "common_gbuffer.glsl"
 #include "common_global.glsl"
@@ -9,7 +9,7 @@
 // -----------------------------------------------------------------------------
 layout(std430, binding = 0) readonly buffer USettingBuffer
 {
-    vec4 m_MinMaxUV;
+    ivec4 m_PositionSize;
 };
 
 layout(std430, binding = 1) writeonly buffer UOutput
@@ -59,23 +59,22 @@ void main()
     // That implementation is for a first test and will be replaced as soon
     // as needed.
     // -----------------------------------------------------------------------------
-    vec2 HomogeneousUV = vec2(m_MinMaxUV.x, 1.0f - m_MinMaxUV.y);
-
-    ivec2 UV = ivec2(HomogeneousUV * g_InvertedScreensizeAndScreensize.zw);
+    vec2 UV = vec2(m_PositionSize.xy) * g_InvertedScreensizeAndScreensize.xy;
 
     // -----------------------------------------------------------------------------
     // Get data
     // -----------------------------------------------------------------------------
-    vec4  GBuffer0 = imageLoad(cs_GBuffer0, UV);
-    vec4  GBuffer1 = imageLoad(cs_GBuffer1, UV);
-    vec4  GBuffer2 = imageLoad(cs_GBuffer2, UV);
-    float VSDepth  = texture(cs_Depth, HomogeneousUV).x;
-    uint  ID       = imageLoad(cs_HitProxy, UV).x;
+    vec4  GBuffer0 = imageLoad(cs_GBuffer0, m_PositionSize.xy);
+    vec4  GBuffer1 = imageLoad(cs_GBuffer1, m_PositionSize.xy);
+    vec4  GBuffer2 = imageLoad(cs_GBuffer2, m_PositionSize.xy);
+    uint  ID       = imageLoad(cs_HitProxy, m_PositionSize.xy).x;
+
+    float VSDepth = texture(cs_Depth, UV).x;
 
     // -----------------------------------------------------------------------------
     // VS position
     // -----------------------------------------------------------------------------
-    vec3 VSPosition = GetViewSpacePositionFromDepth(VSDepth, HomogeneousUV, g_ScreenToView);
+    vec3 VSPosition = GetViewSpacePositionFromDepth(VSDepth, UV, g_ScreenToView);
     
     // -----------------------------------------------------------------------------
     // WS position
@@ -98,4 +97,4 @@ void main()
     out_EntityID   = ID;
 }
 
-#endif // __INCLUDE_CS_PICKING_BLUR_GLSL__
+#endif // __INCLUDE_CS_SELECTION_GLSL__

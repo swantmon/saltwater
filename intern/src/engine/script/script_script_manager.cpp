@@ -35,11 +35,15 @@ namespace
 
     private:
 
-        typedef std::vector<Dt::CScriptComponent*> CScripts;
+        using CScripts = std::vector<Dt::CScriptComponent*>;
 
     private:
 
         CScripts m_Scripts;
+
+        Gui::EventHandler::CEventDelegate::HandleType m_OnEventDelegate;
+
+        Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
 
     private:
 
@@ -53,7 +57,9 @@ namespace
 {
     CScptScriptManager::CScptScriptManager()
     {
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CScptScriptManager::OnDirtyComponent));
+        m_OnEventDelegate = Gui::EventHandler::RegisterEventHandler(std::bind(&CScptScriptManager::OnInputEvent, this, std::placeholders::_1));
+
+        m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CScptScriptManager::OnDirtyComponent, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------
@@ -66,7 +72,6 @@ namespace
 
     void CScptScriptManager::OnStart()
     {
-        Gui::EventHandler::RegisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CScptScriptManager::OnInputEvent));
     }
 
     // -----------------------------------------------------------------------------
@@ -77,8 +82,6 @@ namespace
         {
             rScript->Exit();
         }
-
-        Gui::EventHandler::UnregisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CScptScriptManager::OnInputEvent));
     }
 
     // -----------------------------------------------------------------------------
@@ -110,9 +113,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Only if component has changed
         // -----------------------------------------------------------------------------
-        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CScriptComponent>()) return;
+        if (_pComponent->GetTypeInfo() != Base::CTypeInfo::Get<Dt::CScriptComponent>()) return;
 
-        Dt::CScriptComponent* pScriptComponent = static_cast<Dt::CScriptComponent*>(_pComponent);
+        auto* pScriptComponent = static_cast<Dt::CScriptComponent*>(_pComponent);
 
         // -----------------------------------------------------------------------------
         // Dirty check
@@ -133,14 +136,13 @@ namespace
 
         if ((DirtyFlags & Dt::CScriptComponent::DirtyInfo) != 0)
         {
-            // -----------------------------------------------------------------------------
-            // Get script from list
-            // -----------------------------------------------------------------------------
             auto ScriptIter = std::find_if(m_Scripts.begin(), m_Scripts.end(), [&](Dt::CScriptComponent* _pObject) { return _pObject == pScriptComponent; });
 
             if (!pScriptComponent->IsActiveAndUsable() && ScriptIter != m_Scripts.end())
             {
                 pScriptComponent->Exit();
+
+                m_Scripts.erase(ScriptIter);
             }
 
             if (pScriptComponent->IsActiveAndUsable() && ScriptIter == m_Scripts.end())
@@ -157,7 +159,10 @@ namespace
 
             if (ScriptIter != m_Scripts.end())
             {
-                pScriptComponent->Exit();
+                if (pScriptComponent->IsActiveAndUsable())
+                {
+                    pScriptComponent->Exit();
+                }
 
                 m_Scripts.erase(ScriptIter);
             }
@@ -168,10 +173,7 @@ namespace
 
     void CScptScriptManager::OnInputEvent(const Base::CInputEvent& _rInputEvent)
     {
-        for (auto& rScript : m_Scripts)
-        {
-            rScript->OnInput(_rInputEvent);
-        }
+        for (auto& rScript : m_Scripts) rScript->OnInput(_rInputEvent);
     }
 } // namespace
 

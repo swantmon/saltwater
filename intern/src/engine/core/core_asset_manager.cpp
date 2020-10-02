@@ -1,10 +1,16 @@
 
 #include "engine/engine_precompiled.h"
 
+#include "base/base_exception.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
 #include "engine/core/core_asset_manager.h"
+
+#ifdef PLATFORM_ANDROID
+#else
+#include <filesystem>
+#endif
 
 namespace 
 {
@@ -49,6 +55,23 @@ namespace
     void CCoreAssetManager::SetFilePath(const std::string& _rPath)
     {
         m_PathToFiles = _rPath;
+
+#if PLATFORM_ANDROID
+#else
+        if (!std::filesystem::exists(m_PathToFiles) || !std::filesystem::exists(GetPathToData()))
+        {
+            BASE_THROWV("The root folder ('%s') is incorrect or path to data is not available.", m_PathToFiles.c_str());
+        }
+
+        auto PathToAssets = GetPathToAssets();
+
+        if (!std::filesystem::exists(PathToAssets))
+        {
+            std::filesystem::create_directory(PathToAssets);
+
+            ENGINE_CONSOLE_WARNINGV("The folder %s does not exists. The engine has created an empty one.", PathToAssets.c_str());
+        }
+#endif
     }
 
     // -----------------------------------------------------------------------------

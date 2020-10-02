@@ -69,8 +69,8 @@ namespace AR
     CPluginInterface::CPluginInterface()
         : m_IsActive                (false)
         , m_FlipVertical            (false)
-        , m_pCameraImageData        (0)
-        , m_pCameraTempImageLineData(0)
+        , m_pCameraImageData        (nullptr)
+        , m_pCameraTempImageLineData(nullptr)
     {
 
     }
@@ -89,7 +89,7 @@ namespace AR
         // -----------------------------------------------------------------------------
         // Hooks
         // -----------------------------------------------------------------------------
-        Engine::RegisterEventHandler(Engine::Gfx_OnUpdate, ENGINE_BIND_EVENT_METHOD(&CPluginInterface::Gfx_OnUpdate));
+        m_GfxOnUpdateDelegate = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnUpdate, std::bind(&CPluginInterface::Gfx_OnUpdate, this));
 
         // -----------------------------------------------------------------------------
         // Parameters
@@ -115,6 +115,13 @@ namespace AR
         bool ShowSupportedProperties = Core::CProgramParameters::GetInstance().Get("mr:camera:show_supported_properties", false);
 
         m_FirstTargetIsWorldCenter = Core::CProgramParameters::GetInstance().Get("mr:camera:first_marker_is_world_center", true);
+
+        if (Key == "<INSERT YOUR EASYAR KEY HERE>")
+        {
+            ENGINE_CONSOLE_ERROR("No key for EasyAR found in config file.");
+
+            return;
+        }
 
         // -----------------------------------------------------------------------------
         // Engine
@@ -203,8 +210,8 @@ namespace AR
         TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
         TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
         TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_pFileName        = nullptr;
+        TextureDescriptor.m_pPixels          = nullptr;
         TextureDescriptor.m_Format           = Gfx::CTexture::B8G8R8_UBYTE;
 
         m_BackgroundTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
@@ -271,7 +278,7 @@ namespace AR
         if(m_Camera.m_Native) m_Camera.m_Native->stop();
         if(m_CameraFrameStreamer) m_CameraFrameStreamer->stop();
 
-        m_BackgroundTexturePtr = 0;
+        m_BackgroundTexturePtr = nullptr;
 
         Base::CMemory::Free(m_pCameraImageData);
 
@@ -417,12 +424,14 @@ namespace AR
 
     void CPluginInterface::Gfx_OnUpdate()
     {
+        if (m_IsActive == false) return;
+
         // -----------------------------------------------------------------------------
         // Frame
         // -----------------------------------------------------------------------------
         auto Frame = m_CameraFrameStreamer->peek();
 
-        for (auto Image : Frame->images())
+        for (const auto& Image : Frame->images())
         {
             Base::CMemory::Copy(m_pCameraImageData, Image->data(), m_CameraSize[0] * m_CameraSize[1] * 3 * sizeof(Base::U8));
 

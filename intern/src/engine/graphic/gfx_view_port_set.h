@@ -9,7 +9,7 @@
 
 namespace Gfx
 {
-    class CViewPortSet : public Base::CManagedPoolItemBase
+    class ENGINE_API CViewPortSet : public Base::CManagedPoolItemBase
     {
         public:
 
@@ -17,12 +17,12 @@ namespace Gfx
 
         public:
 
-            ENGINE_API unsigned int GetNumberOfViewPorts() const;
+            unsigned int GetNumberOfViewPorts() const;
 
         public:
 
-            ENGINE_API CViewPortPtr* GetViewPorts();
-            ENGINE_API const CViewPortPtr* GetViewPorts() const;
+            CViewPortPtr* GetViewPorts();
+            const CViewPortPtr* GetViewPorts() const;
 
         protected:
 

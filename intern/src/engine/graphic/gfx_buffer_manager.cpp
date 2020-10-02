@@ -56,7 +56,7 @@ namespace
     public:
 
         void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr);
-        void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range);
+        void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, int _ReadOffset, int _WriteOffset, int _Range);
 
     public:
 
@@ -106,10 +106,10 @@ namespace
         };
 
     
-        typedef Base::CManagedPool<CInternBuffer>    CBuffers;
-        typedef CBuffers::CIterator                  CBufferIterator;
-        typedef Base::CManagedPool<CInternBufferSet> CBufferSets;
-        typedef CBufferSets::CIterator               CBufferSetIterator;
+        using CBuffers = Base::CManagedPool<CInternBuffer>;
+        using CBufferIterator = CBuffers::CIterator;
+        using CBufferSets = Base::CManagedPool<CInternBufferSet>;
+        using CBufferSetIterator = CBufferSets::CIterator;
     
     private:
 
@@ -248,7 +248,7 @@ namespace
 
     CBufferPtr CGfxBufferManager::CreateBuffer(const SBufferDescriptor& _rDescriptor, SDataBehavior::Enum _Behavior)
     {
-        void*                    pBytes;
+        void* pBytes;
         GLenum                   NativeBinding;
         int                      NativeUsage;
         GLbitfield               Flags;
@@ -258,15 +258,19 @@ namespace
         // Setup variables for exception safety.
         // -----------------------------------------------------------------------------
 
-        pBytes        = nullptr;
-        NativeBuffer  = 0;
-        NativeBinding = ConvertBindFlag(_rDescriptor.m_Binding);
-        NativeUsage   = 0;
-        
+        pBytes = nullptr;
+        NativeBuffer = 0;
+        NativeBinding = GL_UNIFORM_BUFFER;
+        NativeUsage = 0;
+
         // -----------------------------------------------------------------------------
         // Generate OpenGL buffer
         // -----------------------------------------------------------------------------
         glGenBuffers(1, &NativeBuffer);
+
+        GLuint OldBuffer;
+
+        glGetIntegerv(GL_UNIFORM_BUFFER_BINDING, reinterpret_cast<GLint*>(&OldBuffer));
 
         glBindBuffer(NativeBinding, NativeBuffer);
 
@@ -292,30 +296,30 @@ namespace
         // Unbound buffer now 
         // ----------------------------------------------------------------------------- 
         glBindBuffer(NativeBinding, 0);
-               
+
         // -----------------------------------------------------------------------------
         // Create the core resource behavior on the owner policy.
         // -----------------------------------------------------------------------------
         CBuffers::CPtr BufferPtr;
-        
+
         try
         {
             BufferPtr = m_Buffers.Allocate();
-            
+
             CInternBuffer& rBuffer = *BufferPtr;
-            
+
             // -----------------------------------------------------------------------------
             // Setup the buffer.
             // -----------------------------------------------------------------------------
-            rBuffer.m_Info.m_Stride  = _rDescriptor.m_Stride;
-            rBuffer.m_Info.m_Usage   = _rDescriptor.m_Usage;
+            rBuffer.m_Info.m_Stride = _rDescriptor.m_Stride;
+            rBuffer.m_Info.m_Usage = _rDescriptor.m_Usage;
             rBuffer.m_Info.m_Binding = _rDescriptor.m_Binding;
-            rBuffer.m_Info.m_Access  = _rDescriptor.m_Access;
-            rBuffer.m_NumberOfBytes  = _rDescriptor.m_NumberOfBytes;
-            rBuffer.m_NativeBuffer   = NativeBuffer;
-            rBuffer.m_NativeBinding  = NativeBinding;
-            rBuffer.m_NativeUsage    = NativeUsage;
-            rBuffer.m_pStorage       = nullptr;
+            rBuffer.m_Info.m_Access = _rDescriptor.m_Access;
+            rBuffer.m_NumberOfBytes = _rDescriptor.m_NumberOfBytes;
+            rBuffer.m_NativeBuffer = NativeBuffer;
+            rBuffer.m_NativeBinding = NativeBinding;
+            rBuffer.m_NativeUsage = NativeUsage;
+            rBuffer.m_pStorage = nullptr;
 
             // -----------------------------------------------------------------------------
             // Check the behavior.
@@ -323,57 +327,57 @@ namespace
             if (_Behavior == SDataBehavior::Copy || _Behavior == SDataBehavior::CopyAndDelete)
             {
                 pBytes = Base::CMemory::Allocate(_rDescriptor.m_NumberOfBytes);
-                
-                assert(pBytes                       != nullptr);
-                assert(_rDescriptor.m_pBytes        != nullptr);
-                assert(_rDescriptor.m_NumberOfBytes  > 0);
+
+                assert(pBytes != nullptr);
+                assert(_rDescriptor.m_pBytes != nullptr);
+                assert(_rDescriptor.m_NumberOfBytes > 0);
 
                 memcpy(pBytes, _rDescriptor.m_pBytes, _rDescriptor.m_NumberOfBytes);
             }
 
             switch (_Behavior)
             {
-                case SDataBehavior::LeftAlone:
-                {
-                    rBuffer.m_Info.m_IsBytesOwner = false;
-                    rBuffer.m_pBytes              = nullptr;
-                }
-                break;
+            case SDataBehavior::LeftAlone:
+            {
+                rBuffer.m_Info.m_IsBytesOwner = false;
+                rBuffer.m_pBytes = nullptr;
+            }
+            break;
 
-                case SDataBehavior::DeleteAfterUpload:
-                {
-                    rBuffer.m_Info.m_IsBytesOwner = false;
-                    rBuffer.m_pBytes              = nullptr;
+            case SDataBehavior::DeleteAfterUpload:
+            {
+                rBuffer.m_Info.m_IsBytesOwner = false;
+                rBuffer.m_pBytes = nullptr;
 
-                    Base::CMemory::Free(_rDescriptor.m_pBytes);
-                }
-                break;
+                Base::CMemory::Free(_rDescriptor.m_pBytes);
+            }
+            break;
 
-                case SDataBehavior::TakeOwnerShip:
-                {
-                    rBuffer.m_Info.m_IsBytesOwner = true;
-                    rBuffer.m_pBytes              = _rDescriptor.m_pBytes;
-                }
-                break;
+            case SDataBehavior::TakeOwnerShip:
+            {
+                rBuffer.m_Info.m_IsBytesOwner = true;
+                rBuffer.m_pBytes = _rDescriptor.m_pBytes;
+            }
+            break;
 
-                case SDataBehavior::Copy:
-                {
-                    rBuffer.m_Info.m_IsBytesOwner = true;
-                    rBuffer.m_pBytes              = pBytes;
-                }
-                break;
+            case SDataBehavior::Copy:
+            {
+                rBuffer.m_Info.m_IsBytesOwner = true;
+                rBuffer.m_pBytes = pBytes;
+            }
+            break;
 
-                case SDataBehavior::CopyAndDelete:
-                {
-                    rBuffer.m_Info.m_IsBytesOwner = true;
-                    rBuffer.m_pBytes              = pBytes;
+            case SDataBehavior::CopyAndDelete:
+            {
+                rBuffer.m_Info.m_IsBytesOwner = true;
+                rBuffer.m_pBytes = pBytes;
 
-                    Base::CMemory::Free(_rDescriptor.m_pBytes);
-                }
-                break;
-                    
-                default:
-                    ENGINE_CONSOLE_STREAMWARNING("Undefined buffer behavior while creating an buffer.");
+                Base::CMemory::Free(_rDescriptor.m_pBytes);
+            }
+            break;
+
+            default:
+                ENGINE_CONSOLE_STREAMWARNING("Undefined buffer behavior while creating an buffer.");
                 break;
             }
         }
@@ -388,7 +392,9 @@ namespace
 
             BASE_THROWV("GL buffer number %i can't be created.", m_Buffers.GetNumberOfItems());
         }
-    
+
+        glBindBuffer(GL_UNIFORM_BUFFER, OldBuffer);
+
         return CBufferPtr(BufferPtr);
     }
 
@@ -437,20 +443,17 @@ namespace
 
     void CGfxBufferManager::CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr)
     {
-        if (_TargetBufferPtr != _SourceBufferPtr)
-        {
-            CInternBuffer& rTargetBuffer = *static_cast<CInternBuffer*>(&(*_TargetBufferPtr));
-            CInternBuffer& rSourceBuffer = *static_cast<CInternBuffer*>(&(*_SourceBufferPtr));
-            
-            GLsizeiptr NumberOfBytes = glm::min(rTargetBuffer.m_NumberOfBytes, rSourceBuffer.m_NumberOfBytes);
+        CInternBuffer& rTargetBuffer = *static_cast<CInternBuffer*>(&(*_TargetBufferPtr));
+        CInternBuffer& rSourceBuffer = *static_cast<CInternBuffer*>(&(*_SourceBufferPtr));
 
-            glCopyBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, 0, 0, NumberOfBytes);
-        }
+        const auto NumberOfBytes = static_cast<int>(glm::min(rTargetBuffer.m_NumberOfBytes, rSourceBuffer.m_NumberOfBytes));
+
+        CopyBufferToBuffer(_TargetBufferPtr, _SourceBufferPtr, 0, 0, NumberOfBytes);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxBufferManager::CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range)
+    void CGfxBufferManager::CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, int _ReadOffset, int _WriteOffset, int _Range)
     {
         if (_TargetBufferPtr != _SourceBufferPtr)
         {
@@ -460,7 +463,13 @@ namespace
             assert(_ReadOffset + _Range <= rTargetBuffer.m_NumberOfBytes);
             assert(_WriteOffset + _Range <= rSourceBuffer.m_NumberOfBytes);
 
-            glCopyBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, _ReadOffset, _WriteOffset, _Range);
+            glBindBuffer(GL_COPY_WRITE_BUFFER, rTargetBuffer.m_NativeBuffer);
+            glBindBuffer(GL_COPY_READ_BUFFER, rSourceBuffer.m_NativeBuffer);
+
+            glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, _ReadOffset, _WriteOffset, _Range);
+
+            glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+            glBindBuffer(GL_COPY_READ_BUFFER, 0);
         }
     }
 
@@ -470,7 +479,7 @@ namespace
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
 
-        CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+        auto pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         assert(pBuffer != nullptr);
 
@@ -488,7 +497,7 @@ namespace
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
 
-        CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+        auto pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         assert(pBuffer != nullptr);
 
@@ -506,7 +515,7 @@ namespace
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
 
-        CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+        auto pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         assert(pBuffer != nullptr);
 
@@ -523,7 +532,7 @@ namespace
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid() && _pData);
 
-        CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+        auto pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         assert(pBuffer != nullptr);
 
@@ -540,7 +549,7 @@ namespace
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid() && _pData && _Range > 0);
 
-        CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+        auto pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         assert(pBuffer != nullptr);
         assert(_Offset + _Range <= pBuffer->m_NumberOfBytes);
@@ -558,7 +567,7 @@ namespace
     {
         assert(_pLabel != nullptr);
 
-        CInternBuffer* pInternBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+        auto pInternBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         glObjectLabel(GL_BUFFER, pInternBuffer->m_NativeBuffer, -1, _pLabel);
     }
@@ -744,7 +753,7 @@ namespace BufferManager
 
     // -----------------------------------------------------------------------------
 
-    void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range)
+    void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, int _ReadOffset, int _WriteOffset, int _Range)
     {
         CGfxBufferManager::GetInstance().CopyBufferToBuffer(_TargetBufferPtr, _SourceBufferPtr, _ReadOffset, _WriteOffset, _Range);
     }

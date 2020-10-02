@@ -2,10 +2,18 @@
 
 #include "base/base_include_glm.h"
 
+#include "engine/graphic/gfx_texture.h"
+
+#include "arcore_c_api.h"
+
 namespace MR
 {
     class CLightEstimation
     {
+    public:
+
+        static const int s_NumberOfSHCoefficients = 27;
+
     public:
 
         enum EEstimationState
@@ -20,12 +28,25 @@ namespace MR
         CLightEstimation();
         ~CLightEstimation();
 
-        EEstimationState GetEstimationState() const;
-        float GetIntensity() const;
+        void Detect();
 
-    protected:
+        EEstimationState GetEstimationState() const;
+        float GetPixelIntensity() const;
+        const glm::vec4& GetColorCorrection() const;
+        const glm::vec3& GetMainLightIntensity() const;
+        const glm::vec3& GetMainLightDirection() const;
+        const float* GetAmbientSHCoefficients() const;
+        Gfx::CTexturePtr GetHDRCubemap() const;
+
+    private:
 
         EEstimationState m_EstimationState;
-        float m_Intensity;
+
+        float m_PixelIntensity;
+        glm::vec4 m_ColorCorrection;
+        glm::vec3 m_MainLightIntensity;
+        glm::vec3 m_MainLightDirection;
+        float m_AmbientSH[s_NumberOfSHCoefficients];
+        Gfx::CTexturePtr m_CubemapHDRPtr;
     };
 } // namespace MR

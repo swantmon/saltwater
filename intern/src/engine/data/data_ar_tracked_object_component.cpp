@@ -5,6 +5,8 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CARTrackedObjectPluginComponent);
+
     CARTrackedObjectPluginComponent::CARTrackedObjectPluginComponent()
         : m_IsFound      (false)
         , m_UID          (0)

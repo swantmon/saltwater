@@ -45,6 +45,53 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
+    void CEditorControl::SetProjectionMatrix(const glm::mat4& _rProjectionMatrix)
+    {
+        Gfx::CCamera& rCamera = *Gfx::ViewManager::GetMainCamera();
+
+        float Near = glm::abs(_rProjectionMatrix[2][3] / (_rProjectionMatrix[2][2] - 1.0f));
+        float Far  = glm::abs(_rProjectionMatrix[2][3] / (_rProjectionMatrix[2][2] + 1.0f));
+
+        float Bottom = Near * (_rProjectionMatrix[2][1] - 1.0f) / _rProjectionMatrix[1][1];
+        float Top    = Near * (_rProjectionMatrix[2][1] + 1.0f) / _rProjectionMatrix[1][1];
+        float Left   = Near * (_rProjectionMatrix[2][0] - 1.0f) / _rProjectionMatrix[0][0];
+        float Right  = Near * (_rProjectionMatrix[2][0] + 1.0f) / _rProjectionMatrix[0][0];
+
+        rCamera.SetPerspective(Left, Right, Bottom, Top, Near, Far);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditorControl::SetRotation(const glm::mat3& _rRotationMatrix)
+    {
+        CControl::SetRotation(_rRotationMatrix);
+
+        // -----------------------------------------------------------------------------
+
+        float X, Y, Z;
+
+        glm::extractEulerAngleXYZ(glm::mat4(m_RotationMatrix), X, Y, Z);
+
+        m_CurrentRotation[0] = glm::degrees(Z);
+        m_CurrentRotation[1] = glm::degrees(Y);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CEditorControl::IsFlying()
+    {
+        return m_IsFlying;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CEditorControl::IsDragging()
+    {
+        return m_IsDragging;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CEditorControl::InternOnEvent(const Base::CInputEvent& _rEvent)
     {
         if (_rEvent.GetAction() == Base::CInputEvent::MouseMiddlePressed && !m_IsFlying)
@@ -102,7 +149,7 @@ namespace Cam
 
                 const glm::vec2& rCursorPosition = _rEvent.GetGlobalCursorPosition();
 
-                float DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
+                auto DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
 
                 glm::vec2 CurrentVelocity = (rCursorPosition - m_LastCursorPosition);
 
@@ -150,7 +197,7 @@ namespace Cam
         glm::vec3 Forward(0.0f, 0.0f, -1.0f);
         glm::vec3 Right  (1.0f, 0.0f,  0.0f);
 
-        float DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
+        auto DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
 
         Forward = m_RotationMatrix * Forward;
         Right   = m_RotationMatrix * Right;

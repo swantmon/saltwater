@@ -1,18 +1,4 @@
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \file base_serialize_archive.h
-///
-/// \author Tobias Schwandt
-/// \author Credits to Joerg Sahm
-/// \author Copyright (c) Tobias Schwandt. All rights reserved.
-///
-/// \date 2012-2013
-///
-/// \version 1.0
-/// 
-////////////////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include "base/base_defines.h"
@@ -32,19 +18,60 @@
 
 namespace SER
 {
-	class CArchive
+    class CArchive
     {
     public:
-        inline CArchive(unsigned int _Version);
+        using CThis = CArchive;
+
+    public:
+        template<typename TElement>
+        inline CThis& Write(const TElement& _rElement) {};
+
+        template<typename TElement>
+        inline CThis& operator << (const TElement& _rElement) {};
+
+        template<typename TElement>
+        inline CThis& Read(TElement& _rElement) {};
+
+        template<typename TElement>
+        inline CThis& operator >> (TElement& _rElement) {};
+
+        template<typename TElement>
+        inline CThis& operator & (const TElement& _rElement) {};
+
+    public:
+        template<typename TElement>
+        inline void BeginCollection() {};
+
+        template<typename TElement>
+        inline void WriteCollection(const TElement* _pElements, unsigned int _NumberOfElements) {};
+
+        template<typename TElement>
+        inline void EndCollection() {};
+
+        template<typename TElement>
+        inline void WritePrimitive(const TElement& _rElement) {};
+
+        template<typename TElement>
+        inline void WriteClass(const TElement& _rElement) {};
+
+        template<typename TElement>
+        inline void ReadPrimitive(TElement& _rElement) {};
+
+        template<typename TElement>
+        inline void ReadClass(TElement& _rElement) {};
 
     protected:
         unsigned int m_ArchiveVersion;
 
     protected:
+        inline CArchive(unsigned int _Version);
+
+    protected:
         template<class TArchive, typename TElement>
         inline static void DispatchWrite(TArchive& _rArchive, const TElement& _rElement)
         {
-            typedef typename SGetDispatcher<TElement>::SDispatcher SDispatcher;
+            using SDispatcher = typename SGetDispatcher<TElement>::SDispatcher;
 
             SDispatcher::Write(_rArchive, _rElement);
         }
@@ -54,7 +81,7 @@ namespace SER
         template<class TArchive, typename TElement>
         inline static void DispatchRead(TArchive& _rArchive, TElement& _rElement)
         {
-            typedef typename SGetDispatcher<TElement>::SDispatcher SDispatcher;
+            using SDispatcher = typename SGetDispatcher<TElement>::SDispatcher;
 
             SDispatcher::Read(_rArchive, _rElement);
         }
@@ -92,7 +119,7 @@ namespace SER
             template<class TArchive>
             inline static void Read(TArchive& _rArchive, TElement*& _rpElement)
             {
-                typedef typename SRemovePointer<TElement*>::X X;
+                using X = typename SRemovePointer<TElement*>::X;
                
                 X* pValue;
 
@@ -140,7 +167,7 @@ namespace SER
             template<class TArchive>
             inline static void Read(TArchive& _rArchive, TElement*& _rpElement)
             {
-                typedef typename SRemovePointer<TElement*>::X X;
+                using X = typename SRemovePointer<TElement*>::X;
                 
                 X* pValue;
 
@@ -184,8 +211,8 @@ namespace SER
         struct SGetDispatcher
         {
         private:
-            typedef typename SRemoveQualifier<TElement>::X   XUnqualified;
-            typedef typename SRemovePointer<XUnqualified>::X XUnqualifiedPointless;
+            using XUnqualified = typename SRemoveQualifier<TElement>::X;
+            using XUnqualifiedPointless = typename SRemovePointer<XUnqualified>::X;
 
         private:
             enum 
@@ -198,10 +225,10 @@ namespace SER
             };
 
         public:
-            typedef typename SIf<IsPrimitive   , SPrimitiveDispatcher<TElement>,
+            using SDispatcher = typename SIf<IsPrimitive   , SPrimitiveDispatcher<TElement>,
                     typename SIf<IsPrimitivePtr, SPrimitivePtrDispatcher<TElement>,
                     typename SIf<IsArray       , SArrayDispatcher<TElement>,
-                    typename SIf<IsClassPtr    , SClassPtrDispatcher<TElement>, SClassDispatcher<TElement>>::X>::X>::X>::X SDispatcher;
+                    typename SIf<IsClassPtr    , SClassPtrDispatcher<TElement>, SClassDispatcher<TElement>>::X>::X>::X>::X;
         };
     };
 } // namespace SER
@@ -214,12 +241,12 @@ namespace SER
         template<class TArchive>
         inline static void Write(TArchive& _rArchive, const char* _pElement)
         {
-            assert(_pElement != 0);
+            assert(_pElement != nullptr);
             
-            unsigned int NumberOfCharacters = static_cast<unsigned int>(strlen(_pElement));
+            auto NumberOfCharacters = static_cast<unsigned int>(strlen(_pElement));
             
             _rArchive.template BeginCollection<char>(NumberOfCharacters);
-            _rArchive.WriteCollection(_pElement);
+            _rArchive.WriteCollection(_pElement, NumberOfCharacters);
             _rArchive.template EndCollection<char>();
         }
         
@@ -233,7 +260,7 @@ namespace SER
             
             pString = new char[NumberOfCharacters + 1];
             
-            assert(pString != 0);
+            assert(pString != nullptr);
             
             _rArchive.ReadCollection(pString, NumberOfCharacters);
             _rArchive.template EndCollection<char>();
@@ -252,9 +279,9 @@ namespace SER
         template<class TArchive>
         inline static void Write(TArchive& _rArchive, const wchar_t* _pElement)
         {
-            assert(_pElement != 0);
+            assert(_pElement != nullptr);
             
-            unsigned int NumberOfCharacters = static_cast<unsigned int>(wcslen(_pElement));
+            auto NumberOfCharacters = static_cast<unsigned int>(wcslen(_pElement));
             
             _rArchive.template BeginCollection<wchar_t>(NumberOfCharacters);
             _rArchive.WriteCollection(_pElement);
@@ -271,7 +298,7 @@ namespace SER
             
             pString = new wchar_t[NumberOfCharacters + 1];
             
-            assert(pString != 0);
+            assert(pString != nullptr);
             
             _rArchive.ReadCollection(pString, NumberOfCharacters);
             _rArchive.template EndCollection<wchar_t>();

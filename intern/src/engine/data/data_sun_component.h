@@ -4,9 +4,11 @@
 #include "engine/engine_config.h"
 
 #include "base/base_include_glm.h"
+#include "base/base_serialize_glm.h"
 #include "base/base_typedef.h"
 
 #include "engine/data/data_component.h"
+#include "engine/data/data_component_manager.h"
 
 namespace Dt
 {
@@ -33,6 +35,10 @@ namespace Dt
         glm::vec3& GetDirection();
         const glm::vec3& GetDirection() const;
 
+        void SetCustomDistanceToOrigin(float _Distance);
+        float GetCustomDistanceToOrigin() const;
+        void ResetCustomDistance();
+
         void SetTemperature(float _Temperature);
         float GetTemperature() const;
 
@@ -56,6 +62,49 @@ namespace Dt
         CSunComponent();
         ~CSunComponent();
 
+    public:
+
+        inline void Read(CSceneReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+
+            int RefreshMode;
+
+            _rCodec >> RefreshMode;
+
+            Base::Serialize(_rCodec, m_Direction);
+            Base::Serialize(_rCodec, m_Color);
+            Base::Serialize(_rCodec, m_Lightness);
+
+            _rCodec >> m_CustomDistanceFromOrigin;
+            _rCodec >> m_Temperature;
+            _rCodec >> m_Intensity;
+            _rCodec >> m_HasTemperature;
+
+            m_RefreshMode = (ERefreshMode)RefreshMode;
+        }
+
+        inline void Write(CSceneWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+
+            _rCodec << (int)m_RefreshMode;
+
+            Base::Serialize(_rCodec, m_Direction);
+            Base::Serialize(_rCodec, m_Color);
+            Base::Serialize(_rCodec, m_Lightness);
+
+            _rCodec << m_CustomDistanceFromOrigin;
+            _rCodec << m_Temperature;
+            _rCodec << m_Intensity;
+            _rCodec << m_HasTemperature;
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CSunComponent();
+        }
+
     private:
 
         ERefreshMode m_RefreshMode;
@@ -64,6 +113,11 @@ namespace Dt
         glm::vec3    m_Lightness;
         float        m_Temperature;
         float        m_Intensity;
+        float        m_CustomDistanceFromOrigin;
         bool         m_HasTemperature;
+
+    private:
+
+        friend class CSunComponentGUI;
     };
 } // namespace Dt

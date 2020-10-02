@@ -27,10 +27,15 @@ namespace LE
 
         void SetInputTexture(Gfx::CTexturePtr _InputTexturePtr);
 
-        void SetOutputCubemap(Gfx::CTexturePtr _OutputCubemapPtr);
         Gfx::CTexturePtr GetOutputCubemap();
 
-    private:
+        void SetActive(bool _Flag);
+
+	private:
+
+		static const unsigned int s_CubemapSize = 512;
+
+	private:
 
         struct SCubemapBuffer
         {
@@ -63,6 +68,8 @@ namespace LE
         Gfx::CViewPortSetPtr m_ViewPortSetPtr;
 
         bool m_IsActive;
+
+        Engine::CEventDelegates::HandleType m_GfxOnUpdateDelegate;
 
     private:
 

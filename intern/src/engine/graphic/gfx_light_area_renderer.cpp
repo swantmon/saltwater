@@ -220,7 +220,7 @@ namespace
         
         CTexturePtr LTCMaterialTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-		TextureManager::SetTextureLabel(LTCMaterialTexturePtr, "Area light LTC Material Texture");
+        TextureManager::SetTextureLabel(LTCMaterialTexturePtr, "Area light LTC Material Texture");
 
         // -----------------------------------------------------------------------------
 

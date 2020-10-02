@@ -31,7 +31,7 @@ BASE_TEST(Test_Base_Coordinate_System)
 
     auto T = glm::mat3(glm::eulerAngleX(glm::radians(-90.0f)));
 
-    BASE_CHECK(EpsilonEqual(Base, glm::mat3(glm::eulerAngleX(glm::radians(-90.0f))), 0.01f));
+    BASE_CHECK(EpsilonEqual(Base, glm::mat3(glm::eulerAngleX(glm::radians(90.0f))), 0.01f));
 
     // -----------------------------------------------------------------------------
 
@@ -41,7 +41,7 @@ BASE_TEST(Test_Base_Coordinate_System)
 
     Base = Base::CCoordinateSystem::GetBaseMatrix(Right, Up, Forward);
 
-    BASE_CHECK(EpsilonEqual(Base, glm::mat3(glm::eulerAngleX(glm::radians(90.0f))), 0.01f));
+    BASE_CHECK(EpsilonEqual(Base, glm::mat3(glm::eulerAngleX(glm::radians(-90.0f))), 0.01f));
 
     // -----------------------------------------------------------------------------
 

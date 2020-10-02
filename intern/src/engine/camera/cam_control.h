@@ -84,5 +84,5 @@ namespace Cam
         private:
 
             virtual void InternUpdate() = 0;
-	};
+    };
 } // namespace Cam

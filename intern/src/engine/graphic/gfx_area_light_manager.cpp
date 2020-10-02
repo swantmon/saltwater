@@ -71,7 +71,7 @@ namespace
 
     private:
 
-        typedef Base::CManagedPool<CInternObject, 4, 0> CAreaLights;
+        using CAreaLights = Base::CManagedPool<CInternObject, 4, 0>;
 
     private:
 
@@ -84,6 +84,10 @@ namespace
         CTexturePtr m_BackgroundTexturePtr;
         CBufferPtr  m_GaussianPropertiesPtr;
         CBufferPtr  m_FilterPropertiesPtr;
+
+        Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
+
+        Dt::CEntityManager::CEntityDelegate::HandleType m_OnDirtyEntityDelegate;
 
     private:
 
@@ -114,13 +118,13 @@ namespace
 {
     CGfxAreaLightManager::CGfxAreaLightManager()
         : m_AreaLights             ( )
-        , m_FilterShaderPtr        (0)
-        , m_BackgroundBlurShaderPtr(0)
-        , m_CombineShaderPtr       (0)
-        , m_ForegroundBlurShaderPtr(0)
-        , m_BackgroundTexturePtr   (0)
-        , m_GaussianPropertiesPtr  (0)
-        , m_FilterPropertiesPtr    (0)
+        , m_FilterShaderPtr        (nullptr)
+        , m_BackgroundBlurShaderPtr(nullptr)
+        , m_CombineShaderPtr       (nullptr)
+        , m_ForegroundBlurShaderPtr(nullptr)
+        , m_BackgroundTexturePtr   (nullptr)
+        , m_GaussianPropertiesPtr  (nullptr)
+        , m_FilterPropertiesPtr    (nullptr)
     {
 
     }
@@ -148,8 +152,8 @@ namespace
         TextureDescriptor.m_Format           = CTexture::Unknown;
         TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
         TextureDescriptor.m_Semantic         = CTexture::Diffuse;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_pFileName        = nullptr;
+        TextureDescriptor.m_pPixels          = nullptr;
         TextureDescriptor.m_Format           = CTexture::R8G8B8A8_UBYTE;
         
         m_BackgroundTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -173,8 +177,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SBlurProperties);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
         
         m_GaussianPropertiesPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -185,17 +189,17 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SFilterProperties);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
         
         m_FilterPropertiesPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxAreaLightManager::OnDirtyComponent));
+        m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxAreaLightManager::OnDirtyComponent, this, std::placeholders::_1));
 
-        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxAreaLightManager::OnDirtyEntity));
+        m_OnDirtyEntityDelegate = Dt::CEntityManager::GetInstance().RegisterDirtyEntityHandler(std::bind(&CGfxAreaLightManager::OnDirtyEntity, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------
@@ -204,13 +208,13 @@ namespace
     {
         m_AreaLights.Clear();
 
-        m_FilterShaderPtr         = 0;
-        m_BackgroundBlurShaderPtr = 0;
-        m_CombineShaderPtr        = 0;
-        m_ForegroundBlurShaderPtr = 0;
-        m_BackgroundTexturePtr    = 0;
-        m_GaussianPropertiesPtr   = 0;
-        m_FilterPropertiesPtr     = 0;
+        m_FilterShaderPtr         = nullptr;
+        m_BackgroundBlurShaderPtr = nullptr;
+        m_CombineShaderPtr        = nullptr;
+        m_ForegroundBlurShaderPtr = nullptr;
+        m_BackgroundTexturePtr    = nullptr;
+        m_GaussianPropertiesPtr   = nullptr;
+        m_FilterPropertiesPtr     = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -233,7 +237,7 @@ namespace
 
         for (auto pComponent : AreaLightComponents)
         {
-            if (pComponent->GetTypeID() == Base::CTypeInfo::GetTypeID<Dt::CAreaLightComponent>())
+            if (pComponent->GetTypeInfo() == Base::CTypeInfo::Get<Dt::CAreaLightComponent>())
             {
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CAreaLightComponent::DirtyInfo);
             }
@@ -247,12 +251,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Vars
         // -----------------------------------------------------------------------------
-        CInternObject* pGfxLightFacet = 0;
+        CInternObject* pGfxLightFacet = nullptr;
 
         // -----------------------------------------------------------------------------
         // Only if component has changed
         // -----------------------------------------------------------------------------
-        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CAreaLightComponent>()) return;
+        if (_pComponent->GetTypeInfo() != Base::CTypeInfo::Get<Dt::CAreaLightComponent>()) return;
 
         auto pAreaLightComponent = static_cast<Dt::CAreaLightComponent*>(_pComponent);
 
@@ -294,7 +298,7 @@ namespace
             BufferDesc.m_Access        = CBuffer::CPUWrite;
             BufferDesc.m_NumberOfBytes = sizeof(PlaneVertexBufferData);
             BufferDesc.m_pBytes        = &PlaneVertexBufferData[0];
-            BufferDesc.m_pClassKey     = 0;
+            BufferDesc.m_pClassKey     = nullptr;
         
             pGfxLightFacet->m_PlaneVertexBufferSetPtr = BufferManager::CreateBuffer(BufferDesc);
         
@@ -306,15 +310,15 @@ namespace
             BufferDesc.m_Access        = CBuffer::CPUWrite;
             BufferDesc.m_NumberOfBytes = sizeof(PlaneIndexBufferData);
             BufferDesc.m_pBytes        = &PlaneIndexBufferData[0];
-            BufferDesc.m_pClassKey     = 0;
+            BufferDesc.m_pClassKey     = nullptr;
         
             pGfxLightFacet->m_PlaneIndexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
             // -----------------------------------------------------------------------------
             // Texture
             // -----------------------------------------------------------------------------
-            pGfxLightFacet->m_FilteredTexturePtr = 0;
-            pGfxLightFacet->m_TexturePtr         = 0;
+            pGfxLightFacet->m_FilteredTexturePtr = nullptr;
+            pGfxLightFacet->m_TexturePtr         = nullptr;
 
             // -----------------------------------------------------------------------------
             // Link
@@ -339,19 +343,19 @@ namespace
                 TextureDescriptor.m_Format           = CTexture::Unknown;
                 TextureDescriptor.m_Usage            = CTexture::GPURead;
                 TextureDescriptor.m_Semantic         = CTexture::Diffuse;
-                TextureDescriptor.m_pPixels          = 0;
+                TextureDescriptor.m_pPixels          = nullptr;
                 TextureDescriptor.m_Format           = STextureDescriptor::s_FormatFromSource;
                 TextureDescriptor.m_pFileName        = pAreaLightComponent->GetTexture().c_str();
 
                 Gfx::CTexturePtr GfxTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
-                if (GfxTexturePtr != 0 && GfxTexturePtr.IsValid())
+                if (GfxTexturePtr != nullptr && GfxTexturePtr.IsValid())
                 {
                     // -----------------------------------------------------------------------------
                     // Remove old
                     // -----------------------------------------------------------------------------
-                    pGfxLightFacet->m_TexturePtr         = 0;
-                    pGfxLightFacet->m_FilteredTexturePtr = 0;
+                    pGfxLightFacet->m_TexturePtr         = nullptr;
+                    pGfxLightFacet->m_FilteredTexturePtr = nullptr;
 
                     // -----------------------------------------------------------------------------
                     // Create new
@@ -366,8 +370,8 @@ namespace
                     TextureDescriptor.m_Format           = CTexture::Unknown;
                     TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
                     TextureDescriptor.m_Semantic         = CTexture::Diffuse;
-                    TextureDescriptor.m_pFileName        = 0;
-                    TextureDescriptor.m_pPixels          = 0;
+                    TextureDescriptor.m_pFileName        = nullptr;
+                    TextureDescriptor.m_pPixels          = nullptr;
                     TextureDescriptor.m_Format           = CTexture::R8G8B8A8_UBYTE;
 
                     Gfx::CTexturePtr FilteredTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -380,7 +384,7 @@ namespace
             }
             else
             {
-                pGfxLightFacet->m_TexturePtr = 0;
+                pGfxLightFacet->m_TexturePtr = nullptr;
             }
         }
         

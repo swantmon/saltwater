@@ -14,22 +14,25 @@ namespace Edit
 
     public:
 
-        void SetNextState(CState::EStateType _NextState);
+        void SaveToFile(const std::string& _rFilename);
+        const std::string& GetFilename() const;
 
-    private:
-
-        CState::EStateType m_NextState;
+        void PreventSaving(bool _Flag);
         
     private:
         
         CUnloadMapState();
         ~CUnloadMapState();
-        
-    private:
-        
-        virtual CState::EStateType InternOnEnter();
-        virtual CState::EStateType InternOnLeave();
-        virtual CState::EStateType InternOnRun();
 
+    private:
+
+        void InternOnEnter() override;
+        void InternOnLeave() override;
+        CState::EStateType InternOnRun() override;
+
+    private:
+
+        std::string m_Filename;
+        bool m_PreventSaving;
     };
 } // namespace Edit

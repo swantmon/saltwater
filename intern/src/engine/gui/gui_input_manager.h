@@ -20,11 +20,8 @@ namespace InputManager
     bool GetKeyDown(Base::CInputEvent::EKey _Key);
     bool GetKeyUp(Base::CInputEvent::EKey _Key);
 
-    bool GetMouseButton(Base::CInputEvent::EKey _Key);
-    bool GetMouseButtonDown(Base::CInputEvent::EKey _Key);
-    bool GetMouseButtonUp(Base::CInputEvent::EKey _Key);
-
-    glm::vec2& GetMousePosition();
+    const glm::vec2& GetGlobalMousePosition();
+    const glm::vec2& GetLocalMousePosition();
     float GetMouseScrollDelta();
 } // namespace InputManager
 } // namespace Gui

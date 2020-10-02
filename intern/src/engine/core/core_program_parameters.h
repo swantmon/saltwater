@@ -8,6 +8,8 @@
 
 #include "engine/core/core_console.h"
 
+#include "engine/gui/gui_event_handler.h"
+
 #include <string>
 
 namespace Core
@@ -38,11 +40,16 @@ namespace Core
         const T Get(const std::string& _rOption, const T _Default);
         const std::string Get(const std::string& _rOption, const char* _Default);
 
+        template<typename T>
+        void Set(const std::string& _rOption, const T _Default);
+
         bool IsNull(const std::string& _rOption);
 
     private:
 
         nlohmann::json m_Container;
+
+        Gui::EventHandler::CEventDelegate::HandleType m_OnEventDelegate;
 
     private:
 
@@ -62,7 +69,7 @@ namespace Core
     {
         ENGINE_CONSOLE_INFOV("Creating new config parameter %s", _rOption.c_str());
 
-        m_Container[ConvertOptionToJSONPointer(_rOption)] = _Parameter;
+        Set(_rOption, _Parameter);
     }
     
     // -----------------------------------------------------------------------------
@@ -87,5 +94,14 @@ namespace Core
         }
 
         return _Default;
+    }
+
+    // -----------------------------------------------------------------------------
+
+
+    template<typename T>
+    void CProgramParameters::Set(const std::string& _rOption, const T _Parameter)
+    {
+        m_Container[ConvertOptionToJSONPointer(_rOption)] = _Parameter;
     }
 } // namespace Core

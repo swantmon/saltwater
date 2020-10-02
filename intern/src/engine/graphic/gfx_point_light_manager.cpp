@@ -106,6 +106,10 @@ namespace
         CBufferSetPtr m_LightCameraVSBufferPtr;
         CBufferSetPtr m_RSMPSBuffer;
 
+        Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
+
+        Dt::CEntityManager::CEntityDelegate::HandleType m_OnDirtyEntityDelegate;
+
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -229,9 +233,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxPointLightManager::OnDirtyComponent));
+        m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxPointLightManager::OnDirtyComponent, this, std::placeholders::_1));
 
-        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxPointLightManager::OnDirtyEntity));
+        m_OnDirtyEntityDelegate = Dt::CEntityManager::GetInstance().RegisterDirtyEntityHandler(std::bind(&CGfxPointLightManager::OnDirtyEntity, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------
@@ -320,7 +324,7 @@ namespace
 
         for (auto pComponent : AreaLightComponents)
         {
-            if (pComponent->GetTypeID() == Base::CTypeInfo::GetTypeID<Dt::CPointLightComponent>())
+            if (pComponent->GetTypeInfo() == Base::CTypeInfo::Get<Dt::CPointLightComponent>())
             {
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CPointLightComponent::DirtyInfo);
             }
@@ -331,7 +335,7 @@ namespace
 
     void CGfxPointLightManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CPointLightComponent>()) return;
+        if (_pComponent->GetTypeInfo() != Base::CTypeInfo::Get<Dt::CPointLightComponent>()) return;
 
         Dt::CPointLightComponent* pPointLightComponent = static_cast<Dt::CPointLightComponent*>(_pComponent);
 
@@ -401,6 +405,14 @@ namespace
                 case Dt::CPointLightComponent::GlobalIllumination: CreateRSM(ShadowmapSize, pGfxPointLightFacet); break;
                 }
             }
+        }
+        else if ((DirtyFlags & Dt::CPointLightComponent::DirtyDestroy) != 0)
+        {
+            pGfxPointLightFacet = static_cast<CInternObject*>(pPointLightComponent->GetFacet(Dt::CPointLightComponent::Graphic));
+
+            pGfxPointLightFacet = 0;
+
+            return;
         }
         else
         {

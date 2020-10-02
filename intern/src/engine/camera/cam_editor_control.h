@@ -13,7 +13,17 @@ namespace Cam
     public:
 
         CEditorControl();
-            ~CEditorControl();
+       ~CEditorControl();
+
+    public:
+
+        void SetProjectionMatrix(const glm::mat4& _rProjectionMatrix);
+
+        void SetRotation(const glm::mat3& _rRotationMatrix);
+
+        bool IsFlying();
+
+        bool IsDragging();
 
     private:
 

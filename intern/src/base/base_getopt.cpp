@@ -14,7 +14,7 @@
 
 namespace 
 {
-	class CGetOpt : private Base::CUncopyable
+    class CGetOpt : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CGetOpt);
 
@@ -67,7 +67,7 @@ namespace
         {
             if (m_OptionError)
             {
-				BASE_THROWV("Getting argument \"%c\" failed with message: %s", static_cast<char>(_Argument), _pDescription);
+                BASE_THROWV("Getting argument \"%c\" failed with message: %s", static_cast<char>(_Argument), _pDescription);
             }
         };
 

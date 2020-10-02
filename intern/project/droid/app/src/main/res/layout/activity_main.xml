@@ -10,6 +10,8 @@
         android:id="@+id/surfaceView"
         android:layout_width="276dp"
         android:layout_height="399dp"
-        tools:layout_editor_absoluteX="50dp"
-        tools:layout_editor_absoluteY="35dp" />
+        app:layout_constraintBottom_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </android.support.constraint.ConstraintLayout>

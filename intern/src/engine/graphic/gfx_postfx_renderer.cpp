@@ -67,6 +67,8 @@ namespace
         void Update();
         void Render();
         
+        void DebugAlbedo(bool _Flag);
+
     private:
         
         enum EPostEffectShader
@@ -164,6 +166,8 @@ namespace
         unsigned int m_SwapCounter;
 
         bool m_DebugAlbedo;
+
+        Gfx::Main::CResizeDelegate::HandleType m_OnResizeDelegate;
         
     private:
         
@@ -198,7 +202,7 @@ namespace
         m_PostAARenderJobs.reserve(2);
         m_DOFRenderJobs   .reserve(2);
 
-        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxPostFXRenderer::OnResize));
+        m_OnResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxPostFXRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
     }
     
     // -----------------------------------------------------------------------------
@@ -1756,6 +1760,14 @@ namespace
             m_DOFRenderJobs.push_back(NewRenderJob);
         }
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxPostFXRenderer::DebugAlbedo(bool _Flag)
+    {
+        m_DebugAlbedo = _Flag;
+    }
+
 } // namespace
 
 namespace Gfx
@@ -1871,6 +1883,14 @@ namespace PostFX
     {
         CGfxPostFXRenderer::GetInstance().Render();
     }
+
+    // -----------------------------------------------------------------------------
+
+    void DebugAlbedo(bool _Flag)
+    {
+        CGfxPostFXRenderer::GetInstance().DebugAlbedo(_Flag);
+    }
+
 } // namespace PostFX
 } // namespace Gfx
 

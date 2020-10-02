@@ -1,4 +1,4 @@
-﻿
+
 #include "engine/engine_precompiled.h"
 
 #include "app_droid/app_application.h"
@@ -63,9 +63,15 @@ namespace
         void ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData, int _Layer);
         void ClearTexture(CTexturePtr _TexturePtr, const void* _pData);
 
-        void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
-        void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
+        void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels);
+        void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels);
         void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels);
+
+        void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr);
+        void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec2& _rSourceMin, const glm::ivec2& _rTargetMin, const glm::ivec2& _rSize, int _SourceLevel, int _TargetLevel);
+        void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec3& _rSourceMin, const glm::ivec3& _rTargetMin, const glm::ivec3& _rSize, int _SourceLevel, int _TargetLevel);
+
+        void CopyActiveTargetSetToTexture(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect);
 
         CTexturePtr GetMipmapFromTexture2D(CTexturePtr _TexturePtr, unsigned int _Mipmap);
         
@@ -113,14 +119,14 @@ namespace
                 friend class CGfxTextureManager;
         };
 
-        typedef Base::CManagedPool<CInternTextureSet, 16> CTextureSets;
+        using CTextureSets = Base::CManagedPool<CInternTextureSet, 16>;
 
         // -----------------------------------------------------------------------------
         // There are way more 2D textures than 3D ones, so use bigger pages here.
         // -----------------------------------------------------------------------------
-        typedef Base::CManagedPool<CInternTexture, 256, 0> CTextures;
+        using CTextures = Base::CManagedPool<CInternTexture, 256, 0>;
         
-        typedef std::unordered_map<unsigned int, CTexturePtr> CTextureByHashs;
+        using CTextureByHashs = std::unordered_map<unsigned int, CTexturePtr>;
 
     private:
 
@@ -139,6 +145,7 @@ namespace
         CTexturePtr InternCreateExternalTexture();
 
         int ConvertGLFormatToBytesPerPixel(Gfx::CTexture::EFormat _Format) const;
+		int ConvertGLFormatToChannels(Gfx::CTexture::EFormat _Format) const;
         int ConvertGLImageUsage(Gfx::CTexture::EUsage _Usage) const;
         int ConvertGLInternalImageFormat(Gfx::CTexture::EFormat _Format) const;
         int ConvertGLImageFormat(Gfx::CTexture::EFormat _Format) const;
@@ -178,6 +185,7 @@ namespace
         // Initialize devil image engine. But we only initialize core part.
         // -----------------------------------------------------------------------------
         ilInit();
+		iluInit();
 
         // -----------------------------------------------------------------------------
         // Create 2x2 dummy texture
@@ -214,13 +222,19 @@ namespace
 #ifdef PLATFORM_WINDOWS
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 #endif // PLATFORM_WINDOWS
+
+        // -----------------------------------------------------------------------------
+        // Do not add padding bytes when copying data between CPU and GPU
+        // -----------------------------------------------------------------------------
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxTextureManager::OnExit()
     {
-        m_Texture2DPtr = 0;
+        m_Texture2DPtr = nullptr;
 
         // -----------------------------------------------------------------------------
         // Clear all the pools with the textures.
@@ -274,8 +288,8 @@ namespace
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_pFileName != nullptr && strlen(_rDescriptor.m_pFileName))
         {
-            NumberOfBytes     = static_cast<unsigned int>(strlen(_rDescriptor.m_pFileName) * sizeof(char));
-            const void* pData = static_cast<const void*>(_rDescriptor.m_pFileName);
+            NumberOfBytes    = static_cast<unsigned int>(strlen(_rDescriptor.m_pFileName) * sizeof(char));
+            const auto pData = static_cast<const void*>(_rDescriptor.m_pFileName);
             
             Hash = Base::CRC32(pData, NumberOfBytes);
             
@@ -290,7 +304,7 @@ namespace
         // -----------------------------------------------------------------------------
         CTexturePtr Texture2DPtr = InternCreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
 
-        CInternTexture* pInternTexture2D = static_cast<CInternTexture*>(Texture2DPtr.GetPtr());
+        auto pInternTexture2D = static_cast<CInternTexture*>(Texture2DPtr.GetPtr());
 
         if (pInternTexture2D == nullptr)
         {
@@ -380,14 +394,14 @@ namespace
         // Renderdoc crashes when _pData is nullptr but OpenGL allows NULL
         // Therefore we create a dummy value until Renderdoc is fixed
 
-        glm::ivec4 Dummy = glm::ivec4(0);
+        auto Dummy = glm::ivec4(0);
 
         if (_pData == nullptr)
         {
             _pData = &Dummy;
         }
 
-        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
         Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
         
         assert(_Layer <= static_cast<int>(pInternTexture->GetNumberOfTextures()));
@@ -419,14 +433,14 @@ namespace
         // Renderdoc crashes when _pData is nullptr but OpenGL allows NULL
         // Therefore we create a dummy value until Renderdoc is fixed
 
-        glm::ivec4 Dummy = glm::ivec4(0);
+        auto Dummy = glm::ivec4(0);
 
         if (_pData == nullptr)
         {
             _pData = &Dummy;
         }
 
-        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
         Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
 
         const int Format = ConvertGLImageFormat(_TexturePtr->GetFormat());
@@ -434,7 +448,10 @@ namespace
 
         const int Width = pInternTexture->GetNumberOfPixelsU();
         const int Height = pInternTexture->GetNumberOfPixelsV();
-        const int LayerCount = pInternTexture->GetNumberOfPixelsW();
+        const int LayerCount = std::max(pInternTexture->GetNumberOfPixelsW(), Gfx::CTexture::BPixels(1)); // make sure depth is at least 1
+
+        // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glClearTexSubImage.xhtml
+        // "For texture types that do not have certain dimensions, this command treats those dimensions as having a size of 1. For example, to clear a portion of a two-dimensional texture, use zoffset equal to zero and depth equal to one."
 
         const int MipLevels = pInternTexture->GetNumberOfMipLevels();
 
@@ -447,7 +464,7 @@ namespace
 
     // -----------------------------------------------------------------------------
     
-    void CGfxTextureManager::CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
+    void CGfxTextureManager::CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels)
     {
         BASE_UNUSED(_NumberOfBytesPerLine);
 
@@ -455,15 +472,15 @@ namespace
         // Get informations
         // -----------------------------------------------------------------------------
         assert(_TexturePtr.IsValid());
-        assert(_pBytes != 0);
+        assert(_pBytes != nullptr);
         
         glm::uvec2 Offset     = _rTargetRect[0];
         glm::uvec2 UpdateSize = _rTargetRect[1] - _rTargetRect[0];
         
-        assert(_TexturePtr->GetNumberOfPixelsU() <= UpdateSize[0] + Offset[0]);
-        assert(_TexturePtr->GetNumberOfPixelsV() <= UpdateSize[1] + Offset[1]);
+        assert(_TexturePtr->GetNumberOfPixelsU() >= UpdateSize[0] + Offset[0]);
+        assert(_TexturePtr->GetNumberOfPixelsV() >= UpdateSize[1] + Offset[1]);
         
-        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
         
         Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
         
@@ -485,7 +502,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxTextureManager::CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
+    void CGfxTextureManager::CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels)
     {
         BASE_UNUSED(_UpdateMipLevels);
         BASE_UNUSED(_NumberOfBytesPerLine);
@@ -493,19 +510,16 @@ namespace
         // -----------------------------------------------------------------------------
         // Get information
         // -----------------------------------------------------------------------------
-        glm::uvec2 Size = _rTargetRect.Size();
-
-        assert(_pBytes != 0);
+        assert(_pBytes != nullptr);
         assert(_TextureArrayPtr.IsValid());
-        assert(_TextureArrayPtr->GetNumberOfPixelsU() == Size[0] && _TextureArrayPtr->GetNumberOfPixelsV() == Size[1]);
         
-        glm::uvec2 Offset     = glm::uvec2(0);
-        glm::uvec2 UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
+        auto Offset           = _rTargetRect[0];
+        auto UpdateSize = _rTargetRect[1] - _rTargetRect[0];
         
-        assert(Size[0] <= UpdateSize[0] + Offset[0]);
-        assert(Size[1] <= UpdateSize[1] + Offset[1]);
+        assert(_TextureArrayPtr->GetNumberOfPixelsU() >= UpdateSize[0] + Offset[0]);
+        assert(_TextureArrayPtr->GetNumberOfPixelsV() >= UpdateSize[1] + Offset[1]);
         
-        CInternTexture* pInternTextureArray = static_cast<CInternTexture*>(_TextureArrayPtr.GetPtr());
+        auto pInternTextureArray = static_cast<CInternTexture*>(_TextureArrayPtr.GetPtr());
         
         int Format = ConvertGLImageFormat(pInternTextureArray->GetFormat());
         int Type   = ConvertGLImageType  (pInternTextureArray->GetFormat());
@@ -515,9 +529,15 @@ namespace
         // -----------------------------------------------------------------------------
         if (pInternTextureArray->m_Info.m_IsCubeTexture)
         {
+            GLint OldTexture;
+
+			glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &OldTexture);
+
             glBindTexture(GL_TEXTURE_CUBE_MAP, _TextureArrayPtr->GetNativeHandle());
 
             glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, _pBytes);
+
+            glBindTexture(GL_TEXTURE_CUBE_MAP, OldTexture);
         }
         else
         {
@@ -541,11 +561,11 @@ namespace
         assert(_TexturePtr     .IsValid());
         assert(_TextureArrayPtr->GetNumberOfPixelsU() == _TexturePtr->GetNumberOfPixelsU() && _TextureArrayPtr->GetNumberOfPixelsV() == _TexturePtr->GetNumberOfPixelsV());
         
-        glm::uvec2 Offset     = glm::uvec2(0);
-        glm::uvec2 UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
+        auto Offset     = glm::uvec2(0);
+        auto UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
         
-        assert(_TexturePtr->GetNumberOfPixelsU() <= UpdateSize[0] + Offset[0]);
-        assert(_TexturePtr->GetNumberOfPixelsV() <= UpdateSize[1] + Offset[1]);
+        assert(_TexturePtr->GetNumberOfPixelsU() >= UpdateSize[0] + Offset[0]);
+        assert(_TexturePtr->GetNumberOfPixelsV() >= UpdateSize[1] + Offset[1]);
 
         int Format = ConvertGLImageFormat(_TextureArrayPtr->GetFormat());
         int Type   = ConvertGLImageType(_TextureArrayPtr->GetFormat());
@@ -570,6 +590,87 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxTextureManager::CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr)
+    {
+        assert(_SourceTexturePtr != nullptr && _TargetTexturePtr != nullptr);
+
+        auto pInternSourceTexture = static_cast<CInternTexture*>(_SourceTexturePtr.GetPtr());
+        auto pInternTargetTexture = static_cast<CInternTexture*>(_TargetTexturePtr.GetPtr());
+
+        assert(pInternSourceTexture && pInternTargetTexture);
+
+        assert(pInternSourceTexture->GetNumberOfPixelsU() == pInternTargetTexture->GetNumberOfPixelsU());
+        assert(pInternSourceTexture->GetNumberOfPixelsV() == pInternTargetTexture->GetNumberOfPixelsV());
+        assert(pInternSourceTexture->GetNumberOfPixelsW() == pInternTargetTexture->GetNumberOfPixelsW());
+        assert(pInternSourceTexture->GetNumberOfTextures() == pInternTargetTexture->GetNumberOfTextures());
+        assert(pInternSourceTexture->GetNumberOfMipLevels() == pInternTargetTexture->GetNumberOfMipLevels());
+
+        auto Min = glm::ivec3(0);
+        
+        for (int LevelIndex = 0; LevelIndex < static_cast<int>(pInternTargetTexture->GetNumberOfMipLevels()); ++ LevelIndex)
+        {
+            auto Size = glm::ivec3(
+                pInternSourceTexture->GetNumberOfPixelsU() << LevelIndex,
+                pInternSourceTexture->GetNumberOfPixelsV() << LevelIndex,
+                pInternSourceTexture->GetNumberOfPixelsW() << LevelIndex
+            );
+
+            CopyTexture(_SourceTexturePtr, _TargetTexturePtr, Min, Min, Size, LevelIndex, LevelIndex);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxTextureManager::CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec2& _rSourceMin, const glm::ivec2& _rTargetMin, const glm::ivec2& _rSize, int _SourceLevel, int _TargetLevel)
+    {
+        assert(_SourceTexturePtr->GetDimension() == CTexture::Dim2D && _TargetTexturePtr->GetDimension() == CTexture::Dim2D);
+
+        CopyTexture(_SourceTexturePtr, _TargetTexturePtr, glm::ivec3(_rSourceMin, 0), glm::ivec3(_rTargetMin, 0), glm::ivec3(_rSize, 1), _SourceLevel, _TargetLevel);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxTextureManager::CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec3& _rSourceMin, const glm::ivec3& _rTargetMin, const glm::ivec3& _rSize, int _SourceLevel, int _TargetLevel)
+    {
+        assert(_SourceTexturePtr != nullptr && _TargetTexturePtr != nullptr);
+
+        auto pInternSourceTexture = static_cast<CInternTexture*>(_SourceTexturePtr.GetPtr());
+        auto pInternTargetTexture = static_cast<CInternTexture*>(_TargetTexturePtr.GetPtr());
+
+        assert(pInternSourceTexture && pInternTargetTexture);
+
+        glCopyImageSubData(
+            pInternSourceTexture->GetNativeHandle(), pInternSourceTexture->GetNativeBinding(),
+            _SourceLevel, _rSourceMin.x, _rSourceMin.y, _rSourceMin.z,
+            pInternTargetTexture->GetNativeHandle(), pInternTargetTexture->GetNativeBinding(),
+            _TargetLevel, _rTargetMin.x, _rTargetMin.y, _rTargetMin.z,
+            _rSize.x, _rSize.y, _rSize.z
+        );
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxTextureManager::CopyActiveTargetSetToTexture(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect)
+    {
+        assert(_TexturePtr.IsValid());
+
+        glm::uvec2 Offset     = _rTargetRect[0];
+        glm::uvec2 UpdateSize = _rTargetRect[1] - _rTargetRect[0];
+
+        assert(_TexturePtr->GetNumberOfPixelsU() >= UpdateSize[0] + Offset[0]);
+        assert(_TexturePtr->GetNumberOfPixelsV() >= UpdateSize[1] + Offset[1]);
+
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+
+        Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
+
+        glBindTexture(GL_TEXTURE_2D, TextureHandle);
+
+        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1]);
+    }
+
+    // -----------------------------------------------------------------------------
+
     CTexturePtr CGfxTextureManager::GetMipmapFromTexture2D(CTexturePtr _TexturePtr, unsigned int _Mipmap)
     {
         // -----------------------------------------------------------------------------
@@ -585,7 +686,7 @@ namespace
             
             CInternTexture& rTexture = *Texture2DPtr;
             
-            int MipmapPow = static_cast<int>(glm::pow(2, static_cast<int>(_Mipmap)));
+            auto MipmapPow = static_cast<int>(glm::pow(2, static_cast<int>(_Mipmap)));
 
             rTexture.m_FileName          = _TexturePtr->GetFileName();
             rTexture.m_pPixels           = _TexturePtr->GetPixels();
@@ -605,7 +706,7 @@ namespace
             rTexture.m_Info.m_Semantic          = _TexturePtr->GetSemantic();
             rTexture.m_Info.m_Usage             = _TexturePtr->GetUsage();
             
-            CInternTexture* pInternalTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+            auto pInternalTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
             rTexture.m_NativeTexture        = pInternalTexture->m_NativeTexture;
             rTexture.m_NativeBinding        = pInternalTexture->m_NativeBinding;
@@ -624,9 +725,9 @@ namespace
     
     void CGfxTextureManager::UpdateMipmap(CTexturePtr _TexturePtr)
     {
-        assert(_TexturePtr != 0);
+        assert(_TexturePtr != nullptr);
         
-        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
         assert(pInternTexture);
 
@@ -648,136 +749,132 @@ namespace
 
     void CGfxTextureManager::SaveTexture(CTexturePtr _TexturePtr, const std::string& _rPathToFile)
     {
-        // -----------------------------------------------------------------------------
-        // Get data
-        // -----------------------------------------------------------------------------
-        assert(_TexturePtr != 0);
+        assert(_TexturePtr != nullptr);
 
-        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
         assert(pInternTexture);
 
-        // -----------------------------------------------------------------------------
-        // Handle error cases
-        // -----------------------------------------------------------------------------
-        if (pInternTexture->GetNumberOfPixelsW() > 1)
-        {
-            ENGINE_CONSOLE_WARNING("Saving 3D textures is not suported. Saving aborted!");
+		// -----------------------------------------------------------------------------
 
-            return;
-        }
+		auto Width			  = pInternTexture->GetNumberOfPixelsU();
+		auto Height			  = pInternTexture->GetNumberOfPixelsV();
+		auto Depth			  = pInternTexture->GetNumberOfPixelsW();
+		auto NumberOfPixels   = Width * Height * Depth;
+		auto NumberOfChannels = ConvertGLFormatToChannels(pInternTexture->GetFormat());
+		auto BPP			  = ConvertGLFormatToBytesPerPixel(pInternTexture->GetFormat());
+		auto NumberOfBytes    = NumberOfPixels * BPP;
+		auto Level		      = pInternTexture->GetCurrentMipLevel();
 
-        if (_rPathToFile.find_last_of('.') == -1 || _rPathToFile.substr(_rPathToFile.find_last_of('.')) != ".ppm")
-        {
-            ENGINE_CONSOLE_WARNING("No or unsupported image extension found. Use Portable Pixmap (.ppm) to save textures.");
+		if (Depth > 1)
+		{
+			ENGINE_CONSOLE_WARNING("Saving 3D texture is not supported. Saving aborted.");
 
-            return;
-        }
+			return;
+		}
+
+		auto pData = Base::CMemory::Allocate((Base::Size)(NumberOfBytes));
+
+		if (pData == nullptr) return;
+
+		// -----------------------------------------------------------------------------
+
+		ILuint TemporaryImage = ilGenImage();
+
+		ilBindImage(TemporaryImage);
+
+		const GLenum NativeBinding = pInternTexture->m_NativeBinding;
+		const GLuint Format		   = ConvertGLImageFormat(pInternTexture->GetFormat());
+		const GLuint ImageType	   = ConvertGLImageType(pInternTexture->GetFormat());
+
+		GLint OldTex;
+
+		if (pInternTexture->IsCube())
+		{
+			glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &OldTex);
+		}
+		else
+		{
+			glGetIntegerv(GL_TEXTURE_BINDING_2D, &OldTex);
+		}
+
+		glBindTexture(NativeBinding, pInternTexture->m_NativeTexture);
+
+		const auto NumberOfLayers = pInternTexture->IsCube() ? 6 : 1;
 
 #if PLATFORM_ANDROID
-        static const int s_NumberOfChannels = 4;
-#else
-        static const int s_NumberOfChannels = 3;
+		GLuint Framebuffer;
+
+		glGenFramebuffers(1, &Framebuffer);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
 #endif
 
-        // -----------------------------------------------------------------------------
-        // Save data to PPM function
-        // -----------------------------------------------------------------------------
-        auto SaveBytesToPPM = [](const std::string& _rPathToFile, int _Width, int _Height, void* _pBytes)
-        {
-            std::ofstream PPMOutput;
-
-            PPMOutput.open(_rPathToFile, std::ofstream::out);
-
-            PPMOutput << "P3" << std::endl;
-
-            PPMOutput << _Width << " " << _Height << std::endl;
-
-            PPMOutput << "255" << std::endl;
-
-            for (int IndexOfPixel = 0; IndexOfPixel < _Width * _Height; ++IndexOfPixel)
+		for (int Layer = 0; Layer < NumberOfLayers; ++Layer)
+		{
+#if PLATFORM_ANDROID
+		    if (pInternTexture->IsCube())
             {
-                int Index = IndexOfPixel * s_NumberOfChannels;
-
-                PPMOutput << ((char*)_pBytes)[Index + 0] % 255 << " ";
-                PPMOutput << ((char*)_pBytes)[Index + 1] % 255 << " ";
-                PPMOutput << ((char*)_pBytes)[Index + 2] % 255 << " ";
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + Layer, pInternTexture->m_NativeTexture, Level);
+            }
+            else
+            {
+				glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, pInternTexture->m_NativeTexture, Level);
             }
 
-            PPMOutput.close();
-        };
+            GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
-        // -----------------------------------------------------------------------------
-        // Allocate memory
-        // -----------------------------------------------------------------------------
-        int NumberOfPixel = pInternTexture->GetNumberOfPixelsU() * pInternTexture->GetNumberOfPixelsV();
-        int NumberOfBytes = NumberOfPixel * s_NumberOfChannels * sizeof(char);
-
-        void* pBytes = Base::CMemory::Allocate(NumberOfBytes);
-
-        // -----------------------------------------------------------------------------
-        // Get data from GPU
-        // -----------------------------------------------------------------------------
-        glBindTexture(pInternTexture->m_NativeBinding, pInternTexture->m_NativeTexture);
-
-        if (pInternTexture->IsCube())
-        {
-#if PLATFORM_ANDROID
-            GLuint Framebuffer;
-
-            glGenFramebuffers(1, &Framebuffer);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
-#endif
-
-            for (int i = 0; i < 6; i++)
-            {
-#if PLATFORM_ANDROID
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, pInternTexture->m_NativeTexture, 0);
-
-                GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-
-                glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGBA, GL_UNSIGNED_BYTE, pBytes);
+            glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGBA, GL_UNSIGNED_BYTE, pData);
 #else
-                glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, GL_BYTE, pBytes);
+			if (pInternTexture->IsCube())
+			{
+				glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + Layer, Level, Format, ImageType, pData);
+			}
+			else
+			{
+				glGetTexImage(NativeBinding, Level, Format, ImageType, pData);
+			}
 #endif
 
-                std::string PathToFilePerFace = _rPathToFile.substr(0, _rPathToFile.find_last_of('.'));
+			if (!ilTexImage(Width, Height, Depth, (ILubyte)NumberOfChannels, Format, ImageType, pData))
+			{
+				ENGINE_CONSOLE_ERRORV("Failed get data from GL texture in layer '%i'.", Layer);
 
-                PathToFilePerFace += "_" + std::to_string(i) + _rPathToFile.substr(_rPathToFile.find_last_of('.'));
+				break;
+			}
 
-                SaveBytesToPPM(PathToFilePerFace, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), pBytes);
-            }
+			// -----------------------------------------------------------------------------
 
-#if PLATFORM_ANDROID
-            glDeleteFramebuffers(1, &Framebuffer);
-#endif
-        }
-        else
-        {
-#if PLATFORM_ANDROID
-            GLuint Framebuffer;
+			std::string NameOfTexture = _rPathToFile.c_str();
 
-            glGenFramebuffers(1, &Framebuffer);
+			if (NumberOfLayers > 1)
+			{
+				NameOfTexture.insert(NameOfTexture.find_last_of('.'), "_l" + std::to_string(Layer));
+			}
 
-            glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
+			ilEnable(IL_FILE_OVERWRITE);
 
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, pInternTexture->m_NativeTexture, 0);
-
-            glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGB, GL_BYTE, pBytes);
-
-            glDeleteFramebuffers(1, &Framebuffer);
+#ifdef PLATFORM_ANDROID
+            auto pSaveImagePath = NameOfTexture.c_str();
 #else
-            glGetTexImage(pInternTexture->m_NativeBinding, 0, GL_RGB, GL_BYTE, pBytes);
+            auto pSaveImagePath = reinterpret_cast<const wchar_t*>(NameOfTexture.c_str());
 #endif
 
-            SaveBytesToPPM(_rPathToFile, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), pBytes);
-        }
+			if (!ilSaveImage(pSaveImagePath))
+			{
+				ENGINE_CONSOLE_ERRORV("Failed saving texture '%s'.", _rPathToFile.c_str());
+			}
+		}
 
-        // -----------------------------------------------------------------------------
-        // Release memory
-        // -----------------------------------------------------------------------------
-        Base::CMemory::Free(pBytes);
+#if PLATFORM_ANDROID
+		glDeleteFramebuffers(1, &Framebuffer);
+#endif
+
+		glBindTexture(NativeBinding, OldTex);
+        ilDeleteImage(TemporaryImage);
+		// -----------------------------------------------------------------------------
+
+		Base::CMemory::Free(pData);
     }
 
     // -----------------------------------------------------------------------------
@@ -787,9 +884,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Get data
         // -----------------------------------------------------------------------------
-        assert(_TexturePtr != 0);
+        assert(_TexturePtr != nullptr);
 
-        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
         assert(pInternTexture);
 
@@ -803,17 +900,13 @@ namespace
             return;
         }
 
-#if PLATFORM_ANDROID
-        static const int s_NumberOfChannels = 4;
-#else
-        static const int s_NumberOfChannels = 4;
-#endif
-
         // -----------------------------------------------------------------------------
         // Allocate memory
         // -----------------------------------------------------------------------------
         const int NumberOfPixels = pInternTexture->GetNumberOfPixelsU() * pInternTexture->GetNumberOfPixelsV();
-        const int NumberOfBytes = NumberOfPixels * s_NumberOfChannels * sizeof(char);
+        const int NumberOfBytes = NumberOfPixels * ConvertGLFormatToBytesPerPixel(pInternTexture->GetFormat());
+        const GLuint Format = ConvertGLImageFormat(pInternTexture->GetFormat());
+        const GLuint ImageType = ConvertGLImageType(pInternTexture->GetFormat());
 
         // -----------------------------------------------------------------------------
         // Get data from GPU
@@ -837,9 +930,9 @@ namespace
 
                 GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
-                glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGBA, GL_UNSIGNED_BYTE, _pBuffer + i * NumberOfBytes);
+                glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), Format, ImageType, _pBuffer + i * NumberOfBytes);
 #else
-                glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, GL_BYTE, _pBuffer + i * NumberOfBytes);
+                glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, Format, ImageType, _pBuffer + i * NumberOfBytes);
 #endif
             }
 
@@ -858,11 +951,11 @@ namespace
 
             glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, pInternTexture->m_NativeTexture, 0);
 
-            glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGBA, GL_UNSIGNED_BYTE, _pBuffer);
+            glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), Format, ImageType, _pBuffer);
 
             glDeleteFramebuffers(1, &Framebuffer);
 #else
-            glGetTexImage(pInternTexture->m_NativeBinding, 0, GL_RGBA, GL_BYTE, _pBuffer);
+            glGetTexImage(pInternTexture->m_NativeBinding, 0, Format, ImageType, _pBuffer);
 #endif
         }
     }
@@ -873,7 +966,7 @@ namespace
     {
         assert(_pLabel != nullptr);
 
-        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
         assert(pInternTexture != nullptr);
         
@@ -948,7 +1041,7 @@ namespace
 
             pPathToTexture = PathToTexture.c_str();
 #else
-            const wchar_t* pPathToTexture = 0;
+            const wchar_t* pPathToTexture = nullptr;
 
             pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
 #endif
@@ -982,12 +1075,17 @@ namespace
                 }
                 else
                 {
-                    NativeILFormat = CheckILFormat;
-                    NativeILType   = CheckILType;
+					auto Channels = ilGetInteger(IL_IMAGE_CHANNELS);
+					auto BPP = ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
+					auto BPC = BPP / Channels * 8;
 
-                    GLInternalFormat = ilGetInteger(IL_IMAGE_CHANNELS) == 4 ? GL_RGBA8 : GL_RGB8;
-                    GLFormat         = NativeILFormat;
-                    GLType           = NativeILType;
+					GLInternalFormat = GL_RGBA8; // (BPC == 8) 
+
+					if (BPC == 16)      GLInternalFormat = GL_RGBA16F;
+					else if (BPC == 32) GLInternalFormat = GL_RGBA32F;
+
+                    GLFormat         = CheckILFormat;
+                    GLType           = CheckILType;
                 }
 
                 pTextureData = ilGetData();
@@ -1016,7 +1114,10 @@ namespace
         }
         else if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_NumberOfMipMapsFromSource)
         {
-            NumberOfMipmaps = ilGetInteger(IL_NUM_MIPMAPS);
+			// Devil reports zero mip maps when loading a png or jpg even though the rest is correct
+			// so we just manually assure that the number is at least one
+
+            NumberOfMipmaps = std::max(1, ilGetInteger(IL_NUM_MIPMAPS));
         }
         
         // -----------------------------------------------------------------------------
@@ -1047,7 +1148,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Is data available, then upload it to graphic card
         // -----------------------------------------------------------------------------
-        if (pTextureData != 0)
+        if (pTextureData != nullptr)
         {
             glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
 
@@ -1103,11 +1204,12 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
-            if (_rDescriptor.m_pFileName != 0) rTexture.m_FileName = _rDescriptor.m_pFileName;
+            if (_rDescriptor.m_pFileName != nullptr) rTexture.m_FileName = _rDescriptor.m_pFileName;
 
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTexture::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTexture::BPixels>(ImageHeight);
+			rTexture.m_NumberOfPixels[2] = static_cast<Gfx::CTexture::BPixels>(1);
             rTexture.m_Hash              = 0;
             
             rTexture.m_Info.m_Access            = _rDescriptor.m_Access;
@@ -1117,7 +1219,7 @@ namespace
             rTexture.m_Info.m_IsCubeTexture     = false;
             rTexture.m_Info.m_IsDeletable       = _IsDeleteable;
             rTexture.m_Info.m_IsDummyTexture    = false;
-            rTexture.m_Info.m_NumberOfTextures  = _rDescriptor.m_NumberOfTextures;
+            rTexture.m_Info.m_NumberOfTextures  = _rDescriptor.m_NumberOfTextures == STextureDescriptor::s_NumberOfTexturesFromSource ? 1 : _rDescriptor.m_NumberOfTextures;
             rTexture.m_Info.m_NumberOfMipLevels = NumberOfMipmaps;
             rTexture.m_Info.m_CurrentMipLevel   = 0;
             rTexture.m_Info.m_Semantic          = _rDescriptor.m_Semantic;
@@ -1290,7 +1392,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Is data available, then upload it to graphic card
         // -----------------------------------------------------------------------------
-        if (pTextureData != 0)
+        if (pTextureData != nullptr)
         {
             glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, ImageWidth, ImageHeight, ImageDepth, GLFormat, GLType, pTextureData);
         }
@@ -1317,7 +1419,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
-            if (_rDescriptor.m_pFileName != 0) rTexture.m_FileName = _rDescriptor.m_pFileName;
+            if (_rDescriptor.m_pFileName != nullptr) rTexture.m_FileName = _rDescriptor.m_pFileName;
 
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTexture::BPixels>(ImageWidth);
@@ -1437,7 +1539,7 @@ namespace
         ILenum       NativeILType;
         ILinfo       NativeILImageInfo;
 
-        assert(_rDescriptor.m_NumberOfTextures == 6 && _rDescriptor.m_NumberOfPixelsW == 1 && _rDescriptor.m_pPixels == 0);
+        assert(_rDescriptor.m_NumberOfTextures == 6 && _rDescriptor.m_NumberOfPixelsW == 1 && _rDescriptor.m_pPixels == nullptr);
 
         ImageIsLoaded = false;
         NumberOfFaces = 1;
@@ -1488,7 +1590,7 @@ namespace
 
             pPathToTexture = PathToTexture.c_str();
 #else
-            const wchar_t* pPathToTexture = 0;
+            const wchar_t* pPathToTexture = nullptr;
 
             pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
 #endif
@@ -1640,7 +1742,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
-            if (_rDescriptor.m_pFileName != 0) rTexture.m_FileName = _rDescriptor.m_pFileName;
+            if (_rDescriptor.m_pFileName != nullptr) rTexture.m_FileName = _rDescriptor.m_pFileName;
 
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTexture::BPixels>(ImageWidth);
@@ -1775,7 +1877,7 @@ namespace
         {
             CInternTexture& rTexture = *static_cast<CInternTexture*>(Texture2DPtr.GetPtr());
 
-            rTexture.m_pPixels           = 0;
+            rTexture.m_pPixels           = nullptr;
             rTexture.m_NumberOfPixels[0] = 0;
             rTexture.m_NumberOfPixels[1] = 0;
             rTexture.m_Hash              = 0;
@@ -1804,7 +1906,90 @@ namespace
         }
 
         return Texture2DPtr;
-    }
+	}
+
+	// -----------------------------------------------------------------------------
+
+	int CGfxTextureManager::ConvertGLFormatToChannels(Gfx::CTexture::EFormat _Format) const
+	{
+		static int s_NativeFormat[] =
+		{
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+
+			3,
+			4,
+			4,
+			4,
+			3,
+		};
+
+		return s_NativeFormat[_Format];
+	}
     
     // -----------------------------------------------------------------------------
     
@@ -1896,8 +2081,6 @@ namespace
         static int s_NativeUsage[] =
         {
             GL_READ_WRITE,
-            GL_READ_ONLY,
-            GL_READ_ONLY,
             GL_READ_ONLY,
         };
 
@@ -2129,10 +2312,10 @@ namespace
             GL_UNSIGNED_SHORT,
             GL_UNSIGNED_SHORT,
             GL_UNSIGNED_SHORT,
-            GL_FLOAT,
-            GL_FLOAT,
-            GL_FLOAT,
-            GL_FLOAT,
+            GL_HALF_FLOAT,
+            GL_HALF_FLOAT,
+            GL_HALF_FLOAT,
+            GL_HALF_FLOAT,
             
             GL_INT,
             GL_INT,
@@ -2357,7 +2540,7 @@ namespace
 
         for (IndexOfTexture = 0; IndexOfTexture < m_NumberOfTextures; ++IndexOfTexture)
         {
-            m_TexturePtrs[IndexOfTexture] = 0;
+            m_TexturePtrs[IndexOfTexture] = nullptr;
         }
     }
 
@@ -2545,14 +2728,14 @@ namespace TextureManager
     
     // -----------------------------------------------------------------------------
 
-    void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
+    void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels)
     {
         CGfxTextureManager::GetInstance().CopyToTexture2D(_TexturePtr, _rTargetRect, _NumberOfBytesPerLine, _pBytes, _UpdateMipLevels);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
+    void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels)
     {
         CGfxTextureManager::GetInstance().CopyToTextureArray2D(_TextureArrayPtr, _IndexOfSlice, _rTargetRect, _NumberOfBytesPerLine, _pBytes, _UpdateMipLevels);
     }
@@ -2562,6 +2745,34 @@ namespace TextureManager
     void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels)
     {
         CGfxTextureManager::GetInstance().CopyToTextureArray2D(_TextureArrayPtr, _IndexOfSlice, _TexturePtr, _UpdateMipLevels);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr)
+    {
+        CGfxTextureManager::GetInstance().CopyTexture(_SourceTexturePtr, _TargetTexturePtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec2& _rSourceMin, const glm::ivec2& _rTargetMin, const glm::ivec2& _rSize, int _SourceLevel, int _TargetLevel)
+    {
+        CGfxTextureManager::GetInstance().CopyTexture(_SourceTexturePtr, _TargetTexturePtr, _rSourceMin, _rTargetMin, _rSize, _SourceLevel, _TargetLevel);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CopyTexture(CTexturePtr _SourceTexturePtr, CTexturePtr _TargetTexturePtr, const glm::ivec3& _rSourceMin, const glm::ivec3& _rTargetMin, const glm::ivec3& _rSize, int _SourceLevel, int _TargetLevel)
+    {
+        CGfxTextureManager::GetInstance().CopyTexture(_SourceTexturePtr, _TargetTexturePtr, _rSourceMin, _rTargetMin, _rSize, _SourceLevel, _TargetLevel);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CopyActiveTargetSetToTexture(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect)
+    {
+        CGfxTextureManager::GetInstance().CopyActiveTargetSetToTexture(_TexturePtr, _rTargetRect);
     }
 
     // -----------------------------------------------------------------------------

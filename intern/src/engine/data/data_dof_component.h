@@ -4,8 +4,10 @@
 #include "engine/engine_config.h"
 
 #include "base/base_include_glm.h"
+#include "base/base_serialize_glm.h"
 
 #include "engine/data/data_component.h"
+#include "engine/data/data_component_manager.h"
 
 namespace Dt
 {
@@ -40,6 +42,45 @@ namespace Dt
         CDOFComponent();
         ~CDOFComponent();
 
+    public:
+
+        inline void Read(CSceneReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+
+            _rCodec >> m_NearDistance;
+            _rCodec >> m_FarDistance;
+            _rCodec >> m_NearToFarRatio;
+            _rCodec >> m_FadeUnToSmallBlur;
+            _rCodec >> m_FadeSmallToMediumBlur;
+
+            Base::Serialize(_rCodec, m_Near);
+            Base::Serialize(_rCodec, m_LerpScale);
+            Base::Serialize(_rCodec, m_LerpBias);
+            Base::Serialize(_rCodec, m_EqFar);
+        }
+
+        inline void Write(CSceneWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+
+            _rCodec << m_NearDistance;
+            _rCodec << m_FarDistance;
+            _rCodec << m_NearToFarRatio;
+            _rCodec << m_FadeUnToSmallBlur;
+            _rCodec << m_FadeSmallToMediumBlur;
+
+            Base::Serialize(_rCodec, m_Near);
+            Base::Serialize(_rCodec, m_LerpScale);
+            Base::Serialize(_rCodec, m_LerpBias);
+            Base::Serialize(_rCodec, m_EqFar);
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CDOFComponent();
+        }
+
     private:
 
         float m_NearDistance;            //< End of near blur (Default: 0.01f)
@@ -52,5 +93,9 @@ namespace Dt
         glm::vec4 m_LerpScale;
         glm::vec4 m_LerpBias;
         glm::vec3 m_EqFar;            //< Distance since everything should be blured (x = 1 / 1 - Start_Distance; y = 1 - x)
+
+    private:
+
+        friend class CDOFComponentGUI;
     };
 } // namespace Dt

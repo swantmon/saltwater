@@ -7,7 +7,7 @@
 
 namespace Gfx
 {
-    class CTargetSet : public Base::CManagedPoolItemBase
+    class ENGINE_API CTargetSet : public Base::CManagedPoolItemBase
     {
     public:
 
@@ -21,9 +21,9 @@ namespace Gfx
     
     protected:
 
-        unsigned int            m_NumberOfRenderTargets;
-        CTexturePtr         m_RenderTargetPtrs[s_MaxNumberOfRenderTargets];
-        CTexturePtr         m_DepthStencilTargetPtr;
+        unsigned int m_NumberOfRenderTargets;
+        CTexturePtr  m_RenderTargetPtrs[s_MaxNumberOfRenderTargets];
+        CTexturePtr  m_DepthStencilTargetPtr;
 
     protected:
 

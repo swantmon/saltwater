@@ -156,6 +156,13 @@ namespace
         CCameraPtr      m_FullQuadCameraPtr;
         CViewPortPtr    m_ViewPortPtr;
         CViewPortSetPtr m_ViewPortSetPtr;
+
+        // -----------------------------------------------------------------------------
+        // Others
+        // -----------------------------------------------------------------------------
+        Gfx::Main::CResizeDelegate::HandleType m_OnResizeDelegate;
+
+        Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
     };
 } // namespace
 
@@ -224,9 +231,9 @@ namespace
 
             ResizeCameras(Width, Height);
             
-            Gfx::Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxViewManager::OnResize));
+            m_OnResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxViewManager::OnResize, this, std::placeholders::_1, std::placeholders::_2));
 
-            Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxViewManager::OnDirtyComponent));
+            m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxViewManager::OnDirtyComponent, this, std::placeholders::_1));
         }
         catch (...)
         {
@@ -530,7 +537,7 @@ namespace
 
     void CGfxViewManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CCameraComponent>()) return;
+        if (_pComponent->GetTypeInfo() != Base::CTypeInfo::Get<Dt::CCameraComponent>()) return;
 
         Dt::CCameraComponent* pCameraComponent = static_cast<Dt::CCameraComponent*>(_pComponent);
 

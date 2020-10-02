@@ -17,6 +17,7 @@
 #include "engine/graphic/gfx_debug.h"
 #include "engine/graphic/gfx_debug_renderer.h"
 #include "engine/graphic/gfx_fog_renderer.h"
+#include "engine/graphic/gfx_highlight_renderer.h"
 #include "engine/graphic/gfx_histogram_renderer.h"
 #include "engine/graphic/gfx_light_area_renderer.h"
 #include "engine/graphic/gfx_light_indirect_renderer.h"
@@ -33,6 +34,7 @@
 #include "engine/graphic/gfx_point_light_manager.h"
 #include "engine/graphic/gfx_postfx_hdr_renderer.h"
 #include "engine/graphic/gfx_postfx_renderer.h"
+#include "engine/graphic/gfx_reconstruction_renderer.h"
 #include "engine/graphic/gfx_refraction_renderer.h"
 #include "engine/graphic/gfx_reflection_renderer.h"
 #include "engine/graphic/gfx_sampler_manager.h"
@@ -122,232 +124,252 @@ namespace Pipeline
         // -----------------------------------------------------------------------------
         ENGINE_CONSOLE_STREAMINFO("Gfx> Start renderer...");
 
-        HistogramRenderer    ::OnStart();
-        BackgroundRenderer   ::OnStart();
-        LightAreaRenderer    ::OnStart();
-        ReflectionRenderer   ::OnStart();
-        LightPointRenderer   ::OnStart();
-        LightSunRenderer     ::OnStart();
-        LightIndirectRenderer::OnStart();
-        ShadowRenderer       ::OnStart();
-        FogRenderer          ::OnStart();
-        ARRenderer           ::OnStart();
-        MeshRenderer         ::OnStart();
-        ParticleRenderer     ::OnStart();
-        PostFXHDR            ::OnStart();
-        PostFX               ::OnStart();
-        DebugRenderer        ::OnStart();
-        SelectionRenderer    ::OnStart();
-        TonemappingRenderer  ::OnStart();
-        CausticRenderer      ::OnStart();
-        RefractionRenderer   ::OnStart();
+        HistogramRenderer     ::OnStart();
+        BackgroundRenderer    ::OnStart();
+        LightAreaRenderer     ::OnStart();
+        ReflectionRenderer    ::OnStart();
+        LightPointRenderer    ::OnStart();
+        LightSunRenderer      ::OnStart();
+        LightIndirectRenderer ::OnStart();
+        ShadowRenderer        ::OnStart();
+        FogRenderer           ::OnStart();
+        ARRenderer            ::OnStart();
+        MeshRenderer          ::OnStart();
+        ParticleRenderer      ::OnStart();
+        PostFXHDR             ::OnStart();
+        PostFX                ::OnStart();
+        DebugRenderer         ::OnStart();
+        SelectionRenderer     ::OnStart();
+        HighlightRenderer     ::OnStart();
+        TonemappingRenderer   ::OnStart();
+        CausticRenderer       ::OnStart();
+        RefractionRenderer    ::OnStart();
+        ReconstructionRenderer::OnStart();
         
         // -----------------------------------------------------------------------------
         // Setup the shader of all renderer
         // -----------------------------------------------------------------------------
-        HistogramRenderer    ::OnSetupShader();
-        BackgroundRenderer   ::OnSetupShader();
-        LightAreaRenderer    ::OnSetupShader();
-        ReflectionRenderer   ::OnSetupShader();
-        LightPointRenderer   ::OnSetupShader();
-        LightSunRenderer     ::OnSetupShader();
-        LightIndirectRenderer::OnSetupShader();
-        ShadowRenderer       ::OnSetupShader();
-        FogRenderer          ::OnSetupShader();
-        ARRenderer           ::OnSetupShader();
-        MeshRenderer         ::OnSetupShader();
-        ParticleRenderer     ::OnSetupShader();
-        PostFXHDR            ::OnSetupShader();
-        PostFX               ::OnSetupShader();
-        DebugRenderer        ::OnSetupShader();
-        SelectionRenderer    ::OnSetupShader();
-        TonemappingRenderer  ::OnSetupShader();
-        CausticRenderer      ::OnSetupShader();
-        RefractionRenderer   ::OnSetupShader();
+        HistogramRenderer     ::OnSetupShader();
+        BackgroundRenderer    ::OnSetupShader();
+        LightAreaRenderer     ::OnSetupShader();
+        ReflectionRenderer    ::OnSetupShader();
+        LightPointRenderer    ::OnSetupShader();
+        LightSunRenderer      ::OnSetupShader();
+        LightIndirectRenderer ::OnSetupShader();
+        ShadowRenderer        ::OnSetupShader();
+        FogRenderer           ::OnSetupShader();
+        ARRenderer            ::OnSetupShader();
+        MeshRenderer          ::OnSetupShader();
+        ParticleRenderer      ::OnSetupShader();
+        PostFXHDR             ::OnSetupShader();
+        PostFX                ::OnSetupShader();
+        DebugRenderer         ::OnSetupShader();
+        SelectionRenderer     ::OnSetupShader();
+        HighlightRenderer     ::OnSetupShader();
+        TonemappingRenderer   ::OnSetupShader();
+        CausticRenderer       ::OnSetupShader();
+        RefractionRenderer    ::OnSetupShader();
+        ReconstructionRenderer::OnSetupShader();
         
         // -----------------------------------------------------------------------------
         // Setup the kernels of all renderer
         // -----------------------------------------------------------------------------
-        HistogramRenderer    ::OnSetupKernels();
-        BackgroundRenderer   ::OnSetupKernels();
-        LightAreaRenderer    ::OnSetupKernels();
-        ReflectionRenderer   ::OnSetupKernels();
-        LightPointRenderer   ::OnSetupKernels();
-        LightSunRenderer     ::OnSetupKernels();
-        LightIndirectRenderer::OnSetupKernels();
-        ShadowRenderer       ::OnSetupKernels();
-        FogRenderer          ::OnSetupKernels();
-        ARRenderer           ::OnSetupKernels();
-        MeshRenderer         ::OnSetupKernels();
-        ParticleRenderer     ::OnSetupKernels();
-        PostFXHDR            ::OnSetupKernels();
-        PostFX               ::OnSetupKernels();
-        DebugRenderer        ::OnSetupKernels();
-        SelectionRenderer    ::OnSetupKernels();
-        TonemappingRenderer  ::OnSetupKernels();
-        CausticRenderer      ::OnSetupKernels();
-        RefractionRenderer   ::OnSetupKernels();
+        HistogramRenderer     ::OnSetupKernels();
+        BackgroundRenderer    ::OnSetupKernels();
+        LightAreaRenderer     ::OnSetupKernels();
+        ReflectionRenderer    ::OnSetupKernels();
+        LightPointRenderer    ::OnSetupKernels();
+        LightSunRenderer      ::OnSetupKernels();
+        LightIndirectRenderer ::OnSetupKernels();
+        ShadowRenderer        ::OnSetupKernels();
+        FogRenderer           ::OnSetupKernels();
+        ARRenderer            ::OnSetupKernels();
+        MeshRenderer          ::OnSetupKernels();
+        ParticleRenderer      ::OnSetupKernels();
+        PostFXHDR             ::OnSetupKernels();
+        PostFX                ::OnSetupKernels();
+        DebugRenderer         ::OnSetupKernels();
+        SelectionRenderer     ::OnSetupKernels();
+        HighlightRenderer     ::OnSetupKernels();
+        TonemappingRenderer   ::OnSetupKernels();
+        CausticRenderer       ::OnSetupKernels();
+        RefractionRenderer    ::OnSetupKernels();
+        ReconstructionRenderer::OnSetupKernels();
         
         // -----------------------------------------------------------------------------
         // Setup the render targets of all renderer
         // -----------------------------------------------------------------------------
-        HistogramRenderer    ::OnSetupRenderTargets();
-        BackgroundRenderer   ::OnSetupRenderTargets();
-        LightAreaRenderer    ::OnSetupRenderTargets();
-        ReflectionRenderer   ::OnSetupRenderTargets();
-        LightPointRenderer   ::OnSetupRenderTargets();
-        LightSunRenderer     ::OnSetupRenderTargets();
-        LightIndirectRenderer::OnSetupRenderTargets();
-        ShadowRenderer       ::OnSetupRenderTargets();
-        FogRenderer          ::OnSetupRenderTargets();
-        ARRenderer           ::OnSetupRenderTargets();
-        MeshRenderer         ::OnSetupRenderTargets();
-        ParticleRenderer     ::OnSetupRenderTargets();
-        PostFXHDR            ::OnSetupRenderTargets();
-        PostFX               ::OnSetupRenderTargets();
-        DebugRenderer        ::OnSetupRenderTargets();
-        SelectionRenderer    ::OnSetupRenderTargets();
-        TonemappingRenderer  ::OnSetupRenderTargets();
-        CausticRenderer      ::OnSetupRenderTargets();
-        RefractionRenderer   ::OnSetupRenderTargets();
+        HistogramRenderer     ::OnSetupRenderTargets();
+        BackgroundRenderer    ::OnSetupRenderTargets();
+        LightAreaRenderer     ::OnSetupRenderTargets();
+        ReflectionRenderer    ::OnSetupRenderTargets();
+        LightPointRenderer    ::OnSetupRenderTargets();
+        LightSunRenderer      ::OnSetupRenderTargets();
+        LightIndirectRenderer ::OnSetupRenderTargets();
+        ShadowRenderer        ::OnSetupRenderTargets();
+        FogRenderer           ::OnSetupRenderTargets();
+        ARRenderer            ::OnSetupRenderTargets();
+        MeshRenderer          ::OnSetupRenderTargets();
+        ParticleRenderer      ::OnSetupRenderTargets();
+        PostFXHDR             ::OnSetupRenderTargets();
+        PostFX                ::OnSetupRenderTargets();
+        DebugRenderer         ::OnSetupRenderTargets();
+        SelectionRenderer     ::OnSetupRenderTargets();
+        HighlightRenderer     ::OnSetupRenderTargets();
+        TonemappingRenderer   ::OnSetupRenderTargets();
+        CausticRenderer       ::OnSetupRenderTargets();
+        RefractionRenderer    ::OnSetupRenderTargets();
+        ReconstructionRenderer::OnSetupRenderTargets();
         
         // -----------------------------------------------------------------------------
         // Setup the states of all renderer
         // -----------------------------------------------------------------------------
-        HistogramRenderer    ::OnSetupStates();
-        BackgroundRenderer   ::OnSetupStates();
-        LightAreaRenderer    ::OnSetupStates();
-        ReflectionRenderer   ::OnSetupStates();
-        LightPointRenderer   ::OnSetupStates();
-        LightSunRenderer     ::OnSetupStates();
-        LightIndirectRenderer::OnSetupStates();
-        ShadowRenderer       ::OnSetupStates();
-        FogRenderer          ::OnSetupStates();
-        ARRenderer           ::OnSetupStates();
-        MeshRenderer         ::OnSetupStates();
-        ParticleRenderer     ::OnSetupStates();
-        PostFXHDR            ::OnSetupStates();
-        PostFX               ::OnSetupStates();
-        DebugRenderer        ::OnSetupStates();
-        SelectionRenderer    ::OnSetupStates();
-        TonemappingRenderer  ::OnSetupStates();
-        CausticRenderer      ::OnSetupStates();
-        RefractionRenderer   ::OnSetupStates();
+        HistogramRenderer     ::OnSetupStates();
+        BackgroundRenderer    ::OnSetupStates();
+        LightAreaRenderer     ::OnSetupStates();
+        ReflectionRenderer    ::OnSetupStates();
+        LightPointRenderer    ::OnSetupStates();
+        LightSunRenderer      ::OnSetupStates();
+        LightIndirectRenderer ::OnSetupStates();
+        ShadowRenderer        ::OnSetupStates();
+        FogRenderer           ::OnSetupStates();
+        ARRenderer            ::OnSetupStates();
+        MeshRenderer          ::OnSetupStates();
+        ParticleRenderer      ::OnSetupStates();
+        PostFXHDR             ::OnSetupStates();
+        PostFX                ::OnSetupStates();
+        DebugRenderer         ::OnSetupStates();
+        SelectionRenderer     ::OnSetupStates();
+        HighlightRenderer     ::OnSetupStates();
+        TonemappingRenderer   ::OnSetupStates();
+        CausticRenderer       ::OnSetupStates();
+        RefractionRenderer    ::OnSetupStates();
+        ReconstructionRenderer::OnSetupStates();
         
         // -----------------------------------------------------------------------------
         // Setup the textures of all renderer
         // -----------------------------------------------------------------------------
-        HistogramRenderer    ::OnSetupTextures();
-        BackgroundRenderer   ::OnSetupTextures();
-        LightAreaRenderer    ::OnSetupTextures();
-        ReflectionRenderer   ::OnSetupTextures();
-        LightPointRenderer   ::OnSetupTextures();
-        LightSunRenderer     ::OnSetupTextures();
-        LightIndirectRenderer::OnSetupTextures();
-        ShadowRenderer       ::OnSetupTextures();
-        FogRenderer          ::OnSetupTextures();
-        ARRenderer           ::OnSetupTextures();
-        MeshRenderer         ::OnSetupTextures();
-        ParticleRenderer     ::OnSetupTextures();
-        PostFXHDR            ::OnSetupTextures();
-        PostFX               ::OnSetupTextures();
-        DebugRenderer        ::OnSetupTextures();
-        SelectionRenderer    ::OnSetupTextures();
-        TonemappingRenderer  ::OnSetupTextures();
-        CausticRenderer      ::OnSetupTextures();
-        RefractionRenderer   ::OnSetupTextures();
+        HistogramRenderer     ::OnSetupTextures();
+        BackgroundRenderer    ::OnSetupTextures();
+        LightAreaRenderer     ::OnSetupTextures();
+        ReflectionRenderer    ::OnSetupTextures();
+        LightPointRenderer    ::OnSetupTextures();
+        LightSunRenderer      ::OnSetupTextures();
+        LightIndirectRenderer ::OnSetupTextures();
+        ShadowRenderer        ::OnSetupTextures();
+        FogRenderer           ::OnSetupTextures();
+        ARRenderer            ::OnSetupTextures();
+        MeshRenderer          ::OnSetupTextures();
+        ParticleRenderer      ::OnSetupTextures();
+        PostFXHDR             ::OnSetupTextures();
+        PostFX                ::OnSetupTextures();
+        DebugRenderer         ::OnSetupTextures();
+        SelectionRenderer     ::OnSetupTextures();
+        HighlightRenderer     ::OnSetupTextures();
+        TonemappingRenderer   ::OnSetupTextures();
+        CausticRenderer       ::OnSetupTextures();
+        RefractionRenderer    ::OnSetupTextures();
+        ReconstructionRenderer::OnSetupTextures();
         
         // -----------------------------------------------------------------------------
         // Setup the buffers of all renderer
         // -----------------------------------------------------------------------------
-        HistogramRenderer    ::OnSetupBuffers();
-        BackgroundRenderer   ::OnSetupBuffers();
-        LightAreaRenderer    ::OnSetupBuffers();
-        ReflectionRenderer   ::OnSetupBuffers();
-        LightPointRenderer   ::OnSetupBuffers();
-        LightSunRenderer     ::OnSetupBuffers();
-        LightIndirectRenderer::OnSetupBuffers();
-        ShadowRenderer       ::OnSetupBuffers();
-        FogRenderer          ::OnSetupBuffers();
-        ARRenderer           ::OnSetupBuffers();
-        MeshRenderer         ::OnSetupBuffers();
-        ParticleRenderer     ::OnSetupBuffers();
-        PostFXHDR            ::OnSetupBuffers();
-        PostFX               ::OnSetupBuffers();
-        DebugRenderer        ::OnSetupBuffers();
-        SelectionRenderer    ::OnSetupBuffers();
-        TonemappingRenderer  ::OnSetupBuffers();
-        CausticRenderer      ::OnSetupBuffers();
-        RefractionRenderer   ::OnSetupBuffers();
+        HistogramRenderer     ::OnSetupBuffers();
+        BackgroundRenderer    ::OnSetupBuffers();
+        LightAreaRenderer     ::OnSetupBuffers();
+        ReflectionRenderer    ::OnSetupBuffers();
+        LightPointRenderer    ::OnSetupBuffers();
+        LightSunRenderer      ::OnSetupBuffers();
+        LightIndirectRenderer ::OnSetupBuffers();
+        ShadowRenderer        ::OnSetupBuffers();
+        FogRenderer           ::OnSetupBuffers();
+        ARRenderer            ::OnSetupBuffers();
+        MeshRenderer          ::OnSetupBuffers();
+        ParticleRenderer      ::OnSetupBuffers();
+        PostFXHDR             ::OnSetupBuffers();
+        PostFX                ::OnSetupBuffers();
+        DebugRenderer         ::OnSetupBuffers();
+        SelectionRenderer     ::OnSetupBuffers();
+        HighlightRenderer     ::OnSetupBuffers();
+        TonemappingRenderer   ::OnSetupBuffers();
+        CausticRenderer       ::OnSetupBuffers();
+        RefractionRenderer    ::OnSetupBuffers();
+        ReconstructionRenderer::OnSetupBuffers();
         
         // -----------------------------------------------------------------------------
         // Setup the resources of all renderer
         // -----------------------------------------------------------------------------
-        HistogramRenderer    ::OnSetupResources();
-        BackgroundRenderer   ::OnSetupResources();
-        LightAreaRenderer    ::OnSetupResources();
-        ReflectionRenderer   ::OnSetupResources();
-        LightPointRenderer   ::OnSetupResources();
-        LightSunRenderer     ::OnSetupResources();
-        LightIndirectRenderer::OnSetupResources();
-        ShadowRenderer       ::OnSetupResources();
-        FogRenderer          ::OnSetupResources();
-        ARRenderer           ::OnSetupResources();
-        MeshRenderer         ::OnSetupResources();
-        ParticleRenderer     ::OnSetupResources();
-        PostFXHDR            ::OnSetupResources();
-        PostFX               ::OnSetupResources();
-        DebugRenderer        ::OnSetupResources();
-        SelectionRenderer    ::OnSetupResources();
-        TonemappingRenderer  ::OnSetupResources();
-        CausticRenderer      ::OnSetupResources();
-        RefractionRenderer   ::OnSetupResources();
+        HistogramRenderer     ::OnSetupResources();
+        BackgroundRenderer    ::OnSetupResources();
+        LightAreaRenderer     ::OnSetupResources();
+        ReflectionRenderer    ::OnSetupResources();
+        LightPointRenderer    ::OnSetupResources();
+        LightSunRenderer      ::OnSetupResources();
+        LightIndirectRenderer ::OnSetupResources();
+        ShadowRenderer        ::OnSetupResources();
+        FogRenderer           ::OnSetupResources();
+        ARRenderer            ::OnSetupResources();
+        MeshRenderer          ::OnSetupResources();
+        ParticleRenderer      ::OnSetupResources();
+        PostFXHDR             ::OnSetupResources();
+        PostFX                ::OnSetupResources();
+        DebugRenderer         ::OnSetupResources();
+        SelectionRenderer     ::OnSetupResources();
+        HighlightRenderer     ::OnSetupResources();
+        TonemappingRenderer   ::OnSetupResources();
+        CausticRenderer       ::OnSetupResources();
+        RefractionRenderer    ::OnSetupResources();
+        ReconstructionRenderer::OnSetupResources();
         
         // -----------------------------------------------------------------------------
         // Setup the models of all renderer
         // -----------------------------------------------------------------------------
-        HistogramRenderer    ::OnSetupModels();
-        BackgroundRenderer   ::OnSetupModels();
-        LightAreaRenderer    ::OnSetupModels();
-        ReflectionRenderer   ::OnSetupModels();
-        LightPointRenderer   ::OnSetupModels();
-        LightSunRenderer     ::OnSetupModels();
-        LightIndirectRenderer::OnSetupModels();
-        ShadowRenderer       ::OnSetupModels();
-        FogRenderer          ::OnSetupModels();
-        ARRenderer           ::OnSetupModels();
-        MeshRenderer         ::OnSetupModels();
-        ParticleRenderer     ::OnSetupModels();
-        PostFXHDR            ::OnSetupModels();
-        PostFX               ::OnSetupModels();
-        DebugRenderer        ::OnSetupModels();
-        SelectionRenderer    ::OnSetupModels();
-        TonemappingRenderer  ::OnSetupModels();
-        CausticRenderer      ::OnSetupModels();
-        RefractionRenderer   ::OnSetupModels();
+        HistogramRenderer     ::OnSetupModels();
+        BackgroundRenderer    ::OnSetupModels();
+        LightAreaRenderer     ::OnSetupModels();
+        ReflectionRenderer    ::OnSetupModels();
+        LightPointRenderer    ::OnSetupModels();
+        LightSunRenderer      ::OnSetupModels();
+        LightIndirectRenderer ::OnSetupModels();
+        ShadowRenderer        ::OnSetupModels();
+        FogRenderer           ::OnSetupModels();
+        ARRenderer            ::OnSetupModels();
+        MeshRenderer          ::OnSetupModels();
+        ParticleRenderer      ::OnSetupModels();
+        PostFXHDR             ::OnSetupModels();
+        PostFX                ::OnSetupModels();
+        DebugRenderer         ::OnSetupModels();
+        SelectionRenderer     ::OnSetupModels();
+        HighlightRenderer     ::OnSetupModels();
+        TonemappingRenderer   ::OnSetupModels();
+        CausticRenderer       ::OnSetupModels();
+        RefractionRenderer    ::OnSetupModels();
+        ReconstructionRenderer::OnSetupModels();
         
         // -----------------------------------------------------------------------------
         // Setup ends with a last call
         // -----------------------------------------------------------------------------
-        HistogramRenderer    ::OnSetupEnd();
-        BackgroundRenderer   ::OnSetupEnd();
-        LightAreaRenderer    ::OnSetupEnd();
-        ReflectionRenderer   ::OnSetupEnd();
-        LightPointRenderer   ::OnSetupEnd();
-        LightSunRenderer     ::OnSetupEnd();
-        LightIndirectRenderer::OnSetupEnd();
-        ShadowRenderer       ::OnSetupEnd();
-        FogRenderer          ::OnSetupEnd();
-        ARRenderer           ::OnSetupEnd();
-        MeshRenderer         ::OnSetupEnd();
-        ParticleRenderer     ::OnSetupEnd();
-        PostFXHDR            ::OnSetupEnd();
-        PostFX               ::OnSetupEnd();
-        DebugRenderer        ::OnSetupEnd();
-        SelectionRenderer    ::OnSetupEnd();
-        TonemappingRenderer  ::OnSetupEnd();
-        CausticRenderer      ::OnSetupEnd();
-        RefractionRenderer   ::OnSetupEnd();
+        HistogramRenderer     ::OnSetupEnd();
+        BackgroundRenderer    ::OnSetupEnd();
+        LightAreaRenderer     ::OnSetupEnd();
+        ReflectionRenderer    ::OnSetupEnd();
+        LightPointRenderer    ::OnSetupEnd();
+        LightSunRenderer      ::OnSetupEnd();
+        LightIndirectRenderer ::OnSetupEnd();
+        ShadowRenderer        ::OnSetupEnd();
+        FogRenderer           ::OnSetupEnd();
+        ARRenderer            ::OnSetupEnd();
+        MeshRenderer          ::OnSetupEnd();
+        ParticleRenderer      ::OnSetupEnd();
+        PostFXHDR             ::OnSetupEnd();
+        PostFX                ::OnSetupEnd();
+        DebugRenderer         ::OnSetupEnd();
+        SelectionRenderer     ::OnSetupEnd();
+        HighlightRenderer     ::OnSetupEnd();
+        TonemappingRenderer   ::OnSetupEnd();
+        CausticRenderer       ::OnSetupEnd();
+        RefractionRenderer    ::OnSetupEnd();
+        ReconstructionRenderer::OnSetupEnd();
 
         ENGINE_CONSOLE_STREAMINFO("Gfx> Finished renderer starting.");
     }
@@ -361,25 +383,27 @@ namespace Pipeline
         // -----------------------------------------------------------------------------
         ENGINE_CONSOLE_STREAMINFO("Gfx> Exit renderer...");
 
-        BackgroundRenderer   ::OnExit();
-        DebugRenderer        ::OnExit();
-        SelectionRenderer    ::OnExit();
-        LightAreaRenderer    ::OnExit();
-        ReflectionRenderer   ::OnExit();
-        LightPointRenderer   ::OnExit();
-        LightSunRenderer     ::OnExit();
-        LightIndirectRenderer::OnExit();
-        ShadowRenderer       ::OnExit();
-        FogRenderer          ::OnExit();
-        HistogramRenderer    ::OnExit();
-        MeshRenderer         ::OnExit();
-        ARRenderer           ::OnExit();
-        ParticleRenderer     ::OnExit();
-        PostFXHDR            ::OnExit();
-        PostFX               ::OnExit();
-        TonemappingRenderer  ::OnExit();
-        CausticRenderer      ::OnExit();
-        RefractionRenderer   ::OnExit();
+        BackgroundRenderer    ::OnExit();
+        DebugRenderer         ::OnExit();
+        SelectionRenderer     ::OnExit();
+        HighlightRenderer     ::OnExit();
+        LightAreaRenderer     ::OnExit();
+        ReflectionRenderer    ::OnExit();
+        LightPointRenderer    ::OnExit();
+        LightSunRenderer      ::OnExit();
+        LightIndirectRenderer ::OnExit();
+        ShadowRenderer        ::OnExit();
+        FogRenderer           ::OnExit();
+        HistogramRenderer     ::OnExit();
+        MeshRenderer          ::OnExit();
+        ARRenderer            ::OnExit();
+        ParticleRenderer      ::OnExit();
+        PostFXHDR             ::OnExit();
+        PostFX                ::OnExit();
+        TonemappingRenderer   ::OnExit();
+        CausticRenderer       ::OnExit();
+        RefractionRenderer    ::OnExit();
+        ReconstructionRenderer::OnExit();
 
         ENGINE_CONSOLE_STREAMINFO("Gfx> Finished exit of renderer.");
         
@@ -481,10 +505,11 @@ namespace Pipeline
         PostFXHDR            ::Update();
         PostFX               ::Update();
         SelectionRenderer    ::Update();
+        HighlightRenderer    ::Update();
         CausticRenderer      ::Update();
         RefractionRenderer   ::Update();
 
-        Engine::RaiseEvent(Engine::Gfx_OnUpdate);
+        Engine::RaiseEvent(Engine::EEvent::Gfx_OnUpdate);
 
         Performance::EndEvent();
 
@@ -496,7 +521,7 @@ namespace Pipeline
         ARRenderer  ::Render();
         MeshRenderer::Render();
 
-        Engine::RaiseEvent(Engine::Gfx_OnRenderGBuffer);
+        Engine::RaiseEvent(Engine::EEvent::Gfx_OnRenderGBuffer);
 
         Performance::EndEvent();
         
@@ -514,7 +539,7 @@ namespace Pipeline
         BackgroundRenderer   ::Render();
         CausticRenderer      ::Render();
 
-        Engine::RaiseEvent(Engine::Gfx_OnRenderLighting);
+        Engine::RaiseEvent(Engine::EEvent::Gfx_OnRenderLighting);
 
         Performance::EndEvent();
 
@@ -529,7 +554,9 @@ namespace Pipeline
 
         RefractionRenderer::RenderForward();
 
-        Engine::RaiseEvent(Engine::Gfx_OnRenderForward);
+        ShadowRenderer::RenderForward();
+
+        Engine::RaiseEvent(Engine::EEvent::Gfx_OnRenderForward);
 
         Performance::EndEvent();
 
@@ -556,11 +583,20 @@ namespace Pipeline
         Performance::EndEvent();
 
         // -----------------------------------------------------------------------------
+        // Highlight Pass
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Highlight Pass");
+
+        SelectionRenderer::Render();
+
+        HighlightRenderer::Render();
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
         // LDR Effect Pass
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("LDR Effect Pass");
-
-        SelectionRenderer::Render();
 
         PostFX::Render();
 
@@ -571,7 +607,7 @@ namespace Pipeline
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("UI Pass");
 
-        Engine::RaiseEvent(Engine::Gfx_OnRenderUI);
+        Engine::RaiseEvent(Engine::EEvent::Gfx_OnRenderUI);
 
         Performance::EndEvent();
 
@@ -583,11 +619,11 @@ namespace Pipeline
 
     // -----------------------------------------------------------------------------
 
-    unsigned int RegisterWindow(void* _pWindow, int _VSync)
+    unsigned int RegisterWindow(void* _pWindow, int _VSync, bool _PreserveContext)
     {
-        assert(_pWindow != 0);
+        assert(_pWindow != nullptr);
 
-        return Main::RegisterWindow(_pWindow, _VSync);
+        return Main::RegisterWindow(_pWindow, _VSync, _PreserveContext);
     }
 
     // -----------------------------------------------------------------------------
@@ -595,6 +631,13 @@ namespace Pipeline
     void ActivateWindow(unsigned int _WindowID)
     {
         Main::ActivateWindow(_WindowID);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ReinitializeWindow(unsigned int _WindowID, void* _pWindow, int _VSync)
+    {
+        Main::ReinitializeWindow(_WindowID, _pWindow, _VSync);
     }
 
     // -----------------------------------------------------------------------------

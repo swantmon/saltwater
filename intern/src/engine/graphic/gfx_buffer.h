@@ -19,7 +19,7 @@ namespace Gfx
                 GPURead          = 1,
                 GPUReadCPUWrite  = 2,
                 GPUToCPU         = 3,
-				Persistent       = 4,
+                Persistent       = 4,
             };
             
             enum EBinding
@@ -29,7 +29,7 @@ namespace Gfx
                 IndexBuffer         = 2,
                 ConstantBuffer      = 3,
                 ResourceBuffer      = 4,
-				AtomicCounterBuffer = 5,
+                AtomicCounterBuffer = 5,
             };
             
             enum EAccess
@@ -47,7 +47,7 @@ namespace Gfx
                 ReadWrite           = 2,
                 WriteDiscard        = 3,
                 WriteNoOverwrite    = 4,
-				ReadWritePersistent = 5,
+                ReadWritePersistent = 5,
             };
         
         public:

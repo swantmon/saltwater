@@ -7,10 +7,9 @@ import android.app.FragmentTransaction;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Build;
-import android.support.v13.app.FragmentCompat;
 import android.util.Log;
 
-public class PermissionFragment extends Fragment implements FragmentCompat.OnRequestPermissionsResultCallback
+public class PermissionFragment extends Fragment
 {
     private static final int PERMISSION_REQUEST_CODE = 1101;
     private static final String TAG = "PermissionFragment";
@@ -91,8 +90,8 @@ public class PermissionFragment extends Fragment implements FragmentCompat.OnReq
 
     // -----------------------------------------------------------------------------
 
-    public void AcquirePermissions(String _Permissions[])
+    public void AcquirePermissions(String[] _Permissions)
     {
-        FragmentCompat.requestPermissions(this, _Permissions, PERMISSION_REQUEST_CODE);
+        requestPermissions(_Permissions, PERMISSION_REQUEST_CODE);
     }
 }

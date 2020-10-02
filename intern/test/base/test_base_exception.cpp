@@ -17,7 +17,7 @@ BASE_TEST(TestBaseException)
     }
     catch (const Base::CException& _rException)
     {
-        BASE_CHECK(_rException.GetLine() == 14);
+        BASE_CHECK(_rException.GetLine() == 16);
         BASE_CHECK(_rException.GetCode() == 2);
         BASE_CHECK(strcmp(_rException.GetText(), "Die Zahl ist 4 und 16!") == 0);
     }

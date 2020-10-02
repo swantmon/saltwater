@@ -13,7 +13,7 @@ namespace
     {
         if (_Result != Z_OK && _Result != Z_STREAM_END)
         {
-            throw Base::CException(__FILE__, __LINE__, "Failed to decompress");
+            BASE_THROWM("Failed to decompress")
         }
     }
 
@@ -46,6 +46,8 @@ namespace Base
         CheckResult(inflateEnd(&infstream));
     }
 
+    // -----------------------------------------------------------------------------
+
     void Compress(const std::vector<char>& _rDecompressedData, std::vector<char>& _rCompressedData, int _Level = 1)
     {
         _rCompressedData.resize(_rDecompressedData.size());
@@ -56,6 +58,28 @@ namespace Base
         defstream.opaque = Z_NULL;
         defstream.avail_in = static_cast<uInt>(_rDecompressedData.size());
         defstream.next_in = const_cast<Bytef*>(reinterpret_cast<const Bytef*>(_rDecompressedData.data()));
+        defstream.avail_out = static_cast<uInt>(_rCompressedData.size());
+        defstream.next_out = reinterpret_cast<Bytef*>(_rCompressedData.data());
+
+        CheckResult(deflateInit2(&defstream, CompressionLevels[_Level], Z_DEFLATED, 15 + 16, 8, Z_DEFAULT_STRATEGY));
+        CheckResult(deflate(&defstream, Z_FINISH));
+        CheckResult(deflateEnd(&defstream));
+
+        _rCompressedData.resize(defstream.total_out);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void Compress(const char* _pDecompressedData, int _Size, std::vector<char>& _rCompressedData, int _Level = 1)
+    {
+        _rCompressedData.resize(_Size);
+
+        z_stream defstream;
+        defstream.zalloc = Z_NULL;
+        defstream.zfree = Z_NULL;
+        defstream.opaque = Z_NULL;
+        defstream.avail_in = static_cast<uInt>(_Size);
+        defstream.next_in = const_cast<Bytef*>(reinterpret_cast<const Bytef*>(_pDecompressedData));
         defstream.avail_out = static_cast<uInt>(_rCompressedData.size());
         defstream.next_out = reinterpret_cast<Bytef*>(_rCompressedData.data());
 

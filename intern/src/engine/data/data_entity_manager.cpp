@@ -3,7 +3,6 @@
 
 #include "base/base_exception.h"
 #include "base/base_include_glm.h"
-#include "base/base_pool.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -12,16 +11,7 @@
 #include "engine/core/core_console.h"
 #include "engine/core/core_time.h"
 
-#include "engine/data/data_component.h"
-#include "engine/data/data_component_facet.h"
-#include "engine/data/data_component_manager.h"
-#include "engine/data/data_entity.h"
 #include "engine/data/data_entity_manager.h"
-#include "engine/data/data_hierarchy_facet.h"
-#include "engine/data/data_map.h"
-#include "engine/data/data_material_component.h"
-#include "engine/data/data_mesh_component.h"
-#include "engine/data/data_transformation_facet.h"
 
 #include "engine/graphic/gfx_material_manager.h"
 
@@ -31,106 +21,13 @@
 
 #include <assert.h>
 #include <unordered_map>
-#include <vector>
 
-using namespace Dt;
-using namespace Dt::EntityManager;
-
-namespace
+namespace Dt
 {
-    class CDtLvlEntityManager : private Base::CUncopyable
-    {
-        BASE_SINGLETON_FUNC(CDtLvlEntityManager);
-        
-    public:
-        
-        CDtLvlEntityManager();
-        ~CDtLvlEntityManager();
-        
-    public:
-        
-        void OnStart();
-        void OnExit();
-
-        void Clear();
-
-        CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
-
-        std::vector<CEntity*> CreateEntitiesFromScene(const std::string& _rFile);
-
-        void FreeEntity(CEntity& _rEntity);
-
-        CEntity* GetEntityByID(CEntity::BID _ID);
-
-        void MarkEntityAsDirty(CEntity& _rEntity, unsigned int _DirtyFlags);
-
-        void Update();
-
-        void RegisterDirtyEntityHandler(CEntityDelegate _NewDelegate);
-        
-    private:
-        
-        class CInternEntity : public CEntity
-        {
-        private:
-            friend class CDtLvlEntityManager;
-        };
-
-        class CInternHierarchyFacet : public CHierarchyFacet
-        {
-        private:
-            friend class CDtLvlEntityManager;
-        };
-
-        class CInternTransformationFacet : public CTransformationFacet
-        {
-        private:
-            friend class CDtLvlEntityManager;
-        };
-
-        class CInternComponentsFacet : public CComponentFacet
-        {
-        private:
-            friend class CDtLvlEntityManager;
-        };
-        
-    private:
-        
-        typedef Base::CPool<CInternEntity, 2048>              CEntityPool;
-        typedef Base::CPool<CInternHierarchyFacet, 2048>      CHierarchyFacetPool;
-        typedef Base::CPool<CInternTransformationFacet, 2048> CTransformationFacetPool;
-        typedef Base::CPool<CInternComponentsFacet, 2048>     CComponentsFacetPool;
-        typedef std::vector<CEntityDelegate>                  CEntityDelegates;
-
-        typedef std::unordered_map<Base::ID, CInternEntity*> CEntityByIDs;
-        typedef CEntityByIDs::iterator                       CEntityByIDPair;
-
-    private:
-        
-        CEntityPool              m_Entities;
-        CHierarchyFacetPool      m_HierarchyFacets;
-        CTransformationFacetPool m_TransformationFacets;
-        CComponentsFacetPool     m_ComponentsFacets;
-        CEntityDelegates         m_EntityDelegates;
-        CEntityByIDs             m_EntityByID;
-        Base::ID                 m_EntityID;
-
-    private:
-
-        void UpdateEntity(CEntity& _rEntity);
-
-        template<typename THasHierarchy>
-        void UpdateWorldMatrix(CEntity& _rEntity, THasHierarchy _HasHierarchy);
-    };
-} // namespace
-
-namespace
-{
-    CDtLvlEntityManager::CDtLvlEntityManager()
+    CEntityManager::CEntityManager()
         : m_Entities            ()
         , m_HierarchyFacets     ()
         , m_TransformationFacets()
-        , m_EntityDelegates     ()
         , m_EntityByID          ()
         , m_EntityID            (0)
     {
@@ -138,26 +35,35 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    CDtLvlEntityManager::~CDtLvlEntityManager()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CDtLvlEntityManager::OnStart()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CDtLvlEntityManager::OnExit()
+    CEntityManager::~CEntityManager()
     {
         Clear();
     }
 
     // -----------------------------------------------------------------------------
 
-    void CDtLvlEntityManager::Clear()
+    CEntityManager& CEntityManager::GetInstance()
+    {
+        static CEntityManager s_Instance;
+        return s_Instance;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntityManager::OnStart()
+    {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntityManager::OnExit()
+    {
+        Clear();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntityManager::Clear()
     {
         m_Entities            .Clear();
         m_HierarchyFacets     .Clear();
@@ -169,24 +75,11 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CEntity& CDtLvlEntityManager::CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID)
+    CEntity& CEntityManager::CreateEntity(const SEntityDescriptor& _rDescriptor)
     {
         CInternEntity& rEntity = m_Entities.Allocate();
 
-        CEntity::BID ID = _ID;
-
-        if (ID == CEntity::s_InvalidID)
-        {
-            ID = m_EntityID;
-        }
-        else
-        {
-            m_EntityID = glm::max(ID, m_EntityID);
-        }
-
-        ++m_EntityID;
-
-        rEntity.m_ID               = ID;
+        rEntity.m_ID               = ++m_EntityID;
         rEntity.m_Flags.m_Category = _rDescriptor.m_EntityCategory;
 
         if ((_rDescriptor.m_FacetFlags & CEntity::FacetHierarchy) != 0)
@@ -211,7 +104,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    std::vector<CEntity*> CDtLvlEntityManager::CreateEntitiesFromScene(const std::string& _rFile)
+    std::vector<CEntity*> CEntityManager::CreateEntitiesFromScene(const std::string& _rFile)
     {
         // -----------------------------------------------------------------------------
         // Create an vector of new entities
@@ -223,16 +116,19 @@ namespace
         // -----------------------------------------------------------------------------
         int GeneratorFlag = Core::AssetGenerator::SGeneratorFlag::Default;
 
-        auto Importer = Core::AssetImporter::AllocateAssimpImporter(_rFile, GeneratorFlag);
+        std::string PathToModel = Core::AssetManager::GetPathToAssets() + "/" + _rFile;
 
-        const Assimp::Importer* pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
+        auto Importer = Core::AssetImporter::AllocateAssimpImporter(PathToModel, GeneratorFlag);
+
+        if (Importer == nullptr) return VectorOfEntites;
+
+        const auto* pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
+
+        if (pImporter == nullptr) return VectorOfEntites;
 
         const aiScene* pScene = pImporter->GetScene();
 
-        if (!pScene)
-        {
-            return VectorOfEntites;
-        }
+        if (!pScene) return VectorOfEntites;
 
         // -----------------------------------------------------------------------------
         // Create a new entity for each mesh
@@ -242,13 +138,13 @@ namespace
         EntityDescriptor.m_EntityCategory = Dt::SEntityCategory::Dynamic;
         EntityDescriptor.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-        int NumberOfMeshes = static_cast<int>(pScene->mNumMeshes);
+        auto NumberOfMeshes = static_cast<int>(pScene->mNumMeshes);
 
         for (int IndexOfMesh = 0; IndexOfMesh < NumberOfMeshes; ++IndexOfMesh)
         {
             aiMesh* pMesh = pScene->mMeshes[IndexOfMesh];
 
-            CInternEntity& rChildEntity = static_cast<CInternEntity&>(CreateEntity(EntityDescriptor));
+            auto& rChildEntity = static_cast<CInternEntity&>(CreateEntity(EntityDescriptor));
 
             rChildEntity.SetName(pMesh->mName.C_Str());
 
@@ -290,9 +186,9 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CDtLvlEntityManager::FreeEntity(CEntity& _rEntity)
+    void CEntityManager::FreeEntity(CEntity& _rEntity)
     {
-        CInternEntity& rInternEntity = static_cast<CInternEntity&>(_rEntity);
+        auto& rInternEntity = static_cast<CInternEntity&>(_rEntity);
 
         if (rInternEntity.m_pHierarchyFacet != nullptr)
         {
@@ -314,7 +210,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CEntity* CDtLvlEntityManager::GetEntityByID(CEntity::BID _ID)
+    CEntity* CEntityManager::GetEntityByID(CEntity::BID _ID)
     {
         if (m_EntityByID.find(_ID) == m_EntityByID.end()) return nullptr;
 
@@ -323,20 +219,12 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CDtLvlEntityManager::MarkEntityAsDirty(CEntity& _rEntity, unsigned int _DirtyFlags)
+    void CEntityManager::MarkEntityAsDirty(CEntity& _rEntity, unsigned int _DirtyFlags)
     {
         // -----------------------------------------------------------------------------
         // Set current entity dirty flag
         // -----------------------------------------------------------------------------
         _rEntity.SetDirtyFlags(_DirtyFlags);
-
-        // -----------------------------------------------------------------------------
-        // Add entity to map
-        // -----------------------------------------------------------------------------
-        if ((_DirtyFlags & CEntity::DirtyAdd) != 0 && (_DirtyFlags & CEntity::DirtyRemove) == 0)
-        {
-            Map::AddEntity(_rEntity);
-        }
 
         // -----------------------------------------------------------------------------
         // Set every child to dirty
@@ -374,33 +262,155 @@ namespace
         // -----------------------------------------------------------------------------
         // Send new dirty entity to all handler
         // -----------------------------------------------------------------------------
-        for (auto& rEntityDelegate : m_EntityDelegates)
-        {
-            (rEntityDelegate)(&_rEntity);
-        }
+        m_EntityDelegate.Notify(&_rEntity);
 
         _rEntity.SetDirtyFlags(0);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CDtLvlEntityManager::Update()
+    void CEntityManager::Update()
     {
     }
 
     // -----------------------------------------------------------------------------
     
-    void CDtLvlEntityManager::RegisterDirtyEntityHandler(CEntityDelegate _NewDelegate)
+    CEntityManager::CEntityDelegate::HandleType CEntityManager::RegisterDirtyEntityHandler(CEntityDelegate::FunctionType _Function)
     {
-        m_EntityDelegates.push_back(_NewDelegate);
+        return m_EntityDelegate.Register(_Function);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CDtLvlEntityManager::UpdateEntity(CEntity& _rEntity)
+    void CEntityManager::Read(Base::CTextReader& _rCodec)
+    {
+        int NumberOfEntities = 0;
+
+        _rCodec >> NumberOfEntities;
+
+        for (int i = 0; i < NumberOfEntities; ++i)
+        {
+            SEntityDescriptor EntityDescriptor = {};
+
+            CreateEntity(EntityDescriptor);
+        }
+
+        std::vector<const void*> TemporaryImporter;
+
+        bool Check = false;
+
+        for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
+        {
+            _rCodec >> *CurrentEntity;
+
+            m_EntityByID[CurrentEntity->m_ID] = &*CurrentEntity;
+        }
+
+        for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
+        {
+            _rCodec >> Check;
+            if (Check)
+            {
+                CurrentEntity->m_pTransformationFacet = &m_TransformationFacets.Allocate();
+
+                _rCodec >> CurrentEntity->m_pTransformationFacet;
+            }
+
+            _rCodec >> Check;
+            if (Check)
+            {
+                CurrentEntity->m_pHierarchyFacet = &m_HierarchyFacets.Allocate();
+
+                _rCodec >> CurrentEntity->m_pHierarchyFacet;
+            }
+
+            _rCodec >> Check;
+            if (Check)
+            {
+                CurrentEntity->m_pComponentsFacet = &m_ComponentsFacets.Allocate();
+
+                _rCodec >> CurrentEntity->m_pComponentsFacet;
+
+                auto Components = CurrentEntity->m_pComponentsFacet->GetComponents();
+
+                for (auto& rComponent : Components)
+                {
+                    if (rComponent->GetTypeInfo() == Base::CTypeInfo::Get<Dt::CMeshComponent>())
+                    {
+                        auto MeshComponent = static_cast<Dt::CMeshComponent*>(rComponent);
+
+                        if (MeshComponent->GetMeshType() == CMeshComponent::Asset)
+                        {
+                            auto& rFile = MeshComponent->GetFilename();
+
+                            std::string PathToModel = Core::AssetManager::GetPathToAssets() + "/" + rFile;
+
+                            auto Importer = Core::AssetImporter::AllocateAssimpImporter(PathToModel, MeshComponent->GetGeneratorFlag());
+
+                            TemporaryImporter.push_back(Importer);
+                        }
+                    }
+
+                    rComponent->SetHostEntity(&*CurrentEntity);
+
+                    Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*rComponent, Dt::IComponent::DirtyCreate);
+                }
+            }
+        }
+
+        for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
+        {
+            MarkEntityAsDirty(*CurrentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        for (auto pImporter : TemporaryImporter)
+        {
+            Core::AssetImporter::ReleaseImporter(pImporter);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntityManager::Write(Base::CTextWriter& _rCodec)
+    {
+        bool Check = false;
+
+        auto NumberOfEntities = m_Entities.GetNumberOfItems();
+
+        _rCodec << NumberOfEntities;
+
+        for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
+        {
+            _rCodec << *CurrentEntity;
+        }
+
+        for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
+        {
+            auto pFacetTransformation = CurrentEntity->GetTransformationFacet();
+            Check = pFacetTransformation != nullptr;
+            _rCodec << Check;
+            if (Check) _rCodec << *pFacetTransformation;
+
+            auto pFacetHierarchy = CurrentEntity->GetHierarchyFacet();
+            Check = pFacetHierarchy != nullptr;
+            _rCodec << Check;
+            if (Check) _rCodec << *pFacetHierarchy;
+
+            auto pFacetComponent = CurrentEntity->GetComponentFacet();
+            Check = pFacetComponent != nullptr;
+            _rCodec << Check;
+            if (Check) _rCodec << *pFacetComponent;
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntityManager::UpdateEntity(CEntity& _rEntity)
     {
         unsigned int     DirtyFlags;
         CHierarchyFacet* pHierarchicalFacet;
+
+        const Base::U64 TimeStamp = Core::Time::GetNumberOfFrame();
 
         // -----------------------------------------------------------------------------
         // Update world matrix
@@ -409,16 +419,10 @@ namespace
 
         if (pHierarchicalFacet != nullptr)
         {
-            const Base::U64 TimeStamp = Core::Time::GetNumberOfFrame();
-
-            if (pHierarchicalFacet->GetTimeStamp() == TimeStamp)
+            if (pHierarchicalFacet->GetTimeStamp() >= TimeStamp)
             {
-                return;
+                UpdateWorldMatrix(_rEntity, true);
             }
-
-            pHierarchicalFacet->SetTimeStamp(TimeStamp);
-
-            UpdateWorldMatrix(_rEntity, true);
         }
         else
         {
@@ -427,28 +431,35 @@ namespace
 
         // -----------------------------------------------------------------------------
         // Update entity in map
-        // -----------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------        
         DirtyFlags = _rEntity.GetDirtyFlags();
 
-        if ((DirtyFlags & CEntity::DirtyRemove) != 0)
+        if (DirtyFlags & CEntity::DirtyRemove && _rEntity.IsInMap())
         {
             Map::RemoveEntity(_rEntity);
-
-            if ((DirtyFlags & CEntity::DirtyDestroy) != 0)
-            {
-                FreeEntity(_rEntity);
-            }
         }
-        else if ((DirtyFlags & CEntity::DirtyMove) != 0)
+        else if (DirtyFlags & CEntity::DirtyAdd && !_rEntity.IsInMap())
+        {
+            Map::AddEntity(_rEntity);
+        }
+
+        if (DirtyFlags & CEntity::DirtyMove)
         {
             Map::MoveEntity(_rEntity);
+
+            if (pHierarchicalFacet != nullptr) pHierarchicalFacet->SetTimeStamp(TimeStamp + 1);
+        }
+
+        if (DirtyFlags & CEntity::DirtyDestroy && !_rEntity.IsInMap())
+        {
+            FreeEntity(_rEntity);
         }
     }
 
     // -----------------------------------------------------------------------------
 
     template<typename THasHierarchy>
-    void CDtLvlEntityManager::UpdateWorldMatrix(CEntity& _rEntity, THasHierarchy _HasHierarchy)
+    void CEntityManager::UpdateWorldMatrix(CEntity& _rEntity, THasHierarchy _HasHierarchy)
     {
         CHierarchyFacet*      pHierarchyFacet;
         CTransformationFacet* pTransformationFacet;
@@ -525,78 +536,4 @@ namespace
 
         _rEntity.SetWorldPosition(WorldPosition);
     }
-} // namespace
-
-namespace Dt
-{
-namespace EntityManager
-{
-    void OnStart()
-    {
-        CDtLvlEntityManager::GetInstance().OnStart();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void OnExit()
-    {
-        CDtLvlEntityManager::GetInstance().OnExit();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void Clear()
-    {
-        CDtLvlEntityManager::GetInstance().Clear();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID)
-    {
-        return CDtLvlEntityManager::GetInstance().CreateEntity(_rDescriptor, _ID);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    std::vector<CEntity*> CreateEntitiesFromScene(const std::string& _rFile)
-    {
-        return CDtLvlEntityManager::GetInstance().CreateEntitiesFromScene(_rFile);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void FreeEntity(CEntity& _rEntity)
-    {
-        CDtLvlEntityManager::GetInstance().FreeEntity(_rEntity);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CEntity* GetEntityByID(CEntity::BID _ID)
-    {
-        return CDtLvlEntityManager::GetInstance().GetEntityByID(_ID);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void MarkEntityAsDirty(CEntity& _rEntity, unsigned int _DirtyFlags)
-    {
-        CDtLvlEntityManager::GetInstance().MarkEntityAsDirty(_rEntity, _DirtyFlags);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void Update()
-    {
-        CDtLvlEntityManager::GetInstance().Update();
-    }
-
-    // -----------------------------------------------------------------------------
-    
-    void RegisterDirtyEntityHandler(CEntityDelegate _NewDelegate)
-    {
-        CDtLvlEntityManager::GetInstance().RegisterDirtyEntityHandler(_NewDelegate);
-    }
-} // namespace EntityManager
 } // namespace Dt

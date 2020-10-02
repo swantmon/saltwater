@@ -10,7 +10,7 @@
 
 namespace 
 {
-	class CTestSuite
+    class CTestSuite
     {
         
     public:
@@ -296,7 +296,7 @@ namespace
         
         m_LogStream << "Info:      " << m_CurrentFunctionName << std::endl;
         m_LogStream << "File:      " << m_CurrentFileName << " (" << m_CurrentLineNumber << ")" << std::endl;
-        m_LogStream << "Time:      " << _pMessage << "> " << DifferenceOfTime << "s (" << DifferenceOfTime * 1000.0 << "ms; " << DifferenceOfTime * 1000000.0 << "µs)" << std::endl << std::endl;
+        m_LogStream << "Time:      " << _pMessage << "> " << DifferenceOfTime << "s (" << DifferenceOfTime * 1000.0 << "ms; " << DifferenceOfTime * 1000000.0 << "micro s)" << std::endl << std::endl;
         
         m_PreviousTimestamp = CurrentTimestamp;
     }
@@ -305,6 +305,8 @@ namespace
     
     void CTestSuite::ResetTime()
     {
+        m_Clock.OnFrame();
+
         m_PreviousTimestamp = m_Clock.GetTime();
     }
 

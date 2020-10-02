@@ -29,7 +29,8 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\plugin\slam\gfx_reconstruction_renderer.cpp" />
     <ClCompile Include="..\..\..\src\plugin\slam\mr_icp_tracker.cpp" />
-    <ClCompile Include="..\..\..\src\plugin\slam\mr_scalable_slam_reconstructor.cpp" />
+    <ClCompile Include="..\..\..\src\plugin\slam\mr_plane_colorizer.cpp" />
+    <ClCompile Include="..\..\..\src\plugin\slam\mr_slam_reconstructor.cpp" />
     <ClCompile Include="..\..\..\src\plugin\slam\mr_slam_reconstruction_settings.cpp" />
     <ClCompile Include="..\..\..\src\plugin\slam\slam_plugin_interface.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -42,7 +43,8 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\plugin\slam\gfx_reconstruction_renderer.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_icp_tracker.h" />
-    <ClInclude Include="..\..\..\src\plugin\slam\mr_scalable_slam_reconstructor.h" />
+    <ClInclude Include="..\..\..\src\plugin\slam\mr_plane_colorizer.h" />
+    <ClInclude Include="..\..\..\src\plugin\slam\mr_slam_reconstructor.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_slam_control.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_slam_reconstruction_settings.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\slam_plugin_interface.h" />
@@ -52,7 +54,7 @@
     <ProjectGuid>{E0842B40-2749-4D03-B627-55761E06452B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>camera</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>plugin_slam</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -60,27 +62,27 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -155,6 +157,7 @@
       <PrecompiledHeaderFile>plugin/slam/slam_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <DisableSpecificWarnings>4251;4275</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -208,6 +211,7 @@
       <PrecompiledHeaderFile>plugin/slam/slam_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <DisableSpecificWarnings>4251;4275</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

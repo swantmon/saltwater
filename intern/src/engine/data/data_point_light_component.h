@@ -4,9 +4,11 @@
 #include "engine/engine_config.h"
 
 #include "base/base_include_glm.h"
+#include "base/base_serialize_glm.h"
 #include "base/base_typedef.h"
 
 #include "engine/data/data_component.h"
+#include "engine/data/data_component_manager.h"
 
 namespace Dt
 {
@@ -90,6 +92,67 @@ namespace Dt
         CPointLightComponent();
         ~CPointLightComponent();
 
+    public:
+
+        inline void Read(CSceneReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+
+            int ShadowType, ShadowQuality, RefreshMode;
+
+            _rCodec >> ShadowType;
+            _rCodec >> ShadowQuality;
+            _rCodec >> RefreshMode;
+
+            m_ShadowType = (EShadowType)ShadowType;
+            m_ShadowQuality = (EShadowQuality)ShadowQuality;
+            m_RefreshMode = (ERefreshMode)RefreshMode;
+
+            Base::Serialize(_rCodec, m_Color);
+            Base::Serialize(_rCodec, m_Direction);
+            Base::Serialize(_rCodec, m_Lightness);
+
+            _rCodec >> m_Temperature;
+            _rCodec >> m_Intensity;
+            _rCodec >> m_AttentuationRadius;
+            _rCodec >> m_ReciprocalSquaredAttentuationRadius;
+            _rCodec >> m_InnerConeAngle;
+            _rCodec >> m_OuterConeAngle;
+            _rCodec >> m_AngleScale;
+            _rCodec >> m_AngleOffset;
+
+            _rCodec >> m_HasTemperature;
+        }
+
+        inline void Write(CSceneWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+
+            _rCodec << (int)m_ShadowType;
+            _rCodec << (int)m_ShadowQuality;
+            _rCodec << (int)m_RefreshMode;
+
+            Base::Serialize(_rCodec, m_Color);
+            Base::Serialize(_rCodec, m_Direction);
+            Base::Serialize(_rCodec, m_Lightness);
+
+            _rCodec << m_Temperature;
+            _rCodec << m_Intensity;
+            _rCodec << m_AttentuationRadius;
+            _rCodec << m_ReciprocalSquaredAttentuationRadius;
+            _rCodec << m_InnerConeAngle;
+            _rCodec << m_OuterConeAngle;
+            _rCodec << m_AngleScale;
+            _rCodec << m_AngleOffset;
+
+            _rCodec << m_HasTemperature;
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CPointLightComponent();
+        }
+
     private:
         EShadowType    m_ShadowType;
         EShadowQuality m_ShadowQuality;
@@ -106,5 +169,9 @@ namespace Dt
         float          m_AngleScale;
         float          m_AngleOffset;
         bool           m_HasTemperature;
+
+    private:
+
+        friend class CPointLightComponentGUI;
     };
 } // namespace Dt

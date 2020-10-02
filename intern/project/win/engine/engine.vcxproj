@@ -73,6 +73,7 @@
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_debug.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_debug_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_depth_stencil_state.cpp" />
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_highlight_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_pipeline.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_fog_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_histogram_renderer.cpp" />
@@ -97,6 +98,7 @@
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_postfx_hdr_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_postfx_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_rasterizer_state.cpp" />
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_reconstruction_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_reflection_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_refraction_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_render_context.cpp" />
@@ -104,6 +106,7 @@
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_sampler.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_sampler_manager.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_sampler_set.cpp" />
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_scissor_rect.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_selection_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_shader.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_shader_manager.cpp" />
@@ -128,7 +131,14 @@
     <ClCompile Include="..\..\..\src\engine\gui\gui_input_manager.cpp" />
     <ClCompile Include="..\..\..\src\engine\network\core_network_manager.cpp" />
     <ClCompile Include="..\..\..\src\engine\network\core_network_socket.cpp" />
+    <ClCompile Include="..\..\..\src\engine\script\script_ar_camera_control_script.cpp" />
+    <ClCompile Include="..\..\..\src\engine\script\script_ar_place_object_on_touch_script.cpp" />
+    <ClCompile Include="..\..\..\src\engine\script\script_camera_control_script.cpp" />
+    <ClCompile Include="..\..\..\src\engine\script\script_easyar_target_script.cpp" />
+    <ClCompile Include="..\..\..\src\engine\script\script_light_estimation.cpp" />
+    <ClCompile Include="..\..\..\src\engine\script\script_pixmix.cpp" />
     <ClCompile Include="..\..\..\src\engine\script\script_script_manager.cpp" />
+    <ClCompile Include="..\..\..\src\engine\script\script_slam.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\engine\camera\cam_control.h" />
@@ -190,6 +200,7 @@
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_debug_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_depth_description.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_depth_stencil_state.h" />
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_highlight_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_pipeline.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_fog_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_graphics_info.h" />
@@ -225,6 +236,7 @@
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_postfx_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_rasterizer_description.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_rasterizer_state.h" />
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_reconstruction_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_reflection_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_refraction_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_render_context.h" />
@@ -232,6 +244,7 @@
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_sampler.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_sampler_manager.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_sampler_set.h" />
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_scissor_rect.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_selection.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_selection_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_shader.h" />
@@ -255,7 +268,6 @@
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_view_manager.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_view_port.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_view_port_set.h" />
-    <ClInclude Include="..\..\..\src\engine\gui\gui_event_delegate.h" />
     <ClInclude Include="..\..\..\src\engine\gui\gui_event_handler.h" />
     <ClInclude Include="..\..\..\src\engine\gui\gui_input_manager.h" />
     <ClInclude Include="..\..\..\src\engine\network\core_network_common.h" />
@@ -266,6 +278,7 @@
     <ClInclude Include="..\..\..\src\engine\script\script_camera_control_script.h" />
     <ClInclude Include="..\..\..\src\engine\script\script_easyar_target_script.h" />
     <ClInclude Include="..\..\..\src\engine\script\script_light_estimation.h" />
+    <ClInclude Include="..\..\..\src\engine\script\script_pixmix.h" />
     <ClInclude Include="..\..\..\src\engine\script\script_script.h" />
     <ClInclude Include="..\..\..\src\engine\script\script_script_manager.h" />
     <ClInclude Include="..\..\..\src\engine\script\script_slam.h" />
@@ -279,7 +292,7 @@
     <ProjectGuid>{E481E898-C074-4491-BC6E-93844BFAFF74}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>camera</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>engine</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -287,27 +300,27 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -381,7 +394,8 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>engine/engine_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <DisableSpecificWarnings>4251;4275</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4251;4275;26495</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -434,7 +448,8 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>engine/engine_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <DisableSpecificWarnings>4251;4275</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4251;4275;26495</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

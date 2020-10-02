@@ -7,12 +7,14 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CSkyComponent);
+
     CSkyComponent::CSkyComponent()
         : m_RefreshMode(Static)
         , m_Quality    (PX1024)
         , m_Type       (Procedural)
         , m_HasHDR     (true)
-        , m_TexturePtr (nullptr)
+        , m_Texture    ("")
         , m_Intensity  (0.0f)
     {
 
@@ -78,30 +80,23 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CSkyComponent::SetTexture(Gfx::CTexturePtr _TexturePtr)
+    void CSkyComponent::SetTexture(const std::string& _rTexture)
     {
-        m_TexturePtr = _TexturePtr;
+        m_Texture = _rTexture;
     }
 
     // -----------------------------------------------------------------------------
 
-    Gfx::CTexturePtr CSkyComponent::GetTexture()
+    const std::string& CSkyComponent::GetTexture() const
     {
-        return m_TexturePtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const Gfx::CTexturePtr CSkyComponent::GetTexture() const
-    {
-        return m_TexturePtr;
+        return m_Texture;
     }
 
     // -----------------------------------------------------------------------------
 
     bool CSkyComponent::HasTexture() const
     {
-        return m_TexturePtr != nullptr;
+        return m_Texture.length() > 0;
     }
 
     // -----------------------------------------------------------------------------

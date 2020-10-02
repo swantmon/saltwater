@@ -17,7 +17,17 @@ namespace Net
         int m_CompressedSize;
         int m_DecompressedSize;
         std::vector<char> m_Payload;
+
+		CMessage()
+			: m_Category(0)
+			, m_MessageType(0)
+			, m_CompressedSize(0)
+			, m_DecompressedSize(0)
+			, m_Payload()
+		{
+
+		}
     };
 
-    typedef std::function<void(const CMessage& _rMessage, int)> CMessageDelegate;
+    using SocketHandle = int;
 } // namespace Net

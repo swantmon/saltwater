@@ -22,7 +22,7 @@ namespace Dt
 {
     struct SEntityCategory
     {
-        enum
+        enum Enum
         {
             Static,
             Dynamic,
@@ -33,15 +33,14 @@ namespace Dt
 
     struct SEntityLayer
     {
-        enum
+        enum Enum
         {
-            Default         = 0x00,
-            AR              = 0x01,
-            TransparentFX   = 0x02,
-            IgnoreRaycast   = 0x04,
-            Water           = 0x08,
+            Default         = 0x01,
+            AR              = 0x02,
+            ShadowOnly      = 0x04,
+            IgnoreRaycast   = 0x08,
             UI              = 0x10,
-            NumberOfLayers  = 6,
+            NumberOfLayers  = 5,
             UndefinedLayer  = -1
         };
     };
@@ -72,7 +71,7 @@ namespace Dt
 
     public:
 
-        typedef Base::ID BID;
+        using BID = Base::ID;
 
     public:
 
@@ -163,13 +162,14 @@ namespace Dt
         CComponentFacet* GetComponentFacet();
         const CComponentFacet* GetComponentFacet() const;
 
-    public:
-
         void Attach(CEntity& _rEntity);
         void Detach();
 
         void AttachComponent(Dt::IComponent* _pComponent);
         void DetachComponent(Dt::IComponent* _pComponent);
+
+        void Read(CSceneReader& _rCodec);
+        void Write(CSceneWriter& _rCodec);
 
     protected:
         
@@ -189,5 +189,9 @@ namespace Dt
 
         CEntity();
         ~CEntity();
+
+    private:
+
+        friend class CEntityGUI;
     };
 } // namespace Dt

@@ -46,6 +46,8 @@ namespace
 
         const glm::ivec2& GetDeviceDimension();
 
+        std::string GetLibraryPath();
+
         bool CheckPermission(const std::string& _rPermission);
 
         void AcquirePermissions(const std::string* _pPermissions, unsigned int _NumberOfPermissions);
@@ -79,6 +81,7 @@ namespace
         jmethodID m_GetDeviceDimensionHeightMethod;
         jmethodID m_CheckPermissionMethod;
         jmethodID m_AcquirePermissionMethod;
+        jmethodID m_GetLibraryPathMethod;
 
         glm::ivec2 m_Dimension;
 
@@ -101,6 +104,7 @@ namespace
         , m_GetDeviceRotationMethod       (0)
         , m_GetDeviceDimensionWidthMethod (0)
         , m_GetDeviceDimensionHeightMethod(0)
+        , m_GetLibraryPathMethod          (0)
         , m_Dimension                     (0)
         , m_OnAcquirePermissionDelegates  ()
     {
@@ -181,6 +185,8 @@ namespace
         m_GetDeviceDimensionWidthMethod = pEnvironment->GetMethodID(m_GameActivityID, "GetDeviceDimensionWidth", "()I");
 
         m_GetDeviceDimensionHeightMethod = pEnvironment->GetMethodID(m_GameActivityID, "GetDeviceDimensionHeight", "()I");
+
+        m_GetLibraryPathMethod = pEnvironment->GetMethodID(m_GameActivityID, "GetLibraryPath", "()Ljava/lang/String;");
     }
 
     // -----------------------------------------------------------------------------
@@ -264,6 +270,23 @@ namespace
         m_Dimension[1] = Height;
 
         return m_Dimension;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    std::string CJNIInterface::GetLibraryPath()
+    {
+        auto pEnvironment = GetJavaEnvironment();
+
+        auto JNIString = static_cast<jstring>(pEnvironment->CallObjectMethod(m_GameActivityThiz, m_GetLibraryPathMethod));
+
+        const char* pTempPath = pEnvironment->GetStringUTFChars(JNIString, 0);
+
+        std::string Path = pTempPath;
+
+        pEnvironment->ReleaseStringUTFChars(JNIString, pTempPath);
+
+        return Path;
     }
 
     // -----------------------------------------------------------------------------
@@ -356,6 +379,13 @@ namespace JNI
     const glm::ivec2& GetDeviceDimension()
     {
         return CJNIInterface::GetInstance().GetDeviceDimension();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    std::string GetLibraryPath()
+    {
+        return CJNIInterface::GetInstance().GetLibraryPath();
     }
 
     // -----------------------------------------------------------------------------

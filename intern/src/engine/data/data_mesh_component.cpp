@@ -9,6 +9,8 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CMeshComponent);
+
     CMeshComponent::CMeshComponent()
         : m_Filename      ()
         , m_GeneratorFlag (Core::AssetGenerator::SGeneratorFlag::Nothing)

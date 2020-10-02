@@ -78,6 +78,10 @@ namespace
         void SetViewPortSet(CViewPortSetPtr _ViewPortSetPtr);
         CViewPortSetPtr GetViewPortSet();
 
+        void ResetScissorRect();
+        void SetScissorRect(const CScissorRect& _rScissorRect);
+        const CScissorRect& GetScissorRect();
+
         void ResetInputLayout();
         void SetInputLayout(CInputLayoutPtr _InputLayoutPtr);
         CInputLayoutPtr GetInputLayout();
@@ -119,7 +123,7 @@ namespace
         CTexturePtr GetTexture(unsigned int _Unit);
 
         void ResetImageTexture(unsigned int _Unit);
-        void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr);
+        void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr, int _Level);
         CTexturePtr GetImageTexture(unsigned int _Unit);
 
         void ResetConstantBuffer(unsigned int _Unit);
@@ -132,10 +136,10 @@ namespace
         void SetResourceBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
         CBufferPtr GetResourceBuffer(unsigned int _Unit);
 
-		void ResetAtomicCounterBuffer(unsigned int _Unit);
-		void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+        void ResetAtomicCounterBuffer(unsigned int _Unit);
+        void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
         void SetAtomicCounterBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
-		CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit);
+        CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit);
 
         void Flush();
 
@@ -160,8 +164,8 @@ namespace
         static const unsigned int s_NumberOfTextureUnits  = 16;
         static const unsigned int s_NumberOfImageUnits    = 8;
         static const unsigned int s_NumberOfBufferUnits   = 16;
-		static const unsigned int s_NumberOfResourceUnits = 16;
-		static const unsigned int s_NumberOfAtomicUnits = 16;
+        static const unsigned int s_NumberOfResourceUnits = 16;
+        static const unsigned int s_NumberOfAtomicUnits   = 16;
 
         static const GLenum s_NativeTopologies[];
         
@@ -180,8 +184,8 @@ namespace
         
     private:
         
-        typedef Base::CManagedPool<CInternRenderContext> CRenderContexts;
-        typedef CRenderContexts::CIterator               CRenderContextIterator;
+        using CRenderContexts = Base::CManagedPool<CInternRenderContext>;
+        using CRenderContextIterator = CRenderContexts::CIterator;
 
     private:
 
@@ -199,12 +203,13 @@ namespace
         CInputLayoutPtr       m_InputLayoutPtr;
         CTargetSetPtr         m_TargetSetPtr;;
         CViewPortSetPtr       m_ViewPortSetPtr;
+        CScissorRect          m_ScissorRect;
         CRenderContexts       m_RenderContexts;
         GLuint                m_NativeShaderPipeline;
         CShaderPtr            m_ShaderSlots[CShader::NumberOfTypes];
-        CTexturePtr       m_TextureUnits[s_NumberOfTextureUnits];
+        CTexturePtr           m_TextureUnits[s_NumberOfTextureUnits];
         CSamplerPtr           m_SamplerUnits[s_NumberOfTextureUnits];
-        CTexturePtr       m_ImageUnits[s_NumberOfImageUnits];
+        CTexturePtr           m_ImageUnits[s_NumberOfImageUnits];
         CBufferPtr            m_BufferUnits[s_NumberOfBufferUnits];
         CBufferPtr            m_ResourceUnits[s_NumberOfResourceUnits];
         CBufferPtr            m_AtomicUnits[s_NumberOfAtomicUnits];
@@ -272,6 +277,7 @@ namespace
         , m_InputLayoutPtr        ()
         , m_TargetSetPtr          ()
         , m_ViewPortSetPtr        ()
+        , m_ScissorRect           ()
         , m_RenderContexts        ()
         , m_NativeShaderPipeline  (0)
     {
@@ -404,6 +410,7 @@ namespace
         ResetShaderCS();
         ResetTargetSet();
         ResetViewPortSet();
+        ResetScissorRect();
 
         for (IndexOfTextureUnit = 0; IndexOfTextureUnit < s_NumberOfTextureUnits; ++IndexOfTextureUnit)
         {
@@ -448,6 +455,7 @@ namespace
     {
         ResetTargetSet();
         ResetViewPortSet();
+        ResetScissorRect();
         ResetBlendState();
         ResetDepthStencilState();
         ResetRasterizerState();
@@ -517,7 +525,7 @@ namespace
                 if (RTDescription.BlendEnable == GL_TRUE)
                 {
                     // -----------------------------------------------------------------------------
-                    // Informations from:
+                    // Information from:
                     // https://www.opengl.org/wiki/Blending
                     // https://www.opengl.org/wiki/GLAPI/glBlendEquationSeparate
                     // https://www.opengl.org/wiki/GLAPI/glBlendFuncSeparate
@@ -578,8 +586,8 @@ namespace
             {
                 glEnable(GL_DEPTH_TEST);
                 
-                GLboolean DepthMask = static_cast<GLboolean>(rDescription.DepthWriteMask);
-                GLenum    DepthFunc = rDescription.DepthFunc;
+                auto   DepthMask = static_cast<GLboolean>(rDescription.DepthWriteMask);
+                GLenum DepthFunc = rDescription.DepthFunc;
                 
                 glDepthFunc(DepthFunc);
                 
@@ -805,11 +813,11 @@ namespace
             {
                 CViewPortPtr CurrentViewportPtr = pViewportPtrs[IndexOfViewport];
 
-                GLint TopX = static_cast<GLint>(CurrentViewportPtr->GetTopLeftX());
-                GLint TopY = static_cast<GLint>(CurrentViewportPtr->GetTopLeftY());
+                auto TopX = static_cast<GLint>(CurrentViewportPtr->GetTopLeftX());
+                auto TopY = static_cast<GLint>(CurrentViewportPtr->GetTopLeftY());
 
-                GLsizei Width = static_cast<GLsizei>(CurrentViewportPtr->GetWidth());
-                GLsizei Height = static_cast<GLsizei>(CurrentViewportPtr->GetHeight());
+                auto Width = static_cast<GLsizei>(CurrentViewportPtr->GetWidth());
+                auto Height = static_cast<GLsizei>(CurrentViewportPtr->GetHeight());
 
                 glViewport(TopX, TopY, Width, Height);
             }
@@ -823,6 +831,31 @@ namespace
     CViewPortSetPtr CGfxContextManager::GetViewPortSet()
     {
         return m_ViewPortSetPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxContextManager::ResetScissorRect()
+    {
+        glDisable(GL_SCISSOR_TEST);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxContextManager::SetScissorRect(const CScissorRect& _rScissorRect)
+    {
+        glEnable(GL_SCISSOR_TEST);
+
+        glScissor(_rScissorRect.GetTopLeftX(), _rScissorRect.GetTopLeftY(), _rScissorRect.GetWidth(), _rScissorRect.GetHeight());
+
+        m_ScissorRect = _rScissorRect;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CScissorRect& CGfxContextManager::GetScissorRect()
+    {
+        return m_ScissorRect;
     }
 
     // -----------------------------------------------------------------------------
@@ -865,7 +898,7 @@ namespace
 
             glEnableVertexAttribArray(IndexOfElement);
 
-            glVertexAttribPointer(IndexOfElement, FormatSize, NativeFormat, GL_FALSE, Stride, (char *)NULL + AlignedByteOffset);
+            glVertexAttribPointer(IndexOfElement, FormatSize, NativeFormat, GL_FALSE, Stride, (char *)nullptr + AlignedByteOffset);
                 
             if (rElement.GetInputClassification() == CInputLayout::PerInstance)
             {
@@ -877,26 +910,26 @@ namespace
             // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 24,  0);
             // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 24, 12);
             // 
-            // Byte	Content
-            // 0	Position
-            // 12	Normal
-            // 24	Position
-            // 36	Normal
-            // 48	Position
-            // 60	Normal
+            // Byte    Content
+            // 0    Position
+            // 12    Normal
+            // 24    Position
+            // 36    Normal
+            // 48    Position
+            // 60    Normal
             // 
             // 
             // Non-Interleaved:
             // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12,  0);  // alternativ auch stride=0
             // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 12, 36);  // alternativ auch stride=0
             // 
-            // Byte	Content
-            // 0	Position
-            // 12	Position
-            // 24	Position
-            // 36	Normal
-            // 48	Normal
-            // 60	Normal
+            // Byte    Content
+            // 0    Position
+            // 12    Position
+            // 24    Position
+            // 36    Normal
+            // 48    Normal
+            // 60    Normal
             //
             // From: http://wiki.delphigl.com/index.php/glVertexAttribPointer
             //
@@ -1231,7 +1264,7 @@ namespace
     {
         if (_SamplerPtr == nullptr) return;
 
-        CNativeSampler* pNativeSampler = 0;
+        CNativeSampler* pNativeSampler = nullptr;
 
         assert(_Unit < s_NumberOfTextureUnits);
 
@@ -1259,14 +1292,14 @@ namespace
 
         GLuint TextureBinding = GL_TEXTURE_2D;
 
-        if (m_TextureUnits[_Unit] != NULL && m_TextureUnits[_Unit]->IsCube())
+        if (m_TextureUnits[_Unit] != nullptr && m_TextureUnits[_Unit]->IsCube())
         {
             TextureBinding = GL_TEXTURE_CUBE_MAP;
         }
 
         glBindTexture(TextureBinding, 0);
 
-        m_TextureUnits[_Unit] = 0;
+        m_TextureUnits[_Unit] = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -1308,12 +1341,12 @@ namespace
 
         glBindImageTexture(_Unit, 0, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
 
-        m_ImageUnits[_Unit] = 0;
+        m_ImageUnits[_Unit] = nullptr;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr)
+    void CGfxContextManager::SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr, int _Level)
     {
         assert(_Unit < s_NumberOfImageUnits);
 
@@ -1330,7 +1363,7 @@ namespace
         if (_TextureBasePtr->GetDimension() == CTexture::Dim3D) IsLayered = GL_TRUE;
         if (_TextureBasePtr->IsCube()) IsLayered = GL_TRUE;
 
-        glBindImageTexture(_Unit, TextureHandle, _TextureBasePtr->GetCurrentMipLevel(), IsLayered, 0, TextureUsage, TextureFormat);
+        glBindImageTexture(_Unit, TextureHandle, _Level, IsLayered, 0, TextureUsage, TextureFormat);
 
         m_ImageUnits[_Unit] = _TextureBasePtr;
     }
@@ -1352,7 +1385,7 @@ namespace
 
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        m_BufferUnits[_Unit] = 0;
+        m_BufferUnits[_Unit] = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -1361,7 +1394,7 @@ namespace
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeBuffer* pNativeBuffer = 0;
+        CNativeBuffer* pNativeBuffer = nullptr;
 
         assert(_Unit < s_NumberOfBufferUnits);
 
@@ -1382,7 +1415,7 @@ namespace
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeBuffer* pNativeBuffer = 0;
+        CNativeBuffer* pNativeBuffer = nullptr;
 
         assert(_Unit < s_NumberOfBufferUnits);
 
@@ -1394,7 +1427,7 @@ namespace
 
         glBindBufferRange(GL_UNIFORM_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, _Offset, _Range);
 
-        m_BufferUnits[_Unit] = 0; // TODO: store range binding
+        m_BufferUnits[_Unit] = nullptr; // TODO: store range binding
     }
 
     // -----------------------------------------------------------------------------
@@ -1414,7 +1447,7 @@ namespace
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-        m_ResourceUnits[_Unit] = 0;
+        m_ResourceUnits[_Unit] = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -1423,7 +1456,7 @@ namespace
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeBuffer* pNativeBuffer = 0;
+        CNativeBuffer* pNativeBuffer = nullptr;
 
         assert(_Unit < s_NumberOfResourceUnits);
 
@@ -1434,7 +1467,7 @@ namespace
         assert(pNativeBuffer->GetBinding() == CBuffer::ResourceBuffer);
 
         glBindBufferRange(GL_SHADER_STORAGE_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
-		
+        
         m_ResourceUnits[_Unit] = _BufferPtr;
     }
 
@@ -1444,7 +1477,7 @@ namespace
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeBuffer* pNativeBuffer = 0;
+        CNativeBuffer* pNativeBuffer = nullptr;
 
         assert(_Unit < s_NumberOfResourceUnits);
 
@@ -1456,7 +1489,7 @@ namespace
 
         glBindBufferRange(GL_SHADER_STORAGE_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, _Offset, _Range);
 
-        m_ResourceUnits[_Unit] = 0; // TODO: store range binding
+        m_ResourceUnits[_Unit] = nullptr; // TODO: store range binding
     }
 
     // -----------------------------------------------------------------------------
@@ -1468,37 +1501,37 @@ namespace
         return m_ResourceUnits[_Unit];
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CGfxContextManager::ResetAtomicCounterBuffer(unsigned int _Unit)
-	{
-		assert(_Unit < s_NumberOfAtomicUnits);
+    void CGfxContextManager::ResetAtomicCounterBuffer(unsigned int _Unit)
+    {
+        assert(_Unit < s_NumberOfAtomicUnits);
 
-		glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
+        glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
 
-		m_AtomicUnits[_Unit] = 0;
-	}
+        m_AtomicUnits[_Unit] = nullptr;
+    }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CGfxContextManager::SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr)
-	{
-		if (_BufferPtr == nullptr) return;
+    void CGfxContextManager::SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        if (_BufferPtr == nullptr) return;
 
-		CNativeBuffer* pNativeBuffer = 0;
+        CNativeBuffer* pNativeBuffer = nullptr;
 
-		assert(_Unit < s_NumberOfAtomicUnits);
+        assert(_Unit < s_NumberOfAtomicUnits);
 
-		if (m_AtomicUnits[_Unit] == _BufferPtr) return;
+        if (m_AtomicUnits[_Unit] == _BufferPtr) return;
 
-		pNativeBuffer = static_cast<CNativeBuffer*>(_BufferPtr.GetPtr());
+        pNativeBuffer = static_cast<CNativeBuffer*>(_BufferPtr.GetPtr());
 
-		assert(pNativeBuffer->GetBinding() == CBuffer::AtomicCounterBuffer);
+        assert(pNativeBuffer->GetBinding() == CBuffer::AtomicCounterBuffer);
 
-		glBindBufferRange(GL_ATOMIC_COUNTER_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
+        glBindBufferRange(GL_ATOMIC_COUNTER_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
 
-		m_AtomicUnits[_Unit] = _BufferPtr;
-	}
+        m_AtomicUnits[_Unit] = _BufferPtr;
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -1506,7 +1539,7 @@ namespace
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeBuffer* pNativeBuffer = 0;
+        CNativeBuffer* pNativeBuffer = nullptr;
 
         assert(_Unit < s_NumberOfAtomicUnits);
 
@@ -1518,17 +1551,17 @@ namespace
 
         glBindBufferRange(GL_ATOMIC_COUNTER_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, _Offset, _Range);
 
-        m_AtomicUnits[_Unit] = 0; // TODO: store range binding
+        m_AtomicUnits[_Unit] = nullptr; // TODO: store range binding
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	CBufferPtr CGfxContextManager::GetAtomicCounterBuffer(unsigned int _Unit)
-	{
-		assert(_Unit < s_NumberOfAtomicUnits);
+    CBufferPtr CGfxContextManager::GetAtomicCounterBuffer(unsigned int _Unit)
+    {
+        assert(_Unit < s_NumberOfAtomicUnits);
 
-		return m_AtomicUnits[_Unit];
-	}
+        return m_AtomicUnits[_Unit];
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -1560,7 +1593,7 @@ namespace
         BASE_UNUSED(_BaseVertexLocation);
 
         ValidatePipeline();
-        glDrawElements(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, 0);
+        glDrawElements(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, nullptr);
     }
 
     // -----------------------------------------------------------------------------
@@ -1580,7 +1613,7 @@ namespace
         BASE_UNUSED(_StartInstanceLocation);
 
         ValidatePipeline();
-        glDrawElementsInstanced(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, 0, _NumberOfInstances);
+        glDrawElementsInstanced(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, nullptr, _NumberOfInstances);
     }
 
     // -----------------------------------------------------------------------------
@@ -1652,7 +1685,7 @@ namespace
             GLint LogLength;
             glGetProgramPipelineiv(m_NativeShaderPipeline, GL_INFO_LOG_LENGTH, &LogLength);
 
-            GLchar* pInfoLog = new char[LogLength];
+            auto* pInfoLog = new char[LogLength];
             glGetProgramPipelineInfoLog(m_NativeShaderPipeline, LogLength, &LogLength, pInfoLog);
             ENGINE_CONSOLE_ERROR(pInfoLog);
             delete[] pInfoLog;
@@ -1951,6 +1984,27 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
+    void ResetScissorRect()
+    {
+        CGfxContextManager::GetInstance().ResetScissorRect();
+    }
+    
+    // -----------------------------------------------------------------------------
+
+    void SetScissorRect(const CScissorRect& _rScissorRect)
+    {
+        CGfxContextManager::GetInstance().SetScissorRect(_rScissorRect);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CScissorRect& GetScissorRect()
+    {
+        return CGfxContextManager::GetInstance().GetScissorRect();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void ResetInputLayout()
     {
         CGfxContextManager::GetInstance().ResetInputLayout();
@@ -2197,9 +2251,9 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
-    void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr)
+    void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr, int _Level)
     {
-        CGfxContextManager::GetInstance().SetImageTexture(_Unit, _TextureBasePtr);
+        CGfxContextManager::GetInstance().SetImageTexture(_Unit, _TextureBasePtr, _Level);
     }
 
     // -----------------------------------------------------------------------------
@@ -2265,19 +2319,19 @@ namespace ContextManager
         return CGfxContextManager::GetInstance().GetResourceBuffer(_Unit);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void ResetAtomicCounterBuffer(unsigned int _Unit)
-	{
-		CGfxContextManager::GetInstance().ResetAtomicCounterBuffer(_Unit);
-	}
+    void ResetAtomicCounterBuffer(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetAtomicCounterBuffer(_Unit);
+    }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr)
-	{
-		CGfxContextManager::GetInstance().SetAtomicCounterBuffer(_Unit, _BufferPtr);
-	}
+    void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        CGfxContextManager::GetInstance().SetAtomicCounterBuffer(_Unit, _BufferPtr);
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -2286,12 +2340,12 @@ namespace ContextManager
         CGfxContextManager::GetInstance().SetAtomicCounterBufferRange(_Unit, _BufferPtr, _Offset, _Range);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit)
-	{
-		return CGfxContextManager::GetInstance().GetAtomicCounterBuffer(_Unit);
-	}
+    CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit)
+    {
+        return CGfxContextManager::GetInstance().GetAtomicCounterBuffer(_Unit);
+    }
 
     // -----------------------------------------------------------------------------
 

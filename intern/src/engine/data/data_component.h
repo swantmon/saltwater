@@ -1,9 +1,11 @@
 
 #pragma once
 
-#include "engine/engine_config.h"
-
+#include "base/base_serialize_text_reader.h"
+#include "base/base_serialize_text_writer.h"
 #include "base/base_type_info.h"
+
+#include "engine/engine_config.h"
 
 #include "engine/data/data_entity.h"
 
@@ -32,9 +34,30 @@ namespace Dt
 
     public:
 
+#pragma warning(push)
+#pragma warning(disable : 4201)
+
+        struct SFlags
+        {
+            union
+            {
+                struct
+                {
+                    unsigned int m_IsActive : 1;        //< Either the component is active or not
+                    unsigned int m_Padding : 31;
+                };
+
+                unsigned int m_Key;
+            };
+        };
+
+#pragma warning(pop) 
+
+    public:
+
         IComponent()
             : m_ID(0)
-            , m_pHostEntity(0)
+            , m_pHostEntity(nullptr)
             , m_DirtyFlags(0)
         {};
 
@@ -48,21 +71,53 @@ namespace Dt
             return m_pHostEntity;
         }
 
+        void SetHostEntity(Dt::CEntity* _pEntity)
+        {
+            if (m_pHostEntity != nullptr)
+            {
+                m_pHostEntity->DetachComponent(this);
+            }
+
+            m_pHostEntity = _pEntity;
+        }
+
         unsigned int GetDirtyFlags() const
         {
             return m_DirtyFlags;
         }
 
+        void SetActive(bool _Flag)
+        {
+            m_Flags.m_IsActive = _Flag;
+        }
+
+        bool IsActive() const
+        {
+            return m_Flags.m_IsActive == true;
+        }
+
+        bool IsActiveAndUsable() const
+        {
+            return m_Flags.m_IsActive == true && m_pHostEntity != nullptr && m_pHostEntity->IsActive() == true;
+        }
+
     public:
 
-        virtual const Base::ID GetTypeID() const = 0;
+        virtual Base::CTypeInfo::BInfo GetTypeInfo() const = 0;
 
         virtual ~IComponent() {};
+
+        virtual inline void Read(CSceneReader& _rCodec) = 0;
+
+        virtual inline void Write(CSceneWriter& _rCodec) = 0;
+
+        virtual IComponent* Allocate() = 0;
 
     protected:
 
         Base::ID m_ID;
         Dt::CEntity* m_pHostEntity;
+        SFlags m_Flags;
         unsigned int m_DirtyFlags;
 
     private:
@@ -87,60 +142,28 @@ namespace Dt
 
     public:
 
-        static const Base::ID STATIC_TYPE_ID;
-
-    public:
-
-#pragma warning(push)
-#pragma warning(disable : 4201)
-
-        struct SFlags
-        {
-            union
-            {
-                struct
-                {
-                    unsigned int m_IsActive   : 1;        //< Either the component is active or not
-                    unsigned int m_Padding    : 31;
-                };
-
-                unsigned int m_Key;
-            };
-        };
-
-#pragma warning(pop) 
-
-    public:
-
         CComponent();
         ~CComponent();
 
-        const Base::ID GetTypeID() const override;
-
-        void SetActive(bool _Flag);
-        bool IsActive() const;
-        bool IsActiveAndUsable() const;
+		Base::CTypeInfo::BInfo GetTypeInfo() const override;
 
         void SetFacet(unsigned int _Category, void* _pFacet);
         void* GetFacet(unsigned int _Category);
         const void* GetFacet(unsigned int _Category) const;
 
+        inline void Read(CSceneReader& _rCodec) override;
+        inline void Write(CSceneWriter& _rCodec) override;
+
     private:
 
-        typedef std::array<void*, NumberOfFacets> CFacets;
+        using CFacets = std::array<void*, NumberOfFacets>;
 
     private:
 
-        SFlags  m_Flags;
         CFacets m_Facets;
     };
 } // namespace Dt
 
-namespace Dt
-{
-    template<class T>
-    const Base::ID CComponent<T>::STATIC_TYPE_ID = Base::CTypeInfo::GetTypeID<T>();
-} // namespace Dt
 
 namespace Dt
 {
@@ -165,33 +188,9 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
     template<class T>
-    const Base::ID CComponent<T>::GetTypeID() const
+    Base::CTypeInfo::BInfo CComponent<T>::GetTypeInfo() const
     {
-        return STATIC_TYPE_ID;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    void CComponent<T>::SetActive(bool _Flag)
-    {
-        m_Flags.m_IsActive = _Flag;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    bool CComponent<T>::IsActive() const
-    {
-        return m_Flags.m_IsActive == true;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    bool CComponent<T>::IsActiveAndUsable() const
-    {
-        return m_Flags.m_IsActive == true && m_pHostEntity != nullptr && m_pHostEntity->IsActive() == true;
+        return Base::CTypeInfo::Get<T>();
     }
 
     // -----------------------------------------------------------------------------
@@ -216,6 +215,26 @@ namespace Dt
     const void* CComponent<T>::GetFacet(unsigned int _Category) const
     {
         return m_Facets[_Category];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    void CComponent<T>::Read(CSceneReader& _rCodec)
+    {
+        _rCodec >> m_ID;
+        _rCodec >> m_Flags.m_Key;
+        _rCodec >> m_DirtyFlags;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    void CComponent<T>::Write(CSceneWriter& _rCodec)
+    {
+        _rCodec << m_ID;
+        _rCodec << m_Flags.m_Key;
+        _rCodec << m_DirtyFlags;
     }
 } // namespace Dt
 

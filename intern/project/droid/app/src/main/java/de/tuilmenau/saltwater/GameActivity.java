@@ -1,9 +1,11 @@
 
 package de.tuilmenau.saltwater;
 
+import android.app.AlertDialog;
 import android.app.NativeActivity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 
 import android.graphics.Point;
 
@@ -30,6 +32,38 @@ public class GameActivity extends NativeActivity
     // -----------------------------------------------------------------------------
     // App lifecycle
     // -----------------------------------------------------------------------------
+    @Override
+    public void onBackPressed()
+    {
+        AlertDialog.Builder DialogBuilder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
+
+        DialogBuilder.setTitle("Close application");
+
+        DialogBuilder.setMessage("Are you sure you want to close the application?");
+
+        DialogBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int which)
+            {
+                finish();
+
+                GameActivity.super.onBackPressed();
+            }
+        });
+
+        DialogBuilder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int which)
+            {
+                // Do nothing
+            }
+        });
+
+        DialogBuilder.show();
+    }
+
+    // -----------------------------------------------------------------------------
+
     @Override
     public void onCreate(Bundle _SavedInstanceState)
     {
@@ -116,10 +150,7 @@ public class GameActivity extends NativeActivity
     // -----------------------------------------------------------------------------
 
     @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
-    }
+    public void onDestroy() { super.onDestroy(); }
 
     // -----------------------------------------------------------------------------
     // Device
@@ -156,6 +187,13 @@ public class GameActivity extends NativeActivity
         getWindowManager().getDefaultDisplay().getSize(Size);
 
         return Size.y;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    public String GetLibraryPath()
+    {
+        return getApplicationContext().getApplicationInfo().nativeLibraryDir;
     }
 
     // -----------------------------------------------------------------------------

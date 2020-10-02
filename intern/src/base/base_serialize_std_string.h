@@ -8,7 +8,7 @@
 
 namespace SER
 {
-	template<class TArchive, typename TObject, class TTraits, class TAllocator>
+    template<class TArchive, typename TObject, class TTraits, class TAllocator>
     inline void Write(TArchive& _rArchive, const std::basic_string<TObject, TTraits, TAllocator>& _rString);
 
     template<class TArchive, typename TObject, class TTraits, class TAllocator>
@@ -20,11 +20,11 @@ namespace SER
 
 namespace SER
 {
-	template<class TArchive, typename TObject, class TTraits, class TAllocator>
+    template<class TArchive, typename TObject, class TTraits, class TAllocator>
     inline void Write(TArchive& _rArchive, const std::basic_string<TObject, TTraits, TAllocator>& _rString)
     {
-        _rArchive.template BeginCollection<TObject>(_rString.size());
-        _rArchive.WriteCollection(_rString.data());
+        _rArchive.template BeginCollection<TObject>(static_cast<unsigned int>(_rString.size()));
+        _rArchive.WriteCollection(_rString.data(), static_cast<unsigned int>(_rString.size()));
         _rArchive.template EndCollection<TObject>();
     }
 

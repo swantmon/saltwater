@@ -7,7 +7,7 @@
 
 namespace Gfx
 {
-    class CViewPort : public Base::CManagedPoolItemBase
+    class ENGINE_API CViewPort : public Base::CManagedPoolItemBase
     {
         public:
             
@@ -16,14 +16,14 @@ namespace Gfx
             
         public:
 
-            ENGINE_API float GetWidth() const;
-            ENGINE_API float GetHeight() const;
+            float GetWidth() const;
+            float GetHeight() const;
 
-            ENGINE_API float GetMinDepth() const;
-            ENGINE_API float GetMaxDepth() const;
+            float GetMinDepth() const;
+            float GetMaxDepth() const;
 
-            ENGINE_API float GetTopLeftX() const;
-            ENGINE_API float GetTopLeftY() const;
+            float GetTopLeftX() const;
+            float GetTopLeftY() const;
 
         public:
 

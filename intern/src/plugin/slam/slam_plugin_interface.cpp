@@ -20,8 +20,9 @@ namespace SLAM
     {
         Gfx::ReconstructionRenderer::OnStart();
 
-        Engine::RegisterEventHandler(Engine::Gfx_OnUpdate, Gfx::ReconstructionRenderer::Update);
-        Engine::RegisterEventHandler(Engine::Gfx_OnRenderGBuffer, Gfx::ReconstructionRenderer::Render);
+        m_UpdateDelegate        = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnUpdate, Gfx::ReconstructionRenderer::Update);
+        m_RenderGBufferDelegate = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnRenderGBuffer, Gfx::ReconstructionRenderer::Render);
+        m_RenderForwardDelegate = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnRenderForward, Gfx::ReconstructionRenderer::RenderForward);
 
         m_SLAMControl.Start();
     }
@@ -51,6 +52,59 @@ namespace SLAM
 
     // -----------------------------------------------------------------------------
 
+    void CPluginInterface::UpdateScriptSettings(const Scpt::CSLAMScript::SScriptSettings& _rSettings)
+    {
+        if (_rSettings.m_Colorize || _rSettings.m_IsPermanentColorizationEnabled)
+        {
+            m_SLAMControl.ColorizePlanes();
+        }
+
+        m_SLAMControl.EnableMouseControl(_rSettings.m_IsMouseControlEnabled);
+        m_SLAMControl.SetActivateSelection(_rSettings.m_IsSelectionEnabled);
+        m_SLAMControl.SetIsPlaying(_rSettings.m_IsPlayingRecording);
+        m_SLAMControl.SetPlaybackSpeed(_rSettings.m_PlaybackSpeed);
+
+        if (_rSettings.m_SetRecordFile)
+        {
+            m_SLAMControl.SetRecordFile(Core::AssetManager::GetPathToAssets() + "/" + _rSettings.m_RecordFile, _rSettings.m_PlaybackSpeed);
+            ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", (Core::AssetManager::GetPathToAssets() + "/" + _rSettings.m_RecordFile).c_str());
+        }
+
+        Gfx::ReconstructionRenderer::SetVisibleObjects(
+            _rSettings.m_RenderVolume,
+            _rSettings.m_RenderRoot,
+            _rSettings.m_RenderLevel1,
+            _rSettings.m_RenderLevel2,
+            _rSettings.m_PlaneMode
+        );
+
+		if (_rSettings.m_SendPlanes)
+		{
+			m_SLAMControl.SendPlanes();
+		}
+
+        if (_rSettings.m_Reset)
+        {
+            m_SLAMControl.ResetReconstruction();
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::ReadScene(CSceneReader& _rCodec)
+    {
+        m_SLAMControl.ReadScene(_rCodec);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::WriteScene(CSceneWriter& _rCodec)
+    {
+        m_SLAMControl.WriteScene(_rCodec);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::OnPause()
     {
         ENGINE_CONSOLE_INFOV("SLAM plugin paused!");
@@ -62,24 +116,58 @@ namespace SLAM
     {
         ENGINE_CONSOLE_INFOV("SLAM plugin resumed!");
     }
-} // namespace HW
+} // namespace SLAM
 
 extern "C" CORE_PLUGIN_API_EXPORT void Pause()
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).OnPause();
 }
 
+// -----------------------------------------------------------------------------
+
 extern "C" CORE_PLUGIN_API_EXPORT void Resume()
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).OnResume();
 }
+
+// -----------------------------------------------------------------------------
 
 extern "C" CORE_PLUGIN_API_EXPORT void Update()
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).Update();
 }
 
+// -----------------------------------------------------------------------------
+
 extern "C" CORE_PLUGIN_API_EXPORT void OnInput(const Base::CInputEvent& _rEvent)
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).OnInput(_rEvent);
+}
+
+// -----------------------------------------------------------------------------
+
+extern "C" CORE_PLUGIN_API_EXPORT void OnRenderHitProxy()
+{
+    Gfx::ReconstructionRenderer::RenderHitProxy();
+}
+
+// -----------------------------------------------------------------------------
+
+extern "C" CORE_PLUGIN_API_EXPORT void UpdateScriptSettings(const Scpt::CSLAMScript::SScriptSettings& _rSettings)
+{
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).UpdateScriptSettings(_rSettings);
+}
+
+// -----------------------------------------------------------------------------
+
+extern "C" CORE_PLUGIN_API_EXPORT void ReadScene(CSceneReader& _rCodec)
+{
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).ReadScene(_rCodec);
+}
+
+// -----------------------------------------------------------------------------
+
+extern "C" CORE_PLUGIN_API_EXPORT void WriteScene(CSceneWriter& _rCodec)
+{
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).WriteScene(_rCodec);
 }

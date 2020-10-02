@@ -5,6 +5,8 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CVolumeFogComponent);
+
     CVolumeFogComponent::CVolumeFogComponent()
         : m_WindDirection        (0.0f)
         , m_FogColor             (1.0f)

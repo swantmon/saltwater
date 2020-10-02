@@ -23,7 +23,7 @@
 
 #include "engine/script/script_script_manager.h"
 
-#include <map>
+#include <array>
 
 using namespace Engine;
 
@@ -49,21 +49,13 @@ namespace
 
         void Pause();
 
-        void RegisterEventHandler(int _EventID, CEventDelegate _Delegate);
+        CEventDelegates::HandleType RegisterEventHandler(EEvent _Event, CEventDelegates::FunctionType _Function);
 
-        void RaiseEvent(int _EventID);
-
-        void LoadPlugin(const std::string& _Plugin);
+        void RaiseEvent(EEvent _Event);
 
     private:
 
-        typedef std::vector<Core::IPlugin*> CPlugins;
-        typedef std::map<int, std::vector<CEventDelegate>> CEventDelegates;
-
-    private:
-
-        CEventDelegates m_EventDelegates;
-        CPlugins m_AvailablePlugins;
+        CEventDelegates m_OnEventDelegates;
     };
 } // namespace 
 
@@ -78,21 +70,17 @@ namespace
 
     CEngine::~CEngine()
     {
-        m_EventDelegates.clear();
     }
 
     // -----------------------------------------------------------------------------
 
     void CEngine::Startup()
     {
-        // -----------------------------------------------------------------------------
-        // Engine
-        // -----------------------------------------------------------------------------
         Core::Time::OnStart();
 
         Scpt::ScriptManager::OnStart();
 
-        Dt::EntityManager::OnStart();
+        Dt::CEntityManager::GetInstance().OnStart();
 
         Gui::InputManager::OnStart();
 
@@ -100,38 +88,22 @@ namespace
 
         Gfx::Pipeline::OnStart();
 
-        // -----------------------------------------------------------------------------
-        // Plugins
-        // -----------------------------------------------------------------------------
-        auto SelectedPlugins = Core::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
+        Core::PluginManager::OnStart();
 
-        for (auto SelectedPlugin : SelectedPlugins)
-        {
-            auto Plugin = Core::PluginManager::LoadPlugin(SelectedPlugin);
-
-            if (Plugin == nullptr) continue;
-
-            m_AvailablePlugins.push_back(&Plugin->GetInstance());
-
-            Plugin->GetInstance().OnStart();
-        }
+        RaiseEvent(EEvent::Engine_OnStartup);
     }
 
     // -----------------------------------------------------------------------------
 
     void CEngine::Shutdown()
     {
-        // -----------------------------------------------------------------------------
-        // Plugins
-        // -----------------------------------------------------------------------------
-        for (auto Plugin : m_AvailablePlugins) Plugin->OnExit();
+        RaiseEvent(EEvent::Engine_OnShutdown);
 
-        // -----------------------------------------------------------------------------
-        // Engine
-        // -----------------------------------------------------------------------------
+        Core::PluginManager::OnExit();
+
         Scpt::ScriptManager::OnExit();
 
-        Dt::EntityManager::OnExit();
+        Dt::CEntityManager::GetInstance().OnExit();
 
         Gui::InputManager::OnExit();
 
@@ -146,19 +118,13 @@ namespace
 
     void CEngine::Update()
     {
-        // -----------------------------------------------------------------------------
-        // Plugins
-        // -----------------------------------------------------------------------------
-        for (auto Plugin : m_AvailablePlugins) Plugin->Update();
+        Core::PluginManager::Update();
 
-        // -----------------------------------------------------------------------------
-        // Engine
-        // -----------------------------------------------------------------------------
         Core::Time::Update();
 
         Cam::ControlManager::Update();
 
-        Dt::EntityManager::Update();
+        Dt::CEntityManager::GetInstance().Update();
 
         Scpt::ScriptManager::Update();
 
@@ -169,57 +135,42 @@ namespace
         Net::CNetworkManager::GetInstance().Update();
 
         Gfx::Pipeline::Render();
+
+        RaiseEvent(EEvent::Engine_OnUpdate);
     }
 
     // -----------------------------------------------------------------------------
 
     void CEngine::Resume()
     {
-        // -----------------------------------------------------------------------------
-        // Plugins
-        // -----------------------------------------------------------------------------
-        for (auto Plugin : m_AvailablePlugins) Plugin->OnResume();
+        Core::PluginManager::OnResume();
+
+        RaiseEvent(EEvent::Engine_OnResume);
     }
 
     // -----------------------------------------------------------------------------
 
     void CEngine::Pause()
     {
-        // -----------------------------------------------------------------------------
-        // Plugins
-        // -----------------------------------------------------------------------------
-        for (auto Plugin : m_AvailablePlugins) Plugin->OnPause();
+        Core::PluginManager::OnPause();
+
+        RaiseEvent(EEvent::Engine_OnPause);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CEngine::RegisterEventHandler(int _EventID, CEventDelegate _Delegate)
+    CEventDelegates::HandleType CEngine::RegisterEventHandler(EEvent _Event, CEventDelegates::FunctionType _Function)
     {
-        m_EventDelegates[_EventID].push_back(_Delegate);
+        return m_OnEventDelegates.Register(static_cast<int>(_Event), _Function);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CEngine::RaiseEvent(int _EventID)
+    void CEngine::RaiseEvent(EEvent _Event)
     {
-        auto& rListOfDelegates = m_EventDelegates[_EventID];
-
-        for (auto& rEvent : rListOfDelegates)
-        {
-            rEvent();
-        }
+        m_OnEventDelegates.Notify(static_cast<int>(_Event));
     }
 
-    // -----------------------------------------------------------------------------
-
-    void CEngine::LoadPlugin(const std::string& _Plugin)
-    {
-        auto Plugin = Core::PluginManager::LoadPlugin(_Plugin);
-
-        m_AvailablePlugins.push_back(&Plugin->GetInstance());
-
-        Plugin->GetInstance().OnStart();
-    }
 } // namespace 
 
 namespace Engine
@@ -259,23 +210,16 @@ namespace Engine
 
     // -----------------------------------------------------------------------------
 
-    void RegisterEventHandler(int _EventID, CEventDelegate _Delegate)
+    CEventDelegates::HandleType RegisterEventHandler(EEvent _Event, CEventDelegates::FunctionType _Function)
     {
-        CEngine::GetInstance().RegisterEventHandler(_EventID, _Delegate);
+        return CEngine::GetInstance().RegisterEventHandler(_Event, _Function);
     }
 
     // -----------------------------------------------------------------------------
 
-    void RaiseEvent(int _EventID)
+    void RaiseEvent(EEvent _Event)
     {
-        CEngine::GetInstance().RaiseEvent(_EventID);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void LoadPlugin(const std::string& _PluginName)
-    {
-        CEngine::GetInstance().LoadPlugin(_PluginName);
+        CEngine::GetInstance().RaiseEvent(_Event);
     }
 
 } // namespace Pipeline

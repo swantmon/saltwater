@@ -98,3 +98,19 @@ int main(int _Argc, char* _pArgv[])
 
     return 0;
 }
+
+// Make sure that the program is run with the dedicated GPU instead of the integrated one
+
+#ifdef _WIN32
+
+extern "C"
+{
+    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+}
+
+extern "C"
+{
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+
+#endif // _WIN32

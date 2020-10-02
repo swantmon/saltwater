@@ -1,18 +1,4 @@
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \file base_serialize_binary_writer.h
-///
-/// \author Tobias Schwandt
-/// \author Credits to Joerg Sahm
-/// \author Copyright (c) Tobias Schwandt. All rights reserved.
-///
-/// \date 2012-2013
-///
-/// \version 1.0
-/// 
-////////////////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include "base/base_defines.h"
@@ -24,7 +10,7 @@
 
 namespace SER
 {
-	class CBinaryWriter : public CArchive
+    class CBinaryWriter : public CArchive
     {
     public:
         enum
@@ -34,8 +20,8 @@ namespace SER
         };
 
     public:
-        typedef std::ostream   CStream;
-        typedef CBinaryWriter  CThis;
+        using CStream = std::ostream;
+        using CThis = CBinaryWriter;
 
     public:
         inline  CBinaryWriter(CStream& _rStream, unsigned int _Version);
@@ -56,7 +42,7 @@ namespace SER
         inline void BeginCollection(unsigned int _NumberOfElements);
 
         template<typename TElement>
-        inline void WriteCollection(const TElement* _pElements);
+        inline void WriteCollection(const TElement* _pElements, unsigned int _NumberOfElements);
 
         template<typename TElement>
         inline void EndCollection();
@@ -70,17 +56,15 @@ namespace SER
         inline void WriteClass(const TElement& _rElement);
 
     private:
-        CStream*     m_pStream;
-        unsigned int m_NumberOfElements;
+        CStream* m_pStream;
     };
 } // namespace SER
 
 namespace SER
 {
-	inline CBinaryWriter::CBinaryWriter(CStream& _rStream, unsigned int _Version)
-        : CArchive          (_Version)
-        , m_pStream         (&_rStream)
-        , m_NumberOfElements(0)
+    inline CBinaryWriter::CBinaryWriter(CStream& _rStream, unsigned int _Version)
+        : CArchive (_Version)
+        , m_pStream(&_rStream)
     {
         // -----------------------------------------------------------------------------
         // Write header informations (internal format, version)
@@ -128,31 +112,24 @@ namespace SER
     template<typename TElement>
     inline void CBinaryWriter::BeginCollection(unsigned int _NumberOfElements)
     {
-        m_NumberOfElements = _NumberOfElements;
-
-        WriteBinary(&m_NumberOfElements, sizeof(m_NumberOfElements));
+        WriteBinary(&_NumberOfElements, sizeof(_NumberOfElements));
     }
 
     // -----------------------------------------------------------------------------
 
     template<typename TElement>
-    inline void CBinaryWriter::WriteCollection(const TElement* _pElements)
+    inline void CBinaryWriter::WriteCollection(const TElement* _pElements, unsigned int _NumberOfElements)
     {
-        typedef typename SRemovePointer<TElement>::X XUnqualified;
+        using XUnqualified = typename SRemovePointer<TElement>::X;
         bool IsPrimitive = SIsPrimitive<TElement>::Value;
 
         if (IsPrimitive)
         {
-            WriteBinary(_pElements, m_NumberOfElements * sizeof(*_pElements));
+            WriteBinary(_pElements, _NumberOfElements * sizeof(*_pElements));
         }
         else
         {
-            unsigned int IndexOfElement;
-            unsigned int NumberOfElements;
-
-            NumberOfElements = m_NumberOfElements;
-
-            for (IndexOfElement = 0; IndexOfElement < NumberOfElements; ++IndexOfElement)
+            for (unsigned int IndexOfElement = 0; IndexOfElement < _NumberOfElements; ++IndexOfElement)
             {
                 Write(_pElements[IndexOfElement]);
             }
@@ -177,7 +154,7 @@ namespace SER
 
     // -----------------------------------------------------------------------------
 
-    inline void CBinaryWriter::WriteBinary(const void* _pBytes, const unsigned int _NumberOfBytes)
+    void CBinaryWriter::WriteBinary(const void* _pBytes, const unsigned int _NumberOfBytes)
     {
         m_pStream->write(static_cast<const char*>(_pBytes), _NumberOfBytes);
     }
@@ -187,6 +164,6 @@ namespace SER
     template<typename TElement>
     inline void CBinaryWriter::WriteClass(const TElement& _rElement)
     {
-        Serialize(*this, const_cast<TElement&>(_rElement));
+        SER::Private::CAccess::Write(*this, const_cast<TElement&>(_rElement));
     }
 } // namespace SER

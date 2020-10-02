@@ -10,7 +10,7 @@ namespace MATH
 {
 
     template<typename T>
-	class CAABB3
+    class CAABB3
     {
 
         //
@@ -75,6 +75,7 @@ namespace MATH
         inline const CVector& GetMax() const;
         
         inline void Extend(const CVector& _rVector);
+        inline void StickyExtend(const CVector& _rVector, float _Factor);
 
     public:
 
@@ -145,7 +146,7 @@ namespace MATH
 {
 
     typedef CAABB3<int>    AABB3int;
-	typedef CAABB3<float>  AABB3Float;
+    typedef CAABB3<float>  AABB3Float;
     typedef CAABB3<double> AABB3Double;
 
 } // namespace MATH
@@ -323,6 +324,27 @@ namespace MATH
         m_MaxPoint[2] = m_MaxPoint[2] > _rVector[2] ? m_MaxPoint[2] : _rVector[2];
         
         assert(IsValid());
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<typename T>
+    inline void CAABB3<T>::StickyExtend(const CVector& _rVector, float _Factor)
+    {
+        if (ContainsPoint(_rVector)) return;
+
+        glm::vec3 PointOnBox;
+        float Distance;
+        
+        if(!IntersectsRay(_rVector, glm::normalize(GetCenter() - _rVector), PointOnBox, Distance)) return;
+
+        glm::vec3 NDirection = glm::normalize(_rVector - PointOnBox);
+
+        Distance = glm::clamp(_Factor / Distance, 0.0f, 1.0f) * Distance;
+
+        glm::vec3 StickyVector = PointOnBox + Distance * NDirection;
+
+        Extend(StickyVector);
     }
 
     // -----------------------------------------------------------------------------

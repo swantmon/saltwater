@@ -10,7 +10,7 @@ namespace CON
 {
 
     template<class TEvent>
-	class CEventQueue : private Base::CUncopyable
+    class CEventQueue : private Base::CUncopyable
     {
 
     public:

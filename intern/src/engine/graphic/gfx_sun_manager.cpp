@@ -97,6 +97,10 @@ namespace
         CShaderPtr m_ShadowSMShaderPSPtr;
         
         CBufferSetPtr m_LightCameraVSBufferPtr;
+
+        Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
+
+        Dt::CEntityManager::CEntityDelegate::HandleType m_OnDirtyEntityDelegate;
         
     private:
 
@@ -183,9 +187,9 @@ namespace
         // -----------------------------------------------------------------------------
         // On dirty stuff
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxSunManager::OnDirtyComponent));
+        m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxSunManager::OnDirtyComponent, this, std::placeholders::_1));
 
-        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxSunManager::OnDirtyEntity));
+        m_OnDirtyEntityDelegate = Dt::CEntityManager::GetInstance().RegisterDirtyEntityHandler(std::bind(&CGfxSunManager::OnDirtyEntity, this, std::placeholders::_1));
     }
     
     // -----------------------------------------------------------------------------
@@ -219,7 +223,10 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Calculate near and far plane
                 // -----------------------------------------------------------------------------
-                float Radius = static_cast<float>(glm::max(Dt::Map::GetNumberOfMetersX(), Dt::Map::GetNumberOfMetersY()));
+                float Radius = pDtComponent->GetCustomDistanceToOrigin();
+
+                if (Radius <= 0.0f) Radius = static_cast<float>(glm::max(Dt::Map::GetNumberOfMetersX(), Dt::Map::GetNumberOfMetersY()));
+
                 float Near   = 1.0f;
                 float Far    = Radius * 3.14f;
 
@@ -260,7 +267,7 @@ namespace
 
         for (auto pComponent : AreaLightComponents)
         {
-            if (pComponent->GetTypeID() == Base::CTypeInfo::GetTypeID<Dt::CSunComponent>())
+            if (pComponent->GetTypeInfo() == Base::CTypeInfo::Get<Dt::CSunComponent>())
             {
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CSunComponent::DirtyInfo);
             }
@@ -271,7 +278,7 @@ namespace
 
     void CGfxSunManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CSunComponent>()) return;
+        if (_pComponent->GetTypeInfo() != Base::CTypeInfo::Get<Dt::CSunComponent>()) return;
 
         Dt::CSunComponent* pSunComponent = static_cast<Dt::CSunComponent*>(_pComponent);
 
@@ -345,14 +352,14 @@ namespace
         
         _pInternLight->m_TextureSMPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth only
 
-		TextureManager::SetTextureLabel(_pInternLight->m_TextureSMPtr, "Sun: Shadowmap");
+        TextureManager::SetTextureLabel(_pInternLight->m_TextureSMPtr, "Sun: Shadowmap");
         
         // -----------------------------------------------------------------------------
         // Create target set for shadow mapping
         // -----------------------------------------------------------------------------
         CTargetSetPtr ShadowTargetSetPtr = TargetSetManager::CreateTargetSet(_pInternLight->m_TextureSMPtr);
 
-		TargetSetManager::SetTargetSetLabel(ShadowTargetSetPtr, "Sun: Shadowmap");
+        TargetSetManager::SetTargetSetLabel(ShadowTargetSetPtr, "Sun: Shadowmap");
         
         // -----------------------------------------------------------------------------
         // Create view and camera
@@ -444,7 +451,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Render every surface of this entity
             // -----------------------------------------------------------------------------
-            if (MeshPtr->GetLOD(0) == nullptr) continue;
+            if (MeshPtr == nullptr || MeshPtr->GetLOD(0) == nullptr) continue;
 
             CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface();
 

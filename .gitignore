@@ -29,6 +29,7 @@ local.properties
 build/
 captures/
 .externalNativeBuild 
+.cxx/
 
 ### VisualStudio ###
 ## Ignore Visual Studio temporary files, build results, and
@@ -254,8 +255,8 @@ CMakeLists.txt.user*
 ### Engine specific folders ###
 /assets/
 /bin/
-/extern/
-!/data/**
+!/extern/**
+/extern/ocean
 
 ### Engine specific files ###
-*.bat
+/*.bat

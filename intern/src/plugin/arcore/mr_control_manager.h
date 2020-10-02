@@ -7,6 +7,7 @@
 
 #include "engine/graphic/gfx_texture.h"
 
+#include <arcore_c_api.h>
 
 namespace MR
 {
@@ -14,8 +15,6 @@ namespace ControlManager
 {
     struct SSettings
     {
-        bool m_ShowPlanes;
-        bool m_ShowPoints;
         float m_Near;
         float m_Far;
     };
@@ -33,6 +32,8 @@ namespace ControlManager
     void OnPause();
     void OnResume();
 
+    void UpdateBackground();
+
     const CCamera& GetCamera();
 
     const CLightEstimation& GetLightEstimation();
@@ -45,5 +46,8 @@ namespace ControlManager
     const SSettings& GetSettings();
     void SetSettings(const SSettings& _rSettings);
     void ResetSettings();
+
+    ArSession* GetCurrentSession();
+    ArFrame* GetCurrentFrame();
 } // namespace ControlManager
 } // namespace MR

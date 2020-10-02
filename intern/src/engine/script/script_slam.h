@@ -30,16 +30,63 @@ namespace Scpt
     {
     public:
 
+        enum EPlaneRenderingMode
+        {
+            NONE,
+            EXTENT_ONLY,
+            MESH_ONLY,
+            MESH_WITH_EXTENT,
+            ALL
+        };
+
+        struct SScriptSettings
+        {
+            bool m_RenderVolume;
+
+            bool m_RenderRoot;
+            bool m_RenderLevel1;
+            bool m_RenderLevel2;
+
+            EPlaneRenderingMode m_PlaneMode;
+
+            bool m_Reset;
+
+            bool m_IsSelectionEnabled;
+            bool m_IsMouseControlEnabled;
+            bool m_IsPlayingRecording;
+            bool m_IsPermanentColorizationEnabled;
+
+            bool m_Colorize;
+			bool m_SendPlanes;
+
+            bool m_SetRecordFile;
+            std::string m_RecordFile;
+            float m_PlaybackSpeed;
+        };
+        
         void Start() override
         {
-            Engine::LoadPlugin("plugin_slam");
-
-            if (!Core::PluginManager::HasPlugin("SLAM"))
+            if (!Core::PluginManager::LoadPlugin("SLAM"))
             {
                 throw Base::CException(__FILE__, __LINE__, "SLAM plugin could not be loaded");
             }
-
+            
             InputCallback = (FInputCallback)(Core::PluginManager::GetPluginFunction("SLAM", "OnInput"));
+
+            SetSettings = (FSetSettings)(Core::PluginManager::GetPluginFunction("SLAM", "UpdateScriptSettings"));
+
+            m_Settings.m_RenderVolume = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume", true);
+            m_Settings.m_RenderRoot = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root", false);
+            m_Settings.m_RenderLevel1 = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1", false);
+            m_Settings.m_RenderLevel2 = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2", false);
+            m_Settings.m_PlaneMode = EPlaneRenderingMode::MESH_ONLY;
+            m_Settings.m_IsSelectionEnabled = false;
+            m_Settings.m_IsMouseControlEnabled = false;
+            m_Settings.m_IsPlayingRecording = false;
+            m_Settings.m_IsPermanentColorizationEnabled = false;
+            m_Settings.m_Colorize = false;
+			m_Settings.m_SendPlanes = false;
+            m_Settings.m_PlaybackSpeed = 1.0f;
         }
 
         // -----------------------------------------------------------------------------
@@ -53,7 +100,7 @@ namespace Scpt
 
         void Update() override
         {
-            
+            SetSettings(m_Settings);
         }
 
         // -----------------------------------------------------------------------------
@@ -62,10 +109,44 @@ namespace Scpt
         {
             InputCallback(_rEvent);
         }
-
+        
     private:
 
-        typedef void(*FInputCallback)(const Base::CInputEvent& _rEvent);
+        using FInputCallback = void(*)(const Base::CInputEvent& _rEvent);
         FInputCallback InputCallback;
+
+        using FSetSettings = void(*)(const SScriptSettings& _rSettings);
+        FSetSettings SetSettings;
+
+    protected:
+
+        SScriptSettings m_Settings;
+
+    public:
+
+        inline void Read(CSceneReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+
+            using FReadCallback = void(*)(CSceneReader & _rCodec);
+            auto ReadSlamScene = (FReadCallback)(Core::PluginManager::GetPluginFunction("SLAM", "ReadScene"));
+
+            ReadSlamScene(_rCodec);
+        }
+
+        inline void Write(CSceneWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+
+            using FWriteCallback = void(*)(CSceneWriter & _rCodec);
+            auto WriteSlamScene = (FWriteCallback)(Core::PluginManager::GetPluginFunction("SLAM", "WriteScene"));
+
+            WriteSlamScene(_rCodec);
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CSLAMScript();
+        }
     };
 } // namespace Scpt

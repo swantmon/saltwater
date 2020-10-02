@@ -167,7 +167,7 @@ namespace MR
 
     bool CICPTracker::CalculatePoseMatrix(glm::mat4& rIncPoseMatrix)
     {
-        typedef float Scalar;
+        using Scalar = float;
 
         Scalar A[36];
         Scalar b[6];
@@ -278,7 +278,7 @@ namespace MR
         BufferDesc.m_Usage = CBuffer::EUsage::GPURead;
         BufferDesc.m_Binding = CBuffer::ConstantBuffer;
         BufferDesc.m_Access = CBuffer::CPUWrite;
-        BufferDesc.m_pClassKey = 0;
+        BufferDesc.m_pClassKey = nullptr;
 
         BufferDesc.m_NumberOfBytes = 16;
         m_ICPSummationConstantBufferPtr = BufferManager::CreateBuffer(BufferDesc);
@@ -329,7 +329,7 @@ namespace MR
 
         std::string DefineString = DefineStream.str();
 
-        m_DetermineSummandsCSPtr = ShaderManager::CompileCS("slam\\tracking\\cs_determine_summands.glsl", "main", DefineString.c_str());
+        m_DetermineSummandsCSPtr = ShaderManager::CompileCS("../../plugins/slam/tracking/cs_determine_summands.glsl", "main", DefineString.c_str());
 
         if (m_UseShuffleIntrinsics)
         {
@@ -345,7 +345,7 @@ namespace MR
                 std::stringstream TempStream;
                 TempStream << DefineString << "#define REDUCTION_SHADER_COUNT " << ReductionSummandsPOT / 2 << " \n";
 
-                m_ReduceSumCSPtr[i] = ShaderManager::CompileCS("slam\\tracking\\cs_reduce_sum.glsl", "main", TempStream.str().c_str());
+                m_ReduceSumCSPtr[i] = ShaderManager::CompileCS("../../plugins/slam/tracking/cs_reduce_sum.glsl", "main", TempStream.str().c_str());
             }
         }
         else
@@ -359,7 +359,7 @@ namespace MR
 
             DefineStream << "#define REDUCTION_SHADER_COUNT " << ReductionSummandsPOT / 2 << " \n";
 
-            m_ReduceSumCSPtr[0] = ShaderManager::CompileCS("slam\\tracking\\cs_reduce_sum.glsl", "main", DefineStream.str().c_str());
+            m_ReduceSumCSPtr[0] = ShaderManager::CompileCS("../../plugins/slam/tracking/cs_reduce_sum.glsl", "main", DefineStream.str().c_str());
         }
     }
 

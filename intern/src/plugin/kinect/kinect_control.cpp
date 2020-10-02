@@ -178,7 +178,7 @@ namespace MR
     
     bool CKinectControl::GetCameraFrame(char* _pBuffer)
     {
-        Byte4* pBuffer = reinterpret_cast<Byte4*>(_pBuffer);
+        auto* pBuffer = reinterpret_cast<Byte4*>(_pBuffer);
 
         IColorFrame* pColorFrame = nullptr;
 
@@ -214,8 +214,8 @@ namespace MR
         {
             for (int j = 0; j < DepthHeight; ++ j)
             {
-                const int x = static_cast<int>(m_ColorSpacePoints[j * DepthWidth + i].X + 0.5f);
-                const int y = static_cast<int>(m_ColorSpacePoints[j * DepthWidth + i].Y + 0.5f);
+                const auto x = static_cast<int>(m_ColorSpacePoints[j * DepthWidth + i].X + 0.5f);
+                const auto y = static_cast<int>(m_ColorSpacePoints[j * DepthWidth + i].Y + 0.5f);
 
                 if (x >= 0 && x < CameraWidth && y >= 0 && y < CameraHeight)
                 {
@@ -280,18 +280,18 @@ namespace MR
         return NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_Y * GetDepthHeight();
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	float CKinectControl::GetMinDepth() const
-	{
-		return 0.5f;
-	}
+    float CKinectControl::GetMinDepth() const
+    {
+        return 0.5f;
+    }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	float CKinectControl::GetMaxDepth() const
-	{
-		return 8.0f;
-	}
+    float CKinectControl::GetMaxDepth() const
+    {
+        return 8.0f;
+    }
 
 } // namespace MR

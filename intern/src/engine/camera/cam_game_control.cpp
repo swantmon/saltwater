@@ -76,7 +76,7 @@ namespace Cam
 
     void CGameControl::InternOnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CCameraComponent>()) return;
+        if (_pComponent->GetTypeInfo() != Base::CTypeInfo::Get<Dt::CCameraComponent>()) return;
 
         if (_pComponent->GetHostEntity() == m_pRelatedEntity)
         {
@@ -213,7 +213,7 @@ namespace Cam
 
             if (pCameraComponent->IsActiveAndUsable())
             {
-                Dt::CEntity* pNewEntity = Dt::EntityManager::GetEntityByID(pCameraComponent->GetHostEntity()->GetID());
+                Dt::CEntity* pNewEntity = Dt::CEntityManager::GetInstance().GetEntityByID(pCameraComponent->GetHostEntity()->GetID());
 
                 if (pNewEntity != nullptr && pNewEntity->IsInMap())
                 {

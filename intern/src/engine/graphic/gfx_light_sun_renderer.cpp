@@ -115,7 +115,7 @@ namespace
     
     CGfxLightSunRenderer::~CGfxLightSunRenderer()
     {
-    	
+        
     }
     
     // -----------------------------------------------------------------------------
@@ -283,10 +283,10 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
-        	Dt::CSunComponent* pDataSunFacet     = CurrentRenderJob->m_pDataSunLightFacet;
-        	Gfx::CSun* pGraphicSunFacet = CurrentRenderJob->m_pGraphicSunLightFacet;
+            Dt::CSunComponent* pDataSunFacet     = CurrentRenderJob->m_pDataSunLightFacet;
+            Gfx::CSun* pGraphicSunFacet = CurrentRenderJob->m_pGraphicSunLightFacet;
 
-        	// -----------------------------------------------------------------------------
+            // -----------------------------------------------------------------------------
             // Upload buffer data
             // -----------------------------------------------------------------------------
             SSunLightProperties LightBuffer;

@@ -19,9 +19,9 @@ namespace Edit
         
     private:
         
-        virtual CState::EStateType InternOnEnter();
-        virtual CState::EStateType InternOnLeave();
-        virtual CState::EStateType InternOnRun();
+        void InternOnEnter() override;
+        void InternOnLeave() override;
+        CState::EStateType InternOnRun() override;
         
     };
 } // namespace Edit

@@ -166,6 +166,12 @@
     <Filter Include="network">
       <UniqueIdentifier>{e9e54e8a-9d7c-43f0-b6c0-50bb3034ffdb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="graphic\engine\scissor rects">
+      <UniqueIdentifier>{7dd9f403-efca-4a0a-b434-70c2577c32cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\input">
+      <UniqueIdentifier>{3f2888bf-eba3-46a6-8f9c-960eccb08285}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\engine\core\core_asset_importer.cpp">
@@ -478,6 +484,36 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_refraction_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_reconstruction_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_scissor_rect.cpp">
+      <Filter>graphic\engine\scissor rects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_highlight_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\script\script_ar_camera_control_script.cpp">
+      <Filter>script\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\script\script_ar_place_object_on_touch_script.cpp">
+      <Filter>script\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\script\script_camera_control_script.cpp">
+      <Filter>script\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\script\script_easyar_target_script.cpp">
+      <Filter>script\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\script\script_light_estimation.cpp">
+      <Filter>script\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\script\script_slam.cpp">
+      <Filter>script\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\script\script_pixmix.cpp">
+      <Filter>script\scripts</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -817,9 +853,6 @@
     <ClInclude Include="..\..\..\src\engine\gui\gui_input_manager.h">
       <Filter>gui\input</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\engine\gui\gui_event_delegate.h">
-      <Filter>gui\events</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\engine\gui\gui_event_handler.h">
       <Filter>gui\events</Filter>
     </ClInclude>
@@ -888,6 +921,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_refraction_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_reconstruction_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_scissor_rect.h">
+      <Filter>graphic\engine\scissor rects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_highlight_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\script\script_pixmix.h">
+      <Filter>script\scripts</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

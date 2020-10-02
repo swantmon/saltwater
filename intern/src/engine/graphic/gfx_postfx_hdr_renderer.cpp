@@ -141,6 +141,8 @@ namespace
         CBloomRenderJobs m_BloomRenderJobs;
         
         unsigned int m_SwapCounter;
+
+        Gfx::Main::CResizeDelegate::HandleType m_OnResizeDelegate;
         
     private:
         
@@ -176,10 +178,7 @@ namespace
     {
         m_BloomRenderJobs.reserve(2);
 
-        // -----------------------------------------------------------------------------
-        // Register for resizing events
-        // -----------------------------------------------------------------------------
-        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxPostFXHDRRenderer::OnResize));
+        m_OnResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxPostFXHDRRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
     }
     
     // -----------------------------------------------------------------------------
@@ -300,7 +299,7 @@ namespace
         
         CTexturePtr ColorTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Swap Color
 
-		TextureManager::SetTextureLabel(ColorTexturePtr, "PostFX (HDR) Swap Target");
+        TextureManager::SetTextureLabel(ColorTexturePtr, "PostFX (HDR) Swap Target");
 
         // -----------------------------------------------------------------------------
         // Create down sample target sets
@@ -312,7 +311,7 @@ namespace
 
             CTexturePtr DownSampleRenderTargetTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Down Samples
 
-			TextureManager::SetTextureLabel(DownSampleRenderTargetTexturePtr, "PostFX (HDR) Down Sample Target");
+            TextureManager::SetTextureLabel(DownSampleRenderTargetTexturePtr, "PostFX (HDR) Down Sample Target");
 
             m_DownSampleTargetSetPtrs[IndexofDownSample] = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(DownSampleRenderTargetTexturePtr));
         }
@@ -428,11 +427,11 @@ namespace
             CTexturePtr   ResultTexturePtr     = TextureManager::CreateTexture2D(TextureDescriptor);
             CTexturePtr DownSampleTexturePtr = m_DownSampleTargetSetPtrs[IndexOfBlurStage]->GetRenderTarget(0);
 
-            m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 0] = TextureManager::CreateTextureSet(DownSampleTexturePtr						, static_cast<CTexturePtr>(TempTexturePtr));
+            m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 0] = TextureManager::CreateTextureSet(DownSampleTexturePtr                        , static_cast<CTexturePtr>(TempTexturePtr));
             m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 1] = TextureManager::CreateTextureSet(static_cast<CTexturePtr>(TempTexturePtr), static_cast<CTexturePtr>(ResultTexturePtr));
 
-			TextureManager::SetTextureLabel(ResultTexturePtr, "Blur Stage Result");
-			TextureManager::SetTextureLabel(TempTexturePtr  , "Blur Temp Stage Result");
+            TextureManager::SetTextureLabel(ResultTexturePtr, "Blur Stage Result");
+            TextureManager::SetTextureLabel(TempTexturePtr  , "Blur Temp Stage Result");
         }
 
         // -----------------------------------------------------------------------------
@@ -589,7 +588,7 @@ namespace
         
         CTexturePtr ColorTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Swap Color
 
-		TextureManager::SetTextureLabel(ColorTexturePtr, "PostFX (HDR) Swap Target");
+        TextureManager::SetTextureLabel(ColorTexturePtr, "PostFX (HDR) Swap Target");
 
         // -----------------------------------------------------------------------------
         // Create down sample target sets
@@ -601,7 +600,7 @@ namespace
 
             CTexturePtr DownSampleRenderTargetTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Down Samples
 
-			TextureManager::SetTextureLabel(DownSampleRenderTargetTexturePtr, "PostFX (HDR) Down Sample Target");
+            TextureManager::SetTextureLabel(DownSampleRenderTargetTexturePtr, "PostFX (HDR) Down Sample Target");
 
             m_DownSampleTargetSetPtrs[IndexofDownSample] = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(DownSampleRenderTargetTexturePtr));
         }
@@ -671,7 +670,7 @@ namespace
             CTexturePtr   ResultTexturePtr     = TextureManager::CreateTexture2D(TextureDescriptor);
             CTexturePtr DownSampleTexturePtr = m_DownSampleTargetSetPtrs[IndexOfBlurStage]->GetRenderTarget(0);
 
-            m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 0] = TextureManager::CreateTextureSet(DownSampleTexturePtr						, static_cast<CTexturePtr>(TempTexturePtr));
+            m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 0] = TextureManager::CreateTextureSet(DownSampleTexturePtr                        , static_cast<CTexturePtr>(TempTexturePtr));
             m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 1] = TextureManager::CreateTextureSet(static_cast<CTexturePtr>(TempTexturePtr), static_cast<CTexturePtr>(ResultTexturePtr));
 
             TextureManager::SetTextureLabel(ResultTexturePtr, "Blur Stage Result");

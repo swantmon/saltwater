@@ -25,15 +25,15 @@ namespace CON
     {
     public:
         
-        typedef CPool<T>         CThis;
-        typedef T                X;
-        typedef T*               XPtr;
-        typedef const T*         XConstPtr;
-        typedef T&               XRef;
-        typedef const T&         XConstRef;
-        typedef unsigned int     BDifference;
-        typedef Size             BSize;
-        typedef Size             BID;
+        using CThis = CPool<T>;
+        using X = T;
+        using XPtr = T*;
+        using XConstPtr = const T*;
+        using XRef = T&;
+        using XConstRef = const T&;
+        using BDifference = unsigned int;
+        using BSize = Size;
+        using BID = Size;
         
     private:
         
@@ -51,14 +51,14 @@ namespace CON
             
             typedef CConstIterator                   CThis;
             typedef CPool<T, TNumberOfItemsPerPage>  CContainer;
-            typedef typename CContainer::X           X;
-            typedef typename CContainer::XConstPtr   XPtr;
-            typedef typename CContainer::XConstPtr   XConstPtr;
-            typedef typename CContainer::XConstRef   XRef;
-            typedef typename CContainer::XConstRef   XConstRef;
-            typedef typename CContainer::BDifference BDifference;
-            typedef typename CContainer::BSize       BSize;
-            typedef typename CContainer::BID         BID;
+            using X = typename CContainer::X;
+            using XPtr = typename CContainer::XConstPtr;
+            using XConstPtr = typename CContainer::XConstPtr;
+            using XRef = typename CContainer::XConstRef;
+            using XConstRef = typename CContainer::XConstRef;
+            using BDifference = typename CContainer::BDifference;
+            using BSize = typename CContainer::BSize;
+            using BID = typename CContainer::BID;
             
         public:
             
@@ -102,16 +102,17 @@ namespace CON
         public:
             
             typedef CIterator                        CThis;
-            typedef CConstIterator                   CBase;
             typedef CPool<T, TNumberOfItemsPerPage>  CContainer;
-            typedef typename CContainer::X           X;
-            typedef typename CContainer::XPtr        XPtr;
-            typedef typename CContainer::XConstPtr   XConstPtr;
-            typedef typename CContainer::XRef        XRef;
-            typedef typename CContainer::XConstRef   XConstRef;
-            typedef typename CContainer::BDifference BDifference;
-            typedef typename CContainer::BSize       BSize;
-            typedef typename CContainer::BID         BID;
+
+            using CBase = CConstIterator;
+            using X = typename CContainer::X;
+            using XPtr = typename CContainer::XPtr;
+            using XConstPtr = typename CContainer::XConstPtr;
+            using XRef = typename CContainer::XRef;
+            using XConstRef = typename CContainer::XConstRef;
+            using BDifference = typename CContainer::BDifference;
+            using BSize = typename CContainer::BSize;
+            using BID = typename CContainer::BID;
             
         public:
             

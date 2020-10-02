@@ -12,6 +12,7 @@
 #include "engine/graphic/gfx_render_context.h"
 #include "engine/graphic/gfx_render_state.h"
 #include "engine/graphic/gfx_sampler_set.h"
+#include "engine/graphic/gfx_scissor_rect.h"
 #include "engine/graphic/gfx_shader.h"
 #include "engine/graphic/gfx_target_set.h"
 #include "engine/graphic/gfx_texture.h"
@@ -58,6 +59,10 @@ namespace ContextManager
     ENGINE_API void SetViewPortSet(CViewPortSetPtr _ViewPortSetPtr);
     ENGINE_API CViewPortSetPtr GetViewPortSet();
 
+    ENGINE_API void ResetScissorRect();
+    ENGINE_API void SetScissorRect(const CScissorRect& _rScissorRect);
+    ENGINE_API const CScissorRect& GetScissorRect();
+
     ENGINE_API void ResetInputLayout();
     ENGINE_API void SetInputLayout(CInputLayoutPtr _InputLayoutPtr);
     ENGINE_API CInputLayoutPtr GetInputLayout();
@@ -99,7 +104,7 @@ namespace ContextManager
     ENGINE_API CTexturePtr GetTexture(unsigned int _Unit);
 
     ENGINE_API void ResetImageTexture(unsigned int _Unit);
-    ENGINE_API void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr);
+    ENGINE_API void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr, int _Level = 0);
     ENGINE_API CTexturePtr GetImageTexture(unsigned int _Unit);
 
     ENGINE_API void ResetConstantBuffer(unsigned int _Unit);
@@ -112,10 +117,10 @@ namespace ContextManager
     ENGINE_API void SetResourceBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
     ENGINE_API CBufferPtr GetResourceBuffer(unsigned int _Unit);
 
-	ENGINE_API void ResetAtomicCounterBuffer(unsigned int _Unit);
-	ENGINE_API void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+    ENGINE_API void ResetAtomicCounterBuffer(unsigned int _Unit);
+    ENGINE_API void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
     ENGINE_API void SetAtomicCounterBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
-	ENGINE_API CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit);
+    ENGINE_API CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit);
 
     ENGINE_API void Flush();
 

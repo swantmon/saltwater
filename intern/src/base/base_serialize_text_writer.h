@@ -1,18 +1,4 @@
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \file base_serialize_text_writer.h
-///
-/// \author Tobias Schwandt
-/// \author Credits to Joerg Sahm
-/// \author Copyright (c) Tobias Schwandt. All rights reserved.
-///
-/// \date 2012-2013
-///
-/// \version 1.0
-/// 
-////////////////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include "base/base_defines.h"
@@ -26,7 +12,7 @@
 
 namespace SER
 {
-	class CTextWriter : public CArchive
+    class CTextWriter : public CArchive
     {
     public:
         enum
@@ -36,8 +22,8 @@ namespace SER
         };
 
     public:
-        typedef std::ostream CStream;
-        typedef CTextWriter  CThis;
+        using CStream = std::ostream;
+        using CThis = CTextWriter;
 
     public:
         inline  CTextWriter(CStream& _rStream, unsigned int _Version);
@@ -58,7 +44,7 @@ namespace SER
         inline void BeginCollection(unsigned int _NumberOfElements);
 
         template<typename TElement>
-        inline void WriteCollection(const TElement* _pElements);
+        inline void WriteCollection(const TElement* _pElements, unsigned int _NumberOfElements);
 
         template<typename TElement>
         inline void EndCollection();
@@ -81,20 +67,19 @@ namespace SER
 
     private:
         CStream*     m_pStream;
-        unsigned int m_NumberOfElements;
         unsigned int m_NumberOfIdents;
         EStatus      m_State;
 
     private:
         template<typename TElement>
-        inline void InternBeginCollection(const TElement* _pElements);
-        inline void InternBeginCollection(const char* _pElements);
-        inline void InternBeginCollection(const wchar_t* _pElements);
+        inline void InternBeginCollection(const TElement* _pElements, unsigned int _NumberOfElements);
+        inline void InternBeginCollection(const char* _pElements, unsigned int _NumberOfElements);
+        inline void InternBeginCollection(const wchar_t* _pElements, unsigned int _NumberOfElements);
 
         template<typename TElement>
-        inline void InternWriteCollection(const TElement* _pElements);
-        inline void InternWriteCollection(const char* _pElements);
-        inline void InternWriteCollection(const wchar_t* _pElements);
+        inline void InternWriteCollection(const TElement* _pElements, unsigned int _NumberOfElements);
+        inline void InternWriteCollection(const char* _pElements, unsigned int _NumberOfElements);
+        inline void InternWriteCollection(const wchar_t* _pElements, unsigned int _NumberOfElements);
 
         template<typename TElement>
         inline void InternEndCollection(const TElement* _pElements);
@@ -122,12 +107,11 @@ namespace SER
 
 namespace SER
 {
-	inline CTextWriter::CTextWriter(CStream& _rStream, unsigned int _Version)
-        : CArchive          (_Version)
-        , m_pStream         (&_rStream)
-        , m_NumberOfElements(0)
-        , m_NumberOfIdents  (0)
-        , m_State           (Default)
+    inline CTextWriter::CTextWriter(CStream& _rStream, unsigned int _Version)
+        : CArchive        (_Version)
+        , m_pStream       (&_rStream)
+        , m_NumberOfIdents(0)
+        , m_State         (Default)
     {
         // -----------------------------------------------------------------------------
         // Write header informations (internal format, version)
@@ -179,19 +163,17 @@ namespace SER
     template<typename TElement>
     inline void CTextWriter::BeginCollection(unsigned int _NumberOfElements)
     {
-        typedef typename SRemoveQualifier<TElement>::X XUnqualified;
+        using XUnqualified = typename SRemoveQualifier<TElement>::X;
 
-        m_NumberOfElements = _NumberOfElements;
-
-        InternBeginCollection(static_cast<XUnqualified*>(0));
+        InternBeginCollection(static_cast<XUnqualified*>(0), _NumberOfElements);
     }
 
     // -----------------------------------------------------------------------------
 
     template<typename TElement>
-    inline void CTextWriter::WriteCollection(const TElement* _pElements)
+    inline void CTextWriter::WriteCollection(const TElement* _pElements, unsigned int _NumberOfElements)
     {
-        InternWriteCollection(_pElements);
+        InternWriteCollection(_pElements, _NumberOfElements);
     }
 
     // -----------------------------------------------------------------------------
@@ -199,7 +181,7 @@ namespace SER
     template<typename TElement>
     inline void CTextWriter::EndCollection()
     {
-        typedef typename SRemoveQualifier<TElement>::X XUnqualified;
+        using XUnqualified = typename SRemoveQualifier<TElement>::X;
 
         InternEndCollection(static_cast<XUnqualified*>(0));
     }
@@ -226,25 +208,23 @@ namespace SER
     template<typename TElement>
     inline void CTextWriter::WriteClass(const TElement& _rElement)
     {
-        typedef typename SRemoveQualifier<TElement>::X XUnqualified;
+        using XUnqualified = typename SRemoveQualifier<TElement>::X;
 
         static const unsigned int s_MaxLengthOfClassName = 2048;
 
-        char ClassName[s_MaxLengthOfClassName];
-
-        strcpy(ClassName, typeid( XUnqualified ).name());
+        std::string ClassName = typeid(XUnqualified).name();
 
         InternWriteIndent();
 
         InternWriteChar(Private::Code::s_BracketOpen);
 
-        InternWriteName(ClassName);
+        InternWriteName(ClassName.c_str());
 
         InternWriteEOL();
 
         ++ m_NumberOfIdents;
 
-        SER::Private::CAccess::Serialize(*this, const_cast<TElement&>(_rElement));
+        SER::Private::CAccess::Write(*this, const_cast<TElement&>(_rElement));
 
         -- m_NumberOfIdents;
 
@@ -258,14 +238,16 @@ namespace SER
     // -----------------------------------------------------------------------------
 
     template<typename TElement>
-    inline void CTextWriter::InternBeginCollection(const TElement* _pElements)
+    inline void CTextWriter::InternBeginCollection(const TElement* _pElements, unsigned int _NumberOfElements)
     {
+        BASE_UNUSED(_pElements);
+
         InternWriteIndent();
         InternWriteChar(Private::Code::s_BracketOpen);
         InternWriteName(Private::Code::s_Collection);
 
         InternWriteChar(Private::Code::s_Space);
-        InternWriteValue(m_NumberOfElements);
+        InternWriteValue(_NumberOfElements);
         InternWriteChar(Private::Code::s_Space);
 
         InternWriteEOL();
@@ -276,7 +258,7 @@ namespace SER
 
     // -----------------------------------------------------------------------------
 
-    inline void CTextWriter::InternBeginCollection(const char* _pElements)
+    inline void CTextWriter::InternBeginCollection(const char* _pElements, unsigned int _NumberOfElements)
     {
         BASE_UNUSED(_pElements);
 
@@ -285,13 +267,13 @@ namespace SER
         InternWriteName(Private::Code::s_Text);
 
         InternWriteChar(Private::Code::s_Space);
-        InternWriteValue(m_NumberOfElements);
+        InternWriteValue(_NumberOfElements);
         InternWriteChar(Private::Code::s_Space);
     }
 
     // -----------------------------------------------------------------------------
 
-    inline void CTextWriter::InternBeginCollection(const wchar_t* _pElements)
+    inline void CTextWriter::InternBeginCollection(const wchar_t* _pElements, unsigned int _NumberOfElements)
     {
         BASE_UNUSED(_pElements);
 
@@ -300,27 +282,22 @@ namespace SER
         InternWriteName(Private::Code::s_Text);
 
         InternWriteChar(Private::Code::s_Space);
-        InternWriteValue(m_NumberOfElements);
+        InternWriteValue(_NumberOfElements);
         InternWriteChar(Private::Code::s_Space);
     }
 
     // -----------------------------------------------------------------------------
 
     template<typename TElement>
-    inline void CTextWriter::InternWriteCollection(const TElement* _pElements)
+    inline void CTextWriter::InternWriteCollection(const TElement* _pElements, unsigned int _NumberOfElements)
     {
-        unsigned int IndexOfElement;
-        unsigned int NumberOfElements;
-
-        NumberOfElements = m_NumberOfElements;
-
         InternWriteIndent();
         InternWriteChar(Private::Code::s_BracketOpen);
         InternWriteEOL();
 
         ++ m_NumberOfIdents;
 
-        for (IndexOfElement = 0; IndexOfElement < NumberOfElements; ++IndexOfElement)
+        for (unsigned int IndexOfElement = 0; IndexOfElement < _NumberOfElements; ++IndexOfElement)
         {
             Write(_pElements[IndexOfElement]);
         }
@@ -334,16 +311,11 @@ namespace SER
 
     // -----------------------------------------------------------------------------
 
-    inline void CTextWriter::InternWriteCollection(const char* _pElements)
+    inline void CTextWriter::InternWriteCollection(const char* _pElements, unsigned int _NumberOfElements)
     {
-        unsigned int IndexOfElement;
-        unsigned int NumberOfElements;
-
-        NumberOfElements = m_NumberOfElements;
-
         InternWriteChar(Private::Code::s_TextSeperator);
 
-        for (IndexOfElement = 0; IndexOfElement < NumberOfElements; ++IndexOfElement)
+        for (unsigned int IndexOfElement = 0; IndexOfElement < _NumberOfElements; ++IndexOfElement)
         {
             Write(_pElements[IndexOfElement]);
         }
@@ -353,16 +325,11 @@ namespace SER
 
     // -----------------------------------------------------------------------------
 
-    inline void CTextWriter::InternWriteCollection(const wchar_t* _pElements)
+    inline void CTextWriter::InternWriteCollection(const wchar_t* _pElements, unsigned int _NumberOfElements)
     {
-        unsigned int IndexOfElement;
-        unsigned int NumberOfElements;
-
-        NumberOfElements = m_NumberOfElements;
-
         InternWriteChar(Private::Code::s_TextSeperator);
 
-        for (IndexOfElement = 0; IndexOfElement < NumberOfElements; ++IndexOfElement)
+        for (unsigned int IndexOfElement = 0; IndexOfElement < _NumberOfElements; ++IndexOfElement)
         {
             Write(_pElements[IndexOfElement]);
         }
@@ -375,6 +342,8 @@ namespace SER
     template<typename TElement>
     inline void CTextWriter::InternEndCollection(const TElement* _pElements)
     {
+        BASE_UNUSED(_pElements);
+
         m_State = Default;
 
         -- m_NumberOfIdents;

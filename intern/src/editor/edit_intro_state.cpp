@@ -3,8 +3,6 @@
 
 #include "editor/edit_intro_state.h"
 
-#include "editor_port/edit_message_manager.h"
-
 namespace Edit
 {
     CIntroState& CIntroState::GetInstance()
@@ -18,10 +16,8 @@ namespace Edit
 namespace Edit
 {
     CIntroState::CIntroState()
-        : m_CurrentState(EStateType::Intro)
+        : CState(Intro)
     {
-        MessageManager::Register(SGUIMessageType::App_LoadMap, EDIT_RECEIVE_MESSAGE(&CIntroState::OnLoadMap));
-        MessageManager::Register(Edit::SGUIMessageType::App_NewMap, EDIT_RECEIVE_MESSAGE(&CIntroState::OnNewMap));
     }
     
     // -----------------------------------------------------------------------------
@@ -33,52 +29,23 @@ namespace Edit
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CIntroState::InternOnEnter()
+    void CIntroState::InternOnEnter()
     {
-        // -----------------------------------------------------------------------------
-        // Load default state behavior
-        // -----------------------------------------------------------------------------
-        m_CurrentState = EStateType::Intro;
-        
-        return Edit::CState::Intro;
     }
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CIntroState::InternOnLeave()
+    void CIntroState::InternOnLeave()
     {
-        return Edit::CState::Intro;
+        m_NextState = CState::Intro;
     }
     
     // -----------------------------------------------------------------------------
     
     CState::EStateType CIntroState::InternOnRun()
     {
-        return m_CurrentState;
-    }
+        m_NextState = CState::LoadMap;
 
-    // -----------------------------------------------------------------------------
-
-    void CIntroState::OnNewMap(Edit::CMessage& _rMessage)
-    {
-        // -----------------------------------------------------------------------------
-        // Allocate a map
-        // -----------------------------------------------------------------------------
-        int MapX = _rMessage.Get<int>();
-        int MapY = _rMessage.Get<int>();
-
-        BASE_UNUSED(MapX);
-        BASE_UNUSED(MapY);
-
-        m_CurrentState = Edit::CState::LoadMap;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CIntroState::OnLoadMap(Edit::CMessage& _rMessage)
-    {
-        BASE_UNUSED(_rMessage);
-
-        m_CurrentState = Edit::CState::LoadMap;
+        return m_NextState;
     }
 } // namespace Edit

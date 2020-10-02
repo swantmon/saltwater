@@ -1,21 +1,8 @@
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \file base_serialize_binary_reader.h
-///
-/// \author Tobias Schwandt
-/// \author Credits to Joerg Sahm
-/// \author Copyright (c) Tobias Schwandt. All rights reserved.
-///
-/// \date 2012-2013
-///
-/// \version 1.0
-/// 
-////////////////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include "base/base_defines.h"
+#include "base/base_exception.h"
 #include "base/base_serialize_archive.h"
 
 #include <assert.h>
@@ -23,7 +10,7 @@
 
 namespace SER
 {
-	class CBinaryReader : public CArchive
+    class CBinaryReader : public CArchive
     {
     public:
         enum
@@ -33,8 +20,8 @@ namespace SER
         };
 
     public:
-        typedef std::istream  CStream;
-        typedef CBinaryReader CThis;
+        using CStream = std::istream;
+        using CThis = CBinaryReader;
 
     public:
         inline  CBinaryReader(CStream& _rStream, unsigned int _Version);
@@ -69,17 +56,15 @@ namespace SER
         inline void ReadClass(TElement& _rElement);
 
     private:
-        CStream*     m_pStream;
-        unsigned int m_NumberOfElements;
+        CStream* m_pStream;
     };
 } // namespace SER
 
 namespace SER
 {
-	inline CBinaryReader::CBinaryReader(CStream& _rStream, unsigned int _Version)
-        : CArchive          (_Version)
-        , m_pStream         (&_rStream)
-        , m_NumberOfElements(0)
+    inline CBinaryReader::CBinaryReader(CStream& _rStream, unsigned int _Version)
+        : CArchive (_Version)
+        , m_pStream(&_rStream)
     {
         // -----------------------------------------------------------------------------
         // Read header informations (internal format, version)
@@ -88,7 +73,7 @@ namespace SER
 
         if (m_ArchiveVersion != _Version)
         {
-            throw "Bad resource because of incompatible version.";
+            BASE_THROWM("Bad resource because of incompatible version.");
         }
     }
 
@@ -132,9 +117,11 @@ namespace SER
     template<typename TElement>
     inline unsigned int CBinaryReader::BeginCollection()
     {
-        ReadBinary(&m_NumberOfElements, sizeof(m_NumberOfElements));
+        int NumberOfElements;
 
-        return m_NumberOfElements;
+        ReadBinary(&NumberOfElements, sizeof(NumberOfElements));
+
+        return NumberOfElements;
     }
 
     // -----------------------------------------------------------------------------
@@ -146,16 +133,11 @@ namespace SER
 
         if (IsPrimitive)
         {
-            ReadBinary(_pElements, m_NumberOfElements * sizeof(*_pElements));
+            ReadBinary(_pElements, _NumberOfElements * sizeof(*_pElements));
         }
         else
         {
-            unsigned int IndexOfElement;
-            unsigned int NumberOfElements;
-
-            NumberOfElements = m_NumberOfElements;
-
-            for (IndexOfElement = 0; IndexOfElement < NumberOfElements; ++IndexOfElement)
+            for (unsigned int IndexOfElement = 0; IndexOfElement < _NumberOfElements; ++IndexOfElement)
             {
                 Read(_pElements[IndexOfElement]);
             }
@@ -190,6 +172,6 @@ namespace SER
     template<typename TElement>
     inline void CBinaryReader::ReadClass(TElement& _rElement)
     {
-        Serialize(*this, const_cast<TElement&>(_rElement));
+        SER::Private::CAccess::Read(*this, const_cast<TElement&>(_rElement));
     }
 } // namespace SER

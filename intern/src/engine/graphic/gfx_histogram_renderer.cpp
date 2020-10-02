@@ -181,14 +181,14 @@ namespace
     
     void CGfxHistogramRenderer::OnExit()
     {
-        m_HistogramShaderPtrs[HistogramBuild]    = 0;
-        m_HistogramShaderPtrs[HistogramMerge]    = 0;
-        m_HistogramShaderPtrs[HistogramEvaluate] = 0;
+        m_HistogramShaderPtrs[HistogramBuild]    = nullptr;
+        m_HistogramShaderPtrs[HistogramMerge]    = nullptr;
+        m_HistogramShaderPtrs[HistogramEvaluate] = nullptr;
 
-        m_HistogramSettingsBufferPtr       = 0;
-        m_HistogramPerThreadGroupBufferPtr = 0;
-        m_HistogramBufferPtr               = 0;
-        m_ExposureHistoryBufferPtr         = 0;
+        m_HistogramSettingsBufferPtr       = nullptr;
+        m_HistogramPerThreadGroupBufferPtr = nullptr;
+        m_HistogramBufferPtr               = nullptr;
+        m_ExposureHistoryBufferPtr         = nullptr;
     }
     
     // -----------------------------------------------------------------------------
@@ -253,7 +253,7 @@ namespace
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SExposureHistoryBuffer);
         ConstanteBufferDesc.m_pBytes        = &DefaultHistoryData;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
         
         m_ExposureHistoryBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -266,8 +266,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SConstantBufferCS);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
 
         m_HistogramSettingsBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -280,8 +280,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = s_MaxNumberOfThreadGroups * s_HistogramSize * sizeof(float);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
         
         m_HistogramPerThreadGroupBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -294,8 +294,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = s_HistogramSize * sizeof(float);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
         
         m_HistogramBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 

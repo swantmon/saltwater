@@ -4,6 +4,7 @@
 #include "engine/engine_config.h"
 
 #include "base/base_include_glm.h"
+#include "base/base_serialize_glm.h"
 
 namespace Dt
 {
@@ -27,6 +28,9 @@ namespace Dt
         glm::mat4& GetWorldMatrix();
         const glm::mat4& GetWorldMatrix() const;
 
+        void Read(CSceneReader& _rCodec);
+        void Write(CSceneWriter& _rCodec);
+
     public:
 
         CTransformationFacet();
@@ -38,6 +42,10 @@ namespace Dt
         glm::vec3 m_Position;              //< Position of the entity to its parent
         glm::quat m_Rotation;              //< Rotation of the entity to its parent
         glm::vec3 m_Scale;                 //< Scale of the entity to its parent
+
+    private:
+
+        friend class CTransformationFacetGUI;
     };
 } // namespace Dt
 

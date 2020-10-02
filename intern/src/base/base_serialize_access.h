@@ -21,14 +21,14 @@ namespace SER
 {
 namespace Private
 {
-	class CAccess
+    class CAccess
     {
     public:
         template <class TArchive, class TObject>
         static void Read(TArchive& _rCodec, TObject& _rObject);
 
         template <class TArchive, class TObject>
-        static void Write(TArchive& _rCodec, const TObject& _rObject);
+        static void Write(TArchive& _rCodec, TObject& _rObject);
 
         template <class TArchive, class TObject>
         static void Serialize(TArchive& _rCodec, TObject& _rObject);
@@ -49,14 +49,14 @@ namespace Private
     // -----------------------------------------------------------------------------
 
     template <class TArchive, class TObject>
-    inline void CAccess::Write(TArchive& _rCodec, const TObject& _rObject)
+    inline void CAccess::Write(TArchive& _rCodec, TObject& _rObject)
     {
         _rObject.Write(_rCodec);
     }
 
     // -----------------------------------------------------------------------------
 
-	template <class TArchive, class TObject>
+    template <class TArchive, class TObject>
     inline void CAccess::Serialize(TArchive& _rCodec, TObject& _rObject)
     {
         _rObject.Serialize(_rCodec);

@@ -11,6 +11,9 @@
 #include "engine/core/core_program_parameters.h"
 #include "engine/core/core_time.h"
 
+#include "engine/data/data_component_manager.h"
+#include "engine/data/data_script_component.h"
+
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_main.h"
@@ -25,8 +28,10 @@
 #include "engine/graphic/gfx_texture_manager.h"
 #include "engine/graphic/gfx_view_manager.h"
 
+#include "engine/script/script_slam.h"
+
 #include "plugin/slam/gfx_reconstruction_renderer.h"
-#include "plugin/slam/mr_scalable_slam_reconstructor.h"
+#include "plugin/slam/mr_slam_reconstructor.h"
 
 #include "GL/glew.h"
 
@@ -40,6 +45,13 @@ using namespace Gfx;
 
 namespace
 {
+    const int g_TileSize2D = 16;
+
+    int DivUp(int TotalShaderCount, int WorkGroupSize)
+    {
+        return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
+    }
+
     glm::vec3 g_CubeVertices[] =
     {
         glm::vec3(0.0f, 0.0f, 0.0f),
@@ -52,17 +64,26 @@ namespace
         glm::vec3(0.0f, 1.0f, 1.0f),
     };
 
-	struct SDrawCallConstantBuffer
-	{
-		glm::mat4 m_WorldMatrix;
-		glm::vec4 m_Color;
-	};
+    struct SDrawCallConstantBuffer
+    {
+        glm::mat4 m_WorldMatrix;
+        glm::vec4 m_Color;
+    };
 
     struct SPickingBuffer
     {
         glm::vec4 m_RayStart;
         glm::vec4 m_RayDirection;
         glm::vec4 m_WorldHitPosition;
+    };
+
+    struct SSelectionTransform
+    {
+        glm::mat4 m_WSToSelectionTransform;
+        glm::vec3 m_AABBMin;
+        float Padding;
+        glm::vec3 m_AABBMax;
+        float Padding1;
     };
 
     class CGfxReconstructionRenderer : private Base::CUncopyable
@@ -96,16 +117,28 @@ namespace
         void OnResize(unsigned int _Width, unsigned int _Height);
         
         void Update();
-        void Render(int _Pass);
+        void Render();
+        void RenderForward();
+        void RenderHitProxy();
         void ChangeCamera(bool _IsTrackingCamera);
 
-        void SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor);
+        void SetReconstructor(MR::CSLAMReconstructor& _rReconstructor);
+        void SetDeviceResolution(const glm::ivec2& _Resolution);
 
         glm::vec3 Pick(const glm::ivec2& _rCursorPosition);
 
-        void SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State);
+        void UpdateSelectionBox();
+        void AddPositionToSelection(const glm::vec3& _rWSPosition);
+        void ResetSelection();
+        void SetInpaintedPlane(Gfx::CTexturePtr _Texture, const Base::AABB3Float& _rAABB);
+        CTexturePtr GetInpaintedRendering(const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr);
+
+        const Base::AABB3Float& GetSelectionBox();
+        void SetVisibleObjects(bool _RenderVolume, bool _RenderRoot, bool _RenderLevel1, bool _RenderLevel2, int _PlaneMode);
 
     private:
+
+        glm::ivec2 m_DeviceResolution;
 
         // -----------------------------------------------------------------------------
         // Stuff for selection box
@@ -113,26 +146,37 @@ namespace
         enum class ESelection
         {
             NOSELECTION,
-            FIRSTPRESS,
-            FIRSTRELEASE,
-            SECONDPRESS,
-            SECONDRELEASE
+            SELECTED,
         };
+
+        // -----------------------------------------------------------------------------
+        // Stuff for inpainted plane
+        // -----------------------------------------------------------------------------
+        Gfx::CTexturePtr m_InpaintedPlaneTexture;
+        Base::AABB3Float m_InpaintedPlaneAABB;
+        float m_InpaintedPlaneScale;
 
     private:
 
         void Initialize();
-
-        void RenderVolumeVertexMap();
-
-		void RaycastScalableVolume();
-        void RaycastScalableVolumeWithHighlight();
         
+        void RaycastVolume();
+        void RaycastVolumeWithHighlight();
+
+        void RenderBackgroundImage(CTexturePtr _Background, bool _IsFlipped = false);
+        void CombineDiminishedImage(CTexturePtr _Background, CTexturePtr _Diminished, bool _IsFlipped = false);
+        void RaycastVolumeDiminished(const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexture = nullptr);
+        void RenderInpaintedPlane(const Base::AABB3Float& _rAABB);
+        
+        void CreateMembrane(CTexturePtr _BackgroundTexturePtr, CTexturePtr _Diminished);
+
         void RenderQueuedRootVolumes();
         void RenderQueuedLevel1Grids();
         void RenderQueuedLevel2Grids();
 
         void RenderCamera();
+
+        void RenderPlanes();
 
         void RenderVertexMap();
 
@@ -140,13 +184,13 @@ namespace
 
     private:
 
-		MR::CScalableSLAMReconstructor* m_pScalableReconstructor;
+        MR::CSLAMReconstructor* m_pReconstructor;
         
         CShaderPtr m_OutlineVSPtr;
         CShaderPtr m_OutlineFSPtr;
 
-        CShaderPtr m_VolumeVertexMapVSPtr;
-        CShaderPtr m_VolumeVertexMapFSPtr;
+        CShaderPtr m_VertexMapVSPtr;
+        CShaderPtr m_VertexMapFSPtr;
 
         CShaderPtr m_OutlineLevel1VSPtr;
         CShaderPtr m_OutlineLevel1FSPtr;
@@ -154,27 +198,55 @@ namespace
         CShaderPtr m_OutlineLevel2FSPtr;
         
         CShaderPtr m_RaycastVSPtr;
+        CShaderPtr m_RaycastDiminishedVSPtr;
         CShaderPtr m_RaycastFSPtr;
         CShaderPtr m_RaycastHighlightFSPtr;
+        CShaderPtr m_RaycastDiminishedFSPtr;
+        CShaderPtr m_RaycastHitProxyFSPtr;
 
-        CShaderPtr m_CopyRaycastVSPtr;
-        CShaderPtr m_CopyRaycastFSPtr;
+        CShaderPtr m_InpaintedPlaneVSPtr;
+        CShaderPtr m_InpaintedPlaneFSPtr;
 
+        CShaderPtr m_BackgroundVSPtr;
+        CShaderPtr m_BackgroundFSPtr;
+        CShaderPtr m_CombineDiminishedFSPtr;
+        
+        CShaderPtr m_MembranePatchesCSPtr;
+        CShaderPtr m_MembraneBorderCSPtr;
+        CShaderPtr m_MembraneEvalBorderCSPtr;
+        CShaderPtr m_MembranePropagateGridCSPtr;
+        CShaderPtr m_MembranePropagatePixelsCSPtr;
+
+        CShaderPtr m_PlaneMeshVSPtr;
+        CShaderPtr m_PlaneMeshFSPtr;
+
+        CShaderPtr m_ExtentMeshVSPtr;
+        CShaderPtr m_ExtentMeshFSPtr;
+        
         CBufferPtr m_RaycastConstantBufferPtr;
+        CBufferPtr m_RaycastHitProxyBufferPtr;
         CBufferPtr m_RaycastHighLightConstantBufferPtr;
         CBufferPtr m_DrawCallConstantBufferPtr;
+
+        CBufferPtr m_MembraneIndirectBufferPtr;
+        CBufferPtr m_MembranePatchBufferPtr;
                 
         CMeshPtr m_CameraMeshPtr;
-		CInputLayoutPtr m_CameraInputLayoutPtr;
+        CInputLayoutPtr m_CameraInputLayoutPtr;
 
-		CMeshPtr m_CubeOutlineMeshPtr;
-		CInputLayoutPtr m_CubeOutlineInputLayoutPtr;
+        CMeshPtr m_CubeOutlineMeshPtr;
+        CInputLayoutPtr m_CubeOutlineInputLayoutPtr;
 
         CMeshPtr m_VolumeMeshPtr;        
         CInputLayoutPtr m_VolumeInputLayoutPtr;
 
-        CMeshPtr m_QuadMeshPtr;
-        CInputLayoutPtr m_QuadInputLayoutPtr;
+        CMeshPtr m_InpaintedPlaneMeshPtr;
+        CInputLayoutPtr m_InpaintedPlaneLayoutPtr;
+
+        CMeshPtr m_FullscreenQuadMeshPtr;
+        CInputLayoutPtr m_FullscreenQuadLayoutPtr;
+
+        CInputLayoutPtr m_PlaneMeshLayoutPtr;
 
         CRenderContextPtr m_OutlineRenderContextPtr;
 
@@ -185,27 +257,54 @@ namespace
 
         CShaderPtr m_PickingCSPtr;
 
-        CTexturePtr m_IntermediateTargetPtr0;
-        CTexturePtr m_IntermediateTargetPtr1;
-        CTargetSetPtr m_IntermediateTargetSetPtr;
+        CTexturePtr m_DiminishedRaycastTargetPtr;
+        CTexturePtr m_DiminishedPlaneTargetPtr;
+        CTexturePtr m_DiminishedFinalTargetPtr;
+
+        CTargetSetPtr m_DiminishedRaycastTargetSetPtr;
+        CTargetSetPtr m_DiminishedPlaneTargetSetPtr;
+        CTargetSetPtr m_DiminishedFinalTargetSetPtr;
+
+        CViewPortSetPtr m_DiminishedViewPortSetPtr;
+
+        CTexturePtr m_MembranePatchesTexturePtr; 
+        CTexturePtr m_MembraneBordersTexturePtr;
+        CTexturePtr m_MembraneTexturePtr;
 
         CBufferPtr m_PickingBuffer;
 
         bool m_UseTrackingCamera;
 
-        bool m_RenderVolumeVertexMap;
         bool m_RenderVolume;
         bool m_RenderVertexMap;
         bool m_RenderRootQueue;
         bool m_RenderLevel1Queue;
         bool m_RenderLevel2Queue;
         bool m_RenderBackSides;
+        
+        enum EPlaneRenderingMode
+        {
+            NONE,
+            EXTENT_ONLY,
+            MESH_ONLY,
+            MESH_WITH_EXTENT,
+            ALL
+        } m_PlaneRenderMode;
 
         glm::mat4 m_SelectionTransform;
-
         ESelection m_SelectionState;
 
+        Base::AABB3Float m_SelectionBox;
+
         bool m_IsInitialized;
+
+        Gfx::Main::CResizeDelegate::HandleType m_ResizeDelegate;
+
+        int m_PatchCount;
+        int m_PatchSize;
+        int m_MaxBorderPatchCount;
+
+        bool m_IsInpainting = false;
     };
 } // namespace
 
@@ -216,11 +315,11 @@ namespace
     CGfxReconstructionRenderer::CGfxReconstructionRenderer()
         : m_UseTrackingCamera    (true)
         , m_RenderVolume         (true)
-        , m_RenderVolumeVertexMap(false)
         , m_RenderVertexMap      (false)
         , m_RenderRootQueue      (false)
         , m_RenderLevel1Queue    (false)
         , m_RenderLevel2Queue    (false)
+        , m_SelectionBox         ()
         , m_IsInitialized        (false)
     {
         
@@ -239,18 +338,55 @@ namespace
     {
         assert(Main::GetGraphicsAPI().m_GraphicsAPI == CGraphicsInfo::OpenGL);
 
-        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxReconstructionRenderer::OnResize));
+        m_ResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxReconstructionRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
                                 
-        m_UseTrackingCamera     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
-        m_RenderVolume          = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
-        m_RenderVolumeVertexMap = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume_vertex_map"  , false);
-        m_RenderVertexMap       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map"         , false);
-        m_RenderRootQueue       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root"        , false);
-        m_RenderLevel1Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
-        m_RenderLevel2Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
-        m_RenderBackSides       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
+        m_UseTrackingCamera   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
+        m_RenderVertexMap     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map", false);
+        m_RenderVolume        = true;
+        m_RenderRootQueue     = false;
+        m_RenderLevel1Queue   = false;
+        m_RenderLevel2Queue   = false;
+        m_RenderBackSides     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides", true);
+        m_InpaintedPlaneScale = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:scale", 2.0f);
+
+        auto PlaneModeString = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:plane_mode", "none");
+
+        if (PlaneModeString == "none")
+        {
+            m_PlaneRenderMode = EPlaneRenderingMode::NONE;
+        } else if (PlaneModeString == "extent")
+        {
+            m_PlaneRenderMode = EPlaneRenderingMode::EXTENT_ONLY;
+        }
+        else if (PlaneModeString == "mesh")
+        {
+            m_PlaneRenderMode = EPlaneRenderingMode::MESH_ONLY;
+        }
+        else if(PlaneModeString == "mesh_with_extent")
+        {
+            m_PlaneRenderMode = EPlaneRenderingMode::MESH_WITH_EXTENT;
+        }
+        else if (PlaneModeString == "all")
+        {
+            m_PlaneRenderMode = EPlaneRenderingMode::ALL;
+        }
+        else
+        {
+            BASE_THROWV("Unknown plane rendering mode: %s", PlaneModeString.c_str());
+        }
+
+        if (Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:aabb:load", false))
+        {
+            m_SelectionState = ESelection::SELECTED;
+            m_SelectionBox.SetMin(Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:aabb:min", glm::vec3(0.0f)));
+            m_SelectionBox.SetMax(Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:aabb:max", glm::vec3(0.0f)));
+        }
 
         m_IsInitialized = false;
+
+        m_MaxBorderPatchCount = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:rendering:max_border_patch_count", 128);
+        m_PatchCount = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:rendering:patch_count", 16);
+        m_PatchSize = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:rendering:patch_size", 16);
     }
 
     // -----------------------------------------------------------------------------
@@ -274,48 +410,89 @@ namespace
     
     void CGfxReconstructionRenderer::OnExit()
     {
-        m_OutlineVSPtr = 0;
-        m_OutlineFSPtr = 0;
-        m_OutlineLevel1VSPtr = 0;
-        m_OutlineLevel1FSPtr = 0;
-        m_OutlineLevel2VSPtr = 0;
-        m_OutlineLevel2FSPtr = 0;
-        m_RaycastVSPtr = 0;
-        m_RaycastFSPtr = 0;
-        m_RaycastHighlightFSPtr = 0;
-        m_CopyRaycastVSPtr = 0;
-        m_CopyRaycastFSPtr = 0;
-        m_PickingCSPtr = 0;
+        if (Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:aabb:store", false))
+        {
+            Core::CProgramParameters::GetInstance().Add("mr:diminished_reality:aabb:min", m_SelectionBox.GetMin());
+            Core::CProgramParameters::GetInstance().Add("mr:diminished_reality:aabb:max", m_SelectionBox.GetMax());
+        }
 
-        m_VolumeVertexMapVSPtr = 0;
-        m_VolumeVertexMapFSPtr = 0;
+        m_OutlineVSPtr = nullptr;
+        m_OutlineFSPtr = nullptr;
+        m_OutlineLevel1VSPtr = nullptr;
+        m_OutlineLevel1FSPtr = nullptr;
+        m_OutlineLevel2VSPtr = nullptr;
+        m_OutlineLevel2FSPtr = nullptr;
+        m_RaycastVSPtr = nullptr;
+        m_RaycastDiminishedVSPtr = nullptr;
+        m_RaycastFSPtr = nullptr;
+        m_RaycastHighlightFSPtr = nullptr;
+        m_RaycastDiminishedFSPtr = nullptr;
+        m_RaycastHitProxyFSPtr = nullptr;
+        m_PickingCSPtr = nullptr;
         
-        m_PickingBuffer = 0;
+        m_VertexMapVSPtr = nullptr;
+        m_VertexMapFSPtr = nullptr;
 
-        m_RaycastConstantBufferPtr = 0;
-        m_RaycastHighLightConstantBufferPtr = 0;
-        m_DrawCallConstantBufferPtr = 0;
+        m_BackgroundVSPtr = nullptr;
+        m_BackgroundFSPtr = nullptr;
+        m_CombineDiminishedFSPtr = nullptr;
+
+        m_MembranePatchesCSPtr = nullptr;
+        m_MembraneBorderCSPtr = nullptr;
+        m_MembraneEvalBorderCSPtr = nullptr;
+        m_MembranePropagateGridCSPtr = nullptr;
+        m_MembranePropagatePixelsCSPtr = nullptr;
+
+        m_PlaneMeshVSPtr = nullptr;
+        m_PlaneMeshFSPtr = nullptr;
         
-        m_CameraMeshPtr = 0;
-        m_VolumeMeshPtr = 0;
-        m_QuadMeshPtr = 0;
-		m_CubeOutlineMeshPtr = 0;
-        m_PlaneMeshPtr = 0;
-        m_CameraInputLayoutPtr = 0;
-        m_VolumeInputLayoutPtr = 0;
-        m_QuadInputLayoutPtr = 0;
-		m_CubeOutlineInputLayoutPtr = 0;
+        m_PickingBuffer = nullptr;
 
-        m_OutlineRenderContextPtr = 0;
+        m_MembranePatchesTexturePtr = nullptr;
+        m_MembraneBordersTexturePtr = nullptr;
+        m_MembraneTexturePtr = nullptr;
 
-		m_pScalableReconstructor = nullptr;
+        m_RaycastConstantBufferPtr = nullptr;
+        m_RaycastHitProxyBufferPtr = nullptr;
+        m_RaycastHighLightConstantBufferPtr = nullptr;
+        m_DrawCallConstantBufferPtr = nullptr;
 
-        m_PointCloudVSPtr = 0;
-        m_PointCloudFSPtr = 0;
+        m_MembranePatchBufferPtr = nullptr;
+        m_MembraneIndirectBufferPtr = nullptr;
 
-        m_IntermediateTargetPtr0 = nullptr;
-        m_IntermediateTargetPtr1 = nullptr;
-        m_IntermediateTargetSetPtr = nullptr;
+        m_CameraMeshPtr = nullptr;
+        m_VolumeMeshPtr = nullptr;
+        m_InpaintedPlaneMeshPtr = nullptr;
+        m_FullscreenQuadMeshPtr = nullptr;
+        m_CubeOutlineMeshPtr = nullptr;
+        m_PlaneMeshPtr = nullptr;
+        m_CameraInputLayoutPtr = nullptr;
+        m_PlaneMeshLayoutPtr = nullptr;
+        m_VolumeInputLayoutPtr = nullptr;
+        m_InpaintedPlaneLayoutPtr = nullptr;
+        m_CubeOutlineInputLayoutPtr = nullptr;
+
+        m_OutlineRenderContextPtr = nullptr;
+
+        m_pReconstructor = nullptr;
+
+        m_PointCloudVSPtr = nullptr;
+        m_PointCloudFSPtr = nullptr;
+
+        m_InpaintedPlaneVSPtr = nullptr;
+        m_InpaintedPlaneFSPtr = nullptr;
+
+        m_DiminishedViewPortSetPtr = nullptr;
+
+        m_DiminishedRaycastTargetPtr = nullptr;
+        m_DiminishedFinalTargetPtr = nullptr;
+        m_DiminishedPlaneTargetPtr = nullptr;
+
+        m_DiminishedRaycastTargetSetPtr = nullptr;
+        m_DiminishedPlaneTargetSetPtr = nullptr;
+        m_DiminishedFinalTargetSetPtr = nullptr;
+
+        m_InpaintedPlaneTexture = nullptr;
 
         m_IsInitialized = false;
     }
@@ -324,17 +501,18 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupShader()
     {
-		MR::SReconstructionSettings Settings;
+        MR::SReconstructionSettings Settings;
 
         const std::string InternalFormatString = Core::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
 
-        m_pScalableReconstructor->GetReconstructionSettings(&Settings);
+        m_pReconstructor->GetReconstructionSettings(&Settings);
 
-        glm::ivec2 DepthImageSize = m_pScalableReconstructor->GetDepthImageSize();
+        glm::ivec2 DepthImageSize = m_pReconstructor->GetDepthImageSize();
 
         std::stringstream DefineStream;
 
         DefineStream
+            << "#define TILE_SIZE_2D " << g_TileSize2D << " \n"
             << "#define TRUNCATED_DISTANCE " << Settings.m_TruncatedDistance / 1000.0f << " \n"
             << "#define VOLUME_SIZE " << Settings.m_VolumeSize << " \n"
             << "#define VOXEL_SIZE " << Settings.m_VoxelSize << " \n"
@@ -350,7 +528,10 @@ namespace
             << "#define MAP_TEXTURE_FORMAT " << InternalFormatString << " \n"
             << "#define RAYCAST_NEAR " << 0.0f << " \n"
             << "#define RAYCAST_FAR " << 1000.0f << " \n"
-            << "#define MIN_TREE_WEIGHT " << Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:min_weight", 30) << " \n";
+            << "#define MIN_TREE_WEIGHT " << Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:min_weight", 30) << " \n"
+            << "#define MAX_BORDER_PATCH_COUNT " << m_MaxBorderPatchCount << " \n"
+            << "#define PATCH_COUNT " << m_PatchCount << " \n"
+            << "#define PATCH_SIZE " << m_PatchSize << " \n";
 
         if (Settings.m_CaptureColor)
         {
@@ -360,30 +541,54 @@ namespace
         {
             DefineStream << "#define RAYCAST_BACKSIDES\n";
         }
+        if (Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:diminish_complete_box", false))
+        {
+            DefineStream << "#define USE_WHOLE_SELECTION_BOX\n";
+        }
 
         std::string DefineString = DefineStream.str();
 
-        m_OutlineVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_outline.glsl", "main", DefineString.c_str());
-        m_OutlineFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_outline.glsl", "main", DefineString.c_str());
-        m_OutlineLevel1VSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_outline_level1.glsl", "main", DefineString.c_str());
-        m_OutlineLevel1FSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_outline_level1.glsl", "main", DefineString.c_str());
-        m_OutlineLevel2VSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_outline_level2.glsl", "main", DefineString.c_str());
-        m_OutlineLevel2FSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_outline_level2.glsl", "main", DefineString.c_str());
+        m_OutlineVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_outline.glsl", "main", DefineString.c_str());
+        m_OutlineFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_outline.glsl", "main", DefineString.c_str());
+        m_OutlineLevel1VSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_outline_level1.glsl", "main", DefineString.c_str());
+        m_OutlineLevel1FSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_outline_level1.glsl", "main", DefineString.c_str());
+        m_OutlineLevel2VSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_outline_level2.glsl", "main", DefineString.c_str());
+        m_OutlineLevel2FSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_outline_level2.glsl", "main", DefineString.c_str());
 
-        m_PointCloudVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_point_cloud.glsl", "main", DefineString.c_str());
-        m_PointCloudFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_point_cloud.glsl", "main", DefineString.c_str());
+        m_PointCloudVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_point_cloud.glsl", "main", DefineString.c_str());
+        m_PointCloudFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_point_cloud.glsl", "main", DefineString.c_str());
 
-        m_RaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_raycast.glsl", "main", DefineString.c_str());
-        m_RaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast.glsl", "main", DefineString.c_str());
-        m_RaycastHighlightFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_highlight.glsl", "main", DefineString.c_str());
+        m_RaycastVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_raycast.glsl", "main", DefineString.c_str());
+        m_RaycastDiminishedVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_raycast_diminished.glsl", "main", DefineString.c_str());
+        m_RaycastFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_raycast.glsl", "main", DefineString.c_str());
+        m_RaycastHighlightFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_raycast_highlight.glsl", "main", DefineString.c_str());
+        m_RaycastDiminishedFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_raycast_diminished.glsl", "main", DefineString.c_str());
+        m_RaycastHitProxyFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_raycast_hitproxy.glsl", "main", DefineString.c_str());
 
-        m_CopyRaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_copy_raycast.glsl", "main", DefineString.c_str());
-        m_CopyRaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_copy_raycast.glsl", "main", DefineString.c_str());
-
-        m_VolumeVertexMapVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_volume_vertex_map.glsl", "main", DefineString.c_str());
-        m_VolumeVertexMapFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_volume_vertex_map.glsl", "main", DefineString.c_str());
+        m_VertexMapVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_vertex_map.glsl", "main", DefineString.c_str());
+        m_VertexMapFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_vertex_map.glsl", "main", DefineString.c_str());
         
-        m_PickingCSPtr = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\cs_picking.glsl", "main", DefineString.c_str());
+        m_PickingCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_picking.glsl", "main", DefineString.c_str());
+
+        m_InpaintedPlaneVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_inpainted_plane.glsl", "main", DefineString.c_str());
+        m_InpaintedPlaneFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_inpainted_plane.glsl", "main", DefineString.c_str());
+
+        m_BackgroundVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_background.glsl", "main", DefineString.c_str());
+        m_BackgroundFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_background.glsl", "main", DefineString.c_str());
+
+        m_CombineDiminishedFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_combine_diminished.glsl", "main", DefineString.c_str());
+
+        m_MembranePatchesCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_patches.glsl", "main", DefineString.c_str());
+        m_MembraneBorderCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_border.glsl", "main", DefineString.c_str());
+        m_MembraneEvalBorderCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_eval_border.glsl", "main", DefineString.c_str());
+        m_MembranePropagateGridCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_propagate_grid.glsl", "main", DefineString.c_str());
+        m_MembranePropagatePixelsCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_propagate_pixels.glsl", "main", DefineString.c_str());
+
+        m_PlaneMeshVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_plane_mesh.glsl", "main", DefineString.c_str());
+        m_PlaneMeshFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_plane_mesh.glsl", "main", DefineString.c_str());
+
+        m_ExtentMeshVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_extent.glsl", "main", DefineString.c_str());
+        m_ExtentMeshFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_extent.glsl", "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -399,7 +604,29 @@ namespace
         m_CameraInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
         m_VolumeInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_RaycastVSPtr);
         m_CubeOutlineInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
-        m_QuadInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
+
+        SInputElementDescriptor QuadLayout[] =
+        {
+            { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 16, CInputLayout::PerVertex, 0 },
+            { "TEXCOORD", 1, CInputLayout::Float2Format, 0, 8, 16, CInputLayout::PerVertex, 0 },
+        };
+
+        m_InpaintedPlaneLayoutPtr = ShaderManager::CreateInputLayout(QuadLayout, sizeof(QuadLayout) / sizeof(QuadLayout[0]), m_InpaintedPlaneVSPtr);
+
+        SInputElementDescriptor FullscreenQuadLayout[] =
+        {
+            { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0 },
+        };
+
+        m_FullscreenQuadLayoutPtr = ShaderManager::CreateInputLayout(FullscreenQuadLayout, sizeof(FullscreenQuadLayout) / sizeof(FullscreenQuadLayout[0]), m_BackgroundVSPtr);
+
+        SInputElementDescriptor PlaneMeshLayout[] =
+        {
+            { "POSITION", 0, CInputLayout::Float3Format, 0,  0, 20, CInputLayout::PerVertex, 0 },
+            { "TEXCOORD", 1, CInputLayout::Float2Format, 0, 12, 20, CInputLayout::PerVertex, 0 },
+        };
+
+        m_PlaneMeshLayoutPtr = ShaderManager::CreateInputLayout(PlaneMeshLayout, sizeof(PlaneMeshLayout) / sizeof(PlaneMeshLayout[0]), m_PlaneMeshVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -413,18 +640,58 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupRenderTargets()
     {
+        assert(m_DeviceResolution.x != 0 && m_DeviceResolution.y != 0);
 
+        STextureDescriptor TextureDescriptor = {};
+
+        TextureDescriptor.m_NumberOfPixelsU  = m_DeviceResolution.x;
+        TextureDescriptor.m_NumberOfPixelsV  = m_DeviceResolution.y;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = CTexture::RenderTarget | CTexture::ShaderResource;
+        TextureDescriptor.m_Access           = CTexture::EAccess::CPURead;
+        TextureDescriptor.m_Usage            = CTexture::EUsage::GPUReadWrite;
+        TextureDescriptor.m_Semantic         = CTexture::UndefinedSemantic;
+        TextureDescriptor.m_Format           = CTexture::R8G8B8A8_BYTE;
+
+        m_DiminishedRaycastTargetPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_DiminishedPlaneTargetPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_DiminishedFinalTargetPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        TextureManager::SetTextureLabel(m_DiminishedRaycastTargetPtr, "Diminished Raycast Texture");
+        TextureManager::SetTextureLabel(m_DiminishedPlaneTargetPtr, "Diminished Plane Texture");
+        TextureManager::SetTextureLabel(m_DiminishedFinalTargetPtr, "Diminished Final Texture");
+
+        m_DiminishedRaycastTargetSetPtr = TargetSetManager::CreateTargetSet(m_DiminishedRaycastTargetPtr);
+        m_DiminishedPlaneTargetSetPtr = TargetSetManager::CreateTargetSet(m_DiminishedPlaneTargetPtr);
+        m_DiminishedFinalTargetSetPtr = TargetSetManager::CreateTargetSet(m_DiminishedFinalTargetPtr);
+
+        TargetSetManager::SetTargetSetLabel(m_DiminishedRaycastTargetSetPtr, "Diminished Raycast Target Set");
+        TargetSetManager::SetTargetSetLabel(m_DiminishedPlaneTargetSetPtr, "Diminished Plane Target Set");
+        TargetSetManager::SetTargetSetLabel(m_DiminishedFinalTargetSetPtr, "Diminished Final Target Set");
     }
     
     // -----------------------------------------------------------------------------
     
     void CGfxReconstructionRenderer::OnSetupStates()
     {
-        m_OutlineRenderContextPtr = ContextManager::CreateRenderContext();
+        assert(m_DeviceResolution.x != 0 && m_DeviceResolution.y != 0);
 
+        Gfx::SViewPortDescriptor Desc;
+        Desc.m_Width = static_cast<float>(m_DeviceResolution.x);
+        Desc.m_Height = static_cast<float>(m_DeviceResolution.y);
+        Desc.m_TopLeftX = 0;
+        Desc.m_TopLeftY = 0;
+        Desc.m_MinDepth = 0.0f;
+        Desc.m_MaxDepth = 0.0f;
+        CViewPortPtr ViewPort = ViewManager::CreateViewPort(Desc);
+        m_DiminishedViewPortSetPtr = ViewManager::CreateViewPortSet(ViewPort);
+
+        m_OutlineRenderContextPtr = ContextManager::CreateRenderContext();
         m_OutlineRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
         m_OutlineRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
-        m_OutlineRenderContextPtr->SetTargetSet(TargetSetManager::GetDeferredTargetSet());
+        m_OutlineRenderContextPtr->SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
         m_OutlineRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull | CRenderState::Wireframe));
     }
     
@@ -432,25 +699,31 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupTextures()
     {
-        glm::ivec2 Size = Main::GetActiveWindowSize();
-
         STextureDescriptor TextureDescriptor = {};
 
-        TextureDescriptor.m_NumberOfPixelsU = Size.x;
-        TextureDescriptor.m_NumberOfPixelsV = Size.y;
+        TextureDescriptor.m_NumberOfPixelsU = m_PatchSize * m_PatchCount;
+        TextureDescriptor.m_NumberOfPixelsV = m_PatchSize * m_PatchCount;
         TextureDescriptor.m_NumberOfPixelsW = 1;
         TextureDescriptor.m_NumberOfMipMaps = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding = CTexture::ShaderResource | CTexture::RenderTarget;
-        TextureDescriptor.m_Access = CTexture::CPUWrite;
-        TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Binding = CTexture::RenderTarget | CTexture::ShaderResource;
+        TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
+        TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = CTexture::R16G16B16A16_FLOAT;
 
-        m_IntermediateTargetPtr0 = TextureManager::CreateTexture2D(TextureDescriptor);
-        m_IntermediateTargetPtr1 = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_MembranePatchesTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_MembraneBordersTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        m_IntermediateTargetSetPtr = TargetSetManager::CreateTargetSet(m_IntermediateTargetPtr0, m_IntermediateTargetPtr1);
+        TextureManager::SetTextureLabel(m_MembranePatchesTexturePtr, "Membrane Patches Texture");
+        TextureManager::SetTextureLabel(m_MembraneBordersTexturePtr, "Membrane Borders Texture");
+
+        TextureDescriptor.m_NumberOfPixelsU = m_PatchCount;
+        TextureDescriptor.m_NumberOfPixelsV = m_PatchCount;
+
+        m_MembraneTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        TextureManager::SetTextureLabel(m_MembraneTexturePtr, "Membrane Final Texture");
+
     }
     
     // -----------------------------------------------------------------------------
@@ -465,11 +738,15 @@ namespace
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(glm::vec4) * 2;
         ConstantBufferDesc.m_pBytes = nullptr;
-        ConstantBufferDesc.m_pClassKey = 0;
+        ConstantBufferDesc.m_pClassKey = nullptr;
 
         m_RaycastConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(glm::mat4);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(int);
+
+        m_RaycastHitProxyBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SSelectionTransform);
 
         m_RaycastHighLightConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         
@@ -482,9 +759,23 @@ namespace
         ConstantBufferDesc.m_Access = CBuffer::CPUReadWrite;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SPickingBuffer);
         ConstantBufferDesc.m_pBytes = nullptr;
-        ConstantBufferDesc.m_pClassKey = 0;
+        ConstantBufferDesc.m_pClassKey = nullptr;
 
         m_PickingBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_Stride = 0;
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = m_MaxBorderPatchCount * 2 * sizeof(glm::vec4);
+        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_pClassKey = nullptr;
+
+        m_MembranePatchBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_NumberOfBytes = 4 * sizeof(int32_t);
+
+        m_MembraneIndirectBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -502,8 +793,8 @@ namespace
         // Create camera frustum mesh
         ////////////////////////////////////////////////////////////////////////////////
 
-        glm::ivec2 DepthSize = m_pScalableReconstructor->GetDepthImageSize();
-        glm::vec4 Intrinsics = m_pScalableReconstructor->GetDepthIntrinsics();
+        glm::ivec2 DepthSize = m_pReconstructor->GetDepthImageSize();
+        glm::vec4 Intrinsics = m_pReconstructor->GetDepthIntrinsics();
         
         float Focalx = (-Intrinsics.z / DepthSize.x) / (Intrinsics.x / DepthSize.x);
         float Focaly = (-Intrinsics.w / DepthSize.y) / (Intrinsics.y / DepthSize.y);
@@ -545,7 +836,7 @@ namespace
             CameraVertices[8], CameraVertices[5],
         };
 
-        m_CameraMeshPtr = MeshManager::CreateMesh(CameraLines, sizeof(CameraLines) / sizeof(CameraLines[0]), nullptr, 0);
+        m_CameraMeshPtr = MeshManager::CreateMesh(CameraLines, sizeof(CameraLines) / sizeof(CameraLines[0]), sizeof(CameraVertices[0]), nullptr, 0);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create cube mesh
@@ -590,16 +881,16 @@ namespace
             4, 6, 5,
         };
         
-        m_VolumeMeshPtr = MeshManager::CreateMesh(g_CubeVertices, sizeof(g_CubeVertices) / sizeof(g_CubeVertices[0]), CubeIndices, sizeof(CubeIndices) / sizeof(CubeIndices[0]));
+        m_VolumeMeshPtr = MeshManager::CreateMesh(g_CubeVertices, sizeof(g_CubeVertices) / sizeof(g_CubeVertices[0]), sizeof(g_CubeVertices), CubeIndices, sizeof(CubeIndices) / sizeof(CubeIndices[0]));
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create cube outline mesh
         ////////////////////////////////////////////////////////////////////////////////
 
-        m_CubeOutlineMeshPtr = MeshManager::CreateMesh(CubeLines, sizeof(CubeLines) / sizeof(CubeLines[0]), nullptr, 0);
+        m_CubeOutlineMeshPtr = MeshManager::CreateMesh(CubeLines, sizeof(CubeLines) / sizeof(CubeLines[0]), sizeof(CubeLines[0]), nullptr, 0);
 
         ////////////////////////////////////////////////////////////////////////////////
-        // Create quad mesh
+        // Create plane mesh
         ////////////////////////////////////////////////////////////////////////////////
 
         glm::vec3 QuadLines[4] =
@@ -610,34 +901,28 @@ namespace
             glm::vec3(1.0f, 0.0f, 0.0f),
         };
 
-        m_QuadMeshPtr = MeshManager::CreateMesh(QuadLines, sizeof(QuadLines) / sizeof(QuadLines[0]), nullptr, 0);
-
-        ////////////////////////////////////////////////////////////////////////////////
-        // Create plane mesh
-        ////////////////////////////////////////////////////////////////////////////////
-
         std::vector<glm::vec3> PlaneVertices;
 
         const int PlaneSize = 3;
 
-        for (int x = -PlaneSize; x <= PlaneSize; ++x)
+        for (int x = -PlaneSize; x <= PlaneSize; ++ x)
         {
-            for (int y = -PlaneSize; y <= PlaneSize; ++y)
+            for (int y = -PlaneSize; y <= PlaneSize; ++ y)
             {
                 glm::vec3 NewVertices[4] =
                 {
-                    QuadLines[0],
-                    QuadLines[1],
-                    QuadLines[2],
-                    QuadLines[3],
+                    glm::vec3(QuadLines[0].x, QuadLines[0].z, QuadLines[0].y),  // convert from x-y to x-z planes
+                    glm::vec3(QuadLines[1].x, QuadLines[1].z, QuadLines[1].y),
+                    glm::vec3(QuadLines[2].x, QuadLines[2].z, QuadLines[2].y),
+                    glm::vec3(QuadLines[3].x, QuadLines[3].z, QuadLines[3].y),
                 };
 
-                for (int i = 0; i < 4; ++i)
+                for (auto & NewVertex : NewVertices)
                 {
-                    NewVertices[i][0] += x;
-                    NewVertices[i][1] += y;
+                    NewVertex[0] += x;
+                    NewVertex[2] += y;
 
-                    PlaneVertices.push_back(NewVertices[i]);
+                    PlaneVertices.push_back(NewVertex / PlaneSize);
                 }
             }
         }
@@ -652,13 +937,36 @@ namespace
 
         for (int i = 0; i < static_cast<int>(PlaneVertices.size()) / 4; ++i)
         {
-            for (int j = 0; j < 6; ++j)
+            for (unsigned int BaseIndex : BaseIndices)
             {
-                Indices.push_back(BaseIndices[j] + i * 4);
+                Indices.push_back(BaseIndex + i * 4);
             }
         }
 
-        m_PlaneMeshPtr = MeshManager::CreateMesh(PlaneVertices, Indices);
+        auto PlaneVertexCount = static_cast<int>(PlaneVertices.size());
+        auto PlaneIndexCount = static_cast<int>(PlaneVertices.size());
+        m_PlaneMeshPtr = MeshManager::CreateMesh(PlaneVertices.data(), PlaneVertexCount, sizeof(PlaneVertices[0]), Indices.data(), PlaneIndexCount);
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Create quad mesh
+        ////////////////////////////////////////////////////////////////////////////////
+        struct SQuadVertex
+        {
+            glm::vec2 m_Pos;
+            glm::vec2 m_Tex;
+        };
+
+        SQuadVertex Quad[4] =
+        {
+            { glm::vec2(-1.0f, -1.0f), glm::vec2(0.0f, 0.0f) },
+            { glm::vec2( 1.0f, -1.0f), glm::vec2(1.0f, 0.0f) },
+            { glm::vec2(-1.0f,  1.0f), glm::vec2(0.0f, 1.0f) },
+            { glm::vec2( 1.0f,  1.0f), glm::vec2(1.0f, 1.0f) },
+        };
+
+        m_InpaintedPlaneMeshPtr = MeshManager::CreateMesh(Quad, sizeof(Quad) / sizeof(Quad[0]), sizeof(Quad[0]), nullptr, 0);
+
+        m_FullscreenQuadMeshPtr = MeshManager::CreateRectangle(-1.0f, -1.0f, 2.0f, 2.0f);
     }
 
     // -----------------------------------------------------------------------------
@@ -672,7 +980,7 @@ namespace
     
     void CGfxReconstructionRenderer::OnReload()
     {
-        m_pScalableReconstructor->ResetReconstruction();
+        m_pReconstructor->ResetReconstruction();
 
         OnSetupShader();
     }
@@ -695,30 +1003,15 @@ namespace
 
     void CGfxReconstructionRenderer::OnResize(unsigned int _Width, unsigned int _Height)
     {
-        STextureDescriptor TextureDescriptor = {};
-
-        TextureDescriptor.m_NumberOfPixelsU = _Width;
-        TextureDescriptor.m_NumberOfPixelsV = _Height;
-        TextureDescriptor.m_NumberOfPixelsW = 1;
-        TextureDescriptor.m_NumberOfMipMaps = 1;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding = CTexture::ShaderResource | CTexture::RenderTarget;
-        TextureDescriptor.m_Access = CTexture::CPUWrite;
-        TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
-        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
-        TextureDescriptor.m_Format = CTexture::R16G16B16A16_FLOAT;
-
-        m_IntermediateTargetPtr0 = TextureManager::CreateTexture2D(TextureDescriptor);
-        m_IntermediateTargetPtr1 = TextureManager::CreateTexture2D(TextureDescriptor);
-
-        m_IntermediateTargetSetPtr = TargetSetManager::CreateTargetSet(m_IntermediateTargetPtr0, m_IntermediateTargetPtr1);
+        BASE_UNUSED(_Width);
+        BASE_UNUSED(_Height);
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxReconstructionRenderer::Update()
     {
-
+        UpdateSelectionBox();
     }
     
     // -----------------------------------------------------------------------------
@@ -729,6 +1022,8 @@ namespace
         {
             return;
         }
+
+        Performance::BeginEvent("Render selection box");
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
@@ -752,46 +1047,23 @@ namespace
         BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
         ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
-    }
 
+        Performance::EndEvent();
+    }
+        
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RenderVolumeVertexMap()
+    void CGfxReconstructionRenderer::RaycastVolume()
     {
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-
-        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
-        ContextManager::SetShaderVS(m_VolumeVertexMapVSPtr);
-        ContextManager::SetShaderPS(m_VolumeVertexMapFSPtr);
-
-        ContextManager::SetImageTexture(0, m_pScalableReconstructor->GetVertexMap());
-        ContextManager::SetImageTexture(1, m_pScalableReconstructor->GetNormalMap());
-
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
-
-        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
-        ContextManager::SetTopology(STopology::TriangleStrip);
-
-        ContextManager::Draw(4, 0);
-    }
-    
-	// -----------------------------------------------------------------------------
-
-	void CGfxReconstructionRenderer::RaycastScalableVolume()
-	{
         Performance::BeginEvent("Raycasting for rendering");
 
         ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
 
-        MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
 
         MR::SReconstructionSettings Settings;
-        m_pScalableReconstructor->GetReconstructionSettings(&Settings);
-
-        glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
-
+        m_pReconstructor->GetReconstructionSettings(&Settings);
+        
         ContextManager::SetShaderVS(m_RaycastVSPtr);
         ContextManager::SetShaderPS(m_RaycastFSPtr);
 
@@ -837,11 +1109,11 @@ namespace
         glm::vec4 Color;
         if (Settings.m_CaptureColor)
         {
-            Color = m_pScalableReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            Color = m_pReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
         }
         else
         {
-            Color = m_pScalableReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            Color = m_pReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
         }
         BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, &Color);
 
@@ -857,11 +1129,11 @@ namespace
         ContextManager::DrawIndexed(36, 0, 0);
 
         Performance::EndEvent();
-	}
+    }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RaycastScalableVolumeWithHighlight()
+    void CGfxReconstructionRenderer::RaycastVolumeWithHighlight()
     {
         glm::mat4 ReconstructionToSaltwater = glm::mat4(
             1.0f, 0.0f, 0.0f, 0.0f,
@@ -874,13 +1146,11 @@ namespace
 
         ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
 
-        MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
 
         MR::SReconstructionSettings Settings;
-        m_pScalableReconstructor->GetReconstructionSettings(&Settings);
-
-        glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
-
+        m_pReconstructor->GetReconstructionSettings(&Settings);
+        
         ContextManager::SetShaderVS(m_RaycastVSPtr);
         ContextManager::SetShaderPS(m_RaycastHighlightFSPtr);
 
@@ -923,9 +1193,12 @@ namespace
             glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
         };
 
-        glm::mat4 InvOBBMatrix = glm::inverse(m_SelectionTransform) * ReconstructionToSaltwater;
+        SSelectionTransform Buffer;
+        Buffer.m_WSToSelectionTransform = glm::inverse(m_SelectionTransform) * ReconstructionToSaltwater;
+        Buffer.m_AABBMin = m_SelectionBox.GetMin();
+        Buffer.m_AABBMax = m_SelectionBox.GetMax();
         
-        BufferManager::UploadBufferData(m_RaycastHighLightConstantBufferPtr, &InvOBBMatrix);
+        BufferManager::UploadBufferData(m_RaycastHighLightConstantBufferPtr, &Buffer);
 
         BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer(), &Vertices);
 
@@ -940,39 +1213,323 @@ namespace
 
         Performance::EndEvent();
     }
+    
+    // -----------------------------------------------------------------------------
 
-	// -----------------------------------------------------------------------------
+    void CGfxReconstructionRenderer::RaycastVolumeDiminished(const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr)
+    {
+        glm::mat4 ReconstructionToSaltwater = glm::mat4(
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f
+        );
 
-	void CGfxReconstructionRenderer::RenderQueuedRootVolumes()
-	{
-		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
+        
+        ContextManager::SetShaderVS(m_RaycastDiminishedVSPtr);
+        ContextManager::SetShaderPS(m_RaycastDiminishedFSPtr);
 
-		ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
-		ContextManager::SetShaderVS(m_OutlineVSPtr);
-		ContextManager::SetShaderPS(m_OutlineFSPtr);
+        ContextManager::SetTexture(0, _BackgroundTexturePtr);
 
-		ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-		ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+        ContextManager::SetImageTexture(0, m_DiminishedPlaneTargetPtr);
 
-		SDrawCallConstantBuffer BufferData;
+        ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
+        ContextManager::SetResourceBuffer(2, rVolume.m_Level1PoolPtr);
+        ContextManager::SetResourceBuffer(3, rVolume.m_TSDFPoolPtr);
+        ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
 
-		ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-		ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_RaycastHighLightConstantBufferPtr);
 
-		ContextManager::SetTopology(STopology::LineList);
+        ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
+
+        ContextManager::Barrier();
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        const glm::vec3 Min = _rAABB.GetMin() - 20.0f;
+        const glm::vec3 Max = _rAABB.GetMax() + 20.0f;
+
+        glm::vec3 Vertices[8] =
+        {
+            glm::vec3(glm::vec4(Min[0], Min[1], Min[2], 1.0f)),
+            glm::vec3(glm::vec4(Max[0], Min[1], Min[2], 1.0f)),
+            glm::vec3(glm::vec4(Max[0], Max[1], Min[2], 1.0f)),
+            glm::vec3(glm::vec4(Min[0], Max[1], Min[2], 1.0f)),
+            glm::vec3(glm::vec4(Min[0], Min[1], Max[2], 1.0f)),
+            glm::vec3(glm::vec4(Max[0], Min[1], Max[2], 1.0f)),
+            glm::vec3(glm::vec4(Max[0], Max[1], Max[2], 1.0f)),
+            glm::vec3(glm::vec4(Min[0], Max[1], Max[2], 1.0f))
+        };
+
+        SSelectionTransform Buffer;
+        Buffer.m_WSToSelectionTransform = glm::inverse(m_SelectionTransform) * ReconstructionToSaltwater;
+        Buffer.m_AABBMin = m_SelectionBox.GetMin();
+        Buffer.m_AABBMax = m_SelectionBox.GetMax();
+
+        BufferManager::UploadBufferData(m_RaycastHighLightConstantBufferPtr, &Buffer);
+
+        BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer(), &Vertices);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::DrawIndexed(36, 0, 0);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RenderBackgroundImage(CTexturePtr _Background, bool _IsFlipped)
+    {
+        assert(_Background != nullptr);
+
+        Performance::BeginEvent("Render background");
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetShaderVS(m_BackgroundVSPtr);
+        ContextManager::SetShaderPS(m_BackgroundFSPtr);
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetTexture(0, _Background);
+
+        SDrawCallConstantBuffer BufferData = {};
+        BufferData.m_Color = glm::vec4(_IsFlipped ? 1.0f : 0.0f);
+
+        BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+        ContextManager::SetConstantBuffer(0, m_DrawCallConstantBufferPtr);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_FullscreenQuadMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_FullscreenQuadMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+        ContextManager::SetInputLayout(m_FullscreenQuadLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleStrip);
+
+        ContextManager::DrawIndexed(m_FullscreenQuadMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+
+        ContextManager::ResetTexture(0);
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::CombineDiminishedImage(CTexturePtr _Background, CTexturePtr _Diminished, bool _IsFlipped)
+    {
+        assert(_Background != nullptr);
+        assert(_Diminished != nullptr);
+
+        Performance::BeginEvent("Combine diminished image");
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetShaderVS(m_BackgroundVSPtr);
+        ContextManager::SetShaderPS(m_CombineDiminishedFSPtr);
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, _Background);        
+        ContextManager::SetTexture(1, _Diminished);
+        ContextManager::SetTexture(2, m_MembraneTexturePtr);
+
+        SDrawCallConstantBuffer BufferData = {};
+        BufferData.m_Color = glm::vec4(_IsFlipped ? 1.0f : 0.0f);
+
+        BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+        ContextManager::SetConstantBuffer(0, m_DrawCallConstantBufferPtr);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_FullscreenQuadMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_FullscreenQuadMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+        ContextManager::SetInputLayout(m_FullscreenQuadLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleStrip);
+
+        ContextManager::DrawIndexed(m_FullscreenQuadMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+
+        ContextManager::ResetTexture(0);
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::CreateMembrane(CTexturePtr _BackgroundTexturePtr, CTexturePtr _Diminished)
+    {
+        // -----------------------------------------------------------------------------
+        // Prepare membrane data
+        // -----------------------------------------------------------------------------
+
+        const int WorkGroupsX = m_PatchCount;
+        const int WorkGroupsY = m_PatchCount;
+
+        TextureManager::ClearTexture(m_MembranePatchesTexturePtr);
+        TextureManager::ClearTexture(m_MembraneBordersTexturePtr);
+        TextureManager::ClearTexture(m_MembraneTexturePtr);
+
+        uint32_t Indirect[] = {0, 1, 1};
+        BufferManager::UploadBufferData(m_MembraneIndirectBufferPtr, &Indirect, 0, sizeof(Indirect));
+
+        ContextManager::SetImageTexture(0, _Diminished);
+        ContextManager::SetImageTexture(1, _BackgroundTexturePtr);
+        ContextManager::SetImageTexture(2, m_MembranePatchesTexturePtr);
+        ContextManager::SetImageTexture(3, m_MembraneBordersTexturePtr);
+        ContextManager::SetImageTexture(4, m_MembraneTexturePtr);
+        ContextManager::SetResourceBuffer(0, m_MembraneIndirectBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_MembranePatchBufferPtr);
+
+        // -----------------------------------------------------------------------------
+        // Find inner membrane patches
+        // -----------------------------------------------------------------------------
+
+        ContextManager::SetShaderCS(m_MembranePatchesCSPtr);
+
+        ContextManager::Barrier();
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        // -----------------------------------------------------------------------------
+        // Find outer membrane patches / the membrane border
+        // -----------------------------------------------------------------------------
+
+        ContextManager::SetShaderCS(m_MembraneBorderCSPtr);
+
+        ContextManager::Barrier();
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        // -----------------------------------------------------------------------------
+        // Evaluate color differences at the membrane border
+        // -----------------------------------------------------------------------------
+
+        ContextManager::SetShaderCS(m_MembraneEvalBorderCSPtr);
+
+        ContextManager::Barrier();
+        ContextManager::DispatchIndirect(m_MembraneIndirectBufferPtr, 0);
+
+        // -----------------------------------------------------------------------------
+        // Propagate differences to grid
+        // -----------------------------------------------------------------------------
+
+        ContextManager::SetShaderCS(m_MembranePropagateGridCSPtr);
+
+        ContextManager::Barrier();
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        // -----------------------------------------------------------------------------
+        // Propagate differences to pixels
+        // -----------------------------------------------------------------------------
+
+        ContextManager::SetShaderCS(m_MembranePropagatePixelsCSPtr);
+
+        ContextManager::Barrier();
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        // -----------------------------------------------------------------------------
+        // Reset
+        // -----------------------------------------------------------------------------
+
+        ContextManager::ResetShaderCS();
+
+        ContextManager::ResetImageTexture(0);
+        ContextManager::ResetImageTexture(1);
+        ContextManager::ResetImageTexture(2);
+        ContextManager::ResetImageTexture(3);
+        ContextManager::ResetResourceBuffer(0);
+        ContextManager::ResetResourceBuffer(1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RenderInpaintedPlane(const Base::AABB3Float& _rAABB)
+    {
+        assert(m_InpaintedPlaneTexture != nullptr);
+
+        Performance::BeginEvent("Render inpainted plane");
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+        
+        ContextManager::SetShaderVS(m_InpaintedPlaneVSPtr);
+        ContextManager::SetShaderPS(m_InpaintedPlaneFSPtr);
+
+        ContextManager::SetTexture(0, m_InpaintedPlaneTexture);
+
+        glm::vec3 Min = _rAABB.GetMin();
+        glm::vec3 Max = _rAABB.GetMax();
+
+        glm::vec3 MinAnchor = Min;
+        glm::vec3 MaxAnchor = Max;
+        Max.z = Min.z;
+
+        float SelectionWidth = glm::max(MaxAnchor.x - MinAnchor.x, MaxAnchor.y - MinAnchor.y);
+        float Scale = m_InpaintedPlaneScale * SelectionWidth * 0.5f;
+
+        glm::vec3 MiddlePoint = (Min + Max) / 2.0f;
+        
+        SDrawCallConstantBuffer BufferData;
+        
+        BufferData.m_WorldMatrix = glm::translate(MiddlePoint) * glm::scale(glm::vec3(Scale));
+        BufferData.m_Color = glm::vec4(Scale, m_InpaintedPlaneScale, 0.0f, 0.0f);
+
+        BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_InpaintedPlaneMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_InpaintedPlaneMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+        ContextManager::SetInputLayout(m_InpaintedPlaneLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleStrip);
+
+        ContextManager::Draw(m_InpaintedPlaneMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RenderQueuedRootVolumes()
+    {
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
+        ContextManager::SetShaderVS(m_OutlineVSPtr);
+        ContextManager::SetShaderPS(m_OutlineFSPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+
+        SDrawCallConstantBuffer BufferData;
+
+        ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::LineList);
 
         glm::vec3 Position;
-		glm::mat4 Scaling;
-		glm::mat4 Translation;
+        glm::mat4 Scaling;
+        glm::mat4 Translation;
 
-        const auto& GridSizes = m_pScalableReconstructor->GetVolumeSizes();
+        const auto& GridSizes = m_pReconstructor->GetVolumeSizes();
 
-		for (auto& rPair : m_pScalableReconstructor->GetRootVolumeMap())
-		{
-			auto& rRootGrid = rPair.second;
+        for (auto& rPair : m_pReconstructor->GetRootVolumeMap())
+        {
+            auto& rRootGrid = rPair.second;
 
-			if (rRootGrid.m_IsVisible)
-			{
+            if (rRootGrid.m_IsVisible)
+            {
                 Position[0] = static_cast<float>(rRootGrid.m_Offset[0]);
                 Position[1] = static_cast<float>(rRootGrid.m_Offset[1]);
                 Position[2] = static_cast<float>(rRootGrid.m_Offset[2]);
@@ -989,9 +1546,9 @@ namespace
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
                 ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
-			}
-		}
-	}
+            }
+        }
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -1017,9 +1574,9 @@ namespace
         glm::mat4 Scaling;
         glm::mat4 Translation;
 
-        const auto& VolumeSizes = m_pScalableReconstructor->GetVolumeSizes();
+        const auto& VolumeSizes = m_pReconstructor->GetVolumeSizes();
 
-        for (auto& rPair : m_pScalableReconstructor->GetRootVolumeMap())
+        for (auto& rPair : m_pReconstructor->GetRootVolumeMap())
         {
             auto& rRootGrid = rPair.second;
 
@@ -1046,7 +1603,7 @@ namespace
                 int VertexCount = m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices();
                 BufferManager::UploadBufferData(rRootGrid.m_IndirectLevel1Buffer, &VertexCount, 0, sizeof(uint32_t));
 
-                ContextManager::DrawIndirect(rRootGrid.m_IndirectLevel1Buffer, MR::CScalableSLAMReconstructor::SIndirectBuffers::s_DrawOffset);
+                ContextManager::DrawIndirect(rRootGrid.m_IndirectLevel1Buffer, MR::CSLAMReconstructor::SIndirectBuffers::s_DrawOffset);
             }
         }
     }
@@ -1074,9 +1631,9 @@ namespace
         glm::vec3 Position;
         glm::mat4 Translation;
 
-        const auto& VolumeSizes = m_pScalableReconstructor->GetVolumeSizes();
+        const auto& VolumeSizes = m_pReconstructor->GetVolumeSizes();
 
-        for (auto& rPair : m_pScalableReconstructor->GetRootVolumeMap())
+        for (auto& rPair : m_pReconstructor->GetRootVolumeMap())
         {
             auto& rRootGrid = rPair.second;
 
@@ -1102,7 +1659,7 @@ namespace
                 int VertexCount = m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices();
                 BufferManager::UploadBufferData(rRootGrid.m_IndirectLevel2Buffer, &VertexCount, 0, sizeof(uint32_t));
 
-                ContextManager::DrawIndirect(rRootGrid.m_IndirectLevel2Buffer, MR::CScalableSLAMReconstructor::SIndirectBuffers::s_DrawOffset);
+                ContextManager::DrawIndirect(rRootGrid.m_IndirectLevel2Buffer, MR::CSLAMReconstructor::SIndirectBuffers::s_DrawOffset);
             }
         }
     }
@@ -1117,14 +1674,14 @@ namespace
         ContextManager::SetShaderVS(m_OutlineVSPtr);
         ContextManager::SetShaderPS(m_OutlineFSPtr);
 
-		SDrawCallConstantBuffer BufferData;
+        SDrawCallConstantBuffer BufferData;
 
-        glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+        glm::mat4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
         
         BufferData.m_WorldMatrix = glm::eulerAngleX(glm::half_pi<float>()) * PoseMatrix;
-		BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+        BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
-		BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+        BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
@@ -1141,6 +1698,84 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxReconstructionRenderer::RenderPlanes()
+    {
+        const auto& rPlanes = m_pReconstructor->GetPlanes();
+
+        if (rPlanes.empty())
+        {
+            return;
+        }
+
+        Performance::BeginEvent("Plane rendering");
+        
+        //ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
+
+        SDrawCallConstantBuffer BufferData;
+        
+        for (const auto&[rKey, rPlane] : rPlanes)
+        {
+            bool HasMesh = rPlane.m_MeshPtr != nullptr;
+
+            bool RenderMesh = (m_PlaneRenderMode == EPlaneRenderingMode::ALL || m_PlaneRenderMode == EPlaneRenderingMode::MESH_ONLY || m_PlaneRenderMode == EPlaneRenderingMode::MESH_WITH_EXTENT) && HasMesh;
+
+            bool RenderExtent = m_PlaneRenderMode == EPlaneRenderingMode::EXTENT_ONLY || m_PlaneRenderMode == EPlaneRenderingMode::ALL || (m_PlaneRenderMode == EPlaneRenderingMode::MESH_WITH_EXTENT && RenderMesh);
+
+            ContextManager::SetTexture(0, rPlane.m_TexturePtr);
+
+            if (RenderMesh)
+            {
+                ContextManager::SetShaderVS(m_PlaneMeshVSPtr);
+                ContextManager::SetShaderPS(m_PlaneMeshFSPtr);
+
+                const unsigned int Offset = 0;
+                ContextManager::SetVertexBuffer(rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+                ContextManager::SetIndexBuffer(rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+                ContextManager::SetInputLayout(m_PlaneMeshLayoutPtr);
+                ContextManager::SetTopology(STopology::TriangleList);
+
+                BufferData.m_WorldMatrix = rPlane.m_Transform;
+                BufferData.m_Color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+
+                BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+                ContextManager::DrawIndexed(rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+            }
+
+            if (RenderExtent)
+            {
+                ContextManager::SetShaderVS(m_ExtentMeshVSPtr);
+                ContextManager::SetShaderPS(m_ExtentMeshFSPtr);
+
+                const unsigned int Offset = 0;
+                ContextManager::SetVertexBuffer(m_InpaintedPlaneMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+                ContextManager::SetIndexBuffer(m_InpaintedPlaneMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+                ContextManager::SetInputLayout(m_InpaintedPlaneLayoutPtr);
+                ContextManager::SetTopology(STopology::TriangleStrip);
+
+                auto Scale = glm::vec3(rPlane.m_Extent.x, 1.0f, rPlane.m_Extent.y);
+
+                BufferData.m_WorldMatrix = rPlane.m_Transform;
+                BufferData.m_Color = glm::vec4(rPlane.m_Min, rPlane.m_Extent);
+
+                BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+                ContextManager::Draw(m_InpaintedPlaneMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
+            }
+        }
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::RenderVertexMap()
     {
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
@@ -1151,7 +1786,7 @@ namespace
 
         SDrawCallConstantBuffer BufferData;
 
-        glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+        glm::mat4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
         
         BufferData.m_WorldMatrix = glm::eulerAngleX(glm::half_pi<float>()) * PoseMatrix;
         BufferData.m_Color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -1161,8 +1796,8 @@ namespace
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
 
-        ContextManager::SetImageTexture(0, m_pScalableReconstructor->GetVertexMap());
-        ContextManager::SetImageTexture(1, m_pScalableReconstructor->GetColorMap());
+        ContextManager::SetImageTexture(0, m_pReconstructor->GetVertexMap());
+        ContextManager::SetImageTexture(1, m_pReconstructor->GetColorMap());
 
         const unsigned int Offset = 0;
         ContextManager::SetVertexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
@@ -1171,7 +1806,7 @@ namespace
         ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
         ContextManager::SetTopology(STopology::PointList);
 
-        glm::ivec2 DepthSize = m_pScalableReconstructor->GetDepthImageSize();
+        glm::ivec2 DepthSize = m_pReconstructor->GetDepthImageSize();
 
         ContextManager::Draw(DepthSize.x * DepthSize.y, 0);
     }
@@ -1194,7 +1829,7 @@ namespace
             0.0f, -1.0f, 0.0f
         );
 
-        MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
 
         const glm::ivec2 WindowSize = Gfx::Main::GetActiveWindowSize();
         const glm::vec3 CameraPosition = Gfx::ViewManager::GetMainCamera()->GetView()->GetPosition();
@@ -1244,109 +1879,334 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State)
+    void CGfxReconstructionRenderer::UpdateSelectionBox()
     {
-        BASE_UNUSED(_Height);
+        if (m_SelectionState == ESelection::NOSELECTION) return;
 
-        glm::vec3 Diagonal = _rAnchor1 - _rAnchor0;
-        glm::vec3 NDiagonal = glm::normalize(Diagonal);
+        // -----------------------------------------------------------------------------
+        // Get minimum and maximum
+        // -----------------------------------------------------------------------------
+        glm::vec3 Min = m_SelectionBox.GetMin();
+        glm::vec3 Max = m_SelectionBox.GetMax();
 
-        glm::vec3 Position = _rAnchor0;
-        glm::mat4 Scaling;
-        glm::mat4 Translation;
-        glm::mat4 Rotation;
+        // -----------------------------------------------------------------------------
+        // Calculate box w/ transform in WS
+        // -----------------------------------------------------------------------------
+        glm::mat4 Scaling     = glm::scale(glm::vec3(m_SelectionBox.GetSize()));
+        glm::mat4 Translation = glm::translate(Min);
 
-        Scaling = glm::scale(glm::vec3(glm::length(Diagonal) / glm::sqrt(2.0f)));
-        Translation = glm::translate(Position);
-
-        glm::vec3 Direction = glm::mat3(glm::eulerAngleZ(-glm::pi<float>() / 4.0f)) * NDiagonal;
-        float Angle = std::atan2(Direction.y, Direction.x); // TODO: find out why glm::atan2 does lead to a compiler error
-        Rotation = glm::eulerAngleZ(Angle);
-
-        m_SelectionTransform = Translation * Scaling * Rotation;
-        m_SelectionState = static_cast<ESelection>(_State);
+        m_SelectionTransform = Translation * Scaling;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::Render(int _Pass)
+    void CGfxReconstructionRenderer::AddPositionToSelection(const glm::vec3& _rWSPosition)
     {
-        if (!m_IsInitialized && !m_pScalableReconstructor->IsInitialized())
+        if (m_SelectionBox.GetMin() == glm::vec3(0.0f) && m_SelectionBox.GetMax() == glm::vec3(0.0f))
+        {
+            m_SelectionBox.SetMin(_rWSPosition);
+            m_SelectionBox.SetMax(_rWSPosition);
+        }
+        else
+        {
+            m_SelectionBox.StickyExtend(_rWSPosition, 0.0035f);
+        }
+
+        m_SelectionState = ESelection::SELECTED;
+    }
+
+    // -----------------------------------------------------------------------------
+    
+    void CGfxReconstructionRenderer::SetInpaintedPlane(Gfx::CTexturePtr _Texture, const Base::AABB3Float& _rAABB)
+    {
+        m_InpaintedPlaneTexture = _Texture;
+        m_InpaintedPlaneAABB = _rAABB;
+    }
+
+    // -----------------------------------------------------------------------------
+    
+    CTexturePtr CGfxReconstructionRenderer::GetInpaintedRendering(const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr)
+    {
+		if (!m_IsInitialized)
+		{
+			return nullptr;
+		}
+
+        m_IsInpainting = true;
+
+        if (m_InpaintedPlaneTexture != nullptr)
+        {
+            Performance::BeginEvent("Render diminished reality");
+
+            Gfx::TargetSetManager::ClearTargetSet(m_DiminishedRaycastTargetSetPtr);
+            Gfx::TargetSetManager::ClearTargetSet(m_DiminishedPlaneTargetSetPtr);
+            Gfx::TargetSetManager::ClearTargetSet(m_DiminishedFinalTargetSetPtr);
+
+            ContextManager::SetTargetSet(m_DiminishedPlaneTargetSetPtr);
+            ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
+
+            //glEnable(GL_BLEND);
+            //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            RenderInpaintedPlane(_rAABB);
+
+            ContextManager::SetTargetSet(m_DiminishedRaycastTargetSetPtr);
+
+            Performance::BeginEvent("Raycasting for diminishing");
+
+            RaycastVolumeDiminished(_rAABB);
+
+            Performance::EndEvent();
+
+            //glDisable(GL_BLEND);
+
+            Performance::BeginEvent("Create membrane");
+
+            CreateMembrane(_BackgroundTexturePtr, m_DiminishedRaycastTargetPtr);
+
+            Performance::EndEvent();
+
+            if (_BackgroundTexturePtr != nullptr)
+            {
+                Performance::BeginEvent("Combine images");
+
+                ContextManager::SetTargetSet(m_DiminishedFinalTargetSetPtr);
+
+                Gfx::TextureManager::UpdateMipmap(m_DiminishedRaycastTargetPtr);
+
+                CombineDiminishedImage(_BackgroundTexturePtr, m_DiminishedRaycastTargetPtr);
+
+                Performance::EndEvent();
+            }
+
+            Performance::EndEvent();
+
+            return m_DiminishedFinalTargetPtr;
+        }
+
+        return nullptr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::ResetSelection()
+    {
+        m_SelectionBox.Set(glm::vec3(0.0f), glm::vec3(0.0f));
+
+        m_SelectionState = ESelection::NOSELECTION;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::AABB3Float& CGfxReconstructionRenderer::GetSelectionBox()
+    {
+        return m_SelectionBox;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::SetVisibleObjects(bool _RenderVolume, bool _RenderRoot, bool _RenderLevel1, bool _RenderLevel2, int _PlaneMode)
+    {
+        m_RenderVolume = _RenderVolume;
+        m_RenderRootQueue = _RenderRoot;
+        m_RenderLevel1Queue = _RenderLevel1;
+        m_RenderLevel2Queue = _RenderLevel2;
+
+        m_PlaneRenderMode = static_cast<EPlaneRenderingMode>(_PlaneMode);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::Render()
+    {
+        if (!m_IsInitialized && !m_pReconstructor->IsInitialized())
         {
             return;
         }
 
-        if (!m_IsInitialized && m_pScalableReconstructor->IsInitialized())
+        if (!m_IsInitialized && m_pReconstructor->IsInitialized())
         {
             Initialize();
         }
 
         glEnable(GL_PROGRAM_POINT_SIZE);
-		if (_Pass == 0)
-		{
-            Performance::BeginEvent("SLAM Reconstruction Rendering");
+        Performance::BeginEvent("SLAM Reconstruction Rendering");
 
-            ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
-            ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
-            //glm::vec4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-            //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+        ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
+        //glm::vec4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);
 
-            if (!m_UseTrackingCamera)
-            {
-                RenderCamera();
-            }
-
-            if (m_RenderVolumeVertexMap)
-            {
-                RenderVolumeVertexMap();
-            }
-
-            if (m_RenderVolume)
-            {
-                if (m_SelectionState == ESelection::NOSELECTION)
-                {
-                    RaycastScalableVolume();
-                }
-                else
-                {
-                    RaycastScalableVolumeWithHighlight();
-                }
-            }
-
-            if (m_RenderVertexMap)
-            {
-                RenderVertexMap();
-            }
-
-            if (m_RenderRootQueue)
-            {
-                RenderQueuedRootVolumes();
-            }
-
-            if (m_RenderLevel1Queue)
-            {
-                RenderQueuedLevel1Grids();
-            }
-
-            if (m_RenderLevel2Queue)
-            {
-                RenderQueuedLevel2Grids();
-            }
-
-            RenderSelectionBox();
-
-            Performance::EndEvent();
-		}
-        else
+        if (m_RenderVolume)
         {
-            if (m_pScalableReconstructor != nullptr)
+            if (m_SelectionState == ESelection::NOSELECTION)
             {
-                if (m_RenderVolumeVertexMap)
+                RaycastVolume();
+            }
+            else
+            {
+                if (!m_IsInpainting)
                 {
-                    RenderVolumeVertexMap();
+                    RaycastVolumeWithHighlight();
                 }
             }
         }
+
+        Performance::EndEvent();
+
+        ContextManager::ResetShaderVS();
+        ContextManager::ResetShaderPS();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RenderForward()
+    {
+        if (!m_IsInitialized && !m_pReconstructor->IsInitialized())
+        {
+            return;
+        }
+        
+        if (m_RenderVertexMap)
+        {
+            RenderVertexMap();
+        }
+
+        if (!m_UseTrackingCamera)
+        {
+            RenderCamera();
+        }
+
+        if (m_RenderRootQueue)
+        {
+            RenderQueuedRootVolumes();
+        }
+
+        if (m_RenderLevel1Queue)
+        {
+            RenderQueuedLevel1Grids();
+        }
+
+        if (m_RenderLevel2Queue)
+        {
+            RenderQueuedLevel2Grids();
+        }
+
+        RenderSelectionBox();
+
+        if (m_PlaneRenderMode != EPlaneRenderingMode::NONE)
+        {
+            RenderPlanes();
+        }
+
+        if (m_IsInpainting)
+        {
+            ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+            RenderBackgroundImage(m_DiminishedFinalTargetPtr, true);
+        }
+
+        ContextManager::ResetShaderVS();
+        ContextManager::ResetShaderPS();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RenderHitProxy()
+    {
+        if (!m_IsInitialized)
+        {
+            return;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Get ID
+        // -----------------------------------------------------------------------------
+        Dt::CEntity::BID ID = Dt::CEntity::s_InvalidID;
+
+        auto& rComponentManager = Dt::CComponentManager::GetInstance();
+
+        auto& rComponents = rComponentManager.GetComponents<Dt::CScriptComponent>();
+
+        for (auto Component : rComponents)
+        {
+            auto ScriptComponent = static_cast<Dt::CScriptComponent*>(Component);
+
+            if (ScriptComponent->IsActiveAndUsable() == false) continue;
+
+            if (ScriptComponent->GetScriptTypeInfo() == Base::CTypeInfo::Get<Scpt::CSLAMScript>())
+            {
+                ID = ScriptComponent->GetHostEntity()->GetID();
+
+                break;
+            }
+        }
+
+        Performance::BeginEvent("Voxel Hit Proxy");
+
+        if (m_RenderVolume && ID != Dt::CEntity::s_InvalidID)
+        {
+            MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
+
+            MR::SReconstructionSettings Settings;
+            m_pReconstructor->GetReconstructionSettings(&Settings);
+
+            ContextManager::SetShaderVS(m_RaycastVSPtr);
+            ContextManager::SetShaderPS(m_RaycastHitProxyFSPtr);
+
+            ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
+            ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
+            ContextManager::SetResourceBuffer(2, rVolume.m_Level1PoolPtr);
+            ContextManager::SetResourceBuffer(3, rVolume.m_TSDFPoolPtr);
+            ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
+
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+            ContextManager::SetConstantBuffer(1, m_RaycastHitProxyBufferPtr);
+            ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
+
+            ContextManager::Barrier();
+
+            const glm::vec3 Min = glm::vec3(
+                rVolume.m_MinOffset[0] * Settings.m_VolumeSize,
+                rVolume.m_MinOffset[1] * Settings.m_VolumeSize,
+                rVolume.m_MinOffset[2] * Settings.m_VolumeSize
+            );
+
+            const glm::vec3 Max = glm::vec3(
+                (rVolume.m_MaxOffset[0] + 1.0f) * Settings.m_VolumeSize, // Add 1.0f because MaxOffset stores the max volume offset
+                (rVolume.m_MaxOffset[1] + 1.0f) * Settings.m_VolumeSize, // and we have to consider the volume size
+                (rVolume.m_MaxOffset[2] + 1.0f) * Settings.m_VolumeSize
+            );
+
+            glm::vec3 Vertices[8] =
+            {
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Min[1], Min[2], 1.0f)),
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Min[1], Min[2], 1.0f)),
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Max[1], Min[2], 1.0f)),
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Min[2], 1.0f)),
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Min[1], Max[2], 1.0f)),
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Min[1], Max[2], 1.0f)),
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Max[1], Max[2], 1.0f)),
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
+            };
+
+            BufferManager::UploadBufferData(m_RaycastHitProxyBufferPtr, &ID);
+
+            BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer(), &Vertices);
+
+            const unsigned int Offset = 0;
+            ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+            ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+            ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
+
+            ContextManager::SetTopology(STopology::TriangleList);
+
+            ContextManager::DrawIndexed(36, 0, 0);
+
+            ContextManager::ResetShaderVS();
+            ContextManager::ResetShaderPS();
+        }
+
+        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
@@ -1358,11 +2218,17 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor)
+    void CGfxReconstructionRenderer::SetReconstructor(MR::CSLAMReconstructor& _rReconstructor)
     {
-        m_pScalableReconstructor = &_rReconstructor;
+        m_pReconstructor = &_rReconstructor;
     }
 
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::SetDeviceResolution(const glm::ivec2& _Resolution)
+    {
+        m_DeviceResolution = _Resolution;
+    }
 } // namespace
 
 namespace Gfx
@@ -1476,7 +2342,21 @@ namespace ReconstructionRenderer
     
     void Render()
     {
-        CGfxReconstructionRenderer::GetInstance().Render(0);
+        CGfxReconstructionRenderer::GetInstance().Render();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void RenderForward()
+    {
+        CGfxReconstructionRenderer::GetInstance().RenderForward();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void RenderHitProxy()
+    {
+        CGfxReconstructionRenderer::GetInstance().RenderHitProxy();
     }
     
     // -----------------------------------------------------------------------------
@@ -1488,9 +2368,16 @@ namespace ReconstructionRenderer
     
     // -----------------------------------------------------------------------------
 
-    void SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor)
+    void SetReconstructor(MR::CSLAMReconstructor& _rReconstructor)
     {
         CGfxReconstructionRenderer::GetInstance().SetReconstructor(_rReconstructor);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetDeviceResolution(const glm::ivec2& _Resolution)
+    {
+        CGfxReconstructionRenderer::GetInstance().SetDeviceResolution(_Resolution);
     }
 
     // -----------------------------------------------------------------------------
@@ -1502,9 +2389,55 @@ namespace ReconstructionRenderer
 
     // -----------------------------------------------------------------------------
 
-    void SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State)
+    void UpdateSelectionBox()
     {
-        CGfxReconstructionRenderer::GetInstance().SetSelectionBox(_rAnchor0, _rAnchor1, _Height, _State);
+        CGfxReconstructionRenderer::GetInstance().UpdateSelectionBox();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void AddPositionToSelection(const glm::vec3& _rWSPosition)
+    {
+        CGfxReconstructionRenderer::GetInstance().AddPositionToSelection(_rWSPosition);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetSelection()
+    {
+        CGfxReconstructionRenderer::GetInstance().ResetSelection();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetInpaintedPlane(Gfx::CTexturePtr _Texture, const Base::AABB3Float& _rAABB)
+    {
+        CGfxReconstructionRenderer::GetInstance().SetInpaintedPlane(_Texture, _rAABB);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTexturePtr GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr)
+    {
+        // TODO: actually use pose matrix for rendering instead of the main camera
+
+        BASE_UNUSED(_rPoseMatrix);
+
+        return CGfxReconstructionRenderer::GetInstance().GetInpaintedRendering(_rAABB, _BackgroundTexturePtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::AABB3Float& GetSelectionBox()
+    {
+        return CGfxReconstructionRenderer::GetInstance().GetSelectionBox();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetVisibleObjects(bool _RenderVolume, bool _RenderRoot, bool _RenderLevel1, bool _RenderLevel2, int _PlaneMode)
+    {
+        CGfxReconstructionRenderer::GetInstance().SetVisibleObjects(_RenderVolume, _RenderRoot, _RenderLevel1, _RenderLevel2, _PlaneMode);
     }
 
 } // namespace ReconstructionRenderer

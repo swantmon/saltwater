@@ -3,9 +3,9 @@
 
 #include "engine/core/core_plugin_manager.h"
 
-#include "plugin/slam/mr_scalable_slam_reconstructor.h"
-
 #include "plugin/slam/mr_slam_control.h"
+
+#include "engine/script/script_slam.h"
 
 namespace SLAM
 {
@@ -21,8 +21,17 @@ namespace SLAM
 
         void OnInput(const Base::CInputEvent& _rEvent);
 
+        void UpdateScriptSettings(const Scpt::CSLAMScript::SScriptSettings& _rSettings);
+
+        void CPluginInterface::ReadScene(CSceneReader& _rCodec);
+        void CPluginInterface::WriteScene(CSceneWriter& _rCodec);
+
     private:
 
         MR::CSLAMControl m_SLAMControl;
+
+        Engine::CEventDelegates::HandleType m_UpdateDelegate;
+        Engine::CEventDelegates::HandleType m_RenderGBufferDelegate;
+        Engine::CEventDelegates::HandleType m_RenderForwardDelegate;
     };
 } // namespace HW

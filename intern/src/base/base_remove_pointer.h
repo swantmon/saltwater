@@ -5,7 +5,7 @@
 
 namespace CORE
 {
-	struct SNull
+    struct SNull
     { };
 
     template<typename T>
