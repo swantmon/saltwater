@@ -120,7 +120,7 @@ namespace Scpt
                 std::vector<char> Payload(InpaintedImage.size() * sizeof(InpaintedImage[0]) + sizeof(glm::ivec2));
 
                 *reinterpret_cast<glm::ivec2*>(Payload.data()) = Size;
-                std::memcpy(Payload.data() + sizeof(glm::ivec2), InpaintedImage.data(), InpaintedImage.size() * sizeof(InpaintedImage[0]));
+                std::memcpy(Payload.data() + sizeof(glm::ivec2), RawData.data(), RawData.size() * sizeof(RawData[0]));
 
                 Net::CMessage Message;
                 Message.m_Category = 0;
