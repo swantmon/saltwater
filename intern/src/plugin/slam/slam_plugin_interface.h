@@ -3,7 +3,7 @@
 
 #include "engine/core/core_plugin_manager.h"
 
-#include "plugin/slam/mr_slam_control.h"
+#include "plugin/slam/mr_slam_control_arkit.h"
 
 #include "engine/script/script_slam.h"
 
@@ -28,7 +28,7 @@ namespace SLAM
 
     private:
 
-        MR::CSLAMControl m_SLAMControl;
+        MR::CSLAMControlARKit m_SLAMControl;
 
         Engine::CEventDelegates::HandleType m_UpdateDelegate;
         Engine::CEventDelegates::HandleType m_RenderGBufferDelegate;

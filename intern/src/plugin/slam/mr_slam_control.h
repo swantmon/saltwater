@@ -49,10 +49,12 @@ namespace MR
         {
             COMMAND,
             TRANSFORM,
-            DEPTHFRAME,
+            STRUCTUREDEPTHFRAME,
             COLORFRAME,
             LIGHTESTIMATE,
-            PLANE
+            PLANE,
+            COLORINTRINSICS,
+            ARKITDEPTHFRAME
         };
 
         enum EDATASOURCE
@@ -151,6 +153,8 @@ namespace MR
         Gfx::CShaderPtr m_ShiftDepthCSPtr;
         Gfx::CShaderPtr m_RegisterDepthCSPtr;
         Gfx::CShaderPtr m_32To16BitCSPtr;
+
+        Gfx::CShaderPtr m_ConvertARKitDepthCSPtr;
         
         Gfx::CTexturePtr m_ShiftTexture;
         Gfx::CTexturePtr m_UnregisteredDepthTexture;
@@ -933,7 +937,7 @@ namespace MR
                     m_PreliminaryPoseMatrix = *reinterpret_cast<glm::mat4*>(Decompressed.data() + sizeof(int32_t)) * glm::eulerAngleX(glm::pi<float>());
                 }
             }
-            else if (MessageType == DEPTHFRAME)
+            else if (MessageType == STRUCTUREDEPTHFRAME)
             {
                 //int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
                 //int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
@@ -1120,6 +1124,31 @@ namespace MR
 
                 m_pPlaneColorizer->UpdatePlane(PlaneID);
             }
+            else if (MessageType == ARKITDEPTHFRAME)
+            {
+                int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
+                int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
+
+                const float* RawBuffer = reinterpret_cast<float*>(Decompressed.data() + 7 * sizeof(int32_t));
+
+                Base::AABB2UInt TargetRect;
+                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(Width, Height));
+                Gfx::TextureManager::CopyToTexture2D(m_ShiftTexture, TargetRect, m_DepthSize.x, const_cast<float*>(RawBuffer));
+
+                Gfx::ContextManager::SetShaderCS(m_ShiftDepthCSPtr);
+                Gfx::ContextManager::SetImageTexture(0, m_ShiftTexture);
+                Gfx::ContextManager::SetImageTexture(1, m_UnregisteredDepthTexture);
+                Gfx::ContextManager::SetImageTexture(2, m_ShiftLUTPtr);
+
+                int WorkgroupsX = DivUp(m_DepthSize.x, m_TileSize2D);
+                int WorkgroupsY = DivUp(m_DepthSize.y, m_TileSize2D);
+                Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
+
+                if (!m_CaptureColor && m_StreamState == STREAM_SLAM)
+                {
+                    m_Reconstructor.OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix, m_DepthIntrinsics.m_FocalLength, m_DepthIntrinsics.m_FocalPoint);
+                }
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -1262,6 +1291,8 @@ namespace MR
 
             m_RegisterDepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_register_depth.glsl", "main", DefineString.c_str());
             m_32To16BitCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_32To16Bit.glsl", "main", DefineString.c_str());
+
+            m_ConvertARKitDepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_convert_arkit_depth.glsl", "main", DefineString.c_str());;
             
             /* Sending the result does not work at the moment
             if (m_SendInpaintedResult)

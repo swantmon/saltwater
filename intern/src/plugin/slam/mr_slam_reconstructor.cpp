@@ -188,6 +188,8 @@ namespace MR
         assert(m_FocalLength.x != 0 && m_FocalLength.y != 0);
         assert(m_FocalPoint.x != 0.0f && m_FocalPoint.y != 0.0f);
         assert(m_DepthBounds.x != 0.0f && m_DepthBounds.y != 0.0f);
+        assert(m_DepthFrameSize.x == m_ColorFrameSize.x);
+        assert(m_DepthFrameSize.y == m_ColorFrameSize.y);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Setup data, buffer etc.
@@ -1342,6 +1344,9 @@ namespace MR
 
     void CSLAMReconstructor::SetImageSizes(glm::ivec2 _DepthFrameSize, glm::ivec2 _ColorFrameSize)
     {
+        assert(_DepthFrameSize.x == _ColorFrameSize.x);
+        assert(_DepthFrameSize.y == _ColorFrameSize.y);
+
         m_DepthFrameSize = _DepthFrameSize;
         m_ColorFrameSize = _ColorFrameSize;
     }
@@ -1771,7 +1776,7 @@ namespace MR
         assert(Size > 0);
         assert(BufferPtr.IsValid());
 
-        BufferManager::UploadBufferData(BufferPtr, m_ClearVector.data(), 0, Size);
+        BufferManager::UploadBufferData(BufferPtr, m_ClearVector.data(), 0, static_cast<unsigned int>(Size));
     }
 
     // -----------------------------------------------------------------------------

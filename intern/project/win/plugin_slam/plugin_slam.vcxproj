@@ -44,6 +44,7 @@
     <ClInclude Include="..\..\..\src\plugin\slam\gfx_reconstruction_renderer.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_icp_tracker.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_plane_colorizer.h" />
+    <ClInclude Include="..\..\..\src\plugin\slam\mr_slam_control_arkit.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_slam_reconstructor.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_slam_control.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_slam_reconstruction_settings.h" />
