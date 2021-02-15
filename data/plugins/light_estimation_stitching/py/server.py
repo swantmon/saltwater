@@ -70,8 +70,9 @@ class Denormalize(object):
 
 transforms_ = [ transforms.Resize((opt.img_size_h, opt.img_size_w), Image.BICUBIC),
                 transforms.ToTensor(),
-                transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5)) ]
-transforms__ = [ Denormalize((0.5,0.5,0.5), (0.5,0.5,0.5)),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)) ]
+transforms__ = [ transforms.Normalize((0, 0 , 0), (1.0 / 0.5, 1.0 / 0.5, 1.0 / 0.5)),
+                 transforms.Normalize((-0.5, -0.5, -0.5), (1.0, 1.0, 1.0)),
                  transforms.ToPILImage(mode='RGB'),
                  transforms.Resize((opt.img_size_h, opt.img_size_w), Image.BICUBIC) ]
 
