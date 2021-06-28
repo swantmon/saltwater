@@ -27,6 +27,7 @@ void PixMix::init(
         
         cv::Mat_<uchar> tmpMask;
         cv::resize(*(pm[lv - 1].getMaskPtr()), tmpMask, lvSize, 0.0, 0.0, cv::INTER_LINEAR);
+        cv::threshold(tmpMask, tmpMask, 0.001, 255.0, cv::THRESH_BINARY);
         for (int r = 0; r < tmpMask.rows; ++r)
         {
             uchar *ptrMask = tmpMask.ptr<uchar>(r);

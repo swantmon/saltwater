@@ -7,6 +7,8 @@
 #include "engine/engine_config.h"
 #include "plugin/pixmix/pm_plugin_interface.h"
 
+#include <opencv2/opencv.hpp>
+
 #include <vector>
 
 #ifdef OCEAN_PIXMIX_ONLY
@@ -118,6 +120,22 @@ namespace PM
 
     void CPluginInterface::Inpaint(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage)
     {
+        int PixelCount = 0;
+        for (const auto& Pixel : _SourceImage)
+        {
+            if (!(Pixel[0] == 0 && Pixel[1] == 0 && Pixel[2] == 0))
+            {
+                ++PixelCount;
+            }
+        }
+
+        if (PixelCount < 50)
+        {
+            ENGINE_CONSOLE_DEBUG("Image is pure black");
+            std::copy(_SourceImage.begin(), _SourceImage.end(), _DestinationImage.begin());
+            return;
+        }
+
 #ifdef OCEAN_PIXMIX_ONLY
         InpaintWithOcean(_Resolution, _SourceImage, _DestinationImage, false);
 #elif defined OPEN_PIXMIX_ONLY
@@ -140,6 +158,48 @@ namespace PM
 
     void CPluginInterface::InpaintWithMask(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage)
     {
+        int PixelCount = 0;
+        cv::Vec3f Sum(0.0f, 0.0f, 0.0f);
+        for (const auto& Pixel : _SourceImage)
+        {
+            if (!(Pixel[0] == 0 && Pixel[1] == 0 && Pixel[2] == 0))
+            {
+                ++PixelCount;
+                Sum[0] += Pixel[0];
+                Sum[1] += Pixel[1];
+                Sum[2] += Pixel[2];
+            }
+        }
+
+        if (PixelCount == 0)
+        {
+            ENGINE_CONSOLE_DEBUG("Image is pure black");
+            std::copy(_SourceImage.begin(), _SourceImage.end(), _DestinationImage.begin());
+            return;
+        }
+
+        if (PixelCount < 50)
+        {
+            ENGINE_CONSOLE_DEBUG("Image is almost black");
+
+            auto Average = Sum / PixelCount;
+            for (int i = 0; i < _DestinationImage.size(); ++ i)
+            {
+                _DestinationImage[i] = glm::u8vec4(Average[0], Average[1], Average[2], 1.0f);
+            }
+
+            cv::Mat Source(cv::Size(_Resolution.x, _Resolution.y), CV_8UC4);
+            cv::Mat Dest(cv::Size(_Resolution.x, _Resolution.y), CV_8UC4);
+
+            std::memcpy(Source.data, _SourceImage.data(), _SourceImage.size() * sizeof(_SourceImage[0]));
+            std::memcpy(Dest.data, _DestinationImage.data(), _DestinationImage.size() * sizeof(_DestinationImage[0]));
+
+//             cv::imwrite("Source.png", Source);
+//             cv::imwrite("Dest.png", Dest);
+
+            return;
+        }
+
 #ifdef OCEAN_PIXMIX_ONLY
         InpaintWithOcean(_Resolution, _SourceImage, _DestinationImage, true);
 #elif defined OPEN_PIXMIX_ONLY
@@ -194,42 +254,28 @@ namespace PM
                 if (_MaskInAlpha ? (color[3] == 0) : (color[0] == 255 && color[1] == 255 && color[2] == 255))
                 {
                     Mask(r, c) = 0;
-                    if (r + 2 < Source3.rows)
-                    {
-                        Mask(r + 2, c) = 0;
-                    }
-
-                    if (r - 2 >= 0)
-                    {
-                        Mask(r - 2, c) = 0;
-                    }
-
-                    if (c + 2 < Source3.cols)
-                    {
-                        Mask(r, c + 2) = 0;
-                    }
-
-                    if (c - 2 >= 0)
-                    {
-                        Mask(r, c - 2) = 0;
-                    }
                 }
             }
         }
 
-#ifdef ENGINE_DEBUG_MODE
-        cv::imshow("Input color image", Source3);
-        cv::imshow("Input mask image", Mask);
-#endif
+//         cv::imwrite("Source4.png", Source4);
+//         cv::imwrite("Mask.png", Mask);
+// 
+// #ifdef ENGINE_DEBUG_MODE
+//         cv::imshow("Input color image", Source3);
+//         cv::imshow("Input mask image", Mask);
+// #endif
 
         PixMix pm;
         pm.init(Source3, Mask);
 
         pm.execute(Dest3, 0.05f);
 
-#ifdef ENGINE_DEBUG_MODE
-        cv::imshow("Output color image", Dest3);
-#endif
+// #ifdef ENGINE_DEBUG_MODE
+//         cv::imshow("Output color image", Dest3);
+// #endif
+// 
+//         cv::imwrite("Output.png", Dest3);
 
         cv::cvtColor(Dest3, Dest4, cv::COLOR_RGB2BGRA);
 
