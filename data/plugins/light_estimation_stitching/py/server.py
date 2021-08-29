@@ -30,23 +30,18 @@ import torch
 # Config
 # -----------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument('--output', type=str, default='./output/', help='output folder of the results')
+parser.add_argument('--output', type=str, default=None, help='output folder of the results')
 parser.add_argument('--img_size_w', type=int, default=256, help='width of image dimension')
 parser.add_argument('--img_size_h', type=int, default=128, help='height of each image dimension')
 parser.add_argument('--path_to_generator', type=str, default='./savepoint/model_best_generator.pth.tar', help='path to saved generator')
-parser.add_argument('--port', type=int, default=12345, help='Port address to an endpoint')
+parser.add_argument('--port', type=int, default=12346, help='Port address to an endpoint')
 parser.add_argument('--flip', type=bool, default=False, help='flip input image')
 opt, unknown_opt = parser.parse_known_args()
 
 # -----------------------------------------------------------------------------
-# Output
-# -----------------------------------------------------------------------------
-os.makedirs(opt.output, exist_ok=True)
-
-# -----------------------------------------------------------------------------
 # Check if cuda is available
 # -----------------------------------------------------------------------------
-cuda = True if torch.cuda.is_available() else False
+cuda = torch.cuda.is_available()
 
 # -----------------------------------------------------------------------------
 # GAN & Settings
@@ -63,15 +58,17 @@ class Denormalize(object):
         Returns:
             Tensor: Normalized image.
         """
-        for t, m, s in zip(tensor, self.mean, self.std):
+        for i, m, s in zip(range(tensor.size(0)), self.mean, self.std):
+            t = tensor[i]
             t.mul_(s).add_(m)
             # The normalize code -> t.sub_(m).div_(s)
         return tensor
 
 transforms_ = [ transforms.Resize((opt.img_size_h, opt.img_size_w), Image.BICUBIC),
                 transforms.ToTensor(),
-                transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5)) ]
-transforms__ = [ Denormalize((0.5,0.5,0.5), (0.5,0.5,0.5)),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)) ]
+transforms__ = [ transforms.Normalize((0, 0 , 0), (1.0 / 0.5, 1.0 / 0.5, 1.0 / 0.5)),
+                 transforms.Normalize((-0.5, -0.5, -0.5), (1.0, 1.0, 1.0)),
                  transforms.ToPILImage(mode='RGB'),
                  transforms.Resize((opt.img_size_h, opt.img_size_w), Image.BICUBIC) ]
 
@@ -197,17 +194,21 @@ def OnNewClient(_Socket, _Address, _ID):
         # -----------------------------------------------------------------------------
         # Save output and input to file system
         # -----------------------------------------------------------------------------
-        Result = Image.new('RGBA', (256, 768))
 
-        Result.paste(OriginalImage, (0, 0))
-        Result.paste(OriginalMask, (0, 128))
-        Result.paste(InputImage.convert('RGB'), (0, 256))
-        Result.paste(InputMask, (0, 384))
-        Result.paste(OutputImage, (0, 512))
-        Result.paste(Image.alpha_composite(OutputImage, OriginalImage), (0, 640))
+        if opt.output is not None:
+            os.makedirs(opt.output, exist_ok=True)
+            
+            Result = Image.new('RGBA', (256, 768))
 
-        os.makedirs('{}{}/{}'.format(opt.output, _Address[0], _ID), exist_ok=True)
-        Result.save('{}{}/{}/result_panorama_{}.png'.format(opt.output, _Address[0], _ID, Interval))
+            Result.paste(OriginalImage, (0, 0))
+            Result.paste(OriginalMask, (0, 128))
+            Result.paste(InputImage.convert('RGB'), (0, 256))
+            Result.paste(InputMask, (0, 384))
+            Result.paste(OutputImage, (0, 512))
+            Result.paste(Image.alpha_composite(OutputImage, OriginalImage), (0, 640))
+
+            os.makedirs('{}{}/{}'.format(opt.output, _Address[0], _ID), exist_ok=True)
+            Result.save('{}{}/{}/result_panorama_{}.png'.format(opt.output, _Address[0], _ID, Interval))
 
         Interval = Interval + 1
 
