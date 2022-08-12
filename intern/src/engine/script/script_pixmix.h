@@ -12,7 +12,7 @@
 
 #include "engine/script/script_script.h"
 
-#include "engine/network/core_network_manager.h"
+#include <zmq.hpp>
 
 namespace Scpt
 {
@@ -33,19 +33,25 @@ namespace Scpt
 
             InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix", "InpaintWithMask"));
 
-            // -----------------------------------------------------------------------------
-            // Create server
-            // -----------------------------------------------------------------------------
-
-            auto SLAMDelegate = std::bind(&CPixMixScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2);
-
-            int Port = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:network_port", 12346);
-            m_Socket = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
-            m_NetHandle = Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_Socket, SLAMDelegate);
-
             m_Threshold = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:color_threshold", 0);
-
             m_AlphaThreshold = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:alpha_threshold", 0);
+
+            // -----------------------------------------------------------------------------
+            // Setup ZMQ
+            // -----------------------------------------------------------------------------
+            int Port = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:network_port", 12346);
+
+            int32_t msgHeader[8];
+            msgHeader[0] = 0;
+            msgHeader[1] = 0;
+            
+            zmq::context_t context;
+
+            inSocket = zmq::socket_t(context, zmq::socket_type::pull);
+            outSocket = zmq::socket_t(context, zmq::socket_type::push);
+
+            inSocket.connect("tcp://localhost:" + std::to_string(Port));
+            outSocket.connect("tcp://localhost:" + std::to_string(Port + 1));
         }
 
         // -----------------------------------------------------------------------------
@@ -59,7 +65,10 @@ namespace Scpt
 
         void Update() override
         {
-            
+            zmq::message_t Message;
+            inSocket.recv(Message);
+
+            HandleMessage(Message);
         }
 
         // -----------------------------------------------------------------------------
@@ -71,80 +80,58 @@ namespace Scpt
 
         // -----------------------------------------------------------------------------
 
-        void OnNewMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
+        void HandleMessage(const zmq::message_t& _rMessage)
         {
-            BASE_UNUSED(_SocketHandle);
+            auto pData = static_cast<const char*>(_rMessage.data());
 
-            if (_rMessage.m_MessageType == 0)
+            auto MsgType = *reinterpret_cast<const int*>(pData);
+            
+            if (MsgType == 0)
             {
-                if (_rMessage.m_Category == 0)
+                auto TextureSize = *reinterpret_cast<const glm::ivec2*>(pData + sizeof(int));
+                auto PixelData = pData + sizeof(int) + sizeof(glm::ivec2);
+
+                std::vector<glm::u8vec4> RawData(TextureSize.x * TextureSize.y);
+
+                std::memcpy(RawData.data(), PixelData, sizeof(RawData[0]) * RawData.size());
+
+                if (m_AlphaThreshold > 0)
                 {
-                    std::vector<char> Decompressed(_rMessage.m_DecompressedSize);
-
-                    if (_rMessage.m_CompressedSize != _rMessage.m_DecompressedSize)
+                    for (auto& Pixel : RawData)
                     {
-                        try
+                        if (Pixel.a > m_AlphaThreshold)
                         {
-                            Base::Decompress(_rMessage.m_Payload, Decompressed);
+                            Pixel.a = 255;
                         }
-                        catch (...)
+                        else
                         {
-                            ENGINE_CONSOLE_ERROR("Failed to decompress! Ignoring network message!");
-                            return;
+                            Pixel.a = 0;
                         }
                     }
-                    else
-                    {
-                        std::memcpy(Decompressed.data(), _rMessage.m_Payload.data(), Decompressed.size());
-                    }
-
-                    glm::ivec2 Size = *reinterpret_cast<glm::ivec2*>(Decompressed.data());
-
-                    std::vector<glm::u8vec4> RawData(Size.x * Size.y);
-
-                    std::memcpy(RawData.data(), Decompressed.data() + sizeof(glm::ivec2), sizeof(RawData[0]) * RawData.size());
-
-                    if (m_AlphaThreshold > 0)
-                    {
-                        for (auto& Pixel : RawData)
-                        {
-                            if (Pixel.a > m_AlphaThreshold)
-                            {
-                                Pixel.a = 255;
-                            }
-                            else
-                            {
-                                Pixel.a = 0;
-                            }
-                        }
-                    }
-
-                    std::vector<glm::u8vec4> InpaintedImage(Size.x * Size.y);
-
-                    InpaintWithPixMix(Size, RawData, InpaintedImage);
-
-                    std::vector<char> Payload(InpaintedImage.size() * sizeof(InpaintedImage[0]) + sizeof(glm::ivec2));
-
-                    *reinterpret_cast<glm::ivec2*>(Payload.data()) = Size;
-                    std::memcpy(Payload.data() + sizeof(glm::ivec2), InpaintedImage.data(), InpaintedImage.size() * sizeof(InpaintedImage[0]));
-
-                    Net::CMessage Message;
-                    Message.m_Category = 0;
-                    Message.m_CompressedSize = static_cast<int>(Payload.size());
-                    Message.m_DecompressedSize = static_cast<int>(Payload.size());
-                    Message.m_MessageType = 0;
-                    Message.m_Payload = Payload;
-
-                    Net::CNetworkManager::GetInstance().SendMessage(m_Socket, Message);
                 }
-                else if (_rMessage.m_Category == 1)
-                {
-                    int Alpha;
 
-                    std::memcpy(&Alpha, _rMessage.m_Payload.data(), sizeof(Alpha));
+                std::vector<glm::u8vec4> InpaintedImage(TextureSize.x * TextureSize.y);
 
-                    m_AlphaThreshold = Alpha;
-                }
+                InpaintWithPixMix(TextureSize, RawData, InpaintedImage);
+
+                //std::vector<char> Payload(InpaintedImage.size() * sizeof(InpaintedImage[0]) + sizeof(glm::ivec2));
+                std::vector<char> Payload(_rMessage.size());
+
+                auto pMsgType = reinterpret_cast<int*>(Payload.data());
+                auto pTextureSize = reinterpret_cast<glm::ivec2*>(pMsgType + sizeof(*pMsgType));
+                auto pPixelData = reinterpret_cast<char*>(pTextureSize + sizeof(*pTextureSize));
+
+                *pMsgType = 0;
+                *pTextureSize = TextureSize;
+                std::memcpy(pPixelData, InpaintedImage.data(), InpaintedImage.size() * sizeof(InpaintedImage[0]));
+
+                outSocket.send(zmq::buffer(Payload));
+            }
+            else if (MsgType == 1)
+            {
+                int Alpha;
+                std::memcpy(&Alpha, pData + sizeof(int), sizeof(Alpha));
+                m_AlphaThreshold = Alpha;
             }
         }
         
@@ -160,10 +147,10 @@ namespace Scpt
         using InpaintWithPixMixFunc = void(*)(const glm::ivec2&, const std::vector<glm::u8vec4>&, std::vector<glm::u8vec4>&);
         InpaintWithPixMixFunc InpaintWithPixMix;
 
-        Net::SocketHandle m_Socket;
-        Net::CNetworkManager::CMessageDelegate::HandleType m_NetHandle;
-
         int m_Threshold;
         int m_AlphaThreshold;
+
+        zmq::socket_t inSocket;
+        zmq::socket_t outSocket;
     };
 } // namespace Scpt
