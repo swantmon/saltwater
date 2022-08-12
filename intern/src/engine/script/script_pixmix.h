@@ -41,17 +41,18 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             int Port = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:network_port", 12346);
 
-            int32_t msgHeader[8];
-            msgHeader[0] = 0;
-            msgHeader[1] = 0;
-            
             zmq::context_t context;
 
             inSocket = zmq::socket_t(context, zmq::socket_type::pull);
             outSocket = zmq::socket_t(context, zmq::socket_type::push);
 
-            inSocket.connect("tcp://localhost:" + std::to_string(Port));
-            outSocket.connect("tcp://localhost:" + std::to_string(Port + 1));
+            inSocket.bind("tcp://*:" + std::to_string(Port + 1));
+            outSocket.bind("tcp://*:" + std::to_string(Port));
+
+            for (;;)
+            {
+                Update(); // Why is this not called automatically?
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -65,27 +66,13 @@ namespace Scpt
 
         void Update() override
         {
-            zmq::message_t Message;
-            inSocket.recv(Message);
+            zmq::message_t Msg;
+            inSocket.recv(Msg);
 
-            HandleMessage(Message);
-        }
-
-        // -----------------------------------------------------------------------------
-
-        void OnInput(const Base::CInputEvent& _rEvent) override
-        {
-            BASE_UNUSED(_rEvent);
-        }
-
-        // -----------------------------------------------------------------------------
-
-        void HandleMessage(const zmq::message_t& _rMessage)
-        {
-            auto pData = static_cast<const char*>(_rMessage.data());
+            auto pData = static_cast<const char*>(Msg.data());
 
             auto MsgType = *reinterpret_cast<const int*>(pData);
-            
+
             if (MsgType == 0)
             {
                 auto TextureSize = *reinterpret_cast<const glm::ivec2*>(pData + sizeof(int));
@@ -115,17 +102,17 @@ namespace Scpt
                 InpaintWithPixMix(TextureSize, RawData, InpaintedImage);
 
                 //std::vector<char> Payload(InpaintedImage.size() * sizeof(InpaintedImage[0]) + sizeof(glm::ivec2));
-                std::vector<char> Payload(_rMessage.size());
+                std::vector<char> ResultMsg(Msg.size());
 
-                auto pMsgType = reinterpret_cast<int*>(Payload.data());
-                auto pTextureSize = reinterpret_cast<glm::ivec2*>(pMsgType + sizeof(*pMsgType));
-                auto pPixelData = reinterpret_cast<char*>(pTextureSize + sizeof(*pTextureSize));
+                auto pMsgType = ResultMsg.data();
+                auto pTextureSize = pMsgType + sizeof(*pMsgType);
+                auto pPixelData = pTextureSize + sizeof(*pTextureSize);
 
-                *pMsgType = 0;
-                *pTextureSize = TextureSize;
+                *reinterpret_cast<int*>(pMsgType) = 0;
+                *reinterpret_cast<glm::ivec2*>(pTextureSize) = TextureSize;
                 std::memcpy(pPixelData, InpaintedImage.data(), InpaintedImage.size() * sizeof(InpaintedImage[0]));
 
-                outSocket.send(zmq::buffer(Payload));
+                outSocket.send(zmq::buffer(ResultMsg));
             }
             else if (MsgType == 1)
             {
@@ -134,7 +121,14 @@ namespace Scpt
                 m_AlphaThreshold = Alpha;
             }
         }
-        
+
+        // -----------------------------------------------------------------------------
+
+        void OnInput(const Base::CInputEvent& _rEvent) override
+        {
+            BASE_UNUSED(_rEvent);
+        }
+                
     public:
 
         inline IComponent* Allocate() override
