@@ -12,7 +12,7 @@
 
 #include "engine/script/script_script.h"
 
-#include "engine/network/core_network_manager.h"
+#include <zmq.hpp>
 
 namespace Scpt
 {
@@ -33,19 +33,26 @@ namespace Scpt
 
             InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix", "InpaintWithMask"));
 
-            // -----------------------------------------------------------------------------
-            // Create server
-            // -----------------------------------------------------------------------------
-
-            auto SLAMDelegate = std::bind(&CPixMixScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2);
-
-            int Port = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:network_port", 12346);
-            m_Socket = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
-            m_NetHandle = Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_Socket, SLAMDelegate);
-
             m_Threshold = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:color_threshold", 0);
-
             m_AlphaThreshold = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:alpha_threshold", 0);
+
+            // -----------------------------------------------------------------------------
+            // Setup ZMQ
+            // -----------------------------------------------------------------------------
+            int Port = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:network_port", 12346);
+
+            zmq::context_t context;
+
+            inSocket = zmq::socket_t(context, zmq::socket_type::pull);
+            outSocket = zmq::socket_t(context, zmq::socket_type::push);
+
+            inSocket.bind("tcp://*:" + std::to_string(Port + 1));
+            outSocket.bind("tcp://*:" + std::to_string(Port));
+
+            for (;;)
+            {
+                Update(); // Why is this not called automatically?
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -59,7 +66,59 @@ namespace Scpt
 
         void Update() override
         {
-            
+            zmq::message_t Msg;
+            inSocket.recv(Msg);
+
+            auto pMsgData = static_cast<const char*>(Msg.data());
+
+            auto MsgType = *reinterpret_cast<const int*>(pMsgData);
+
+            if (MsgType == 0)
+            {
+                auto TextureSize = *reinterpret_cast<const glm::ivec2*>(pMsgData + sizeof(int32_t));
+                auto pInputPixelData = pMsgData + 3 * sizeof(int32_t);
+
+                std::vector<glm::u8vec4> InputImage(TextureSize.x * TextureSize.y);
+
+                std::memcpy(InputImage.data(), pInputPixelData, sizeof(InputImage[0]) * InputImage.size());
+
+                if (m_AlphaThreshold > 0)
+                {
+                    for (auto& Pixel : InputImage)
+                    {
+                        if (Pixel.a > m_AlphaThreshold)
+                        {
+                            Pixel.a = 255;
+                        }
+                        else
+                        {
+                            Pixel.a = 0;
+                        }
+                    }
+                }
+
+                std::vector<glm::u8vec4> ResultImage(TextureSize.x * TextureSize.y);
+
+                InpaintWithPixMix(TextureSize, InputImage, ResultImage);
+
+                std::vector<char> ResultMsg(Msg.size());
+
+                auto pMsgType = ResultMsg.data();
+                auto pTextureSize = pMsgType + sizeof(int32_t);
+                auto pResultPixelData = pTextureSize + sizeof(glm::ivec2);
+
+                *reinterpret_cast<int*>(pMsgType) = 0;
+                *reinterpret_cast<glm::ivec2*>(pTextureSize) = TextureSize;
+                std::memcpy(pResultPixelData, ResultImage.data(), ResultImage.size() * sizeof(ResultImage[0]));
+
+                outSocket.send(zmq::buffer(ResultMsg));
+            }
+            else if (MsgType == 1)
+            {
+                int Alpha;
+                std::memcpy(&Alpha, pMsgData + sizeof(int), sizeof(Alpha));
+                m_AlphaThreshold = Alpha;
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -68,86 +127,7 @@ namespace Scpt
         {
             BASE_UNUSED(_rEvent);
         }
-
-        // -----------------------------------------------------------------------------
-
-        void OnNewMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
-        {
-            BASE_UNUSED(_SocketHandle);
-
-            if (_rMessage.m_MessageType == 0)
-            {
-                if (_rMessage.m_Category == 0)
-                {
-                    std::vector<char> Decompressed(_rMessage.m_DecompressedSize);
-
-                    if (_rMessage.m_CompressedSize != _rMessage.m_DecompressedSize)
-                    {
-                        try
-                        {
-                            Base::Decompress(_rMessage.m_Payload, Decompressed);
-                        }
-                        catch (...)
-                        {
-                            ENGINE_CONSOLE_ERROR("Failed to decompress! Ignoring network message!");
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        std::memcpy(Decompressed.data(), _rMessage.m_Payload.data(), Decompressed.size());
-                    }
-
-                    glm::ivec2 Size = *reinterpret_cast<glm::ivec2*>(Decompressed.data());
-
-                    std::vector<glm::u8vec4> RawData(Size.x * Size.y);
-
-                    std::memcpy(RawData.data(), Decompressed.data() + sizeof(glm::ivec2), sizeof(RawData[0]) * RawData.size());
-
-                    if (m_AlphaThreshold > 0)
-                    {
-                        for (auto& Pixel : RawData)
-                        {
-                            if (Pixel.a > m_AlphaThreshold)
-                            {
-                                Pixel.a = 255;
-                            }
-                            else
-                            {
-                                Pixel.a = 0;
-                            }
-                        }
-                    }
-
-                    std::vector<glm::u8vec4> InpaintedImage(Size.x * Size.y);
-
-                    InpaintWithPixMix(Size, RawData, InpaintedImage);
-
-                    std::vector<char> Payload(InpaintedImage.size() * sizeof(InpaintedImage[0]) + sizeof(glm::ivec2));
-
-                    *reinterpret_cast<glm::ivec2*>(Payload.data()) = Size;
-                    std::memcpy(Payload.data() + sizeof(glm::ivec2), InpaintedImage.data(), InpaintedImage.size() * sizeof(InpaintedImage[0]));
-
-                    Net::CMessage Message;
-                    Message.m_Category = 0;
-                    Message.m_CompressedSize = static_cast<int>(Payload.size());
-                    Message.m_DecompressedSize = static_cast<int>(Payload.size());
-                    Message.m_MessageType = 0;
-                    Message.m_Payload = Payload;
-
-                    Net::CNetworkManager::GetInstance().SendMessage(m_Socket, Message);
-                }
-                else if (_rMessage.m_Category == 1)
-                {
-                    int Alpha;
-
-                    std::memcpy(&Alpha, _rMessage.m_Payload.data(), sizeof(Alpha));
-
-                    m_AlphaThreshold = Alpha;
-                }
-            }
-        }
-        
+                
     public:
 
         inline IComponent* Allocate() override
@@ -160,10 +140,10 @@ namespace Scpt
         using InpaintWithPixMixFunc = void(*)(const glm::ivec2&, const std::vector<glm::u8vec4>&, std::vector<glm::u8vec4>&);
         InpaintWithPixMixFunc InpaintWithPixMix;
 
-        Net::SocketHandle m_Socket;
-        Net::CNetworkManager::CMessageDelegate::HandleType m_NetHandle;
-
         int m_Threshold;
         int m_AlphaThreshold;
+
+        zmq::socket_t inSocket;
+        zmq::socket_t outSocket;
     };
 } // namespace Scpt
