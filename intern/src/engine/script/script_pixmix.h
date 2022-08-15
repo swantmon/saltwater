@@ -69,22 +69,22 @@ namespace Scpt
             zmq::message_t Msg;
             inSocket.recv(Msg);
 
-            auto pData = static_cast<const char*>(Msg.data());
+            auto pMsgData = static_cast<const char*>(Msg.data());
 
-            auto MsgType = *reinterpret_cast<const int*>(pData);
+            auto MsgType = *reinterpret_cast<const int*>(pMsgData);
 
             if (MsgType == 0)
             {
-                auto TextureSize = *reinterpret_cast<const glm::ivec2*>(pData + sizeof(int));
-                auto PixelData = pData + sizeof(int) + sizeof(glm::ivec2);
+                auto TextureSize = *reinterpret_cast<const glm::ivec2*>(pMsgData + sizeof(int32_t));
+                auto pInputPixelData = pMsgData + 3 * sizeof(int32_t);
 
-                std::vector<glm::u8vec4> RawData(TextureSize.x * TextureSize.y);
+                std::vector<glm::u8vec4> InputImage(TextureSize.x * TextureSize.y);
 
-                std::memcpy(RawData.data(), PixelData, sizeof(RawData[0]) * RawData.size());
+                std::memcpy(InputImage.data(), pInputPixelData, sizeof(InputImage[0]) * InputImage.size());
 
                 if (m_AlphaThreshold > 0)
                 {
-                    for (auto& Pixel : RawData)
+                    for (auto& Pixel : InputImage)
                     {
                         if (Pixel.a > m_AlphaThreshold)
                         {
@@ -97,27 +97,26 @@ namespace Scpt
                     }
                 }
 
-                std::vector<glm::u8vec4> InpaintedImage(TextureSize.x * TextureSize.y);
+                std::vector<glm::u8vec4> ResultImage(TextureSize.x * TextureSize.y);
 
-                InpaintWithPixMix(TextureSize, RawData, InpaintedImage);
+                InpaintWithPixMix(TextureSize, InputImage, ResultImage);
 
-                //std::vector<char> Payload(InpaintedImage.size() * sizeof(InpaintedImage[0]) + sizeof(glm::ivec2));
                 std::vector<char> ResultMsg(Msg.size());
 
                 auto pMsgType = ResultMsg.data();
-                auto pTextureSize = pMsgType + sizeof(*pMsgType);
-                auto pPixelData = pTextureSize + sizeof(*pTextureSize);
+                auto pTextureSize = pMsgType + sizeof(int32_t);
+                auto pResultPixelData = pTextureSize + sizeof(glm::ivec2);
 
                 *reinterpret_cast<int*>(pMsgType) = 0;
                 *reinterpret_cast<glm::ivec2*>(pTextureSize) = TextureSize;
-                std::memcpy(pPixelData, InpaintedImage.data(), InpaintedImage.size() * sizeof(InpaintedImage[0]));
+                std::memcpy(pResultPixelData, ResultImage.data(), ResultImage.size() * sizeof(ResultImage[0]));
 
                 outSocket.send(zmq::buffer(ResultMsg));
             }
             else if (MsgType == 1)
             {
                 int Alpha;
-                std::memcpy(&Alpha, pData + sizeof(int), sizeof(Alpha));
+                std::memcpy(&Alpha, pMsgData + sizeof(int), sizeof(Alpha));
                 m_AlphaThreshold = Alpha;
             }
         }
