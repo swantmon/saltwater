@@ -39,7 +39,7 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             // Setup ZMQ
             // -----------------------------------------------------------------------------
-            int Port = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:network_port", 12346);
+            int Port = Core::CProgramParameters::GetInstance().Get("mr:pixmix_server:network_port", 61234);
 
             zmq::context_t context;
 
