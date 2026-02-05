@@ -77,59 +77,74 @@ namespace Scpt
 
             if (_rMessage.m_MessageType == 0)
             {
-                std::vector<char> Decompressed(_rMessage.m_DecompressedSize);
-
-                if (_rMessage.m_CompressedSize != _rMessage.m_DecompressedSize)
+                if (_rMessage.m_Category == 0)
                 {
-                    try
-                    {
-                        Base::Decompress(_rMessage.m_Payload, Decompressed);
-                    }
-                    catch (...)
-                    {
-                        ENGINE_CONSOLE_ERROR("Failed to decompress! Ignoring network message!");
-                        return;
-                    }
-                }
-                else
-                {
-                    std::memcpy(Decompressed.data(), _rMessage.m_Payload.data(), Decompressed.size());
-                }
-                
-                glm::ivec2 Size = *reinterpret_cast<glm::ivec2*>(Decompressed.data());
+                    std::vector<char> Decompressed(_rMessage.m_DecompressedSize);
 
-                std::vector<glm::u8vec4> RawData(Size.x * Size.y);
-
-                std::memcpy(RawData.data(), Decompressed.data() + sizeof(glm::ivec2), sizeof(RawData[0]) * RawData.size());
-
-                if (m_AlphaThreshold > 0)
-                {
-                    for (auto& Pixel : RawData)
+                    if (_rMessage.m_CompressedSize != _rMessage.m_DecompressedSize)
                     {
-                        if (Pixel.a > m_AlphaThreshold)
+                        try
                         {
-                            Pixel.a = 255;
+                            Base::Decompress(_rMessage.m_Payload, Decompressed);
+                        }
+                        catch (...)
+                        {
+                            ENGINE_CONSOLE_ERROR("Failed to decompress! Ignoring network message!");
+                            return;
                         }
                     }
+                    else
+                    {
+                        std::memcpy(Decompressed.data(), _rMessage.m_Payload.data(), Decompressed.size());
+                    }
+
+                    glm::ivec2 Size = *reinterpret_cast<glm::ivec2*>(Decompressed.data());
+
+                    std::vector<glm::u8vec4> RawData(Size.x * Size.y);
+
+                    std::memcpy(RawData.data(), Decompressed.data() + sizeof(glm::ivec2), sizeof(RawData[0]) * RawData.size());
+
+                    if (m_AlphaThreshold > 0)
+                    {
+                        for (auto& Pixel : RawData)
+                        {
+                            if (Pixel.a > m_AlphaThreshold)
+                            {
+                                Pixel.a = 255;
+                            }
+                            else
+                            {
+                                Pixel.a = 0;
+                            }
+                        }
+                    }
+
+                    std::vector<glm::u8vec4> InpaintedImage(Size.x * Size.y);
+
+                    InpaintWithPixMix(Size, RawData, InpaintedImage);
+
+                    std::vector<char> Payload(InpaintedImage.size() * sizeof(InpaintedImage[0]) + sizeof(glm::ivec2));
+
+                    *reinterpret_cast<glm::ivec2*>(Payload.data()) = Size;
+                    std::memcpy(Payload.data() + sizeof(glm::ivec2), InpaintedImage.data(), InpaintedImage.size() * sizeof(InpaintedImage[0]));
+
+                    Net::CMessage Message;
+                    Message.m_Category = 0;
+                    Message.m_CompressedSize = static_cast<int>(Payload.size());
+                    Message.m_DecompressedSize = static_cast<int>(Payload.size());
+                    Message.m_MessageType = 0;
+                    Message.m_Payload = Payload;
+
+                    Net::CNetworkManager::GetInstance().SendMessage(m_Socket, Message);
                 }
+                else if (_rMessage.m_Category == 1)
+                {
+                    int Alpha;
 
-                std::vector<glm::u8vec4> InpaintedImage(Size.x * Size.y);
+                    std::memcpy(&Alpha, _rMessage.m_Payload.data(), sizeof(Alpha));
 
-                InpaintWithPixMix(Size, RawData, InpaintedImage);
-
-                std::vector<char> Payload(InpaintedImage.size() * sizeof(InpaintedImage[0]) + sizeof(glm::ivec2));
-
-                *reinterpret_cast<glm::ivec2*>(Payload.data()) = Size;
-                std::memcpy(Payload.data() + sizeof(glm::ivec2), InpaintedImage.data(), InpaintedImage.size() * sizeof(InpaintedImage[0]));
-
-                Net::CMessage Message;
-                Message.m_Category = 0;
-                Message.m_CompressedSize = static_cast<int>(Payload.size());
-                Message.m_DecompressedSize = static_cast<int>(Payload.size());
-                Message.m_MessageType = 0;
-                Message.m_Payload = Payload;
-
-                Net::CNetworkManager::GetInstance().SendMessage(m_Socket, Message);
+                    m_AlphaThreshold = Alpha;
+                }
             }
         }
         
