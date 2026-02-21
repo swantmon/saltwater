@@ -21,7 +21,7 @@ Relevant publications: [1](https://ieeexplore.ieee.org/abstract/document/7781764
 
 ## Main Features
 
-- **Mixed and Mdiated Reality Rendering**  
+- **Mixed and Mediated Reality Rendering**  
   Wide range of graphics effeects in a deferred shading engine and support for combining real and virtual content.
 
 - **Reflection Probe Stitching**  
@@ -113,12 +113,12 @@ Unknown background information is synthesized.
 
 ---
 
-## Installation notes:
+## Build Guide:
 1. Clone respository  
 2. Fetch large files with Git LFS  
 2. Copy DLL files from external to bin folder  
 3. Open Visual Studio project file  
-4. Change project properties->debugging:  
+4. Change project properties -> Debugging:
 ```
 Command = "$(SolutionDir)..\..\..\bin\$(TargetFileName)"
 ```
@@ -128,8 +128,8 @@ Working Directory = "$(SolutionDir)..\..\..\bin\"
 Last but not least: Build and Run  
 
 
-## Special Android:
-These commands are needed for putting data to mobile phone (Android):  
+## Android:
+These commands are needed for pushing data to Android devices:  
 ```
 adb push data/ /storage/emulated/0/Android/data/de.tuilmenau.saltwater/files
 ```
